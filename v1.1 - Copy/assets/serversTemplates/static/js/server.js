@@ -37,13 +37,16 @@ function changeColor(prop, command) {
     let list = [2, 3]
     statusCircle = document.getElementById('statusCircle');
 
+    var r = document.querySelector(':root');
+
     if (prop == 1) {
         runServerCommand(command)
 
         document.getElementById('1').classList.remove('activeBtn')
         document.getElementById('1').disabled = true;
 
-        statusCircle.style.background = '#87FF2C'
+        //statusCircle.style.background = '#87FF2C'
+        r.style.setProperty('--statusCircleColor', '#87FF2C');
 
         list.forEach((n) => {
             document.getElementById(`${n}`).classList.add("activeBtn")
@@ -56,7 +59,8 @@ function changeColor(prop, command) {
         document.getElementById('1').classList.add('activeBtn')
         document.getElementById('1').disabled = false;
 
-        statusCircle.style.background = '#FF3535'
+        //statusCircle.style.background = '#FF3535'
+        r.style.setProperty('--statusCircleColor', '#FF3535');
 
         list.forEach((n) => {
             document.getElementById(`${n}`).classList.remove("activeBtn")
@@ -69,7 +73,8 @@ function changeColor(prop, command) {
         document.getElementById('1').classList.add('activeBtn')
         document.getElementById('1').disabled = false;
 
-        statusCircle.style.background = '#FF3535'
+        //statusCircle.style.background = '#FF3535'
+        r.style.setProperty('--statusCircleColor', '#FF3535');
 
         list.forEach((n) => {
             document.getElementById(`${n}`).classList.remove("activeBtn")

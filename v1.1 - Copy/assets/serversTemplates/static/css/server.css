@@ -3,8 +3,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-:root{
+:root {
     --manageTextSize: 35px;
+    --statusCircleColor: #FF3535;
 }
 
 * {
@@ -13,20 +14,20 @@
     padding: 0;
 }
 
-body{
+body {
     background: #1C2127;
     display: flex;
     min-height: 100vh;
 }
 
-.mainPage{
+.mainPage {
     width: 100%;
     padding: 80px;
 }
 
 /* Main Side Bar Style */
 
-.sideBarParent{
+.sideBarParent {
     /* display: none; */
     width: 300px;
     height: page;
@@ -34,26 +35,26 @@ body{
     user-select: none;
 }
 
-.imgLogoDiv{
+.imgLogoDiv {
     display: flex;
     justify-content: center;
 }
 
-.imgLogo{
+.imgLogo {
     display: flex;
     align-items: center;
     width: 250px;
     z-index: 0;
 }
 
-.sideBarOptions{
+.sideBarOptions {
     display: grid;
     width: 300px;
     transform: translateY(-40px);
     z-index: 1;
 }
 
-.sideBarOption{
+.sideBarOption {
     font-family: "Istok Web";
     font-weight: bold;
     font-size: 40px;
@@ -68,35 +69,35 @@ body{
     transition: background 0.5s ease;
 }
 
-.sideBarOption a{
+.sideBarOption a {
     position: relative;
     transform: translateY(2px);
     text-decoration: none;
 }
 
-.sideBarOption:hover{   
+.sideBarOption:hover {
     background: #22262ca9;
 }
 
-.activeSideBarOption{
+.activeSideBarOption {
     background: #22262D;
 }
 
-.activeSideBarOption a{
+.activeSideBarOption a {
     color: #FEC538;
 }
 
 /* Main Page Show */
 
-.content{
+.content {
     display: none;
 }
 
-.tabShow{
+.tabShow {
     display: block;
 }
 
-.dropdown{
+.dropdown {
     position: absolute;
     user-select: none;
     width: 7.6em;
@@ -107,11 +108,11 @@ body{
     transform: translate(225%, -825%);
 }
 
-.dropdown *{
+.dropdown * {
     box-sizing: border-box;
 }
 
-.select{
+.select {
     background: #2a2f3b;
     color: #fff;
     display: flex;
@@ -128,16 +129,16 @@ body{
 Clicked styles
 */
 
-.select-clicked{
+.select-clicked {
     border: 2px #26489a solid;
     box-shadow: 0 0 0.8em #26489a;
 }
 
-.select:hover{
+.select:hover {
     background: #323741;
 }
 
-.caret{
+.caret {
     width: 0;
     height: 0;
     border-left: 6px solid transparent;
@@ -151,11 +152,11 @@ Clicked styles
 Rotate styles
 */
 
-.caret-rotate{
+.caret-rotate {
     transform: rotate(270deg);
 }
 
-.menu{
+.menu {
     list-style: none;
     padding: 0em 0.3em;
     background: #323741;
@@ -175,7 +176,7 @@ Rotate styles
     transition: all 0.3s;
 }
 
-.menu li{
+.menu li {
     padding: 0.4em 0.5em;
     margin: 0.3em 0;
     border-radius: 0.5em;
@@ -183,7 +184,7 @@ Rotate styles
     transition: all 0.3s;
 }
 
-.menu li:hover{
+.menu li:hover {
     background: #2a2d35;
 }
 
@@ -191,7 +192,7 @@ Rotate styles
 Active styles
 */
 
-.activePage{
+.activePage {
     background: #23242a;
 }
 
@@ -199,7 +200,7 @@ Active styles
 Open styles
 */
 
-.menu-open{
+.menu-open {
     display: block;
     opacity: 1;
 }
@@ -210,11 +211,12 @@ Open styles
 
 /* Server Info Box */
 
-.toCenter{
+.toCenter {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 82.5vh; /* Temporar */
+    height: 82.5vh;
+    /* Temporar */
 }
 
 /* #manage{
@@ -282,7 +284,7 @@ Merge dar nu pot rezolva z-index-ul!!!
     margin-bottom: 20px;
 }
 
-.addressIP p{
+.addressIP p {
     font-size: calc(var(--manageTextSize) - 10px);
     transform: translateY(2px);
 }
@@ -291,8 +293,10 @@ Merge dar nu pot rezolva z-index-ul!!!
     transform: translateX(10px);
     width: 12.5px;
     height: 12.5px;
-    background: #FF3535;
     border-radius: 50%;
+    background: var(--statusCircleColor);
+    box-shadow: 0px 0px 5px 1px var(--statusCircleColor);
+    transition: all 0.15s ease-in-out;
 }
 
 .controlButtons {
@@ -330,7 +334,6 @@ Merge dar nu pot rezolva z-index-ul!!!
 
 .controlButton.activeBtn:nth-child(2) {
     background: #e92626;
-    transition: 0.2s ease-in-out;
 }
 
 .controlButton.activeBtn:nth-child(2):hover {
@@ -340,19 +343,8 @@ Merge dar nu pot rezolva z-index-ul!!!
 
 .controlButton.activeBtn:nth-child(3) {
     background: #b921ff;
-    transition: inputIcon 0.2s ease-in-out;
 }
 
 .controlButton.activeBtn:nth-child(3):hover {
     background: #bf34ff;
-}
-
-@keyframes inputIcon {
-    from {
-        transform: scale(0.9);
-    }
-
-    to {
-        transform: scale(1);
-    }
 }
