@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="stylesheet" href="/assets/serversTemplates/static/css/server.css">
     <title>Server</title>
 </head>
@@ -14,23 +15,23 @@
             <img src="/static/img/logo.svg" alt="error" class="imgLogo">
         </div>
         <div class="sideBarOptions">
-            <div class="sideBarOption">
+            <div class="sideBarOption activeSideBarOption">
                 <a href="/templates/servers.html">Servers</a>
             </div>
             <div class="sideBarOption">
                 <a href="/templates/profile.html">Profile</a>
             </div>
-            <div class="sideBarOption activeSideBarOption">
+            <div class="sideBarOption">
                 <a href="/templates/support.html">Support</a>
             </div>
             <div class="dropdown">
                 <div class="select">
-                    <span class="selected">Manage</span>
+                    <span class="selected">Console</span>
                     <div class="caret"></div>
                 </div>
                 <ul class="menu">
-                    <li value="manage" class="active">Manage</li>
-                    <li value="console">Console</li>
+                    <li value="manage">Manage</li>
+                    <li value="console" class="active">Console</li>
                     <li value="files">Files</li>
                     <li value="settings">Settings</li>
                 </ul>
@@ -39,15 +40,17 @@
     </div>
 
     <div class="mainPage">
-        <div class="content tabShow" id="manage">
+        <div class="content" id="manage">
             <div class="toCenter">
                 <div class="infoBox">
                     <img src="/assets/serversTemplates/static/img/minecraft.jpg" alt="error" class="minecraftImg">
                     <div class="infoBoxControls">
                         <div class="controlButtons">
-                            <button class="controlButton activeBtn" id="1" onclick="changeColor(1, 'start')">Start</button>
+                            <button class="controlButton activeBtn" id="1"
+                                onclick="changeColor(1, 'start')">Start</button>
                             <button class="controlButton" id="2" onclick="changeColor(2, 'stop')" disabled>Stop</button>
-                            <button class="controlButton" id="3" onclick="changeColor(3, 'restart')" disabled>Restart</button>
+                            <button class="controlButton" id="3" onclick="changeColor(3, 'restart')"
+                                disabled>Restart</button>
                         </div>
                         <div class="serverInfo">
                             <p class="serverName" id="serverName">Moldova SMP</p>
@@ -72,8 +75,45 @@
             </div>
         </div>
 
-        <div class="content" id="console">
-            <p>console</p>
+        <div class="content tabShow" id="console">
+            <div class="toCenterConsole">
+                <div class="consoleForm">
+                    <textarea class="console" readonly id="textarea" rows="50"></textarea>
+                    <div class="consoleInputDiv">
+                        <div class="inputText">Send Command</div>
+                        <input type="text" class="consoleInput" id="consoleInputCommand">
+                        <div class=""></div>
+                        <span class="material-symbols-outlined" onclick="sendCommand()">
+                            send
+                        </span>
+                    </div>
+                </div>
+                <div class="statsConsole">
+                    <div class="statsConsoleBar">
+                        <div class="statsConsoleIcon">
+                            <ion-icon name="time"></ion-icon>
+                        </div>
+                        <div class="upTimeStats">
+                            <div class="Uptime">
+                                <p>Uptime:</p>
+                            </div>
+                            <p class="timer">0h 0m 0s</p>
+                        </div>
+                    </div>
+                    <div class="statsConsoleBar">
+                        <div class="statsConsoleIcon">
+                            <ion-icon name="file-tray-full"></ion-icon>
+                        </div>
+                        <div class="memoryStats">
+                            <div class="memory">
+
+                                <p>Memory:</p>
+                            </div>
+                            <p class="timer">0MB / 0MB</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="content" id="files">

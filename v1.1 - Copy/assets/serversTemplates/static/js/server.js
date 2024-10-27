@@ -24,7 +24,7 @@ dropdowns.forEach(dropdown => {
 
             options.forEach(option => {
                 option.classList.remove('active');
-            allContents.forEach(allContent => { allContent.classList.remove('tabShow') })
+                allContents.forEach(allContent => { allContent.classList.remove('tabShow') })
             })
             option.classList.add('active');
             allContents[index].classList.add('tabShow')
@@ -45,7 +45,6 @@ function changeColor(prop, command) {
         document.getElementById('1').classList.remove('activeBtn')
         document.getElementById('1').disabled = true;
 
-        //statusCircle.style.background = '#87FF2C'
         r.style.setProperty('--statusCircleColor', '#87FF2C');
 
         list.forEach((n) => {
@@ -59,7 +58,6 @@ function changeColor(prop, command) {
         document.getElementById('1').classList.add('activeBtn')
         document.getElementById('1').disabled = false;
 
-        //statusCircle.style.background = '#FF3535'
         r.style.setProperty('--statusCircleColor', '#FF3535');
 
         list.forEach((n) => {
@@ -73,7 +71,6 @@ function changeColor(prop, command) {
         document.getElementById('1').classList.add('activeBtn')
         document.getElementById('1').disabled = false;
 
-        //statusCircle.style.background = '#FF3535'
         r.style.setProperty('--statusCircleColor', '#FF3535');
 
         list.forEach((n) => {
@@ -83,6 +80,6 @@ function changeColor(prop, command) {
     }
 }
 
-function runServerCommand(command){
-    console.log(command)
+function runServerCommand(command) {
+    //console.log(command)
 }

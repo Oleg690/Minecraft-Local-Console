@@ -12,6 +12,7 @@
     color: #fff;
     margin: 0;
     padding: 0;
+    font-family: "Istok Web";
 }
 
 body {
@@ -106,10 +107,12 @@ body {
     font-weight: bold;
     font-family: 'Istok Web';
     transform: translate(225%, -825%);
+    z-index: 1000;
 }
 
 .dropdown * {
     box-sizing: border-box;
+    z-index: 1000;
 }
 
 .select {
@@ -123,6 +126,7 @@ body {
     padding: 0.5em;
     cursor: pointer;
     transition: all 0.3s;
+    z-index: 1000;
 }
 
 /* 
@@ -132,10 +136,12 @@ Clicked styles
 .select-clicked {
     border: 2px #26489a solid;
     box-shadow: 0 0 0.8em #26489a;
+    z-index: 1000;
 }
 
 .select:hover {
     background: #323741;
+    z-index: 1000;
 }
 
 .caret {
@@ -146,6 +152,7 @@ Clicked styles
     border-top: 7px solid #fff;
     transition: all 0.3s;
     transform: rotate(90deg);
+    z-index: 1000;
 }
 
 /* 
@@ -154,6 +161,7 @@ Rotate styles
 
 .caret-rotate {
     transform: rotate(270deg);
+    z-index: 1000;
 }
 
 .menu {
@@ -174,6 +182,7 @@ Rotate styles
     transition: 0.2s all;
     z-index: 10;
     transition: all 0.3s;
+    z-index: 1000;
 }
 
 .menu li {
@@ -182,10 +191,12 @@ Rotate styles
     border-radius: 0.5em;
     cursor: pointer;
     transition: all 0.3s;
+    z-index: 1000;
 }
 
 .menu li:hover {
     background: #2a2d35;
+    z-index: 1000;
 }
 
 /* 
@@ -205,9 +216,7 @@ Open styles
     opacity: 1;
 }
 
-
-
-/* --------------------------------------------------- */
+/* ------------ ↓ Manage Page Style ↓ ------------ */
 
 /* Server Info Box */
 
@@ -215,8 +224,7 @@ Open styles
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 82.5vh;
-    /* Temporar */
+    height: 82.5vh;/* <--- Temporary! */
 }
 
 /* #manage{
@@ -309,10 +317,11 @@ Merge dar nu pot rezolva z-index-ul!!!
 .controlButton {
     padding: 10px 20px 10px 20px;
     border-radius: 5px;
+    font-size: calc(var(--manageTextSize) - 10px);
+    font-weight: 700;
     border: none;
     color: #fff;
     cursor: pointer;
-    font-size: calc(var(--manageTextSize) - 10px);
     background: #535353;
     transition: 0.2s ease-in-out;
 }
@@ -324,7 +333,6 @@ Merge dar nu pot rezolva z-index-ul!!!
 
 .controlButton.activeBtn:nth-child(1) {
     background: #2781e6;
-    transition: 0.2s ease-in-out;
 }
 
 .controlButton.activeBtn:nth-child(1):hover {
@@ -347,4 +355,181 @@ Merge dar nu pot rezolva z-index-ul!!!
 
 .controlButton.activeBtn:nth-child(3):hover {
     background: #bf34ff;
+}
+
+/* ------------ ↓ Console Page Style ↓ ------------ */
+
+.toCenterConsole {
+    display: flex;
+}
+
+.console {
+    border: none;
+    width: 800px;
+    height: 600px;
+    background: #222428;
+    resize: none;
+    font-size: 15px;
+    padding: 5px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    color: #fff;
+    z-index: -1;
+    overflow: visible;
+}
+
+textarea::-webkit-scrollbar {
+    border-radius: 10px;
+    width: 10px;
+    background: #2b2b2b;
+    cursor: default;
+}
+
+textarea::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #424242;
+    cursor: default;
+}
+
+.console:focus {
+    outline: none;
+}
+
+.consoleForm {
+    display: grid;
+}
+
+.consoleInput {
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background: transparent;
+    width: 95%;
+    border-radius: 10px;
+    height: 30px;
+    border: none;
+    padding-left: 10px;
+    color: #dbdcdd;
+    font-size: 15px;
+    padding: 5px 0px 5px 10px;
+    border: 1px solid #bbb8b8;
+}
+
+.consoleInput:focus {
+    outline: none;
+}
+
+.consoleInputDiv {
+    background: #262a32;
+    display: flex;
+    justify-content: center;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.inputText {
+    position: absolute;
+    background: #262a32;
+    z-index: 101;
+    transform: translate(-315px, 2px);
+    width: 125px;
+    text-align: center;
+}
+
+.inputForIcon {
+    display: flex;
+    width: 95%;
+}
+
+.material-symbols-outlined {
+    position: absolute;
+    transform: translate(365px, 20px);
+    cursor: pointer;
+    transition-duration: 0.5s;
+    transition: inputIcon;
+}
+
+@keyframes inputIcon {
+    from {
+        transform: scale(0.9);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+.statsConsole {
+    width: 400px;
+    margin-left: 20px;
+}
+
+.statsConsoleBar {
+    display: flex;
+    background: #262a32;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.statsConsoleIcon {
+    display: flex;
+    width: 40px;
+    font-size: 30px;
+    align-items: center;
+}
+
+.Uptime {
+    height: 25px;
+}
+
+.timer {
+    font-weight: 700;
+}
+
+.memory {
+    height: 25px;
+}
+
+.statsConsole ion-icon {
+    color: #fec538;
+}
+
+.mainDiv{
+    height: 75vh;
+    overflow-y: scroll;
+}
+
+.mainDiv .divFolder {
+    cursor: pointer;
+    width: 70%;
+    padding: 10px;
+    font-size: 20px;
+    background: #262a32;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 2px 0.5px #181c20;
+}
+
+.mainDiv .divFile {
+    width: 70%;
+    padding: 10px;
+    font-size: 20px;
+    background: #262a32;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 2px 0.5px #181c20;
+}
+
+.utilitiesFilesViewer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.undoBtn {
+    cursor: pointer;
+    position: absolute;
+    transform: translate(-30px, -1px) scale(1.5);
 }
