@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Itim&family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root{
+    --cardWidth: 662.5px;
+}
+
+* {
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background: #1C2127;
+    display: flex;
+    min-height: 100vh;
+}
+
+.mainPage{
+    width: 100%;
+    padding: 80px;
+}
+
+/* Main Side Bar Style */
+
+.sideBarParent{
+    /* display: none; */
+    width: 300px;
+    height: page;
+    background: #262A32;
+    user-select: none;
+}
+
+.imgLogoDiv{
+    display: flex;
+    justify-content: center;
+}
+
+.imgLogo{
+    display: flex;
+    align-items: center;
+    width: 250px;
+    z-index: 0;
+}
+
+.sideBarOptions{
+    display: grid;
+    width: 300px;
+    transform: translateY(-40px);
+    z-index: 1;
+}
+
+.sideBarOption{
+    font-family: "Istok Web";
+    font-weight: bold;
+    font-size: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    height: 82px;
+    width: 300px;
+    margin-top: 29px;
+    cursor: pointer;
+    transition: background 0.5s ease;
+}
+
+.sideBarOption a{
+    position: relative;
+    transform: translateY(2px);
+    text-decoration: none;
+}
+
+.sideBarOption:hover{   
+    background: #22262ca9;
+}
+
+.activeSideBarOption{
+    background: #22262D;
+}
+
+.activeSideBarOption a{
+    color: #FEC538;
+}
+
+/* Main Page Show */
+
+.content{
+    display: none;
+}
+
+.tabShow{
+    display: block;
+}

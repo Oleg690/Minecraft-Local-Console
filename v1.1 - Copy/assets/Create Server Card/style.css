@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* margin/padding: top, right, bottom, left */
+* {
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    font-family: "Istok Web";
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1C2127;
+    min-height: 100vh;
+}
+
+.createCard {
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 662.5px;
+    height: 326px;
+    background: #262A32;
+    border-radius: 44px;
+}
+
+.createCard p {
+    transform: translateY(30px);
+    font-size: 43px;
+}
+
+.createCard button {
+    transform: translateY(-20px);
+    align-items: center;
+    height: 90px;
+    width: 90px;
+    border-radius: 50%;
+    outline: none;
+    border: none;
+    cursor: pointer;
+}
+
+.createCard ion-icon {
+    transform: translateY(5px);
+    height: 40px;
+    width: 40px;
+    color: #000;
+    text-align: center;
+}

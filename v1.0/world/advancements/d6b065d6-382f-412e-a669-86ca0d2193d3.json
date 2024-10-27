@@ -1,0 +1,22 @@
+{
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2024-06-20 18:57:26 +0300"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:cherry_grove": "2024-06-20 19:03:32 +0300",
+      "minecraft:plains": "2024-06-20 19:14:06 +0300"
+    },
+    "done": false
+  },
+  "minecraft:recipes/decorations/chest": {
+    "criteria": {
+      "has_lots_of_items": "2024-06-20 19:44:08 +0300"
+    },
+    "done": true
+  },
+  "DataVersion": 3839
+}

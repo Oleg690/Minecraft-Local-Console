@@ -1,0 +1,474 @@
+@import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Itim&family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root{
+    --selectWidth: 105%;
+    --menuAllBorder: 20px;
+
+    --serverOptionsWidth: 420px;
+    /* --serverOptionsHeight: 70px; */
+    --serverOptionsHeight: calc(var(--serverOptionsWidth) / 6);
+    --serverOptionsPaddingLeft: 20px;
+    --serverOptionsPaddingRight: 20px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    color: #fff;
+    z-index: 1;
+}
+
+body{
+    background: #1C2127;
+    display: flex;
+    min-height: 100vh;
+}
+
+span{
+    user-select: none;
+}
+
+.mainPage{
+    width: 100%;
+}
+
+/* Main Side Bar Style */
+
+.sideBarParent{
+    /* display: none; */
+    width: 300px;
+    height: page;
+    background: #262A32;
+    user-select: none;
+}
+
+.imgLogoDiv{
+    display: flex;
+    justify-content: center;
+}
+
+.imgLogo{
+    display: flex;
+    align-items: center;
+    width: 250px;
+    z-index: 0;
+}
+
+.sideBarOptions{
+    display: grid;
+    width: 300px;
+    transform: translateY(-40px);
+    z-index: 1;
+}
+
+.sideBarOption{
+    font-family: "Istok Web";
+    font-weight: bold;
+    font-size: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    height: 82px;
+    width: 300px;
+    margin-top: 29px;
+    cursor: pointer;
+    transition: background 0.5s ease;
+}
+
+.sideBarOption:hover{   
+    background: #22262ca9;
+}
+
+.sideBarOption a{
+    position: relative;
+    transform: translateY(2px);
+    text-decoration: none;
+}
+
+.activeSideBarOption{
+    background: #22262D;
+}
+
+.activeSideBarOption a{
+    color: #FEC538;
+}
+
+/* Main Page Show */
+
+.content{
+    display: none;
+}
+
+.tabShow{
+    display: block;
+}
+
+/* -------------------- Style for main page -------------------- */
+
+.createServerSection{
+    font-family: "Inter";
+    padding: 20px 40px;
+}
+
+/* Img Styling */
+
+.backgroundImage{
+    transform: translateY(-4px);
+}
+
+.backgroundImage img{
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    object-position: top;
+    transform: translateY(4px);
+}
+
+/* Server Name Styling */
+
+.serverName p{
+    font-family: 'Itim';
+    font-size: 40px;
+}
+
+.serverName div{
+    display: flex;
+    width: 100%;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.serverNameInput{
+    font-family: 'Inter';
+    font-weight: bold;
+    font-size: 25px;
+    width: 100%;
+    height: 40px;
+    outline: none;
+    border: none;
+    background: #262A32;
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+
+/* Server Options Text Style */
+
+.optionForserverOptions{
+    font-family: 'Itim';
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+/* server.proprierties Style Alignment*/
+
+.serverPropSettings{
+    display: grid;
+    justify-content: center;
+    min-width: 460px;
+    border-radius: 25px;
+    padding: 20px 20px;
+    background: #262A32;
+}
+
+/* server.proprierties text style */
+
+.serverPropSettingsInfo{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    font-family: "Inter";
+    font-size: 35px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.serverPropSettingsInfo div{
+    display: flex;
+    align-items: center;
+}
+
+/* Style for div for all the checking inputs (server settings) */
+
+.allServerInputs{
+    /* border: 1px solid red; */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 469px));
+    justify-content: center;
+    gap: 38px;
+    max-width: 1483px;
+}
+
+
+
+/* Style for create button */
+
+.createBtnDiv{
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    margin-top: 20px;
+    width: 100%;
+    height: 60px;
+}
+
+.createServerSection button{
+    width: 257px;
+    height: 100%;
+    border: 0px;
+    border-radius: 25px;
+    background: #262A32;
+    font-size: 35px;
+    font-family: "Inter";
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.createServerSection button:hover{
+    background: #2c303a;
+}
+
+.createServerSection button:active{
+    background: #3d434e;
+}
+
+/* Styling for all the checking buttons and menu's */
+
+/* Text Input */
+
+.checkboxTextBackground{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: var(--serverOptionsPaddingLeft);
+    padding-right: var(--serverOptionsPaddingRight);
+    width: var(--serverOptionsWidth);
+    height: var(--serverOptionsHeight);
+    background: #1C2127;
+    border-radius: 25px;
+    z-index: 1;
+}
+
+.checkboxTextBackground p{
+    font-family: "Inter";
+    font-weight: bold;
+    font-size: 30px;
+}
+
+.inputForOptions[type="number"]{
+    width: 110px;
+    height: 44px;
+    border-radius: 25px;
+    border: none;
+    background: #262A32;
+    text-decoration: none;
+    font-family: "Inter";
+    font-size: 25px;
+    font-weight: bold;
+    padding: 2px 7px 2px 7px;
+    text-align: right;
+    outline: none;
+}
+
+.inputForOptions[type="number"]::-webkit-inner-spin-button{
+    display: none;
+}
+
+/* Check Input */
+
+.checkboxBackground{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: var(--serverOptionsPaddingLeft);
+    padding-right: var(--serverOptionsPaddingRight);
+    width: var(--serverOptionsWidth);
+    height: var(--serverOptionsHeight);
+    background: #1C2127;
+    border-radius: 25px;
+    z-index: 1;
+}
+
+.checkboxBackground p{
+    font-family: "Inter";
+    font-weight: bold;
+    font-size: 30px;
+}
+
+.checkbox {
+    position: relative;
+    height: 40px;
+    width: 70px;
+    background: #262A32;
+    border-radius: 30px;
+}
+
+.checkbox-input {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.checkbox-icons::before {
+    position: absolute;
+    content: "\f00d";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: white;
+    height: 35px;
+    width: 35px;
+    background: #F62451;
+    border-radius: 50%;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.4s;
+}
+
+.checkbox-input:checked+label .checkbox-icons::before {
+    background: #1FD78D;
+    transform: translateY(-50%) rotate(360deg);
+    left: calc(100% - 38px);
+    content: "\f00c";
+}
+
+/* List Input */
+
+.dropdown{
+    min-width: 8em;
+    position: relative;
+}
+
+.dropdown *{
+    box-sizing: border-box;
+}
+
+.menuForOptions{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: var(--serverOptionsPaddingLeft);
+    padding-right: var(--serverOptionsPaddingRight);
+    width: var(--serverOptionsWidth);
+    height: var(--serverOptionsHeight);
+    background: #1C2127;
+    border-radius: var(--menuAllBorder);
+    z-index: 11;
+}
+
+.menuForOptions p{
+    font-family: "Inter";
+    font-weight: bold;
+    font-size: 30px;
+}
+
+.select span{
+    font-family: "Inter";
+    font-size: 20px;
+    font-weight: bold;
+    z-index: 11;
+}
+
+.select{
+    background: #262a32;
+    color: #fff;
+    display: flex;
+    width: var(--selectWidth);
+    justify-content: space-between;
+    align-items: center;
+    border-radius: var(--menuAllBorder);
+    padding: 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+    z-index: 11;
+}
+
+/* 
+Clicked styles
+*/
+
+.select:hover{
+    background: #323741;
+}
+
+.caret{
+    margin-left: 10px;
+    width: 0px;
+    height: 0px;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #fff;
+    transition: 0.3s;
+}
+
+/* 
+Rotate styles
+*/
+
+.caret-rotate{
+    transform: rotate(180deg);
+}
+
+.menu{
+    list-style: none;
+    padding: 5px;
+    background: #323741;
+    border: 1px #363a43 solid;
+    box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
+    border-radius: var(--menuAllBorder);
+    color: #9fa5b5;
+    position: absolute;
+    top: 2.75em;
+    left: 52.5%;
+    left: calc(var(--selectWidth) - 52.5%);
+    width: var(--selectWidth);
+    transform: translateX(-50%);
+    opacity: 0;
+    display: none;
+    font-family: "Inter";
+    font-size: 20px;
+    font-weight: bold;
+    user-select: none;
+    text-align: center;
+    transition: 0.2s;
+}
+
+.menu li{
+    padding: 0.7em 0.5em;
+    border-radius: var(--menuAllBorder);
+    cursor: pointer;
+}
+
+.menu li:hover{
+    background: #2a2d35;
+}
+
+/* 
+Active styles
+*/
+
+.activePage{
+    background: #23242a;
+}
+
+/* 
+Open styles
+*/
+
+.menu-open{
+    display: block;
+    opacity: 1;
+}

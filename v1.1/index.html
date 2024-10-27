@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../static/css/style.css" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <title>Server Hosting</title>
+</head>
+
+<body onload="run()">
+    <div class="sideBar">
+        <div class="logo">
+            <img src="../static/img/logo.svg" alt="error" class="logoText">
+        </div>
+        <div class="sideBarSections">
+
+            <div class="sideBarSection active">
+                <div class="icons">
+                    <ion-icon name="game-controller" class="icon"></ion-icon>
+                </div>
+                <p class="sideBarText">Server</p>
+            </div>
+            <div class="sideBarSection">
+                <div class="icons">
+                    <ion-icon name="construct" class="icon"></ion-icon>
+                </div>
+                <p class="sideBarText">Console</p>
+            </div>
+            <div class="sideBarSection">
+                <div class="icons">
+                    <ion-icon name="folder-open" class="icon"></ion-icon>
+                </div>
+                <p class="sideBarText">Files</p>
+            </div>
+            <div class="sideBarSection">
+                <div class="icons">
+                    <ion-icon name="cog" class="icon"></ion-icon>
+                </div>
+                <p class="sideBarText">Settings</p>
+            </div>
+        </div>
+    </div>
+    <div class="mainPage">
+        <div class="content tabShow">
+            <nav class="navBar">
+                <div class="navBarMainText">Server</div>
+            </nav>
+            <div class="view">
+
+                <div class="infoBox">
+                    <div class="img">
+                        <img src="../static/img/minecraft.jpg" alt="error" class="minecraftImg">
+                    </div>
+                    <div class="infoBoxControls">
+                        <div class="controlButtons">
+                            <button class="controlButton marginRight activeBtn" id="1"
+                                onclick="changeColor(1)">Start</button>
+                            <button class="controlButton marginRight" id="2" onclick="changeColor(2)" disabled>Stop</button>
+                            <button class="controlButton" id="3" onclick="changeColor(3)" disabled>Restart</button>
+                        </div>
+                        <div class="serverInfo">
+                            <div class="serverInfoMargin">
+                                <p class="serverName" id="serverName">Moldova SMP</p>
+                                <div class="address">
+                                    <div class="displayFlex">
+                                        <ion-icon name="wifi" class="wifi iconServerInfo"></ion-icon>
+                                        <p>Address:</p>
+                                    </div>
+                                    <div class="addressIP">
+                                        <p>localhost</p>
+                                    </div>
+                                </div>
+                                <div class="displayFlex">
+                                    <ion-icon name="heart" class="heart iconServerInfo"></ion-icon>
+                                    <p>Status</p>
+                                    <p class="status" id="status">: Stopped</p>
+                                    <div class="statusCircle" id="statusCircle"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="content">
+            <nav class="navBar">
+                <div class="navBarMainText">Console</div>
+            </nav>
+            <div class="view">
+                <div class="consoleDiv">
+                    <div class="consoleForm">
+                        <textarea class="console" readonly id="textarea" rows="50"></textarea>
+                        <div class="consoleInputDiv">
+                            <div class="inputText">Send Command</div>
+                            <input type="text" class="consoleInput" id="consoleInputCommand">
+                            <div class=""></div>
+                            <span class="material-symbols-outlined" onclick="sendCommand()">
+                                send
+                            </span>
+                        </div>
+                    </div>
+                    <div class="statsConsole">
+                        <div class="statsConsoleBar">
+                            <div class="statsConsoleIcon">
+                                <ion-icon name="time"></ion-icon>
+                            </div>
+                            <div class="upTimeStats">
+                                <div class="Uptime">
+                                    <p>Uptime:</p>
+                                </div>
+                                <p class="timer">0h 0m 0s</p>
+                            </div>
+                        </div>
+                        <div class="statsConsoleBar">
+                            <div class="statsConsoleIcon">
+                                <ion-icon name="file-tray-full"></ion-icon>
+                            </div>
+                            <div class="memoryStats">
+                                <div class="memory">
+
+                                    <p>Memory:</p>
+                                </div>
+                                <p class="timer">0MB / 0MB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <nav class="navBar">
+                <div class="navBarMainText">Files</div>
+            </nav>
+            <div class="view">
+                <div class="utilitiesFilesViewer">
+                    <ion-icon class="undoBtn"  name="arrow-undo" onclick="back('..')" ></ion-icon>
+                    <p id="par"></p>
+                </div>
+                <div class="mainDiv" id="mainDiv"></div>
+            </div>
+        </div>
+
+        <div class="content">
+            <nav class="navBar">
+                <div class="navBarMainText">Settings</div>
+            </nav>
+            <div class="view"></div>
+        </div>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <script src="../static/js/index.js"></script>
+</body>
+
+</html>
