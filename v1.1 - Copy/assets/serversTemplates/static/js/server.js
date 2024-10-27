@@ -31,3 +31,53 @@ dropdowns.forEach(dropdown => {
         })
     })
 });
+
+
+function changeColor(prop, command) {
+    let list = [2, 3]
+    statusCircle = document.getElementById('statusCircle');
+
+    if (prop == 1) {
+        runServerCommand(command)
+
+        document.getElementById('1').classList.remove('activeBtn')
+        document.getElementById('1').disabled = true;
+
+        statusCircle.style.background = '#87FF2C'
+
+        list.forEach((n) => {
+            document.getElementById(`${n}`).classList.add("activeBtn")
+            document.getElementById(`${n}`).disabled = false;
+        })
+    }
+    else if (prop == 2) {
+        runServerCommand(command)
+
+        document.getElementById('1').classList.add('activeBtn')
+        document.getElementById('1').disabled = false;
+
+        statusCircle.style.background = '#FF3535'
+
+        list.forEach((n) => {
+            document.getElementById(`${n}`).classList.remove("activeBtn")
+            document.getElementById(`${n}`).disabled = true;
+        })
+    }
+    else if (prop == 3) {
+        runServerCommand(command)
+
+        document.getElementById('1').classList.add('activeBtn')
+        document.getElementById('1').disabled = false;
+
+        statusCircle.style.background = '#FF3535'
+
+        list.forEach((n) => {
+            document.getElementById(`${n}`).classList.remove("activeBtn")
+            document.getElementById(`${n}`).disabled = true;
+        })
+    }
+}
+
+function runServerCommand(command){
+    console.log(command)
+}

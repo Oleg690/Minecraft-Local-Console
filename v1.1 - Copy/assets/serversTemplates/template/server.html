@@ -40,19 +40,16 @@
 
     <div class="mainPage">
         <div class="content tabShow" id="manage">
-            <div class="infoBox">
-                <div class="img">
+            <div class="toCenter">
+                <div class="infoBox">
                     <img src="/assets/serversTemplates/static/img/minecraft.jpg" alt="error" class="minecraftImg">
-                </div>
-                <div class="infoBoxControls">
-                    <div class="controlButtons">
-                        <button class="controlButton marginRight activeBtn" id="1"
-                            onclick="changeColor(1)">Start</button>
-                        <button class="controlButton marginRight" id="2" onclick="changeColor(2)" disabled>Stop</button>
-                        <button class="controlButton" id="3" onclick="changeColor(3)" disabled>Restart</button>
-                    </div>
-                    <div class="serverInfo">
-                        <div class="serverInfoMargin">
+                    <div class="infoBoxControls">
+                        <div class="controlButtons">
+                            <button class="controlButton activeBtn" id="1" onclick="changeColor(1, 'start')">Start</button>
+                            <button class="controlButton" id="2" onclick="changeColor(2, 'stop')" disabled>Stop</button>
+                            <button class="controlButton" id="3" onclick="changeColor(3, 'restart')" disabled>Restart</button>
+                        </div>
+                        <div class="serverInfo">
                             <p class="serverName" id="serverName">Moldova SMP</p>
                             <div class="address">
                                 <div class="displayFlex">
