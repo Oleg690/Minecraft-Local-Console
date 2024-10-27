@@ -9,7 +9,7 @@ function getServersResult(e) {
     let html = '';
 
     for (let i = 0; i < result.length; i++) {
-        html += `<div class='serverCard'>
+        html += `<div class='serverCard' onclick='openServer(${result[i][3]})'>
                     <div class='serverCardImage'>
                         <img src='/static/img/serverCardBackground.png' alt='error'>
                     </div>
@@ -40,6 +40,10 @@ function getServersResult(e) {
                 </div>`
 
     document.getElementById('serverCards').innerHTML += html;
+}
+
+function openServer(serverNumber){
+    console.log(serverNumber)
 }
 
 function send(url, result) {
