@@ -1,4 +1,0 @@
-#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://aka.ms/MinecraftEULA).
-#Thu Sep 05 19:58:35 EEST 2024
-eula=true
-
