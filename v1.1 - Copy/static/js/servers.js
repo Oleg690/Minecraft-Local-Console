@@ -43,7 +43,7 @@ function getServersResult(e) {
 }
 
 function openServer(serverNumber){
-    console.log(serverNumber)
+    //console.log(serverNumber)
 }
 
 function send(url, result) {
