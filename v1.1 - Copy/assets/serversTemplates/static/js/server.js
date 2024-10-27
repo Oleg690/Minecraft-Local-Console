@@ -1,7 +1,7 @@
+const allContents = document.querySelectorAll(".content");
 const dropdowns = document.querySelectorAll('.dropdown');
 
 dropdowns.forEach(dropdown => {
-    // Get inner elements from each dropdown
     const select = dropdown.querySelector('.select');
     const caret = dropdown.querySelector('.caret');
     const menu = dropdown.querySelector('.menu');
@@ -9,16 +9,12 @@ dropdowns.forEach(dropdown => {
     const selected = dropdown.querySelector('.selected');
 
     select.addEventListener('click', () => {
-        //Add the clicekd select styles to the select element
         select.classList.toggle('select-clicked');
-        //Add the rotate styles to the caret element
         caret.classList.toggle('caret-rotate');
-        //Add the open styles to the menu element
         menu.classList.toggle('menu-open');
     });
 
-    //Loop throught all option elements
-    options.forEach(option => {
+    options.forEach((option, index) => {
         option.addEventListener('click', () => {
             selected.innerText = option.innerText;
             //console.log(selected.innerText)
@@ -28,8 +24,10 @@ dropdowns.forEach(dropdown => {
 
             options.forEach(option => {
                 option.classList.remove('active');
+            allContents.forEach(allContent => { allContent.classList.remove('tabShow') })
             })
             option.classList.add('active');
+            allContents[index].classList.add('tabShow')
         })
     })
 });

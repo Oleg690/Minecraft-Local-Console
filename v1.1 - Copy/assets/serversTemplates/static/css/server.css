@@ -1,0 +1,313 @@
+@import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Itim&family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root{
+    --manageTextSize: 35px;
+}
+
+* {
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background: #1C2127;
+    display: flex;
+    min-height: 100vh;
+}
+
+.mainPage{
+    width: 100%;
+    padding: 80px;
+}
+
+/* Main Side Bar Style */
+
+.sideBarParent{
+    /* display: none; */
+    width: 300px;
+    height: page;
+    background: #262A32;
+    user-select: none;
+}
+
+.imgLogoDiv{
+    display: flex;
+    justify-content: center;
+}
+
+.imgLogo{
+    display: flex;
+    align-items: center;
+    width: 250px;
+    z-index: 0;
+}
+
+.sideBarOptions{
+    display: grid;
+    width: 300px;
+    transform: translateY(-40px);
+    z-index: 1;
+}
+
+.sideBarOption{
+    font-family: "Istok Web";
+    font-weight: bold;
+    font-size: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    height: 82px;
+    width: 300px;
+    margin-top: 29px;
+    cursor: pointer;
+    transition: background 0.5s ease;
+}
+
+.sideBarOption a{
+    position: relative;
+    transform: translateY(2px);
+    text-decoration: none;
+}
+
+.sideBarOption:hover{   
+    background: #22262ca9;
+}
+
+.activeSideBarOption{
+    background: #22262D;
+}
+
+.activeSideBarOption a{
+    color: #FEC538;
+}
+
+/* Main Page Show */
+
+.content{
+    display: none;
+}
+
+.tabShow{
+    display: block;
+}
+
+.dropdown{
+    user-select: none;
+    width: 7.6em;
+    position: relative;
+    font-size: 19px;
+    font-weight: bold;
+    font-family: 'Istok Web';
+    transform: translate(225%, -825%);
+}
+
+.dropdown *{
+    box-sizing: border-box;
+}
+
+.select{
+    background: #2a2f3b;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px #2a2f3b solid;
+    border-radius: 0.5em;
+    padding: 0.5em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* 
+Clicked styles
+*/
+
+.select-clicked{
+    border: 2px #26489a solid;
+    box-shadow: 0 0 0.8em #26489a;
+}
+
+.select:hover{
+    background: #323741;
+}
+
+.caret{
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid #fff;
+    transition: all 0.3s;
+    transform: rotate(90deg);
+}
+
+/* 
+Rotate styles
+*/
+
+.caret-rotate{
+    transform: rotate(270deg);
+}
+
+.menu{
+    list-style: none;
+    padding: 0em 0.3em;
+    background: #323741;
+    border: 1px #363a43 solid;
+    box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
+    border-radius: 0.5em;
+    color: #9fa5b5;
+    position: absolute;
+    top: 0em;
+    left: 155%;
+    width: 100%;
+    transform: translateX(-50%);
+    opacity: 0;
+    display: none;
+    transition: 0.2s all;
+    z-index: 10;
+    transition: all 0.3s;
+}
+
+.menu li{
+    padding: 0.4em 0.5em;
+    margin: 0.3em 0;
+    border-radius: 0.5em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.menu li:hover{
+    background: #2a2d35;
+}
+
+/* 
+Active styles
+*/
+
+.activePage{
+    background: #23242a;
+}
+
+/* 
+Open styles
+*/
+
+.menu-open{
+    display: block;
+    opacity: 1;
+}
+
+
+
+/* --------------------------------------------------- */
+
+/* Server Info Box */
+
+.infoBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+    font-family: "Istok Web";
+    font-weight: bold;
+    font-size: var(--manageTextSize);
+}
+
+.infoBox .img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    width: 250px;
+    height: 350px;
+    border-radius: 10px;
+}
+
+.infoBox img {
+    transform: scale(0.9);
+}
+
+.infoBoxControls {
+    margin-left: 30px;
+}
+
+.serverInfo {
+    overflow: hidden;
+    width: 980px;
+    border-radius: 15px;
+    background: #262a32;
+}
+
+.serverInfoMargin {
+    margin: 20px;
+}
+
+.displayFlex {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin-bottom: 5px;
+}
+
+.address {
+    margin-top: 10px;
+}
+
+.address .wifi {
+    font-size: var(--manageTextSize - 10px);
+}
+
+.iconServerInfo {
+    transform: translateY(-4px);
+    color: #fec538;
+    width: 35px;
+}
+
+.addressIP {
+    width: 96.5%;
+    background: #1c2127;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.statusCircle {
+    transform: translateX(10px);
+    width: 12.5px;
+    height: 12.5px;
+    background: red;
+    border-radius: 50%;
+}
+
+.controlButtons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.marginRight {
+    margin-right: 10px;
+}
+
+.controlButton {
+    padding: 10px 20px 10px 20px;
+    border-radius: 5px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.controlButton {
+    background: #535353;
+    transition: 0.2s ease-in-out;
+}
+
+.controlButton:hover {
+    background: #5f5f5f;
+}

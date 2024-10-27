@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/serversTemplates/static/css/server.css">
+    <title>Server</title>
+</head>
+
+<body>
+    <div class="sideBarParent">
+        <div class="imgLogoDiv">
+            <img src="/static/img/logo.svg" alt="error" class="imgLogo">
+        </div>
+        <div class="sideBarOptions">
+            <div class="sideBarOption">
+                <a href="/templates/servers.html">Servers</a>
+            </div>
+            <div class="sideBarOption">
+                <a href="/templates/profile.html">Profile</a>
+            </div>
+            <div class="sideBarOption activeSideBarOption">
+                <a href="/templates/support.html">Support</a>
+            </div>
+            <div class="dropdown">
+                <div class="select">
+                    <span class="selected">Manage</span>
+                    <div class="caret"></div>
+                </div>
+                <ul class="menu">
+                    <li value="manage" class="active">Manage</li>
+                    <li value="console">Console</li>
+                    <li value="files">Files</li>
+                    <li value="settings">Settings</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="mainPage">
+        <div class="content tabShow" id="manage">
+            <div class="infoBox">
+                <div class="img">
+                    <img src="/assets/serversTemplates/static/img/minecraft.jpg" alt="error" class="minecraftImg">
+                </div>
+                <div class="infoBoxControls">
+                    <div class="controlButtons">
+                        <button class="controlButton marginRight activeBtn" id="1"
+                            onclick="changeColor(1)">Start</button>
+                        <button class="controlButton marginRight" id="2" onclick="changeColor(2)" disabled>Stop</button>
+                        <button class="controlButton" id="3" onclick="changeColor(3)" disabled>Restart</button>
+                    </div>
+                    <div class="serverInfo">
+                        <div class="serverInfoMargin">
+                            <p class="serverName" id="serverName">Moldova SMP</p>
+                            <div class="address">
+                                <div class="displayFlex">
+                                    <ion-icon name="wifi" class="wifi iconServerInfo"></ion-icon>
+                                    <p>Address:</p>
+                                </div>
+                                <div class="addressIP">
+                                    <p>localhost</p>
+                                </div>
+                            </div>
+                            <div class="displayFlex">
+                                <ion-icon name="heart" class="heart iconServerInfo"></ion-icon>
+                                <p>Status</p>
+                                <p class="status" id="status">: Stopped</p>
+                                <div class="statusCircle" id="statusCircle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="console">
+            <p>console</p>
+        </div>
+
+        <div class="content" id="files">
+            <p>files</p>
+        </div>
+
+        <div class="content" id="settings">
+            <p>settings</p>
+        </div>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <script src="/assets/serversTemplates/static/js/server.js"></script>
+</body>
+
+</html>
