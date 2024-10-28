@@ -89,9 +89,30 @@ function runServerCommand(command) {
 
 function serverCommandResult(e) {
     let result = e.target.response;
-    console.log(result);
     result = JSON.parse(result);
-    console.log(result);
+
+    console.log(result)
+
+    //    infoCardColor = document.querySelector('#color')
+    //    infoCardText = document.querySelector('#infoCardText')
+    //    infoPopupDescription = document.querySelector('#infoPopupDescription')
+    //
+    //    infoCardColor.className = 'color'
+    //    infoCardColor.classList.add(`${result[0]}`)
+    //    
+    //    infoPopupDescription.innerText = result[1]
+    //    if (result[0] == 'blue') {
+    //        infoCardText.innerText = 'Info'
+    //    } else if (result[0] == 'green') {
+    //        infoCardText.innerText = 'Success'
+    //    } else if (result[0] == 'red') {
+    //        infoCardText.innerText = 'Error'
+    //    }
+
+    let infoCardColor = result[0];
+    let infoPopupDescription = result[1];
+
+    spawnPopup(infoCardColor, getTextForColor(infoCardColor), infoPopupDescription)
 }
 
 function onLoadFunc() {
@@ -112,6 +133,37 @@ function serverInfoResult(e) {
     }
 }
 
+function getTextForColor(infoCardColor) {
+    if (infoCardColor == 'blue') {
+        infoCardText = 'Info'
+    } else if (infoCardColor == 'green') {
+        infoCardText = 'Success'
+    } else if (infoCardColor == 'red') {
+        infoCardText = 'Error'
+    }
+
+    return infoCardText
+}
+
+function spawnPopup(infoCardColor, infoCardText, infoPopupDescription) {
+    allPopupsDiv = document.querySelector('#infoPopups');
+    allInfoPopups = document.querySelectorAll('.infoPopup');
+
+    allPopupsDiv.innerHTML += ` <div class="infoPopup" id="${allInfoPopups.length + 1}0">
+                                    <div class="color ${infoCardColor}" id="color">
+                                        <div class="infoCardText" id="infoCardText">${infoCardText}</div>
+                                        <div class="x-icon">
+                                            <ion-icon name="close-outline" id="close-outline" onclick="deleteDiv(${allInfoPopups.length + 1})"></ion-icon>
+                                        </div>
+                                    </div>
+                                    <p class="infoPopupDescription" id="infoPopupDescription">${infoPopupDescription}</p>
+                                </div>`
+}
+
+function deleteDiv(e) {
+    $(`#${e}0`).delay(0).fadeOut(500);
+    console.log("hello")
+}
 function send(url, result) {
     let oReq = new XMLHttpRequest();
 

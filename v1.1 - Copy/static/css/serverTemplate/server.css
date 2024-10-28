@@ -6,6 +6,9 @@
 :root {
     --manageTextSize: 35px;
     --statusCircleColor: #FF3535;
+
+    --infoPopupFontSize: 30px;
+    --borderRadiusForInfoPopup: 15px;
 }
 
 * {
@@ -216,6 +219,104 @@ Open styles
     opacity: 1;
 }
 
+/* ------------ ↓ Popup Style ↓ ------------ */
+
+.infoPopups {
+    display: grid;
+    position: absolute;
+    left: 500%;
+    top: -20%;
+    gap: 20px;
+}
+
+.infoPopup{
+    display: block;
+    background: #242830;
+    position: relative;
+    min-width: 400px;
+    width: fit-content;
+    min-height: 140px;
+    border-radius: var(--borderRadiusForInfoPopup);
+}
+
+.infoPopup:nth-last-child(1){
+    animation-duration: 1s;
+    animation-name: popupAnimation;
+}
+
+.color {
+    display: flex;
+    min-height: 70px;
+    border-top-left-radius: var(--borderRadiusForInfoPopup);
+    border-top-right-radius: var(--borderRadiusForInfoPopup);
+    justify-content: space-between;
+}
+
+.blue {
+    background: #2196F3;
+}
+
+.green {
+    background: #5acb5a;
+}
+
+.red {
+    background: #f04a4a;
+}
+
+.infoCardText {
+    transform: translateY(3px);
+    display: flex;
+    align-items: center;
+    font-size: var(--infoPopupFontSize);
+    margin-left: 20px;
+}
+
+.x-icon {
+    display: flex;
+    font-size: calc(var(--infoPopupFontSize) + 5px);
+    align-items: center;
+    margin-right: 20px;
+}
+
+#close-outline {
+    color: #000;
+    transform: translateY(2px);
+    cursor: pointer;
+}
+
+.infoPopupDescription {
+    text-align: left;
+    width: fit-content;
+    font-size: var(--infoPopupFontSize);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+@keyframes popupAnimation {
+    from {
+        display: block;
+        transform: scale(0);
+    }
+
+    to {
+        display: block;
+        transform: scale(1);
+    }
+}
+
+@keyframes disparition {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
 /* ------------ ↓ Manage Page Style ↓ ------------ */
 
 /* Server Info Box */
@@ -224,7 +325,8 @@ Open styles
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 82.5vh;/* <--- Temporary! */
+    height: 82.5vh;
+    /* <--- Temporary! */
 }
 
 /* #manage{
@@ -495,7 +597,7 @@ textarea::-webkit-scrollbar-thumb {
     color: #fec538;
 }
 
-.mainDiv{
+.mainDiv {
     height: 75vh;
     overflow-y: scroll;
 }

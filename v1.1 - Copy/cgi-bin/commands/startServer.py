@@ -32,10 +32,10 @@ if worldNumber != '0':
     batch_file = curent_dir + '\\' + batch_file_name
 
     if is_server_running():
-        print(json.dumps('Server Already Running!'))
+        print(json.dumps(['blue', 'Server Already Running!']))
     else:
         os.chdir(dir)
         os.startfile(f"{batch_file}")
-        print(json.dumps('Server Powered!'))
+        print(json.dumps(['green', 'Server Powered!']))
 else:
-    print(json.dumps('World number wrong!'))
+    print(json.dumps(['red', 'World number wrong!']))

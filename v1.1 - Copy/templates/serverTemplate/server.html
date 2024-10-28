@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link rel="stylesheet" href="/static/css/serverTemplate/server.css">
     <title>Server</title>
 </head>
@@ -36,6 +37,26 @@
                     <li value="settings">Settings</li>
                 </ul>
             </div>
+            <div class="infoPopups" id="infoPopups">
+                <!-- <div class="infoPopup" id="1">
+                    <div class="color blue" id="color">
+                        <div class="infoCardText" id="infoCardText">Info</div>
+                        <div class="x-icon">
+                            <ion-icon name="close-outline" id="close-outline" onclick="closePopup()"></ion-icon>
+                        </div>
+                    </div>
+                    <p class="infoPopupDescription" id="infoPopupDescription">Description</p>
+                </div>
+                <div class="infoPopup" id="2">
+                    <div class="color blue" id="color">
+                        <div class="infoCardText" id="infoCardText">Info</div>
+                        <div class="x-icon">
+                            <ion-icon name="close-outline" id="close-outline" onclick="closePopup()"></ion-icon>
+                        </div>
+                    </div>
+                    <p class="infoPopupDescription" id="infoPopupDescription">Description</p>
+                </div> -->
+            </div>
         </div>
     </div>
 
@@ -46,8 +67,7 @@
                     <img src="/static/img/minecraft.jpg" alt="error" class="minecraftImg">
                     <div class="infoBoxControls">
                         <div class="controlButtons">
-                            <button class="controlButton activeBtn" id="1"
-                                onclick="changeColor(1, 'start')">Start</button>
+                            <button class="controlButton activeBtn" id="1" onclick="changeColor(1, 'start')">Start</button>
                             <button class="controlButton" id="2" onclick="changeColor(2, 'stop')" disabled>Stop</button>
                             <button class="controlButton" id="3" onclick="changeColor(3, 'restart')"
                                 disabled>Restart</button>
@@ -125,6 +145,7 @@
         </div>
     </div>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
