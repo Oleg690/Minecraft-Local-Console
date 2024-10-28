@@ -1,18 +1,25 @@
-[18:47:09] [ServerMain/ERROR]: Failed to load properties from file: server.properties
-java.nio.file.NoSuchFileException: server.properties
-	at java.base/sun.nio.fs.WindowsException.translateToIOException(WindowsException.java:85) ~[?:?]
-	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:103) ~[?:?]
-	at java.base/sun.nio.fs.WindowsException.rethrowAsIOException(WindowsException.java:108) ~[?:?]
-	at java.base/sun.nio.fs.WindowsFileSystemProvider.newByteChannel(WindowsFileSystemProvider.java:234) ~[?:?]
-	at java.base/java.nio.file.Files.newByteChannel(Files.java:379) ~[?:?]
-	at java.base/java.nio.file.Files.newByteChannel(Files.java:431) ~[?:?]
-	at java.base/java.nio.file.spi.FileSystemProvider.newInputStream(FileSystemProvider.java:420) ~[?:?]
-	at java.base/java.nio.file.Files.newInputStream(Files.java:159) ~[?:?]
-	at apr.b(SourceFile:62) ~[server-1.21.jar:?]
-	at apo.a(SourceFile:141) ~[server-1.21.jar:?]
-	at app.<init>(SourceFile:12) ~[server-1.21.jar:?]
-	at net.minecraft.server.Main.main(SourceFile:114) ~[server-1.21.jar:?]
-	at net.minecraft.bundler.Main.lambda$run$0(Main.java:54) ~[?:?]
-	at java.base/java.lang.Thread.run(Thread.java:1570) [?:?]
-[18:47:09] [ServerMain/WARN]: Failed to load eula.txt
-[18:47:09] [ServerMain/INFO]: You need to agree to the EULA in order to run the server. Go to eula.txt for more info.
+[18:49:22] [ServerMain/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[18:49:23] [ServerMain/INFO]: Loaded 1290 recipes
+[18:49:23] [ServerMain/INFO]: Loaded 1399 advancements
+[18:49:23] [Server thread/INFO]: Starting minecraft server version 1.21
+[18:49:23] [Server thread/INFO]: Loading properties
+[18:49:23] [Server thread/INFO]: Default game type: SURVIVAL
+[18:49:23] [Server thread/INFO]: Generating keypair
+[18:49:23] [Server thread/INFO]: Starting Minecraft server on *:25565
+[18:49:23] [Server thread/INFO]: Using default channel type
+[18:49:24] [Server thread/INFO]: Preparing level "world"
+[18:49:24] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
+[18:49:24] [Worker-Main-9/INFO]: Preparing spawn area: 0%
+[18:49:24] [Server thread/INFO]: Time elapsed: 383 ms
+[18:49:24] [Server thread/INFO]: Done (0.849s)! For help, type "help"
+[18:52:14] [Server thread/INFO]: Stopping the server
+[18:52:15] [Server thread/INFO]: Stopping server
+[18:52:15] [Server thread/INFO]: Saving players
+[18:52:15] [Server thread/INFO]: Saving worlds
+[18:52:15] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[18:52:15] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[18:52:15] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[18:52:15] [Server thread/INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[18:52:15] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[18:52:15] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[18:52:15] [Server thread/INFO]: ThreadedAnvilChunkStorage: All dimensions are saved

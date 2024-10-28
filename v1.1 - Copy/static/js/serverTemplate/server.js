@@ -3,6 +3,8 @@ const searchParams = new URLSearchParams(window.location.search);
 const allContents = document.querySelectorAll(".content");
 const dropdowns = document.querySelectorAll('.dropdown');
 
+let serverData = []
+
 dropdowns.forEach(dropdown => {
     const select = dropdown.querySelector('.select');
     const caret = dropdown.querySelector('.caret');
@@ -38,7 +40,7 @@ function changeColor(prop, command) {
     let list = [2, 3]
     statusCircle = document.getElementById('statusCircle');
 
-    var r = document.querySelector(':root');
+    var root = document.querySelector(':root');
 
     if (prop == 1) {
         runServerCommand(command)
@@ -46,7 +48,7 @@ function changeColor(prop, command) {
         document.getElementById('1').classList.remove('activeBtn')
         document.getElementById('1').disabled = true;
 
-        r.style.setProperty('--statusCircleColor', '#87FF2C');
+        root.style.setProperty('--statusCircleColor', '#87FF2C');
 
         list.forEach((n) => {
             document.getElementById(`${n}`).classList.add("activeBtn")
@@ -59,7 +61,7 @@ function changeColor(prop, command) {
         document.getElementById('1').classList.add('activeBtn')
         document.getElementById('1').disabled = false;
 
-        r.style.setProperty('--statusCircleColor', '#FF3535');
+        root.style.setProperty('--statusCircleColor', '#FF3535');
 
         list.forEach((n) => {
             document.getElementById(`${n}`).classList.remove("activeBtn")
@@ -72,7 +74,7 @@ function changeColor(prop, command) {
         document.getElementById('1').classList.add('activeBtn')
         document.getElementById('1').disabled = false;
 
-        r.style.setProperty('--statusCircleColor', '#FF3535');
+        root.style.setProperty('--statusCircleColor', '#FF3535');
 
         list.forEach((n) => {
             document.getElementById(`${n}`).classList.remove("activeBtn")
@@ -82,23 +84,31 @@ function changeColor(prop, command) {
 }
 
 function runServerCommand(command) {
-    //console.log(command)
+    if (command == 'start') {
+        send(`\\cgi-bin\\commands\\startServer.py?number=${window.value[3]}`, serverCommandResult)
+    }
 }
 
-function onLoadFunc(){
-    console.log(searchParams.get('n'));
+function serverCommandResult(e) {
+    let result = e.target.response;
+    console.log(result);
+    result = JSON.parse(result);
+    console.log(result);
+}
 
+function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
 }
 
-function serverInfoResult(e){
-    let result = e.target.response;
-    result = JSON.parse(result);
+function serverInfoResult(e) {
+    serverData = e.target.response;
+    serverData = JSON.parse(serverData);
 
-    for (let i = 0; i < result.length; i++){
-        for (let j = 0; j < result[i].length; j++){
-            if (result[i][j] == searchParams.get('n')){
-                document.getElementById("serverName").innerText = result[i][0]
+    for (let i = 0; i < serverData.length; i++) {
+        for (let j = 0; j < serverData[i].length; j++) {
+            if (serverData[i][j] == searchParams.get('n')) {
+                document.getElementById("serverName").innerText = serverData[i][0];
+                window.value = serverData[i]
             }
         }
     }

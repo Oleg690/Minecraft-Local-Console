@@ -22,6 +22,8 @@ def checkEula(directory):
 def start_server(directory, batch_file_name):
     current_dir = os.getcwd()
 
+#    return current_dir
+
     directory = os.path.join(current_dir, directory)
     batch_file_name = os.path.join(current_dir, batch_file_name)
 
@@ -46,5 +48,6 @@ directory_path = "minecraft_worlds\\" + str(world)
 batch_file_name = "start_minecraft_server.bat"
 
 start_server(directory_path, batch_file_name)
+#print(start_server(directory_path, batch_file_name))
 
 print(json.dumps(['Files created succeasfully!', world, worldVersion]))
