@@ -26,12 +26,12 @@
             </div>
             <div class="dropdown">
                 <div class="select">
-                    <span class="selected">Console</span>
+                    <span class="selected">Manage</span>
                     <div class="caret"></div>
                 </div>
                 <ul class="menu">
-                    <li value="manage">Manage</li>
-                    <li value="console" class="active">Console</li>
+                    <li value="manage" class="active">Manage</li>
+                    <li value="console">Console</li>
                     <li value="files">Files</li>
                     <li value="settings">Settings</li>
                 </ul>
@@ -40,7 +40,7 @@
     </div>
 
     <div class="mainPage">
-        <div class="content" id="manage">
+        <div class="content tabShow" id="manage">
             <div class="toCenter">
                 <div class="infoBox">
                     <img src="/static/img/minecraft.jpg" alt="error" class="minecraftImg">
@@ -75,7 +75,7 @@
             </div>
         </div>
 
-        <div class="content tabShow" id="console">
+        <div class="content" id="console">
             <div class="toCenterConsole">
                 <div class="consoleForm">
                     <textarea class="console" readonly id="textarea" rows="50"></textarea>

@@ -43,7 +43,7 @@ function getServersResult(e) {
 }
 
 function openServer(serverNumber){
-    //console.log(serverNumber)
+    window.location.href = `/templates/serverTemplate/server.html?${serverNumber}`
 }
 
 function send(url, result) {
