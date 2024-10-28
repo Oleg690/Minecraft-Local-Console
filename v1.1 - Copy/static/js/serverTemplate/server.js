@@ -3,8 +3,6 @@ const searchParams = new URLSearchParams(window.location.search);
 const allContents = document.querySelectorAll(".content");
 const dropdowns = document.querySelectorAll('.dropdown');
 
-let serverData = []
-
 dropdowns.forEach(dropdown => {
     const select = dropdown.querySelector('.select');
     const caret = dropdown.querySelector('.caret');
