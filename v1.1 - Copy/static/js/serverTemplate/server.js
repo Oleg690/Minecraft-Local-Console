@@ -32,7 +32,6 @@ dropdowns.forEach(dropdown => {
     })
 });
 
-
 function changeColor(prop, command) {
     let list = [2, 3]
     statusCircle = document.getElementById('statusCircle');
