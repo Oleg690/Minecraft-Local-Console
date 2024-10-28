@@ -1,3 +1,5 @@
+const searchParams = new URLSearchParams(window.location.search);
+
 const allContents = document.querySelectorAll(".content");
 const dropdowns = document.querySelectorAll('.dropdown');
 
@@ -81,4 +83,32 @@ function changeColor(prop, command) {
 
 function runServerCommand(command) {
     //console.log(command)
+}
+
+function onLoadFunc(){
+    console.log(searchParams.get('n'));
+
+    send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
+}
+
+function serverInfoResult(e){
+    let result = e.target.response;
+    result = JSON.parse(result);
+
+    for (let i = 0; i < result.length; i++){
+        for (let j = 0; j < result[i].length; j++){
+            if (result[i][j] == searchParams.get('n')){
+                document.getElementById("serverName").innerText = result[i][0]
+            }
+        }
+    }
+}
+
+function send(url, result) {
+    let oReq = new XMLHttpRequest();
+
+    oReq.onload = result;
+
+    oReq.open('GET', url);
+    oReq.send();
 }

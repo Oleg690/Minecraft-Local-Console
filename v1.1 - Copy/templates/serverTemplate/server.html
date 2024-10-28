@@ -9,7 +9,7 @@
     <title>Server</title>
 </head>
 
-<body>
+<body onload="onLoadFunc()">
     <div class="sideBarParent">
         <div class="imgLogoDiv">
             <img src="/static/img/logo.svg" alt="error" class="imgLogo">
@@ -53,7 +53,7 @@
                                 disabled>Restart</button>
                         </div>
                         <div class="serverInfo">
-                            <p class="serverName" id="serverName">Moldova SMP</p>
+                            <p class="serverName" id="serverName"></p>
                             <div class="address">
                                 <div class="displayFlex">
                                     <ion-icon name="wifi" class="wifi iconServerInfo"></ion-icon>

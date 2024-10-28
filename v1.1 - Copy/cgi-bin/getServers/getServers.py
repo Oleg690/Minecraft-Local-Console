@@ -1,4 +1,4 @@
-import cgi, sqlite3, json
+import sqlite3, json
 
 print("Content-type: text/html\n")
 
@@ -17,8 +17,9 @@ array = []
 
 for i in data:
     #i[0] = serverName
-    #i[1] = serverVersion
-    #i[2] = serverPlayers
+    #i[1] = serverName
+    #i[2] = serverVersion
+    #i[3] = serverPlayers
 
     array.append([i[1], i[2], i[3], i[0]])
 
