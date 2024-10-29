@@ -27,13 +27,13 @@
             </div>
             <div class="dropdown">
                 <div class="select">
-                    <span class="selected">Files</span>
+                    <span class="selected">Manage</span>
                     <div class="caret"></div>
                 </div>
                 <ul class="menu">
-                    <li value="manage">Manage</li>
+                    <li value="manage" class="active">Manage</li>
                     <li value="console">Console</li>
-                    <li value="files" class="active">Files</li>
+                    <li value="files">Files</li>
                     <li value="settings">Settings</li>
                 </ul>
             </div>
@@ -42,7 +42,7 @@
     </div>
 
     <div class="mainPage">
-        <div class="content" id="manage">
+        <div class="content tabShow" id="manage">
             <div class="toCenter">
                 <div class="infoBox">
                     <img src="/static/img/minecraft.jpg" alt="error" class="minecraftImg">
@@ -117,7 +117,7 @@
             </div>
         </div>
 
-        <div class="content tabShow" id="files">
+        <div class="content" id="files">
             <div class="utilitiesFilesViewer">
                 <ion-icon class="undoBtn"  name="arrow-undo" onclick="run('..')" ></ion-icon>
                 <p id="par">D:\minecraft</p>
