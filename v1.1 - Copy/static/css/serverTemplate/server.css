@@ -9,6 +9,8 @@
 
     --infoPopupFontSize: 30px;
     --borderRadiusForInfoPopup: 15px;
+
+    --contentSectionHeight: 85vh; /* Temporary */
 }
 
 * {
@@ -168,9 +170,11 @@ Rotate styles
 }
 
 .menu {
+    position: absolute;
     list-style: none;
     padding: 0em 0.3em;
     background: #323741;
+    /* background: red; */
     border: 1px #363a43 solid;
     box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
     border-radius: 0.5em;
@@ -182,8 +186,6 @@ Rotate styles
     transform: translateX(-50%);
     opacity: 0;
     display: none;
-    transition: 0.2s all;
-    z-index: 10;
     transition: all 0.3s;
     z-index: 1000;
 }
@@ -597,9 +599,8 @@ textarea::-webkit-scrollbar-thumb {
     color: #fec538;
 }
 
-.mainDiv {
-    height: 75vh;
-    overflow-y: scroll;
+#files {
+    height: auto;
 }
 
 .mainDiv .divFolder {
@@ -634,4 +635,9 @@ textarea::-webkit-scrollbar-thumb {
     cursor: pointer;
     position: absolute;
     transform: translate(-30px, -1px) scale(1.5);
+}
+
+.par{
+    position: relative;
+    z-index: -1;
 }

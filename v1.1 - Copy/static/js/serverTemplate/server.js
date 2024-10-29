@@ -1,7 +1,11 @@
 const searchParams = new URLSearchParams(window.location.search);
+const worldNumber = searchParams.get('n')
 
 const allContents = document.querySelectorAll(".content");
 const dropdowns = document.querySelectorAll('.dropdown');
+
+const currentPath = 'D:\\Minecraft-Server\\v1.1 - Copy\\minecraft_worlds';
+let lastPath = '';
 
 dropdowns.forEach(dropdown => {
     const select = dropdown.querySelector('.select');
@@ -115,8 +119,37 @@ function serverCommandResult(e) {
     spawnPopup(infoCardColor, getTextForColor(infoCardColor), infoPopupDescription)
 }
 
+function run(props) {
+    if (props) {
+        lastPath = document.getElementById("directoryName").innerText
+        console.log('Folder: ', props)
+        //console.log(`send('/cgi-bin/main.py?folder=' + ${props} + '&current_path=' + ${currentPath})`)
+        //send(`\\cgi-bin\\serverFilesShower.py?folder=${props}&current_path=${document.getElementById("directoryName").innerText}`, serverFilesResult);
+        send(`\\cgi-bin\\serverFilesShower.py?current_path=${currentPath}&lastPath=${lastPath}&folder=${props}&worldNumber=${searchParams.get('n')}`, serverFilesResult);
+    }
+    else {
+        send(`\\cgi-bin\\serverFilesShower.py?worldNumber=${worldNumber}`)
+    }
+}
+
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
+
+    send(`\\cgi-bin\\serverFilesShower.py?worldNumber=${searchParams.get('n')}`, serverFilesResult);
+}
+
+function serverFilesResult(e){
+    result = e.target.response;
+    //console.log("HTML: ", result);
+    result = JSON.parse(result);
+
+    //console.log("HTML: ", result);
+    //console.log("HTML[0]: ", result[0][0]);
+    //console.log("HTML[1]: ", result[0][1]);
+    console.log("HTML[error]: ", result[1]);
+
+    document.querySelector('#par').innerHTML = result[0][0];
+    document.querySelector('#mainDiv').innerHTML = result[0][1];
 }
 
 function serverInfoResult(e) {
@@ -125,7 +158,7 @@ function serverInfoResult(e) {
 
     for (let i = 0; i < serverData.length; i++) {
         for (let j = 0; j < serverData[i].length; j++) {
-            if (serverData[i][j] == searchParams.get('n')) {
+            if (serverData[i][j] == worldNumber) {
                 document.getElementById("serverName").innerText = serverData[i][0];
                 window.value = serverData[i]
             }
@@ -164,6 +197,7 @@ function deleteDiv(e) {
     $(`#${e}0`).delay(0).fadeOut(500);
     console.log("hello")
 }
+
 function send(url, result) {
     let oReq = new XMLHttpRequest();
 

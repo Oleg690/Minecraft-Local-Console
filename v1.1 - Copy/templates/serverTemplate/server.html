@@ -27,41 +27,22 @@
             </div>
             <div class="dropdown">
                 <div class="select">
-                    <span class="selected">Manage</span>
+                    <span class="selected">Files</span>
                     <div class="caret"></div>
                 </div>
                 <ul class="menu">
-                    <li value="manage" class="active">Manage</li>
+                    <li value="manage">Manage</li>
                     <li value="console">Console</li>
-                    <li value="files">Files</li>
+                    <li value="files" class="active">Files</li>
                     <li value="settings">Settings</li>
                 </ul>
             </div>
-            <div class="infoPopups" id="infoPopups">
-                <!-- <div class="infoPopup" id="1">
-                    <div class="color blue" id="color">
-                        <div class="infoCardText" id="infoCardText">Info</div>
-                        <div class="x-icon">
-                            <ion-icon name="close-outline" id="close-outline" onclick="closePopup()"></ion-icon>
-                        </div>
-                    </div>
-                    <p class="infoPopupDescription" id="infoPopupDescription">Description</p>
-                </div>
-                <div class="infoPopup" id="2">
-                    <div class="color blue" id="color">
-                        <div class="infoCardText" id="infoCardText">Info</div>
-                        <div class="x-icon">
-                            <ion-icon name="close-outline" id="close-outline" onclick="closePopup()"></ion-icon>
-                        </div>
-                    </div>
-                    <p class="infoPopupDescription" id="infoPopupDescription">Description</p>
-                </div> -->
-            </div>
+            <div class="infoPopups" id="infoPopups"></div>
         </div>
     </div>
 
     <div class="mainPage">
-        <div class="content tabShow" id="manage">
+        <div class="content" id="manage">
             <div class="toCenter">
                 <div class="infoBox">
                     <img src="/static/img/minecraft.jpg" alt="error" class="minecraftImg">
@@ -136,8 +117,12 @@
             </div>
         </div>
 
-        <div class="content" id="files">
-            <p>files</p>
+        <div class="content tabShow" id="files">
+            <div class="utilitiesFilesViewer">
+                <ion-icon class="undoBtn"  name="arrow-undo" onclick="run('..')" ></ion-icon>
+                <p id="par">D:\minecraft</p>
+            </div>
+            <div class="mainDiv" id="mainDiv"></div>
         </div>
 
         <div class="content" id="settings">
