@@ -48,38 +48,37 @@ def remove_after_last_slash(s):
 
 form = cgi.FieldStorage()
 
-#initial_directory = 'D:\\Minecraft-Server\\v1.1 - Copy\\minecraft_worlds'
-initial_directory = os.path.join(os.getcwd(), 'minecraft_worlds')
-
-current_path = form.getfirst('current_path', initial_directory)
 lastPath = form.getfirst('lastPath', '')
 folder = form.getfirst('folder', '')
 worldNumber = form.getfirst('worldNumber', '')
-#folders, files = list_files_and_folders(current_path, initial_directory)
-#html = generate_html(current_path, folders, files)
+initial_directory = os.path.join(os.getcwd(), 'minecraft_worlds')
+current_path = form.getfirst('current_path', initial_directory)
+
 html = ''
+
 
 print("Content-type: text/html\n")
 
 if folder == '..':
-    if current_path == 'D:\\Minecraft-Server\\v1.1 - Copy\\minecraft_worlds\\199621852':
+    if lastPath == os.path.join(os.getcwd(), 'minecraft_worlds', worldNumber):
+        current_path = os.path.join(current_path, worldNumber)
         folders, files = list_files_and_folders(current_path, initial_directory)
-        print(json.dumps([generate_html(current_path, folders, files), 'nothing']))
+        print(json.dumps([generate_html(current_path, folders, files), 'nothing 1']))
     else:
-        current_path = remove_after_last_slash(current_path)
+        current_path = remove_after_last_slash(lastPath)
         folders, files = list_files_and_folders(current_path, initial_directory)
-        print(json.dumps([generate_html(current_path, folders, files), 'nothing']))
+        print(json.dumps([generate_html(current_path, folders, files), f'nothing 2']))
 else:
     next_path = os.path.join(current_path, worldNumber, folder)
     if os.path.isdir(next_path):
         current_path = next_path
         folders, files = list_files_and_folders(current_path, initial_directory)
-        print(json.dumps([generate_html(current_path, folders, files), f'{os.getcwd(), initial_directory}']))
+        print(json.dumps([generate_html(current_path, folders, files), f'nothing 3']))
     else:
         nextLastPath = os.path.join(lastPath, folder)
         if os.path.isdir(nextLastPath):
             current_path = nextLastPath
             folders, files = list_files_and_folders(current_path, initial_directory)
-            print(json.dumps([generate_html(current_path, folders, files), f'nothing']))
+            print(json.dumps([generate_html(current_path, folders, files), f'nothing 4']))
         else:
-            print(json.dumps(["Path dosen't exist", f'nothing']))
+            print(json.dumps(["Path dosen't exist", f'error']))

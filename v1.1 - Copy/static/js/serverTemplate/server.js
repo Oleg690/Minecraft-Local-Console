@@ -95,7 +95,7 @@ function serverCommandResult(e) {
     let result = e.target.response;
     result = JSON.parse(result);
 
-    console.log(result)
+    //console.log(result)
 
     //    infoCardColor = document.querySelector('#color')
     //    infoCardText = document.querySelector('#infoCardText')
@@ -123,8 +123,6 @@ function run(props) {
     if (props) {
         lastPath = document.getElementById("directoryName").innerText
         console.log('Folder: ', props)
-        //console.log(`send('/cgi-bin/main.py?folder=' + ${props} + '&current_path=' + ${currentPath})`)
-        //send(`\\cgi-bin\\serverFilesShower.py?folder=${props}&current_path=${document.getElementById("directoryName").innerText}`, serverFilesResult);
         send(`\\cgi-bin\\serverFilesShower.py?current_path=${currentPath}&lastPath=${lastPath}&folder=${props}&worldNumber=${searchParams.get('n')}`, serverFilesResult);
     }
     else {
@@ -144,9 +142,9 @@ function serverFilesResult(e){
     result = JSON.parse(result);
 
     //console.log("HTML: ", result);
-    //console.log("HTML[0]: ", result[0][0]);
-    //console.log("HTML[1]: ", result[0][1]);
-    console.log("HTML[error]: ", result[1]);
+    //console.log("HTML[0][0]: ", result[0][0]);
+    //console.log("HTML[0][1]: ", result[0][1]);
+    //console.log("HTML[1]: ", result[1]);
 
     document.querySelector('#par').innerHTML = result[0][0];
     document.querySelector('#mainDiv').innerHTML = result[0][1];
@@ -195,7 +193,6 @@ function spawnPopup(infoCardColor, infoCardText, infoPopupDescription) {
 
 function deleteDiv(e) {
     $(`#${e}0`).delay(0).fadeOut(500);
-    console.log("hello")
 }
 
 function send(url, result) {
