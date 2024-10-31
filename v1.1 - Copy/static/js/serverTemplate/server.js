@@ -4,7 +4,6 @@ const worldNumber = searchParams.get('n')
 const allContents = document.querySelectorAll(".content");
 const dropdowns = document.querySelectorAll('.dropdown');
 
-const currentPath = 'D:\\Minecraft-Server\\v1.1 - Copy\\minecraft_worlds';
 let lastPath = '';
 
 dropdowns.forEach(dropdown => {
@@ -119,35 +118,34 @@ function serverCommandResult(e) {
     spawnPopup(infoCardColor, getTextForColor(infoCardColor), infoPopupDescription)
 }
 
-function run(props) {
-    if (props) {
-        lastPath = document.getElementById("directoryName").innerText
-        console.log('Folder: ', props)
-        send(`\\cgi-bin\\serverFilesShower.py?current_path=${currentPath}&lastPath=${lastPath}&folder=${props}&worldNumber=${searchParams.get('n')}`, serverFilesResult);
-    }
-    else {
-        send(`\\cgi-bin\\serverFilesShower.py?worldNumber=${worldNumber}`)
-    }
+function run(folder, action) {
+    lastPath = document.getElementById("directoryName").innerText;
+
+    console.log('Folder: ', folder)
+    console.log('Action: ', action)
+    send(`\\cgi-bin\\serverFilesShower.py?lastPath=${lastPath}&folder=${folder}&worldNumber=${worldNumber} action=${action}`, serverFilesResult);
 }
 
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
 
-    send(`\\cgi-bin\\serverFilesShower.py?worldNumber=${searchParams.get('n')}`, serverFilesResult);
+    send(`\\cgi-bin\\serverFilesShower.py?worldNumber=${worldNumber}&action=to`, serverFilesResult);
 }
 
-function serverFilesResult(e){
+function serverFilesResult(e) {
     result = e.target.response;
-    //console.log("HTML: ", result);
+    console.log("HTML: ", result);
     result = JSON.parse(result);
 
     //console.log("HTML: ", result);
     //console.log("HTML[0][0]: ", result[0][0]);
     //console.log("HTML[0][1]: ", result[0][1]);
-    //console.log("HTML[1]: ", result[1]);
+    console.log("HTML[1]: ", result[1]);
 
-    document.querySelector('#par').innerHTML = result[0][0];
-    document.querySelector('#mainDiv').innerHTML = result[0][1];
+    if (result[0] != 'base') {
+        document.querySelector('#par').innerHTML = result[0][0];
+        document.querySelector('#mainDiv').innerHTML = result[0][1];
+    }
 }
 
 function serverInfoResult(e) {

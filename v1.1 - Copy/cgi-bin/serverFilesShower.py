@@ -1,6 +1,6 @@
 import os, cgi, json
 
-def list_files_and_folders(directory_path, initial_directory):
+def list_files_and_folders(directory_path,):
     try:
         items = os.listdir(directory_path)
         items.sort()
@@ -8,14 +8,10 @@ def list_files_and_folders(directory_path, initial_directory):
 
         #print(folders)
 
-        #if directory_path == initial_directory: -> For Removing Specific Folders
-        #    folders = folders[3:]
         files = [item for item in items if os.path.isfile(os.path.join(directory_path, item))]
 
         #print(files)
 
-        #if directory_path == initial_directory: -> For Removing Specific Files
-        #    files = files[2:]
         return folders, files
     except Exception as e:
         return [], [str(e)]
@@ -28,7 +24,7 @@ def generate_html(directory_path, folders, files):
     title += f"<h1 id='directoryName'>{directory_path}</h1>"
 
     for folder in folders:
-        mainFolder += f'''<div class="divFolder" onclick="run('{folder}')">{folder}</div>'''
+        mainFolder += f'''<div class="divFolder" onclick="run('{folder}', '')">{folder}</div>'''
 
     for file in files:
         mainFile += f'''<div class="divFile">{file}</div>'''
@@ -46,39 +42,47 @@ def remove_after_last_slash(s):
     else:
         return s
 
+def check(lastPath, worldNumber):
+    if lastPath == str(os.path.join(os.getcwd(), 'minecraft_worlds', worldNumber)):
+        return True
+    #elif remove_after_last_slash(lastPath) == str(os.path.join(os.getcwd(), 'minecraft_worlds', worldNumber)+ '\\'):
+    #    return True
+    else:
+        return False
+
+
 form = cgi.FieldStorage()
 
 lastPath = form.getfirst('lastPath', '')
-folder = form.getfirst('folder', '')
+folderTo = form.getfirst('folder', '')
+action = form.getfirst('action', '')
 worldNumber = form.getfirst('worldNumber', '')
-initial_directory = os.path.join(os.getcwd(), 'minecraft_worlds')
-current_path = form.getfirst('current_path', initial_directory)
+
+current_path = os.path.join(os.getcwd(), 'minecraft_worlds', worldNumber)
+back_of_current_path = os.path.join(os.getcwd(), 'minecraft_worlds')
 
 html = ''
 
-
 print("Content-type: text/html\n")
 
-if folder == '..':
-    if lastPath == os.path.join(os.getcwd(), 'minecraft_worlds', worldNumber):
-        current_path = os.path.join(current_path, worldNumber)
-        folders, files = list_files_and_folders(current_path, initial_directory)
-        print(json.dumps([generate_html(current_path, folders, files), 'nothing 1']))
+if action == 'back':
+    if remove_after_last_slash(current_path) == back_of_current_path:
+        print(json.dumps(['base', f'nothing 1']))
     else:
         current_path = remove_after_last_slash(lastPath)
-        folders, files = list_files_and_folders(current_path, initial_directory)
+        folders, files = list_files_and_folders(current_path)
         print(json.dumps([generate_html(current_path, folders, files), f'nothing 2']))
-else:
-    next_path = os.path.join(current_path, worldNumber, folder)
+elif action == 'to':
+    next_path = os.path.join(current_path, folderTo)
     if os.path.isdir(next_path):
         current_path = next_path
-        folders, files = list_files_and_folders(current_path, initial_directory)
-        print(json.dumps([generate_html(current_path, folders, files), f'nothing 3']))
+        folders, files = list_files_and_folders(current_path)
+        print(json.dumps([generate_html(current_path, folders, files), f'{current_path}']))
     else:
-        nextLastPath = os.path.join(lastPath, folder)
+        nextLastPath = os.path.join(lastPath, folderTo)
         if os.path.isdir(nextLastPath):
             current_path = nextLastPath
-            folders, files = list_files_and_folders(current_path, initial_directory)
+            folders, files = list_files_and_folders(current_path)
             print(json.dumps([generate_html(current_path, folders, files), f'nothing 4']))
         else:
             print(json.dumps(["Path dosen't exist", f'error']))
