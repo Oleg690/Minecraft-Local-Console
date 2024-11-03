@@ -116,6 +116,7 @@ body {
 }
 
 .dropdown * {
+    position: relative;
     box-sizing: border-box;
     z-index: 1000;
 }
@@ -197,10 +198,16 @@ Rotate styles
     cursor: pointer;
     transition: all 0.3s;
     z-index: 1000;
+    z-index: 1000;
 }
 
 .menu li:hover {
     background: #2a2d35;
+    z-index: 1000;
+}
+
+ul{
+    position: relative;
     z-index: 1000;
 }
 
@@ -210,6 +217,7 @@ Active styles
 
 .activePage {
     background: #23242a;
+    z-index: 1000;
 }
 
 /* 
@@ -219,6 +227,7 @@ Open styles
 .menu-open {
     display: block;
     opacity: 1;
+    z-index: 1000;
 }
 
 /* ------------ ↓ Popup Style ↓ ------------ */
@@ -601,6 +610,7 @@ textarea::-webkit-scrollbar-thumb {
 
 #files {
     height: auto;
+    user-select: none;
 }
 
 .mainDiv .divFolder {
@@ -612,9 +622,16 @@ textarea::-webkit-scrollbar-thumb {
     margin-bottom: 5px;
     border-radius: 5px;
     box-shadow: 0px 0px 2px 0.5px #181c20;
+    transform: scale(1);
+    transition: all 0.05s ease-in-out;
+}
+
+.mainDiv .divFolder:active{
+    transform: scale(0.995);
 }
 
 .mainDiv .divFile {
+    user-select: text;
     width: 70%;
     padding: 10px;
     font-size: 20px;
@@ -622,6 +639,17 @@ textarea::-webkit-scrollbar-thumb {
     margin-bottom: 5px;
     border-radius: 5px;
     box-shadow: 0px 0px 2px 0.5px #181c20;
+    transform: scale(1);
+    transition: all 0.05s ease-in-out;
+}
+
+.mainDiv #filesToEdit{
+    user-select: none;
+    cursor: pointer;
+}
+
+.mainDiv #filesToEdit:active{
+    transform: scale(0.995);
 }
 
 .utilitiesFilesViewer {
@@ -634,10 +662,20 @@ textarea::-webkit-scrollbar-thumb {
 .undoBtn {
     cursor: pointer;
     position: absolute;
+    transform: translate(-30px, -1px) scale(1.75);
+    transition: all 0.05s ease-in-out;
+}
+
+.undoBtn:active{
     transform: translate(-30px, -1px) scale(1.5);
 }
 
 .par{
+    position: relative;
+    z-index: -1;
+}
+
+#directoryName{
     position: relative;
     z-index: -1;
 }

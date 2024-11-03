@@ -94,24 +94,6 @@ function serverCommandResult(e) {
     let result = e.target.response;
     result = JSON.parse(result);
 
-    //console.log(result)
-
-    //    infoCardColor = document.querySelector('#color')
-    //    infoCardText = document.querySelector('#infoCardText')
-    //    infoPopupDescription = document.querySelector('#infoPopupDescription')
-    //
-    //    infoCardColor.className = 'color'
-    //    infoCardColor.classList.add(`${result[0]}`)
-    //    
-    //    infoPopupDescription.innerText = result[1]
-    //    if (result[0] == 'blue') {
-    //        infoCardText.innerText = 'Info'
-    //    } else if (result[0] == 'green') {
-    //        infoCardText.innerText = 'Success'
-    //    } else if (result[0] == 'red') {
-    //        infoCardText.innerText = 'Error'
-    //    }
-
     let infoCardColor = result[0];
     let infoPopupDescription = result[1];
 

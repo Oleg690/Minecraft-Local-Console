@@ -27,11 +27,20 @@ def generate_html(directory_path, folders, files):
         mainFolder += f'''<div class="divFolder" onclick="run('{folder}', 'to')">{folder}</div>'''
 
     for file in files:
-        mainFile += f'''<div class="divFile">{file}</div>'''
+        if getExtensionName(file) in filesExToEdit:
+            mainFile += f'''<div class="divFile" id="filesToEdit">{file}</div>'''
+        else:
+            mainFile += f'''<div class="divFile">{file}</div>'''
 
     html = [[title], [mainFolder + mainFile], [directory_path]]
     
     return html
+
+def getExtensionName(file):
+    index_ex = file.rfind('.')
+    file_ex = file[index_ex + 1:]
+
+    return file_ex
 
 def remove_after_last_slash(s):
     last_slash_index = s.rfind('\\')
@@ -40,15 +49,10 @@ def remove_after_last_slash(s):
         return s[:last_slash_index]
     else:
         return s
-    d
-def check(lastPath, worldNumber):
-    if lastPath == str(os.path.join(os.getcwd(), 'minecraft_worlds', worldNumber)):
-        return True
-    else:
-        return False
-
 
 form = cgi.FieldStorage()
+
+filesExToEdit = ['properties', 'json', 'txt']
 
 lastPath = form.getfirst('lastPath', '')
 folderTo = form.getfirst('folder', '')
@@ -64,7 +68,7 @@ print("Content-type: text/html\n")
 
 if action == 'back':
     if remove_after_last_slash(lastPath) == back_of_current_path:
-        print(json.dumps(['base', f'nothing 1']))
+        print(json.dumps(['base', f'']))
     else:
         current_path = remove_after_last_slash(lastPath)
         folders, files = list_files_and_folders(current_path)
