@@ -121,9 +121,9 @@ function serverCommandResult(e) {
 function run(folder, action) {
     lastPath = document.getElementById("directoryName").innerText;
 
-    console.log('Folder: ', folder)
-    console.log('Action: ', action)
-    send(`\\cgi-bin\\serverFilesShower.py?lastPath=${lastPath}&folder=${folder}&worldNumber=${worldNumber} action=${action}`, serverFilesResult);
+    //console.log('Folder: ', folder)
+    //console.log('Action: ', action)
+    send(`\\cgi-bin\\serverFilesShower.py?lastPath=${lastPath}&folder=${folder}&worldNumber=${worldNumber}&action=${action}`, serverFilesResult);
 }
 
 function onLoadFunc() {
@@ -134,15 +134,18 @@ function onLoadFunc() {
 
 function serverFilesResult(e) {
     result = e.target.response;
-    console.log("HTML: ", result);
+    //console.log("HTML: ", result);
     result = JSON.parse(result);
 
     //console.log("HTML: ", result);
-    //console.log("HTML[0][0]: ", result[0][0]);
+    //console.log("HTML[0]: ", result[0]);
     //console.log("HTML[0][1]: ", result[0][1]);
     console.log("HTML[1]: ", result[1]);
 
-    if (result[0] != 'base') {
+    if (result[1] == 'error'){
+        console.log('error')
+        spawnPopup('red', 'Error', result[0])
+    }else if (result[0] != 'base') {
         document.querySelector('#par').innerHTML = result[0][0];
         document.querySelector('#mainDiv').innerHTML = result[0][1];
     }
