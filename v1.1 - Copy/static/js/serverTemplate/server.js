@@ -134,13 +134,11 @@ function onLoadFunc() {
 
 function serverFilesResult(e) {
     result = e.target.response;
-    //console.log("HTML: ", result);
     result = JSON.parse(result);
 
     //console.log("HTML: ", result);
     //console.log("HTML[0]: ", result[0]);
-    //console.log("HTML[0][1]: ", result[0][1]);
-    console.log("HTML[1]: ", result[1]);
+    //console.log("HTML[1]: ", result[1]);
 
     if (result[1] == 'error'){
         console.log('error')
