@@ -9,6 +9,9 @@ const dropdowns = document.querySelectorAll('.dropdown');
 
 let lastPath = '';
 
+let divForFolder = document.querySelector('#mainDivForFolders')
+let divForInnerFile = document.querySelector('#mainDivForFiles')
+
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
 
@@ -113,52 +116,64 @@ function serverCommandResult(e) {
 function run(folderTo, action, folderOrFile) {
     let lastPath = document.getElementById("directoryName").innerText;
 
-    //console.log('Folder: ', folder)
-    //console.log('Action: ', action)
     if (folderOrFile == 'folder') {
-        send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folder=${folder}&worldNumber=${worldNumber}&action=${action}&folderOrFile=folder`, serverFilesResult);
+        send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folderTo=${folderTo}&worldNumber=${worldNumber}&action=${action}&folderOrFile=${folderOrFile}`, serverFilesResult);
     } else if (folderOrFile == 'file') {
         send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?&folderTo=${folderTo}&worldNumber=${worldNumber}&folderOrFile=file`, handleInnerFileResult);
     }
-
 }
 
-function backFromFile() {
-    //send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folder=${folder}&worldNumber=${worldNumber}&action=${action}&folderOrFile=folder`, serverFilesResult);
+function back(folderTo, action, folderOrFile) {
+    let lastPath = document.getElementById("directoryName").innerText;
+
+    send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folderTo=${folderTo}&worldNumber=${worldNumber}&action=${action}&folderOrFile=${folderOrFile}`, serverFilesResult);
+
+    document.querySelector('.undoBtn').setAttribute("onClick", "back('', 'back', 'file')");
 }
 
 function serverFilesResult(e) {
     result = e.target.response;
     result = JSON.parse(result);
 
-    //console.log("HTML: ", result);
     //console.log("HTML[0]: ", result[0]);
     //console.log("HTML[1]: ", result[1]);
 
     if (result[1] == 'error') {
-        console.log('error')
         spawnPopup('red', 'Error', result[0])
     } else if (result[0] != 'base') {
         document.querySelector('#par').innerHTML = result[0][0];
         document.querySelector('#mainDivForFolders').innerHTML = result[0][1];
+    } else {
+        console.log('error, wrong values!')
     }
+
+    hideEditTab()
 }
 
 function handleInnerFileResult(e) {
     result = e.target.response;
     result = JSON.parse(result);
 
-    let innerFile = result[0][0]
-    let fileEx = result[0][1]
-
-    let divForFolder = document.querySelector('#mainDivForFolders')
-    let divForInnerFile = document.querySelector('#mainDivForFiles')
+    let title = result[0][0]
+    let innerFile = result[0][1]
+    let fileEx = result[0][2]
 
     updateEditor('properties', innerFile)
-    //divForInnerFile.innerHTML = innerFile;
 
+    document.getElementById('par').innerHTML = title;
+
+    showEditTab()
+    document.querySelector('.undoBtn').setAttribute("onClick", "back('', 'back', 'file')");
+}
+
+function showEditTab() {
     divForInnerFile.style.display = 'block'
     divForFolder.style.display = 'none'
+}
+
+function hideEditTab() {
+    divForInnerFile.style.display = 'none'
+    divForFolder.style.display = 'block'
 }
 
 function serverInfoResult(e) {

@@ -46,8 +46,6 @@ def generate_inner_file_text(fileDir):
 
     file.close()
 
-    html = ''
-
     return fileTxt
 
 def getExtensionName(file):
@@ -107,5 +105,14 @@ if folderOrFile == 'folder':
     else:
         print(json.dumps(["Action is wrong, error on code side", f'error']))
 elif folderOrFile == 'file':
-    #generate_inner_file_text(os.path.join(current_path, folderTo))
-    print(json.dumps([[f"{generate_inner_file_text(os.path.join(current_path, folderTo))}", getExtensionName(os.path.join(current_path, folderTo))], f'error']))
+    if action != 'back':
+        newPath = os.path.join(current_path, folderTo)
+        title = f"<h1 id='directoryName'>{newPath}</h1>"
+        print(json.dumps([[title, f"{generate_inner_file_text(newPath)}", getExtensionName(newPath)], f'nothing 5']))
+    else:
+        current_path = remove_after_last_slash(lastPath)
+        if os.path.isdir(current_path):
+            folders, files = list_files_and_folders(current_path)
+            print(json.dumps([generate_html(current_path, folders, files), f'nothing 6']))
+        else:
+            print(json.dumps([f"wrong directory, {lastPath}", f'error']))
