@@ -15,15 +15,15 @@
 
 * {
     color: #fff;
-    margin: 0;
-    padding: 0;
-    font-family: "Istok Web";
+    margin: 0px;
+    padding: 0px;
 }
 
 body {
     background: #1C2127;
     display: flex;
     min-height: 100vh;
+    font-family: "Istok Web";
 }
 
 .mainPage {
@@ -671,8 +671,8 @@ textarea::-webkit-scrollbar-thumb {
     justify-content: center;
     align-items: center;
     position: relative;
-    width: 800px;
-    height: 500px;
-    border-radius: 10px;
+    width: 900px;
+    height: 700px;
+    border-radius: 7.5px;
     z-index: 10;
 }

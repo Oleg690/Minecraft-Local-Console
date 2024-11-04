@@ -211,7 +211,7 @@ function updateEditor(fileType, values) {
 
     editor.setTheme(theme1)
     editor.session.setMode(`ace/mode/${fileType}`)
-    editor.setFontSize(18)
+    editor.setFontSize(15)
 
     editor.setValue(`${values}`)
 }
