@@ -1,3 +1,6 @@
+const theme1 = "ace/theme/tomorrow_night_eighties"
+const theme2 = "ace/theme/idle_fingers"
+
 const searchParams = new URLSearchParams(window.location.search);
 const worldNumber = searchParams.get('n')
 
@@ -5,6 +8,13 @@ const allContents = document.querySelectorAll(".content");
 const dropdowns = document.querySelectorAll('.dropdown');
 
 let lastPath = '';
+
+function onLoadFunc() {
+    send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
+
+    // send(`\\cgi-bin\\serverFilesShower.py?worldNumber=${worldNumber}&action=to`, serverFilesResult); -> Temp
+    send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?worldNumber=${worldNumber}&action=to&folderOrFile=folder`, serverFilesResult);
+}
 
 dropdowns.forEach(dropdown => {
     const select = dropdown.querySelector('.select');
@@ -100,18 +110,21 @@ function serverCommandResult(e) {
     spawnPopup(infoCardColor, getTextForColor(infoCardColor), infoPopupDescription)
 }
 
-function run(folder, action) {
-    lastPath = document.getElementById("directoryName").innerText;
+function run(folderTo, action, folderOrFile) {
+    let lastPath = document.getElementById("directoryName").innerText;
 
     //console.log('Folder: ', folder)
     //console.log('Action: ', action)
-    send(`\\cgi-bin\\serverFilesShower.py?lastPath=${lastPath}&folder=${folder}&worldNumber=${worldNumber}&action=${action}`, serverFilesResult);
+    if (folderOrFile == 'folder') {
+        send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folder=${folder}&worldNumber=${worldNumber}&action=${action}&folderOrFile=folder`, serverFilesResult);
+    } else if (folderOrFile == 'file') {
+        send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?&folderTo=${folderTo}&worldNumber=${worldNumber}&folderOrFile=file`, handleInnerFileResult);
+    }
+
 }
 
-function onLoadFunc() {
-    send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
-
-    send(`\\cgi-bin\\serverFilesShower.py?worldNumber=${worldNumber}&action=to`, serverFilesResult);
+function backFromFile() {
+    //send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folder=${folder}&worldNumber=${worldNumber}&action=${action}&folderOrFile=folder`, serverFilesResult);
 }
 
 function serverFilesResult(e) {
@@ -122,13 +135,30 @@ function serverFilesResult(e) {
     //console.log("HTML[0]: ", result[0]);
     //console.log("HTML[1]: ", result[1]);
 
-    if (result[1] == 'error'){
+    if (result[1] == 'error') {
         console.log('error')
         spawnPopup('red', 'Error', result[0])
-    }else if (result[0] != 'base') {
+    } else if (result[0] != 'base') {
         document.querySelector('#par').innerHTML = result[0][0];
-        document.querySelector('#mainDiv').innerHTML = result[0][1];
+        document.querySelector('#mainDivForFolders').innerHTML = result[0][1];
     }
+}
+
+function handleInnerFileResult(e) {
+    result = e.target.response;
+    result = JSON.parse(result);
+
+    let innerFile = result[0][0]
+    let fileEx = result[0][1]
+
+    let divForFolder = document.querySelector('#mainDivForFolders')
+    let divForInnerFile = document.querySelector('#mainDivForFiles')
+
+    updateEditor('properties', innerFile)
+    //divForInnerFile.innerHTML = innerFile;
+
+    divForInnerFile.style.display = 'block'
+    divForFolder.style.display = 'none'
 }
 
 function serverInfoResult(e) {
@@ -174,6 +204,23 @@ function spawnPopup(infoCardColor, infoCardText, infoPopupDescription) {
 
 function deleteDiv(e) {
     $(`#${e}0`).delay(0).fadeOut(500);
+}
+
+function updateEditor(fileType, values) {
+    let editor = ace.edit(mainDivForFiles)
+
+    editor.setTheme(theme1)
+    editor.session.setMode(`ace/mode/${fileType}`)
+    editor.setFontSize(18)
+
+    editor.setValue(`${values}`)
+}
+
+function sendUpdateEditorToFile() {
+    let valuesToSend = ace.edit(editor).getValue()
+    let fileTo = document.getElementById("directoryName").innerText;
+
+    send(`\\cgi-bin\\fileHandler\\modifyFile.py?worldNumber=${worldNumber}&values=${valuesToSend}&fileTo=${fileTo}`, serverFilesResult)
 }
 
 function send(url, result) {

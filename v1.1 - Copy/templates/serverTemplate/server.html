@@ -27,13 +27,13 @@
             </div>
             <div class="dropdown">
                 <div class="select">
-                    <span class="selected">Manage</span>
+                    <span class="selected">Files</span>
                     <div class="caret"></div>
                 </div>
                 <ul class="menu">
-                    <li value="manage" class="active">Manage</li>
+                    <li value="manage">Manage</li>
                     <li value="console">Console</li>
-                    <li value="files">Files</li>
+                    <li value="files" class="active">Files</li>
                     <li value="settings">Settings</li>
                 </ul>
             </div>
@@ -42,13 +42,14 @@
     </div>
 
     <div class="mainPage">
-        <div class="content tabShow" id="manage">
+        <div class="content" id="manage">
             <div class="toCenter">
                 <div class="infoBox">
                     <img src="/static/img/minecraft.jpg" alt="error" class="minecraftImg">
                     <div class="infoBoxControls">
                         <div class="controlButtons">
-                            <button class="controlButton activeBtn" id="1" onclick="changeColor(1, 'start')">Start</button>
+                            <button class="controlButton activeBtn" id="1"
+                                onclick="changeColor(1, 'start')">Start</button>
                             <button class="controlButton" id="2" onclick="changeColor(2, 'stop')" disabled>Stop</button>
                             <button class="controlButton" id="3" onclick="changeColor(3, 'restart')"
                                 disabled>Restart</button>
@@ -117,12 +118,15 @@
             </div>
         </div>
 
-        <div class="content" id="files">
-            <div class="utilitiesFilesViewer">
-                <ion-icon class="undoBtn"  name="arrow-undo" onclick="run('', 'back')" ></ion-icon>
-                <p id="par">D:\minecraft</p>
+        <div class="content tabShow" id="files">
+            <div class="filesToDisplay" id="filesToDisplay">
+                <div class="utilitiesFilesViewer">
+                    <ion-icon class="undoBtn" name="arrow-undo" onclick="run('', 'back', 'folder')"></ion-icon>
+                    <p id="par">\minecraft\</p>
+                </div>
+                <div class="mainDiv" id="mainDivForFolders" style="display: block;"></div>
+                <div class="mainDivForFiles" id="mainDivForFiles" style="display: none;"></div>
             </div>
-            <div class="mainDiv" id="mainDiv"></div>
         </div>
 
         <div class="content" id="settings">
@@ -130,11 +134,12 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
-    <script src="/static/js/serverTemplate/server.js"></script>
+    <script type="text/javascript" src="/static/js/serverTemplate/server.js"></script>
 </body>
 
 </html>
