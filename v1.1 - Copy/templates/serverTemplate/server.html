@@ -121,11 +121,15 @@
         <div class="content tabShow" id="files">
             <div class="filesToDisplay" id="filesToDisplay">
                 <div class="utilitiesFilesViewer">
-                    <ion-icon class="undoBtn" id="backBtn" name="arrow-undo" onclick="run('', 'back', 'folder')"></ion-icon>
+                    <ion-icon class="undoBtn" id="backBtn" name="arrow-undo"
+                        onclick="run('', 'back', 'folder')"></ion-icon>
                     <p id="par">\minecraft\</p>
                 </div>
                 <div class="mainDiv" id="mainDivForFolders" style="display: block;"></div>
-                <div class="mainDivForFiles" id="mainDivForFiles" style="display: none;"></div>
+                <div class="mainDivForFilesAndBtn" style="display: none;">
+                    <div class="mainDivForFiles" id="mainDivForFiles"></div>
+                    <button class="saveFileBtn" id="saveFileBtn">Save <ion-icon name="save-outline"></ion-icon></button>
+                </div>
             </div>
         </div>
 

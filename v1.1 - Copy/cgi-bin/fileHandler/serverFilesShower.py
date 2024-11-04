@@ -38,12 +38,7 @@ def generate_html(directory_path, folders, files):
 
 def generate_inner_file_text(fileDir):
     file = open(fileDir, 'r', encoding='utf-8')
-
     fileTxt = file.read()
-
-    fileTxt = fileTxt.replace(' ', '&nbsp')
-    fileTxt = fileTxt.replace('\n', '<br>')
-
     file.close()
 
     return fileTxt
@@ -82,24 +77,24 @@ print("Content-type: text/html\n")
 if folderOrFile == 'folder':
     if action == 'back':
         if remove_after_last_slash(lastPath) == back_of_current_path:
-            print(json.dumps(['base', f'']))
+            print(json.dumps(['base', f'nothing 1']))
         else:
             current_path = remove_after_last_slash(lastPath)
             folders, files = list_files_and_folders(current_path)
-            print(json.dumps([generate_html(current_path, folders, files), f'']))
+            print(json.dumps([generate_html(current_path, folders, files), f'nothing 2']))
     elif action == 'to':
         next_path = os.path.join(current_path, folderTo)
         next_path = next_path[0:-1]
         if os.path.isdir(next_path):
             current_path = next_path
             folders, files = list_files_and_folders(current_path)
-            print(json.dumps([generate_html(current_path, folders, files), f'']))
+            print(json.dumps([generate_html(current_path, folders, files), f'nothing 3']))
         else:
             nextLastPath = os.path.join(lastPath, folderTo)
             if os.path.isdir(nextLastPath):
                 current_path = nextLastPath
                 folders, files = list_files_and_folders(current_path)
-                print(json.dumps([generate_html(current_path, folders, files), f'']))
+                print(json.dumps([generate_html(current_path, folders, files), f'nothing 4']))
             else:
                 print(json.dumps(["Path dosen't exist, error on code side", f'error']))
     else:

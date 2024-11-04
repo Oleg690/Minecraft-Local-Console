@@ -10,7 +10,7 @@ const dropdowns = document.querySelectorAll('.dropdown');
 let lastPath = '';
 
 let divForFolder = document.querySelector('#mainDivForFolders')
-let divForInnerFile = document.querySelector('#mainDivForFiles')
+let divForInnerFile = document.querySelector('.mainDivForFilesAndBtn')
 
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
@@ -128,7 +128,7 @@ function back(folderTo, action, folderOrFile) {
 
     send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folderTo=${folderTo}&worldNumber=${worldNumber}&action=${action}&folderOrFile=${folderOrFile}`, serverFilesResult);
 
-    document.querySelector('.undoBtn').setAttribute("onClick", "back('', 'back', 'file')");
+    document.querySelector('.undoBtn').setAttribute("onClick", "run('', 'back', 'file')");
 }
 
 function serverFilesResult(e) {
@@ -158,12 +158,19 @@ function handleInnerFileResult(e) {
     let innerFile = result[0][1]
     let fileEx = result[0][2]
 
-    updateEditor('properties', innerFile)
+    let filesExToEdit = [['properties', 'properties'], ['json', 'json'], ['txt', 'properties']]
+
+    for (let i = 0; i > -1; i++) {
+        if (fileEx == filesExToEdit[i][0]) {
+            updateEditor(filesExToEdit[i][1], innerFile)
+            break
+        }
+    }
 
     document.getElementById('par').innerHTML = title;
 
-    showEditTab()
     document.querySelector('.undoBtn').setAttribute("onClick", "back('', 'back', 'file')");
+    showEditTab()
 }
 
 function showEditTab() {
@@ -228,7 +235,7 @@ function updateEditor(fileType, values) {
     editor.session.setMode(`ace/mode/${fileType}`)
     editor.setFontSize(15)
 
-    editor.setValue(`${values}`)
+    editor.setValue(`${values}`, 1)
 }
 
 function sendUpdateEditorToFile() {
