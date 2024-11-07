@@ -1,0 +1,39 @@
+body{
+    margin: 0px;
+    font-family: 'Raleway', sans-serif;
+    overflow: hidden;
+}
+
+.editor{
+    width: 100%;
+    height: calc(100vh);
+    display: flex;
+    
+    font-family: 'Raleway', sans-serif;
+}
+
+.editor .code{
+    width: 500px;
+    border-right: 1px solid #888;
+    
+    font-family: 'Raleway', sans-serif;
+}
+
+.editor .code > div{
+    width: 100%;
+    height: 33.33%;
+    border-bottom: 1px solid #888;
+    
+}
+
+/* .editor .preview{
+    width: calc(100% - 500px);
+    height: 100%;
+}
+
+.editor .preview iframe{
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+} */

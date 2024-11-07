@@ -236,6 +236,7 @@ Open styles
     width: fit-content;
     min-height: 140px;
     border-radius: var(--borderRadiusForInfoPopup);
+    z-index: 1001;
 }
 
 .infoPopup:nth-last-child(1) {
