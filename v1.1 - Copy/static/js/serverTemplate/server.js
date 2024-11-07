@@ -15,8 +15,7 @@ let divForInnerFile = document.querySelector('.mainDivForFilesAndBtn')
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
 
-    // send(`\\cgi-bin\\serverFilesShower.py?worldNumber=${worldNumber}&action=to`, serverFilesResult); -> Temp
-    send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?worldNumber=${worldNumber}&action=to&folderOrFile=folder`, serverFilesResult);
+    send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?worldNumber=${worldNumber}&action=to&folderOrFile=folder`, serverFilesResult);
 }
 
 dropdowns.forEach(dropdown => {
@@ -107,28 +106,52 @@ function serverCommandResult(e) {
     let result = e.target.response;
     result = JSON.parse(result);
 
-    let infoCardColor = result[0];
+    let infoCardText = result[0];
     let infoPopupDescription = result[1];
 
-    spawnPopup(infoCardColor, getTextForColor(infoCardColor), infoPopupDescription)
+    spawnPopup(infoCardText, infoPopupDescription)
 }
 
 function run(folderTo, action, folderOrFile) {
     let lastPath = document.getElementById("directoryName").innerText;
 
     if (folderOrFile == 'folder') {
-        send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folderTo=${folderTo}&worldNumber=${worldNumber}&action=${action}&folderOrFile=${folderOrFile}`, serverFilesResult);
+        send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?lastPath=${lastPath}&folderTo=${folderTo}&worldNumber=${worldNumber}&action=${action}&folderOrFile=${folderOrFile}`, serverFilesResult);
     } else if (folderOrFile == 'file') {
-        send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?&folderTo=${folderTo}&worldNumber=${worldNumber}&folderOrFile=file`, handleInnerFileResult);
+        send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?&folderTo=${folderTo}&worldNumber=${worldNumber}&folderOrFile=file`, handleInnerFileResult);
     }
 }
 
 function back(folderTo, action, folderOrFile) {
     let lastPath = document.getElementById("directoryName").innerText;
 
-    send(`\\cgi-bin\\fileHandler\\serverFilesShower.py?lastPath=${lastPath}&folderTo=${folderTo}&worldNumber=${worldNumber}&action=${action}&folderOrFile=${folderOrFile}`, serverFilesResult);
+    send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?lastPath=${lastPath}&folderTo=${folderTo}&worldNumber=${worldNumber}&action=${action}&folderOrFile=${folderOrFile}`, serverFilesResult);
 
-    document.querySelector('.undoBtn').setAttribute("onClick", "run('', 'back', 'file')");
+    document.querySelector('.undoBtn').setAttribute("onClick", "run('', 'back', 'folder')");
+}
+
+function saveFile() {
+    let lastPath = document.getElementById("directoryName").innerText;
+    let editor = ace.edit(mainDivForFiles)
+    let editorValues = editor.getValue()
+    console.log("Values from JS: ", editorValues)
+
+    //send(`\\cgi-bin\\fileHandler\\insertIntoFile.py?lastPath=${lastPath}&worldNumber=${worldNumber}&values=${editorValues}`, saveFileHandler);
+
+    fetch('\\cgi-bin\\fileHandler\\insertIntoFile.py', {
+        method: 'POST',  // Use PUT for updating
+        headers: {
+            'Content-Type': 'application/json',  // Set the content type to JSON
+        },
+        body: JSON.stringify({
+            lastPath: lastPath,
+            worldNumber: worldNumber,
+            values: editorValues  // Your data to update
+        })
+    })
+    .then(response => response.json())
+    .then(data => spawnPopup('Success', data[1]))
+    .catch((error) => spawnPopup('Error', error[1]));
 }
 
 function serverFilesResult(e) {
@@ -139,7 +162,7 @@ function serverFilesResult(e) {
     //console.log("HTML[1]: ", result[1]);
 
     if (result[1] == 'error') {
-        spawnPopup('red', 'Error', result[0])
+        spawnPopup('Error', result[0])
     } else if (result[0] != 'base') {
         document.querySelector('#par').innerHTML = result[0][0];
         document.querySelector('#mainDivForFolders').innerHTML = result[0][1];
@@ -167,19 +190,34 @@ function handleInnerFileResult(e) {
         }
     }
 
+    if (result[1] == 'error') {
+        spawnPopup('Error', result[0])
+    }
+
     document.getElementById('par').innerHTML = title;
 
     document.querySelector('.undoBtn').setAttribute("onClick", "back('', 'back', 'file')");
     showEditTab()
 }
 
+function saveFileHandler(e){
+    result = e.target.response;
+    result = JSON.parse(result);
+
+    console.log(result)
+
+    //spawnPopup(result[1], result[0])
+}
+
 function showEditTab() {
-    divForInnerFile.style.display = 'block'
+    divForInnerFile.style.display = 'grid'
+    document.getElementById('saveFileBtn').style.display = 'block';
     divForFolder.style.display = 'none'
 }
 
 function hideEditTab() {
     divForInnerFile.style.display = 'none'
+    document.getElementById('saveFileBtn').style.display = 'none';
     divForFolder.style.display = 'block'
 }
 
@@ -197,21 +235,18 @@ function serverInfoResult(e) {
     }
 }
 
-function getTextForColor(infoCardColor) {
-    if (infoCardColor == 'blue') {
-        infoCardText = 'Info'
-    } else if (infoCardColor == 'green') {
-        infoCardText = 'Success'
-    } else if (infoCardColor == 'red') {
-        infoCardText = 'Error'
-    }
-
-    return infoCardText
-}
-
-function spawnPopup(infoCardColor, infoCardText, infoPopupDescription) {
+function spawnPopup(infoCardText, infoPopupDescription) {
     allPopupsDiv = document.querySelector('#infoPopups');
     allInfoPopups = document.querySelectorAll('.infoPopup');
+    let infoCardColor = '';
+
+    if (infoCardText == 'Error') {
+        infoCardColor = 'red'
+    } else if (infoCardText == 'Info') {
+        infoCardColor = 'blue'
+    } else if (infoCardText == 'Success') {
+        infoCardColor = 'green'
+    }
 
     allPopupsDiv.innerHTML += ` <div class="infoPopup" id="${allInfoPopups.length + 1}0">
                                     <div class="color ${infoCardColor}" id="color">

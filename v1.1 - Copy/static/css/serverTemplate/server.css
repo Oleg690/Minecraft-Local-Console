@@ -10,7 +10,8 @@
     --infoPopupFontSize: 30px;
     --borderRadiusForInfoPopup: 15px;
 
-    --contentSectionHeight: 85vh; /* Temporary */
+    --contentSectionHeight: 85vh;
+    /* Temporary */
 }
 
 * {
@@ -196,7 +197,7 @@ Rotate styles
     background: #2a2d35;
 }
 
-ul{
+ul {
     position: relative;
 }
 
@@ -227,7 +228,7 @@ Open styles
     gap: 20px;
 }
 
-.infoPopup{
+.infoPopup {
     display: block;
     background: #242830;
     position: relative;
@@ -237,7 +238,7 @@ Open styles
     border-radius: var(--borderRadiusForInfoPopup);
 }
 
-.infoPopup:nth-last-child(1){
+.infoPopup:nth-last-child(1) {
     animation-duration: 1s;
     animation-name: popupAnimation;
 }
@@ -615,7 +616,7 @@ textarea::-webkit-scrollbar-thumb {
     z-index: 0;
 }
 
-.mainDiv .divFolder:active{
+.mainDiv .divFolder:active {
     transform: scale(0.995);
     z-index: 0;
 }
@@ -634,13 +635,13 @@ textarea::-webkit-scrollbar-thumb {
     z-index: 0;
 }
 
-.mainDiv #filesToEdit{
+.mainDiv #filesToEdit {
     user-select: none;
     cursor: pointer;
     z-index: 0;
 }
 
-.mainDiv #filesToEdit:active{
+.mainDiv #filesToEdit:active {
     transform: scale(0.995);
     z-index: 0;
 }
@@ -659,14 +660,14 @@ textarea::-webkit-scrollbar-thumb {
     transition: all 0.05s ease-in-out;
 }
 
-.undoBtn:active{
+.undoBtn:active {
     transform: translate(-30px, -1px) scale(1.5);
 }
 
 
 /* File Editor Style */
 
-#mainDivForFiles{
+#mainDivForFiles {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -682,13 +683,100 @@ textarea::-webkit-scrollbar-thumb {
     width: 7px;
 }
 
-.ace_scrollbar::-webkit-scrollbar-track
-{
-    box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-    background-color: #272822; /* Matches ace monokai */
+.ace_scrollbar::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #272822;
+    /* Matches ace monokai */
 }
 
 .ace_scrollbar::-webkit-scrollbar-thumb {
     background-color: darkgrey;
     border-radius: 2px;
+}
+
+.mainDivForFilesAndBtn{
+    width: 900px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* -------------- Btn in the file edit section -------------- */
+
+.save-outline {
+    font-size: 20px;
+    margin-left: 10px;
+}
+
+.saveFileBtn {
+    display: flex;
+    justify-self: center;
+    appearance: none;
+    backface-visibility: hidden;
+    background-color: #2f80ed;
+    border-radius: 10px;
+    border-style: none;
+    box-shadow: none;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Inter, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    height: 50px;
+    letter-spacing: normal;
+    line-height: 1.5;
+    outline: none;
+    overflow: hidden;
+    padding: 14px 30px;
+    margin-top: 15px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    transform: translate3d(0, 0, 0);
+    transition: all .1s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: top;
+    white-space: nowrap;
+}
+
+.saveFileBtn div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.saveFileBtn p{
+    transform: translateY(-1px);
+}
+
+.saveFileBtn:hover {
+    background-color: #1366d6;
+    box-shadow: rgba(0, 0, 0, .05) 0 5px 30px, rgba(0, 0, 0, .05) 0 1px 4px;
+    opacity: 1;
+    transform: translateY(0);
+    transition-duration: .35s;
+}
+
+.saveFileBtn:hover:after {
+    opacity: .5;
+}
+
+.saveFileBtn:active {
+    box-shadow: rgba(0, 0, 0, .1) 0 3px 6px 0, rgba(0, 0, 0, .1) 0 0 10px 0, rgba(0, 0, 0, .1) 0 1px 4px -1px;
+    transform: translateY(2px);
+    transition-duration: .35s;
+}
+
+.saveFileBtn:active:after {
+    opacity: 1;
+}
+
+@media (min-width: 768px) {
+    .saveFileBtn {
+        padding: 14px 22px;
+        width: 176px;
+    }
 }
