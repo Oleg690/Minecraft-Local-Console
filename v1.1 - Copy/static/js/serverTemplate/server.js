@@ -15,7 +15,7 @@ let divForInnerFile = document.querySelector('.mainDivForFilesAndBtn')
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult)
 
-    send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?worldNumber=${worldNumber}&action=to&folderOrFile=folder`, serverFilesResult);
+    send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?worldNumber=${worldNumber}&action=firstLoad&folderOrFile=folder`, serverFilesResult);
 }
 
 dropdowns.forEach(dropdown => {
@@ -161,13 +161,11 @@ function serverFilesResult(e) {
     //console.log("HTML[0]: ", result[0]);
     //console.log("HTML[1]: ", result[1]);
 
-    if (result[1] == 'error') {
+    if (result[1] == 'Error') {
         spawnPopup('Error', result[0])
-    } else if (result[0] != 'base') {
+    } else if (result[1] != 'Base_Directory') {
         document.querySelector('#par').innerHTML = result[0][0];
         document.querySelector('#mainDivForFolders').innerHTML = result[0][1];
-    } else {
-        console.log('error, wrong values!')
     }
 
     hideEditTab()
