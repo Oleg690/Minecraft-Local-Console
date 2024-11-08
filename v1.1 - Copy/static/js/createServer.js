@@ -118,7 +118,7 @@ let width = 0;
 
 function runProcentage(procentage) {
     var element = document.querySelector('.progress-done')
-    var progress = document.querySelector('#par')
+    var progress = document.querySelector('#progress-par')
     var main = setInterval(frame, 50)
 
     function frame() {

@@ -509,7 +509,7 @@ Open styles
     place-items: center;
     width: 0;
     box-shadow: 0 0 3px -5px #b2fd02, 0 3px 30px #02fd56;
-    transition: width .5s ease;
+    transition: width .5s ease-out;
 }
 
 button {
@@ -525,7 +525,7 @@ button {
     background: cornsilk;
 }
 
-#par {
+#progress-par {
     position: relative;
     display: grid;
     text-align: center;
