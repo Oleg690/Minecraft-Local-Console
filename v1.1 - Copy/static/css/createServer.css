@@ -3,7 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-:root{
+:root {
     --selectWidth: 105%;
     --menuAllBorder: 20px;
 
@@ -21,23 +21,23 @@
     z-index: 1;
 }
 
-body{
+body {
     background: #1C2127;
     display: flex;
     min-height: 100vh;
 }
 
-span{
+span {
     user-select: none;
 }
 
-.mainPage{
+.mainPage {
     width: 100%;
 }
 
 /* Main Side Bar Style */
 
-.sideBarParent{
+.sideBarParent {
     /* display: none; */
     width: 300px;
     height: page;
@@ -45,26 +45,26 @@ span{
     user-select: none;
 }
 
-.imgLogoDiv{
+.imgLogoDiv {
     display: flex;
     justify-content: center;
 }
 
-.imgLogo{
+.imgLogo {
     display: flex;
     align-items: center;
     width: 250px;
     z-index: 0;
 }
 
-.sideBarOptions{
+.sideBarOptions {
     display: grid;
     width: 300px;
     transform: translateY(-40px);
     z-index: 1;
 }
 
-.sideBarOption{
+.sideBarOption {
     font-family: "Istok Web";
     font-weight: bold;
     font-size: 40px;
@@ -79,48 +79,48 @@ span{
     transition: background 0.5s ease;
 }
 
-.sideBarOption:hover{   
+.sideBarOption:hover {
     background: #22262ca9;
 }
 
-.sideBarOption a{
+.sideBarOption a {
     position: relative;
     transform: translateY(2px);
     text-decoration: none;
 }
 
-.activeSideBarOption{
+.activeSideBarOption {
     background: #22262D;
 }
 
-.activeSideBarOption a{
+.activeSideBarOption a {
     color: #FEC538;
 }
 
 /* Main Page Show */
 
-.content{
+.content {
     display: none;
 }
 
-.tabShow{
+.tabShow {
     display: block;
 }
 
 /* -------------------- Style for main page -------------------- */
 
-.createServerSection{
+.createServerSection {
     font-family: "Inter";
     padding: 20px 40px;
 }
 
 /* Img Styling */
 
-.backgroundImage{
+.backgroundImage {
     transform: translateY(-4px);
 }
 
-.backgroundImage img{
+.backgroundImage img {
     width: 100%;
     height: 200px;
     object-fit: cover;
@@ -130,19 +130,19 @@ span{
 
 /* Server Name Styling */
 
-.serverName p{
+.serverName p {
     font-family: 'Itim';
     font-size: 40px;
 }
 
-.serverName div{
+.serverName div {
     display: flex;
     width: 100%;
     padding-top: 15px;
     padding-bottom: 15px;
 }
 
-.serverNameInput{
+.serverNameInput {
     font-family: 'Inter';
     font-weight: bold;
     font-size: 25px;
@@ -157,7 +157,7 @@ span{
 
 /* Server Options Text Style */
 
-.optionForserverOptions{
+.optionForserverOptions {
     font-family: 'Itim';
     font-size: 40px;
     margin-bottom: 20px;
@@ -165,7 +165,7 @@ span{
 
 /* server.proprierties Style Alignment*/
 
-.serverPropSettings{
+.serverPropSettings {
     display: grid;
     justify-content: center;
     min-width: 460px;
@@ -176,7 +176,7 @@ span{
 
 /* server.proprierties text style */
 
-.serverPropSettingsInfo{
+.serverPropSettingsInfo {
     display: flex;
     justify-content: left;
     align-items: center;
@@ -188,14 +188,14 @@ span{
     margin-bottom: 15px;
 }
 
-.serverPropSettingsInfo div{
+.serverPropSettingsInfo div {
     display: flex;
     align-items: center;
 }
 
 /* Style for div for all the checking inputs (server settings) */
 
-.allServerInputs{
+.allServerInputs {
     /* border: 1px solid red; */
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 469px));
@@ -208,7 +208,7 @@ span{
 
 /* Style for create button */
 
-.createBtnDiv{
+.createBtnDiv {
     display: flex;
     align-items: center;
     justify-content: right;
@@ -217,7 +217,7 @@ span{
     height: 60px;
 }
 
-.createServerSection button{
+.createServerSection button {
     width: 257px;
     height: 100%;
     border: 0px;
@@ -230,11 +230,11 @@ span{
     transition: 0.2s ease;
 }
 
-.createServerSection button:hover{
+.createServerSection button:hover {
     background: #2c303a;
 }
 
-.createServerSection button:active{
+.createServerSection button:active {
     background: #3d434e;
 }
 
@@ -242,7 +242,7 @@ span{
 
 /* Text Input */
 
-.checkboxTextBackground{
+.checkboxTextBackground {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -255,13 +255,13 @@ span{
     z-index: 1;
 }
 
-.checkboxTextBackground p{
+.checkboxTextBackground p {
     font-family: "Inter";
     font-weight: bold;
     font-size: 30px;
 }
 
-.inputForOptions[type="number"]{
+.inputForOptions[type="number"] {
     width: 110px;
     height: 44px;
     border-radius: 25px;
@@ -276,13 +276,13 @@ span{
     outline: none;
 }
 
-.inputForOptions[type="number"]::-webkit-inner-spin-button{
+.inputForOptions[type="number"]::-webkit-inner-spin-button {
     display: none;
 }
 
 /* Check Input */
 
-.checkboxBackground{
+.checkboxBackground {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -295,7 +295,7 @@ span{
     z-index: 1;
 }
 
-.checkboxBackground p{
+.checkboxBackground p {
     font-family: "Inter";
     font-weight: bold;
     font-size: 30px;
@@ -347,16 +347,16 @@ span{
 
 /* List Input */
 
-.dropdown{
+.dropdown {
     min-width: 8em;
     position: relative;
 }
 
-.dropdown *{
+.dropdown * {
     box-sizing: border-box;
 }
 
-.menuForOptions{
+.menuForOptions {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -369,20 +369,20 @@ span{
     z-index: 11;
 }
 
-.menuForOptions p{
+.menuForOptions p {
     font-family: "Inter";
     font-weight: bold;
     font-size: 30px;
 }
 
-.select span{
+.select span {
     font-family: "Inter";
     font-size: 20px;
     font-weight: bold;
     z-index: 11;
 }
 
-.select{
+.select {
     background: #262a32;
     color: #fff;
     display: flex;
@@ -400,11 +400,11 @@ span{
 Clicked styles
 */
 
-.select:hover{
+.select:hover {
     background: #323741;
 }
 
-.caret{
+.caret {
     margin-left: 10px;
     width: 0px;
     height: 0px;
@@ -418,11 +418,11 @@ Clicked styles
 Rotate styles
 */
 
-.caret-rotate{
+.caret-rotate {
     transform: rotate(180deg);
 }
 
-.menu{
+.menu {
     list-style: none;
     padding: 5px;
     background: #323741;
@@ -446,13 +446,13 @@ Rotate styles
     transition: 0.2s;
 }
 
-.menu li{
+.menu li {
     padding: 0.7em 0.5em;
     border-radius: var(--menuAllBorder);
     cursor: pointer;
 }
 
-.menu li:hover{
+.menu li:hover {
     background: #2a2d35;
 }
 
@@ -460,7 +460,7 @@ Rotate styles
 Active styles
 */
 
-.activePage{
+.activePage {
     background: #23242a;
 }
 
@@ -468,7 +468,72 @@ Active styles
 Open styles
 */
 
-.menu-open{
+.menu-open {
     display: block;
     opacity: 1;
+}
+
+/* --------------------------------------------- */
+
+.background {
+    position: absolute;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background: #4747474f;
+    z-index: 100;
+    user-select: none;
+    transform: translateY(0px);
+}
+
+.progress {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ddd;
+    height: 50px;
+    width: 500px;
+    border-radius: 20px;
+}
+
+.progress-done {
+    position: absolute;
+    font-family: sans-serif;
+    font-weight: bolder;
+    font-size: 30px;
+    height: 100%;
+    background: linear-gradient(to left, #02fd4d, #c7f0ca);
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    width: 0;
+    box-shadow: 0 0 3px -5px #b2fd02, 0 3px 30px #02fd56;
+    transition: width .5s ease;
+}
+
+button {
+    cursor: pointer;
+    width: 100px;
+    height: 35px;
+    font-size: 20px;
+    font-family: 'Istok Web', sans-serif;
+    font-weight: 600;
+    margin: 10px;
+    border: 2px solid rgb(255, 233, 143);
+    border-radius: 10px;
+    background: cornsilk;
+}
+
+#par {
+    position: relative;
+    display: grid;
+    text-align: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    font-family: sans-serif;
+    font-weight: bolder;
+    font-size: 30px;
+    color: #fff;
 }

@@ -35,15 +35,13 @@ function createWorld() {
     const validNamePattern = /^[a-zA-Z0-9 _-]+$/;
 
     if (!worldName) {
-        console.log('Please insert a world name');
+        alert('Please insert a world name');
         return; // Prevent further actions if input is empty
     } else if (!validNamePattern.test(worldName)) {
-        console.log('World name contains invalid characters. Please use only letters, numbers, spaces, hyphens, or underscores.');
+        alert('World name contains invalid characters. Please use only letters, numbers, spaces, hyphens, or underscores.');
         return; // Prevent further actions if input contains special characters
     } else {
         // The input is valid
-        console.log('Valid world name:', worldName);
-
         document.querySelector('.createServerBtn').disabled = true;
         send(`../cgi-bin/createServer/createWorld.py`, createWorldResult);
     }
@@ -53,15 +51,22 @@ function createWorld() {
 function createWorldResult(e) {
     let result = JSON.parse(e.target.response);
 
+    document.getElementById('body').style.overflow = 'hidden';
+    document.querySelector('.background').style.transform = `translateY(${window.scrollY}px)`
+    show(document.querySelector('#background'));
+    runProcentage(44);
+
     send(`../cgi-bin/createServer/createServerFiles.py?world=${result[1]}&version=${result[2]}`, createFilesResult);
 }
 
 // Modify server.proprierties Function
 function createFilesResult(e) {
     let result = JSON.parse(e.target.response);
-    
+
+    runProcentage(73);
+
     let serverOptions = gatherServerOptions();
-    
+
     let worldNumber = result[1];
     let worldVersion = result[2];
 
@@ -71,7 +76,8 @@ function createFilesResult(e) {
 
 function propriertiesResult(e) {
     let result = JSON.parse(e.target.response);
-    window.location.href = '/templates/servers.html';
+
+    runProcentage(100);
 }
 
 // Collect Server Options
@@ -106,4 +112,62 @@ function send(url, result) {
     oReq.send();
 }
 
-// Server Create Animation
+// Server Create Progress-Bar
+
+let width = 0;
+
+function runProcentage(procentage) {
+    var element = document.querySelector('.progress-done')
+    var progress = document.querySelector('#par')
+    var main = setInterval(frame, 50)
+
+    function frame() {
+        if (width >= procentage) {
+            clearInterval(main);
+            if (width >= 100) {
+                delay(1000).then(() => window.location.href = '/templates/servers.html');
+            }
+        } else {
+            width++;
+            element.style.width = width + '%';
+            progress.innerText = width + '%';
+        }
+    }
+}
+
+function send(url, result) {
+    let oReq = new XMLHttpRequest();
+    oReq.onload = result;
+    oReq.open('GET', url);
+    oReq.send();
+}
+
+function delay(time) {
+    return new Promise(resolve => setTimeout(resolve, time));
+}
+
+function hide(element) {
+    var op = 1;  // initial opacity
+    var timer = setInterval(function () {
+        if (op <= 0.1) {
+            clearInterval(timer);
+            element.style.display = 'none';
+        }
+        element.style.opacity = op;
+        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        op -= op * 0.1;
+    }, 50);
+}
+
+function show(element) {
+    var op = 0.1;  // initial opacity
+    element.style.display = 'block';
+    var timer = setInterval(function () {
+        if (op >= 1) {
+            clearInterval(timer);
+        }
+        element.style.opacity = op;
+        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        op += op * 0.1;
+    }, 10);
+}
