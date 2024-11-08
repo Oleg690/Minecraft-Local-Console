@@ -1,0 +1,29 @@
+[17:31:02] [ServerMain/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[17:31:02] [ServerMain/INFO]: No existing world data, creating new world
+[17:31:03] [ServerMain/INFO]: Loaded 1290 recipes
+[17:31:03] [ServerMain/INFO]: Loaded 1399 advancements
+[17:31:03] [Server thread/INFO]: Starting minecraft server version 1.21
+[17:31:03] [Server thread/INFO]: Loading properties
+[17:31:03] [Server thread/INFO]: Default game type: SURVIVAL
+[17:31:03] [Server thread/INFO]: Generating keypair
+[17:31:03] [Server thread/INFO]: Starting Minecraft server on *:25565
+[17:31:03] [Server thread/INFO]: Using default channel type
+[17:31:04] [Server thread/INFO]: Preparing level "world"
+[17:31:05] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
+[17:31:05] [Worker-Main-1/INFO]: Preparing spawn area: 2%
+[17:31:06] [Worker-Main-14/INFO]: Preparing spawn area: 2%
+[17:31:06] [Worker-Main-14/INFO]: Preparing spawn area: 18%
+[17:31:06] [Worker-Main-23/INFO]: Preparing spawn area: 51%
+[17:31:07] [Server thread/INFO]: Time elapsed: 1681 ms
+[17:31:07] [Server thread/INFO]: Done (3.147s)! For help, type "help"
+[17:31:20] [Server thread/INFO]: Stopping the server
+[17:31:20] [Server thread/INFO]: Stopping server
+[17:31:20] [Server thread/INFO]: Saving players
+[17:31:20] [Server thread/INFO]: Saving worlds
+[17:31:20] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[17:31:20] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[17:31:20] [Server thread/INFO]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[17:31:20] [Server thread/INFO]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[17:31:20] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[17:31:20] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[17:31:20] [Server thread/INFO]: ThreadedAnvilChunkStorage: All dimensions are saved

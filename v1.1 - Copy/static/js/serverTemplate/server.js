@@ -18,6 +18,8 @@ let divForInnerFile = document.querySelector('.mainDivForFilesAndBtn');
 // Function to load server info and files on page load
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult);
+
+    send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?worldNumber=${worldNumber}&action=firstLoad&folderOrFile=folder`, serverFilesResult);
 }
 
 // Setup dropdown menu functionality
