@@ -91,6 +91,6 @@ if worldNumber != '0':
         else:
             findSettings(directory_path_to_world, int(i[1]), i[0])
 
-    print(json.dumps('server.proprierties modified succeasfuly!'))
+    print(json.dumps(['Server proprirerties modefied with success!']))
 else:
     print(json.dumps('world is 0'))

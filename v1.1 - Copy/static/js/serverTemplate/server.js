@@ -18,7 +18,6 @@ let divForInnerFile = document.querySelector('.mainDivForFilesAndBtn');
 // Function to load server info and files on page load
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult);
-    send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?worldNumber=${worldNumber}&action=firstLoad&folderOrFile=folder`, serverFilesResult);
 }
 
 // Setup dropdown menu functionality
@@ -40,6 +39,11 @@ dropdowns.forEach(dropdown => {
     options.forEach((option, index) => {
         option.addEventListener('click', () => {
             selected.innerText = option.innerText;
+
+            if (selected.innerText == 'Files'){
+                send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?worldNumber=${worldNumber}&action=firstLoad&folderOrFile=folder`, serverFilesResult);
+            }
+
             select.classList.remove('select-clicked');
             caret.classList.remove('caret-rotate');
             menu.classList.remove('menu-open');
@@ -129,6 +133,8 @@ function saveFile() {
 // Handle server files response and update the display
 function serverFilesResult(e) {
     let result = JSON.parse(e.target.response);
+
+    console.log('Files Refreshed!')
 
     if (result[1] === 'Error') {
         spawnPopup('Error', result[0]);

@@ -48,4 +48,4 @@ batch_file_name = "start_minecraft_server.bat"
 start_server(directory_path, batch_file_name)
 #print(start_server(directory_path, batch_file_name))
 
-print(json.dumps(['Files created succeasfully!', world, worldVersion]))
+print(json.dumps(['World files created!', world, worldVersion]))

@@ -4,7 +4,7 @@ connection = sqlite3.connect('database\\worldsData.db')
 cursor = connection.cursor()
 
 tableName = 'worlds'
-insertOneDefaultSQLVerificator = True
+insertOneDefaultSQLVerificator = False
 insertOneDefaultSQL = f'''insert into {tableName} (worldNumber, name, version, totalPlayers, rconPassword) values('123456789', 'Minecraft SMP', '1.21', '20', '123456789123456789');'''
 
 def createTable(sql):

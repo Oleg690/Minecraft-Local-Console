@@ -1,3 +1,5 @@
+let serverNumber = ''
+
 // Menu Dropdown Functionality
 const dropdowns = document.querySelectorAll('.dropdown');
 
@@ -51,10 +53,12 @@ function createWorld() {
 function createWorldResult(e) {
     let result = JSON.parse(e.target.response);
 
+    serverNumber = result[1]
+
     document.getElementById('body').style.overflow = 'hidden';
     document.querySelector('.background').style.transform = `translateY(${window.scrollY}px)`
     show(document.querySelector('#background'));
-    runProcentage(44);
+    runProcentage(44, result[0]);
 
     send(`../cgi-bin/createServer/createServerFiles.py?world=${result[1]}&version=${result[2]}`, createFilesResult);
 }
@@ -63,7 +67,7 @@ function createWorldResult(e) {
 function createFilesResult(e) {
     let result = JSON.parse(e.target.response);
 
-    runProcentage(73);
+    runProcentage(73, result[0]);
 
     let serverOptions = gatherServerOptions();
 
@@ -77,7 +81,7 @@ function createFilesResult(e) {
 function propriertiesResult(e) {
     let result = JSON.parse(e.target.response);
 
-    runProcentage(100);
+    runProcentage(100, result[0]);
 }
 
 // Collect Server Options
@@ -116,16 +120,18 @@ function send(url, result) {
 
 let width = 0;
 
-function runProcentage(procentage) {
-    var element = document.querySelector('.progress-done')
-    var progress = document.querySelector('#progress-par')
-    var main = setInterval(frame, 50)
+function runProcentage(procentage, description) {
+    let element = document.querySelector('.progress-done');
+    let progress = document.querySelector('#progress-par');
+    let descriptionPar = document.querySelector('.descriptionPar');
+    descriptionPar.innerText = description;
+    let main = setInterval(frame, 50);
 
     function frame() {
         if (width >= procentage) {
             clearInterval(main);
             if (width >= 100) {
-                delay(1000).then(() => window.location.href = '/templates/servers.html');
+                delay(1000).then(() => window.location.href = `/templates/serverTemplate/server.html?n=${serverNumber}`);
             }
         } else {
             width++;

@@ -26,4 +26,4 @@ os.makedirs(destination_folder, exist_ok=True)
 
 shutil.copy(source_file_path, destination_folder)
 
-print(json.dumps(['World created succeasfully!', worldNumber, worldVersion]))
+print(json.dumps(["World's main file created!", worldNumber, worldVersion]))

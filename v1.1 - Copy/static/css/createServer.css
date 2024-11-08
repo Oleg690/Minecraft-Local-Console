@@ -537,3 +537,14 @@ button {
     font-size: 30px;
     color: #fff;
 }
+
+.descriptionPar{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% - 60px));
+    font-size: 22.5px;
+    font-weight: bold;
+    font-family: 'Istok Web';
+    z-index: 100;
+}
