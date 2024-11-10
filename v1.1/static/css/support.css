@@ -82,6 +82,23 @@ body{
     color: #FEC538;
 }
 
+.sideBarParent a{
+    display: flex;
+    align-items: center;
+}
+
+.sideBarParent a ion-icon{
+    color: #fff;
+    margin-right: 10px;
+    transform: translateY(-3px);
+}
+
+.activeSideBarOption a ion-icon{
+    color: #FEC538;
+    margin-right: 10px;
+    transform: translateY(-3px);
+}
+
 /* Main Page Show */
 
 .content{

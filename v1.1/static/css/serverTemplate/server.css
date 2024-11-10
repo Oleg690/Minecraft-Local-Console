@@ -69,6 +69,7 @@ body {
     user-select: none;
 }
 
+
 .imgLogoDiv {
     display: flex;
     justify-content: center;
@@ -119,6 +120,23 @@ body {
 
 .activeSideBarOption a {
     color: #FEC538;
+}
+
+.sideBarParent a{
+    display: flex;
+    align-items: center;
+}
+
+.sideBarParent a ion-icon{
+    color: #fff;
+    margin-right: 10px;
+    transform: translateY(-3px);
+}
+
+.activeSideBarOption a ion-icon{
+    color: #FEC538;
+    margin-right: 10px;
+    transform: translateY(-3px);
 }
 
 /* Main Page Show */
