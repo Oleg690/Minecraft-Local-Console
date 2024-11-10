@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    z-index: 10;
+    color: #fff;
+}
+
+body {
+    background: #262A32;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.checkboxBackground{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 30px;
+    padding-right: 15px;
+    width: 424px;
+    height: 67px;
+    background: #1C2127;
+    border-radius: 25px;
+    z-index: 1;
+}
+
+.checkboxBackground p{
+    font-family: "Inter";
+    font-weight: bold;
+    font-size: 30px;
+}
+
+
+.checkbox {
+    position: relative;
+    height: 40px;
+    width: 70px;
+    background: #262A32;
+    border-radius: 30px;
+}
+
+.checkbox-input {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    outline: none;
+    z-index: 10;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.checkbox-icons::before {
+    position: absolute;
+    content: "\f00d";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: white;
+    height: 35px;
+    width: 35px;
+    background: #F62451;
+    border-radius: 50%;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.4s;
+}
+
+.checkbox-input:checked+label .checkbox-icons::before {
+    background: #1FD78D;
+    transform: translateY(-50%) rotate(360deg);
+    left: calc(100% - 38px);
+    content: "\f00c";
+}

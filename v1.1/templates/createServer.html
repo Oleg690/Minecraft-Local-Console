@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/createServer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0/css/all.min.css" />
+    <title>Create Server</title>
+</head>
+
+<body id="body" style="overflow: auto;">
+    <div class="background" id="background" style="display: none;">
+        <p class="descriptionPar"></p>
+        <div class="progress" id="progress">
+            <div class="progress-done"></div>
+            <p id="progress-par"></p>
+        </div>
+    </div>
+    <div class="sideBarParent">
+        <div class="imgLogoDiv">
+            <img src="/static/img/logo.svg" alt="error" class="imgLogo">
+        </div>
+        <div class="sideBarOptions">
+            <div class="sideBarOption activeSideBarOption">
+                <a href="/templates/servers.html">Servers</a>
+            </div>
+            <div class="sideBarOption">
+                <a href="/templates/profile.html">Profile</a>
+            </div>
+            <div class="sideBarOption">
+                <a href="/templates/support.html">Support</a>
+            </div>
+        </div>
+    </div>
+    <div class="mainPage">
+        <div class="content tabShow">
+            <div class="backgroundImage">
+                <img src="/static/img/serverBackgroundImgTemp.png" alt="error">
+            </div>
+            <div class="createServerSection">
+                <div class="serverName">
+                    <p>Server Name</p>
+                    <div>
+                        <input type="text" class="serverNameInput" id="serverNameInput">
+                    </div>
+                </div>
+                <div class="serverOptions">
+                    <p class="optionForserverOptions">Options</p>
+                    <div class="serverPropSettings">
+                        <div class="serverPropSettingsInfo">
+                            <div>
+                                <ion-icon name="document-outline"></ion-icon>
+                            </div>
+                            <p>server.proprierties</p>
+                        </div>
+                        <div class="allServerInputs">
+                            <div class="checkboxTextBackground">
+                                <p>Slots</p>
+                                <div class="checkboxText">
+                                    <input type="number" class="inputForOptions" id="slots" value="20" />
+                                </div>
+                            </div>
+
+                            <div class="menuForOptions">
+                                <p>Gamemode</p>
+                                <div class="dropdown">
+                                    <div class="select">
+                                        <span class="selected" id="gamemode">Survival</span>
+                                        <div class="caret"></div>
+                                    </div>
+                                    <ul class="menu">
+                                        <li class="active">Survival</li>
+                                        <li>Creative</li>
+                                        <li>Adventure</li>
+                                        <li>Spectator</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="menuForOptions">
+                                <p>Difficulty</p>
+                                <div class="dropdown">
+                                    <div class="select">
+                                        <span class="selected" id="difficulty">Normal</span>
+                                        <div class="caret"></div>
+                                    </div>
+                                    <ul class="menu">
+                                        <li>Peaceful</li>
+                                        <li>Easy</li>
+                                        <li class="active">Normal</li>
+                                        <li>Hard</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Whitelist</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="whitelist-input" value="63" />
+                                    <label for="whitelist-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Cracked</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="cracked-input" value="37" />
+                                    <label for="cracked-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>PVP</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="pvp-input" checked value="41" />
+                                    <label for="pvp-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Commandblocks</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="commandblocks-input" checked
+                                        value="10" />
+                                    <label for="commandblocks-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Fly</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="fly-input" checked value="4" />
+                                    <label for="fly-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Animals</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="animals-input" checked
+                                        value="55" />
+                                    <label for="animals-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Monster</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="monster-input" checked
+                                        value="56" />
+                                    <label for="monster-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Villagers</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="villagers-input" checked
+                                        value="57" />
+                                    <label for="villagers-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Nether</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="nether-input" checked value="5" />
+                                    <label for="nether-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxBackground">
+                                <p>Force Gamemode</p>
+                                <div class="checkbox">
+                                    <input type="checkbox" class="checkbox-input" id="force-gamemode-input"
+                                        value="18" />
+                                    <label for="force-gamemode-input">
+                                        <div class="checkbox-icons"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="checkboxTextBackground">
+                                <p>Spawn Protection</p>
+                                <div class="checkboxText">
+                                    <input type="number" class="inputForOptions" id="spawn-protection" value="0" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="createBtnDiv">
+                    <button class="createServerBtn" onclick="createWorld()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <script src="/static/js/createServer.js"></script>
+</body>
+
+</html>

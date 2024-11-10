@@ -1,0 +1,783 @@
+@import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Itim&family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+    --manageTextSize: 35px;
+    --statusCircleColor: #FF3535;
+
+    --infoPopupFontSize: 30px;
+    --borderRadiusForInfoPopup: 15px;
+
+    --contentSectionHeight: 85vh;
+    /* Temporary */
+}
+
+* {
+    color: #fff;
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    background: #1C2127;
+    display: flex;
+    min-height: 100vh;
+    font-family: "Istok Web";
+}
+
+.mainPage {
+    width: 100%;
+    padding: 80px;
+}
+
+/* Main Side Bar Style */
+
+.sideBarParent {
+    /* display: none; */
+    width: 300px;
+    height: page;
+    background: #262A32;
+    user-select: none;
+    z-index: 1000;
+}
+
+.imgLogoDiv {
+    display: flex;
+    justify-content: center;
+}
+
+.imgLogo {
+    display: flex;
+    align-items: center;
+    width: 250px;
+    z-index: 0;
+}
+
+.sideBarOptions {
+    display: grid;
+    width: 300px;
+    transform: translateY(-40px);
+    z-index: 1;
+}
+
+.sideBarOption {
+    font-family: "Istok Web";
+    font-weight: bold;
+    font-size: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    height: 82px;
+    width: 300px;
+    margin-top: 29px;
+    cursor: pointer;
+    transition: background 0.5s ease;
+}
+
+.sideBarOption a {
+    position: relative;
+    transform: translateY(2px);
+    text-decoration: none;
+}
+
+.sideBarOption:hover {
+    background: #22262ca9;
+}
+
+.activeSideBarOption {
+    background: #22262D;
+}
+
+.activeSideBarOption a {
+    color: #FEC538;
+}
+
+/* Main Page Show */
+
+.content {
+    display: none;
+}
+
+.tabShow {
+    display: block;
+}
+
+.dropdown {
+    position: absolute;
+    user-select: none;
+    width: 7.6em;
+    position: relative;
+    font-size: 19px;
+    font-weight: bold;
+    font-family: 'Istok Web';
+    transform: translate(225%, -825%);
+}
+
+.dropdown * {
+    position: relative;
+    box-sizing: border-box;
+}
+
+.select {
+    background: #2a2f3b;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px #2a2f3b solid;
+    border-radius: 0.5em;
+    padding: 0.5em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+/* 
+Clicked styles
+*/
+
+.select-clicked {
+    border: 2px #26489a solid;
+    box-shadow: 0 0 0.8em #26489a;
+}
+
+.select:hover {
+    background: #323741;
+}
+
+.caret {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid #fff;
+    transition: all 0.3s;
+    transform: rotate(90deg);
+}
+
+/* 
+Rotate styles
+*/
+
+.caret-rotate {
+    transform: rotate(270deg);
+}
+
+.menu {
+    position: absolute;
+    list-style: none;
+    padding: 0em 0.3em;
+    background: #323741;
+    /* background: red; */
+    border: 1px #363a43 solid;
+    box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
+    border-radius: 0.5em;
+    color: #9fa5b5;
+    position: absolute;
+    top: 0em;
+    left: 155%;
+    width: 100%;
+    transform: translateX(-50%);
+    opacity: 0;
+    display: none;
+    transition: all 0.3s;
+}
+
+.menu li {
+    padding: 0.4em 0.5em;
+    margin: 0.3em 0;
+    border-radius: 0.5em;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.menu li:hover {
+    background: #2a2d35;
+}
+
+ul {
+    position: relative;
+}
+
+/* 
+Active styles
+*/
+
+.activePage {
+    background: #23242a;
+}
+
+/* 
+Open styles
+*/
+
+.menu-open {
+    display: block;
+    opacity: 1;
+}
+
+/* ------------ ↓ Popup Style ↓ ------------ */
+
+.infoPopups {
+    display: grid;
+    position: absolute;
+    left: 500%;
+    top: -20%;
+    gap: 20px;
+}
+
+.infoPopup {
+    display: block;
+    background: #242830;
+    position: relative;
+    min-width: 400px;
+    width: fit-content;
+    min-height: 140px;
+    border-radius: var(--borderRadiusForInfoPopup);
+    z-index: 1001;
+}
+
+.infoPopup:nth-last-child(1) {
+    animation-duration: 1s;
+    animation-name: popupAnimation;
+}
+
+.color {
+    display: flex;
+    min-height: 70px;
+    border-top-left-radius: var(--borderRadiusForInfoPopup);
+    border-top-right-radius: var(--borderRadiusForInfoPopup);
+    justify-content: space-between;
+}
+
+.blue {
+    background: #2196F3;
+}
+
+.green {
+    background: #5acb5a;
+}
+
+.red {
+    background: #f04a4a;
+}
+
+.infoCardText {
+    transform: translateY(3px);
+    display: flex;
+    align-items: center;
+    font-size: var(--infoPopupFontSize);
+    margin-left: 20px;
+}
+
+.x-icon {
+    display: flex;
+    font-size: calc(var(--infoPopupFontSize) + 5px);
+    align-items: center;
+    margin-right: 20px;
+}
+
+#close-outline {
+    color: #000;
+    transform: translateY(2px);
+    cursor: pointer;
+}
+
+.infoPopupDescription {
+    text-align: left;
+    width: fit-content;
+    font-size: var(--infoPopupFontSize);
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+@keyframes popupAnimation {
+    from {
+        display: block;
+        transform: scale(0);
+    }
+
+    to {
+        display: block;
+        transform: scale(1);
+    }
+}
+
+@keyframes disparition {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* ------------ ↓ Manage Page Style ↓ ------------ */
+
+/* Server Info Box */
+
+.toCenter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 82.5vh;
+    /* <--- Temporary! */
+}
+
+/* #manage{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+} 
+Merge dar nu pot rezolva z-index-ul!!!
+*/
+
+.infoBox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 345px;
+    width: 100%;
+    font-family: "Istok Web";
+    font-weight: bold;
+    font-size: var(--manageTextSize);
+}
+
+.infoBox img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 10px;
+    transform: scale(0.9);
+}
+
+.infoBoxControls {
+    margin-left: 30px;
+}
+
+.serverInfo {
+    overflow: hidden;
+    width: 980px;
+    border-radius: 15px;
+    background: #262a32;
+    padding: 20px;
+}
+
+.displayFlex {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    margin-bottom: 5px;
+    margin-top: 10px;
+    font-size: calc(var(--manageTextSize) - 10px);
+}
+
+.iconServerInfo {
+    transform: translateY(-4px);
+    font-size: calc(var(--manageTextSize) + 10px);
+    margin-right: 10px;
+    color: #fec538;
+    width: 35px;
+}
+
+.addressIP {
+    background: #1c2127;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.addressIP p {
+    font-size: calc(var(--manageTextSize) - 10px);
+    transform: translateY(2px);
+}
+
+.statusCircle {
+    transform: translateX(10px);
+    width: 12.5px;
+    height: 12.5px;
+    border-radius: 50%;
+    background: var(--statusCircleColor);
+    box-shadow: 0px 0px 5px 1px var(--statusCircleColor);
+    transition: all 0.15s ease-in-out;
+}
+
+.controlButtons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.controlButton {
+    padding: 10px 20px 10px 20px;
+    border-radius: 5px;
+    font-size: calc(var(--manageTextSize) - 10px);
+    font-weight: 700;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    background: #535353;
+    transition: 0.2s ease-in-out;
+}
+
+.controlButton:hover {
+    background: #5f5f5f;
+}
+
+
+.controlButton.activeBtn:nth-child(1) {
+    background: #2781e6;
+}
+
+.controlButton.activeBtn:nth-child(1):hover {
+    background: #2d94ff;
+}
+
+
+.controlButton.activeBtn:nth-child(2) {
+    background: #e92626;
+}
+
+.controlButton.activeBtn:nth-child(2):hover {
+    background: #ff2c2c;
+}
+
+
+.controlButton.activeBtn:nth-child(3) {
+    background: #b921ff;
+}
+
+.controlButton.activeBtn:nth-child(3):hover {
+    background: #bf34ff;
+}
+
+/* ------------ ↓ Console Page Style ↓ ------------ */
+
+.toCenterConsole {
+    display: flex;
+}
+
+.console {
+    border: none;
+    width: 800px;
+    height: 600px;
+    background: #222428;
+    resize: none;
+    font-size: 15px;
+    padding: 5px;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    color: #fff;
+    z-index: 0;
+    overflow: visible;
+}
+
+textarea::-webkit-scrollbar {
+    border-radius: 10px;
+    width: 10px;
+    background: #2b2b2b;
+    cursor: default;
+}
+
+textarea::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: #424242;
+    cursor: default;
+}
+
+.console:focus {
+    outline: none;
+}
+
+.consoleForm {
+    display: grid;
+}
+
+.consoleInput {
+    position: relative;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    background: transparent;
+    width: 95%;
+    border-radius: 10px;
+    height: 30px;
+    border: none;
+    padding-left: 10px;
+    color: #dbdcdd;
+    font-size: 15px;
+    padding: 5px 0px 5px 10px;
+    border: 1px solid #bbb8b8;
+}
+
+.consoleInput:focus {
+    outline: none;
+}
+
+.consoleInputDiv {
+    background: #262a32;
+    display: flex;
+    justify-content: center;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.inputText {
+    position: absolute;
+    background: #262a32;
+    z-index: 101;
+    transform: translate(-315px, 2px);
+    width: 125px;
+    text-align: center;
+}
+
+.inputForIcon {
+    display: flex;
+    width: 95%;
+}
+
+.material-symbols-outlined {
+    position: absolute;
+    transform: translate(365px, 20px);
+    cursor: pointer;
+    transition-duration: 0.5s;
+    transition: inputIcon;
+}
+
+@keyframes inputIcon {
+    from {
+        transform: scale(0.9);
+    }
+
+    to {
+        transform: scale(1);
+    }
+}
+
+.statsConsole {
+    width: 400px;
+    margin-left: 20px;
+}
+
+.statsConsoleBar {
+    display: flex;
+    background: #262a32;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.statsConsoleIcon {
+    display: flex;
+    width: 40px;
+    font-size: 30px;
+    align-items: center;
+}
+
+.Uptime {
+    height: 25px;
+}
+
+.timer {
+    font-weight: 700;
+}
+
+.memory {
+    height: 25px;
+}
+
+.statsConsole ion-icon {
+    color: #fec538;
+}
+
+.utilitiesFilesViewer {
+    user-select: none;
+    z-index: 0;
+}
+
+.mainDiv .divFolder {
+    position: relative;
+    cursor: pointer;
+    width: 70%;
+    padding: 10px;
+    font-size: 20px;
+    background: #262a32;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 2px 0.5px #181c20;
+    transform: scale(1);
+    transition: all 0.05s ease-in-out;
+    z-index: 0;
+}
+
+.mainDiv .divFolder:active {
+    transform: scale(0.995);
+    z-index: 0;
+}
+
+.mainDiv .divFile {
+    user-select: text;
+    width: 70%;
+    padding: 10px;
+    font-size: 20px;
+    background: #262a32;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 2px 0.5px #181c20;
+    transform: scale(1);
+    transition: all 0.05s ease-in-out;
+    z-index: 0;
+}
+
+.mainDiv #filesToEdit {
+    user-select: none;
+    cursor: pointer;
+    z-index: 0;
+}
+
+.mainDiv #filesToEdit:active {
+    transform: scale(0.995);
+    z-index: 0;
+}
+
+.utilitiesFilesViewer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.undoBtn {
+    cursor: pointer;
+    position: absolute;
+    transform: translate(-30px, -1px) scale(1.75);
+    transition: all 0.05s ease-in-out;
+}
+
+.undoBtn:active {
+    transform: translate(-30px, -1px) scale(1.5);
+}
+
+
+/* File Editor Style */
+
+#mainDivForFiles {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 900px;
+    height: calc(100vh - 217.5px);
+    border-radius: 7.5px;
+    z-index: 10;
+}
+
+.ace_scrollbar::-webkit-scrollbar {
+    height: 7px;
+    width: 7px;
+}
+
+.ace_scrollbar::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #272822;
+    /* Matches ace monokai */
+}
+
+.ace_scrollbar::-webkit-scrollbar-thumb {
+    background-color: darkgrey;
+    border-radius: 2px;
+}
+
+.mainDivForFilesAndBtn{
+    width: 900px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* -------------- Btn in the file edit section -------------- */
+
+.save-outline {
+    font-size: 20px;
+    margin-left: 10px;
+}
+
+.saveFileBtn {
+    display: flex;
+    justify-self: center;
+    appearance: none;
+    backface-visibility: hidden;
+    background-color: #2f80ed;
+    border-radius: 10px;
+    border-style: none;
+    box-shadow: none;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    font-family: Inter, -apple-system, system-ui, "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    height: 50px;
+    letter-spacing: normal;
+    line-height: 1.5;
+    outline: none;
+    overflow: hidden;
+    padding: 14px 30px;
+    margin-top: 15px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    transform: translate3d(0, 0, 0);
+    transition: all .1s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: top;
+    white-space: nowrap;
+}
+
+.saveFileBtn div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.saveFileBtn p{
+    transform: translateY(-1px);
+}
+
+.saveFileBtn:hover {
+    background-color: #1366d6;
+    box-shadow: rgba(0, 0, 0, .05) 0 5px 30px, rgba(0, 0, 0, .05) 0 1px 4px;
+    opacity: 1;
+    transform: translateY(0);
+    transition-duration: .35s;
+}
+
+.saveFileBtn:hover:after {
+    opacity: .5;
+}
+
+.saveFileBtn:active {
+    box-shadow: rgba(0, 0, 0, .1) 0 3px 6px 0, rgba(0, 0, 0, .1) 0 0 10px 0, rgba(0, 0, 0, .1) 0 1px 4px -1px;
+    transform: translateY(2px);
+    transition-duration: .35s;
+}
+
+.saveFileBtn:active:after {
+    opacity: 1;
+}
+
+@media (min-width: 768px) {
+    .saveFileBtn {
+        padding: 14px 22px;
+        width: 176px;
+    }
+}

@@ -1,0 +1,234 @@
+@import url('https://fonts.googleapis.com/css2?family=Istok+Web:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Itim&family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jomhuria&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root{
+    --cardWidth: 662.5px;
+}
+
+* {
+    color: #fff;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background: #1C2127;
+    display: flex;
+    min-height: 100vh;
+}
+
+.mainPage{
+    width: 100%;
+    padding: 80px;
+}
+
+/* Main Side Bar Style */
+
+.sideBarParent{
+    /* display: none; */
+    width: 300px;
+    height: page;
+    background: #262A32;
+    user-select: none;
+}
+
+.imgLogoDiv{
+    display: flex;
+    justify-content: center;
+}
+
+.imgLogo{
+    display: flex;
+    align-items: center;
+    width: 250px;
+    z-index: 0;
+}
+
+.sideBarOptions{
+    display: grid;
+    width: 300px;
+    transform: translateY(-40px);
+    z-index: 1;
+}
+
+.sideBarOption{
+    font-family: "Istok Web";
+    font-weight: bold;
+    font-size: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    height: 82px;
+    width: 300px;
+    margin-top: 29px;
+    cursor: pointer;
+    transition: background 0.5s ease;
+}
+
+.sideBarOption:hover{   
+    background: #22262ca9;
+}
+
+.sideBarOption a{
+    position: relative;
+    transform: translateY(2px);
+    text-decoration: none;
+}
+
+.activeSideBarOption{
+    background: #22262D;
+}
+
+.activeSideBarOption a{
+    color: #FEC538;
+}
+
+/* Main Page Show */
+
+.content{
+    display: none;
+}
+
+.tabShow{
+    display: block;
+}
+
+/* ------------------ Server Cards Page Style ------------------ */
+
+/* Create Card Style */
+
+.createCard {
+    font-family: "Istok Web";
+    font-weight: bold;
+    font-size: 40px;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: var(--cardWidth);
+    height: 326px;
+    background: #262A32;
+    border-radius: 44px;
+}
+
+.createCard p {
+    transform: translateY(30px);
+    font-size: 43px;
+}
+
+.createCard button {
+    transform: translateY(-20px);
+    align-items: center;
+    height: 90px;
+    width: 90px;
+    border-radius: 50%;
+    outline: none;
+    border: none;
+    cursor: pointer;
+}
+
+.createCard ion-icon {
+    transform: translateY(5px);
+    height: 40px;
+    width: 40px;
+    color: #000;
+    text-align: center;
+}
+
+/* Servers Page Style For Aligning Server Cards*/
+
+.serverCards{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 662.5px);
+    gap: 87px;
+    justify-content: center;
+}
+
+/* Style For Server That is Created */
+
+.serverCard{
+    cursor: pointer;
+    font-family: "Itim";
+    user-select: none;
+    position: relative;
+    width: var(--cardWidth);
+    height: 326px;
+    background: #262A32;
+    border-radius: 44px;
+    overflow: hidden;
+}
+
+.serverCardName{
+    position: absolute;
+    top: 100px;
+    background: #262A32;
+    padding-top: 15px;
+    padding-left: 15px;
+    padding-bottom: 12px;
+    padding-right: 20px;
+    border-top-right-radius: 30px;
+}
+
+.serverCardName p{
+    font-size: 45px;
+    z-index: 10;
+}
+
+.serverCardName::after{
+    content: "";
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    top: 20px;
+    left: 100%;
+    border-radius: 50%;
+    background: transparent;
+    box-shadow: -30px 30px 0 #262A32;
+    z-index: 1;
+}
+
+.serverCardDetailsAll{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.serverCardDetailsAll .serverCardOnOrOff{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(10px);
+}
+
+.serverCardOnOrOffTxt{
+    text-transform: uppercase;
+    color: #FF5151;
+    transform: translateY(6px);
+}
+
+.onTxt{
+    color: #62FF59;
+}
+
+.serverCardDetails{
+    height: 120px;
+    display: grid;
+    align-items: center;
+    font-size: 35px;
+    margin-left: 20px;
+    z-index: 10;
+}
+
+.serverCardOnOrOff{
+    font-family: "Jomhuria";
+    margin-right: 30px;
+    font-size: 70px;
+    height: 91px;
+    width: 144px;
+    background: #3B414D;
+    border-radius: 20px;
+    z-index: 10;
+}
