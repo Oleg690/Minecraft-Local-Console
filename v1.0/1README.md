@@ -21,7 +21,8 @@
 
 ## Installation
 
-Downlaod this git-hub project and run the web-server.py file in to run the server, and access it with e.g. localhost:2000 (you can change the port in the same file)
+- Downlaod this git-hub project and run the web-server.py file in to run the server, and access it with e.g. localhost:2000 (you can change the port in the same file)
+- You need to change the directory of the project in the js file on line 8 with the actual directory
 ## Support
 
 For support, ideas or errors found, email cristisofroni37@gmail.com.

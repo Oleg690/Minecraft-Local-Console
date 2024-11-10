@@ -9,7 +9,7 @@ def list_files_and_folders(directory_path):
             folders = folders[3:]
         files = [item for item in items if os.path.isfile(os.path.join(directory_path, item))]
         if directory_path == initial_directory:
-            files = files[2:]
+            files = files[3:]
         return folders, files
     except Exception as e:
         return [], [str(e)]
