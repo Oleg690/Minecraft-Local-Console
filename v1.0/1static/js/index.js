@@ -4,6 +4,7 @@ const allContents = document.querySelectorAll(".content");
 const input = document.getElementById('action')
 const par = document.getElementById('par')
 const div1 = document.getElementById('mainDiv')
+
 let currentPath = 'D:\\Server - Copy Minecraft';
 
 let consoleInputCommand = document.getElementById("consoleInputCommand")
