@@ -136,8 +136,6 @@ function saveFile() {
 function serverFilesResult(e) {
     let result = JSON.parse(e.target.response);
 
-    console.log('Files Refreshed!')
-
     if (result[1] === 'Error') {
         spawnPopup('Error', result[0]);
     } else if (result[1] !== 'Base_Directory') {

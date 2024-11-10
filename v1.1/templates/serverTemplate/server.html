@@ -25,23 +25,24 @@
             <div class="sideBarOption">
                 <a href="/templates/support.html">Support</a>
             </div>
-            <div class="dropdown">
-                <div class="select">
-                    <span class="selected">Manage</span>
-                    <div class="caret"></div>
-                </div>
-                <ul class="menu">
-                    <li value="manage" class="active">Manage</li>
-                    <li value="console">Console</li>
-                    <li value="files">Files</li>
-                    <li value="settings">Settings</li>
-                </ul>
-            </div>
             <div class="infoPopups" id="infoPopups"></div>
         </div>
     </div>
 
     <div class="mainPage">
+        <div class="dropdown">
+            <div class="select">
+                <span class="selected">Manage</span>
+                <div class="caret"></div>
+            </div>
+            <ul class="menu">
+                <li value="manage" class="active">Manage</li>
+                <li value="console">Console</li>
+                <li value="files">Files</li>
+                <li value="settings">Settings</li>
+            </ul>
+        </div>
+
         <div class="content tabShow" id="manage">
             <div class="toCenter">
                 <div class="infoBox">
@@ -128,7 +129,8 @@
                 <div class="mainDiv" id="mainDivForFolders" style="display: block;"></div>
                 <div class="mainDivForFilesAndBtn" style="display: grid;">
                     <div class="mainDivForFiles" id="mainDivForFiles"></div>
-                    <button class="saveFileBtn" id="saveFileBtn" role="button" style="display: none;" onclick="saveFile()">
+                    <button class="saveFileBtn" id="saveFileBtn" role="button" style="display: none;"
+                        onclick="saveFile()">
                         <div>
                             <p>Save</p>
                             <div>
@@ -140,7 +142,7 @@
                 </div>
             </div>
 
-            
+
         </div>
 
         <div class="content" id="settings">

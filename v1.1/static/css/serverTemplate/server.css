@@ -11,7 +11,10 @@
     --borderRadiusForInfoPopup: 15px;
 
     --contentSectionHeight: 85vh;
-    /* Temporary */
+
+    --dropdownAlignment: 20px;
+
+    --sideBarWidth: 300px;
 }
 
 * {
@@ -29,7 +32,31 @@ body {
 
 .mainPage {
     width: 100%;
-    padding: 80px;
+}
+
+.content{
+    width: calc(100% - var(--sideBarWidth));
+}
+
+#manage{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+#console{
+    padding-top: 80px;
+    padding-left: 70px;
+}
+
+#files{
+    padding-top: 80px;
+    padding-left: 70px;
+}
+
+#settings{
+    padding-top: 80px;
+    padding-left: 70px;
 }
 
 /* Main Side Bar Style */
@@ -40,7 +67,6 @@ body {
     height: page;
     background: #262A32;
     user-select: none;
-    z-index: 1000;
 }
 
 .imgLogoDiv {
@@ -99,22 +125,31 @@ body {
 
 .content {
     display: none;
+    transform: translateY(-50px);
 }
 
 .tabShow {
     display: block;
 }
 
+.mainPage .dropdown{
+    z-index: 1000;
+}
+
+
+
 .dropdown {
-    position: absolute;
+    position: relative;
     user-select: none;
     width: 7.6em;
     position: relative;
     font-size: 19px;
     font-weight: bold;
     font-family: 'Istok Web';
-    transform: translate(225%, -825%);
+    top: var(--dropdownAlignment);
+    left: var(--dropdownAlignment);
 }
+
 
 .dropdown * {
     position: relative;
@@ -695,7 +730,7 @@ textarea::-webkit-scrollbar-thumb {
     border-radius: 2px;
 }
 
-.mainDivForFilesAndBtn{
+.mainDivForFilesAndBtn {
     width: 900px;
     justify-content: center;
     align-items: center;
@@ -743,13 +778,13 @@ textarea::-webkit-scrollbar-thumb {
     white-space: nowrap;
 }
 
-.saveFileBtn div{
+.saveFileBtn div {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.saveFileBtn p{
+.saveFileBtn p {
     transform: translateY(-1px);
 }
 
