@@ -5,12 +5,6 @@
 
 - [@Oleg690](https://github.com/Oleg690)
 
-
-## Demo
-
-Insert gif or link to demo
-
-
 ## Features
 
 - Can run and operate one server
