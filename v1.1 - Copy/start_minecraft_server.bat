@@ -1,1 +1,0 @@
-java -Xmx16384M -Xms16384M -jar 1.21.jar
