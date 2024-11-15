@@ -1,25 +1,17 @@
 from mcrcon import MCRcon
 import time, cgi, json, sqlite3
-from startServer import startServer
+from startServer import start_server
 
-print('Content-type: text/html\n')
+def connectToServer(worldNumber):
+    global mc
+    connection = sqlite3.connect('database\\worldsData.db')
+    cursor = connection.cursor()
 
-params = cgi.FieldStorage()
-action = params.getfirst('action')
-worldNumber = params.getfirst('number', '')
+    cursor.execute(f'SELECT rconPassword FROM worlds where worldNumber = {worldNumber};')
+    password = cursor.fetchall()
 
-connection = sqlite3.connect('database\\worldsData.db')
-cursor = connection.cursor()
-
-cursor.execute(f'SELECT rconPassword FROM worlds where worldNumber = {worldNumber};')
-password = cursor.fetchall()
-
-mc = MCRcon('127.0.0.1', f'{password}', port=25575) #        ↓
-#                                                       For testing
-#mc = MCRcon('0.0.0.0', f'{password}', port=25575)           ↑
-
-#mc = MCRcon('192.168.100.106', f'{password}', port=25575) → working
-mc.connect()
+    mc = MCRcon('0.0.0.0', f'{password}', port=25575)
+    mc.connect()
 
 def countdown(awaitTime, action):
     print(f"say Server will {action} in...")
@@ -29,7 +21,9 @@ def countdown(awaitTime, action):
         timerTemp -= 1
         time.sleep(1)
 
-def runCommand(action):
+def runCommand(action, worldNumber):
+    connectToServer(worldNumber)
+
     if action != 'stop' or action != 'restart':
         result = mc.command(f"/{action}")
         mc.command(f"say { result}")
@@ -42,6 +36,6 @@ def runCommand(action):
             countdown(5, action)
             mc.command('save-all')
             mc.command('stop')
-            startServer()
+            start_server(worldNumber)
         else:
             print(f"Enter a valid action")

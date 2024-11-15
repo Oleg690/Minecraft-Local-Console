@@ -1,45 +1,62 @@
 from mcstatus import JavaServer
-import mcstatus
-from mcrcon import MCRcon
-import os, cgi, json, time, sqlite3
+import os, cgi, json, sqlite3
 
-print('Content-type: text/html\n')
+def setup_cgi_environment():
+    print('Content-type: text/html\n')
+    return cgi.FieldStorage()
 
-params = cgi.FieldStorage()
-worldNumber = params.getfirst('number', '0')
+def get_world_number(params):
+    return params.getfirst('number', '0')
 
-connection = sqlite3.connect('database\\worldsData.db')
-cursor = connection.cursor()
+def get_rcon_password(world_number):
+    database_path = 'database\\worldsData.db'
+    connection = sqlite3.connect(database_path)
+    cursor = connection.cursor()
 
-cursor.execute(f'SELECT rconPassword FROM worlds where worldNumber = {worldNumber};')
-password = cursor.fetchall()
+    query = "SELECT rconPassword FROM worlds WHERE worldNumber = ?;"
+    cursor.execute(query, (world_number,))
+    result = cursor.fetchone()
+    connection.close()
 
-localDir = f'\\minecraft_worlds\\{worldNumber}'
-
-batch_file_name = "start_minecraft_server.bat"
+    return result[0] if result else None
 
 def is_server_running():
     try:
-        server = JavaServer.lookup("localhost")
+        server = JavaServer.lookup("0.0.0.0")
         server.status()
         return True
     except Exception:
         return False
 
-def startServer():
-    curent_dir = os.getcwd()
-    dir = curent_dir + '\\' + localDir
-    batch_file = curent_dir + '\\' + batch_file_name
+def start_server(world_number):
+    local_dir = f'\\minecraft_worlds\\{world_number}'
+    batch_file_name = "start_minecraft_server.bat"
+    current_dir = os.getcwd()
 
-    os.chdir(dir)
-    os.startfile(f"{batch_file}")
-    print(json.dumps(['Success', 'Server Powered!']))
+    dir_path = os.path.join(current_dir, local_dir)
+    batch_file_path = os.path.join(current_dir, batch_file_name)
 
-if worldNumber != '0':
+    try:
+        os.chdir(dir_path)
+        os.startfile(batch_file_path)
+        return ['Success', 'Server Powered!']
+    except Exception as e:
+        return ['Error', f"Failed to start server: {str(e)}"]
+    finally:
+        os.chdir(current_dir)
+
+def main():
+    params = setup_cgi_environment()
+    world_number = get_world_number(params)
+
+    if world_number == '0':
+        print(json.dumps(['Error', 'World number wrong!']))
+        return
+
     if is_server_running():
         print(json.dumps(['Info', 'Server Already Running!']))
     else:
-        startServer()
-        print(json.dumps(['Success', 'Server Powered!']))
-else:
-    print(json.dumps(['Error', 'World number wrong!']))
+        result = start_server(world_number)
+        print(json.dumps(result))
+
+main()
