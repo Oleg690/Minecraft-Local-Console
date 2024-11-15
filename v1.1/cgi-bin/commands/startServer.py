@@ -33,7 +33,7 @@ def start_server(world_number):
     batch_file_name = "start_minecraft_server.bat"
     current_dir = os.getcwd()
 
-    dir_path = os.path.join(current_dir, local_dir)
+    dir_path = current_dir + '\\' + local_dir
     batch_file_path = os.path.join(current_dir, batch_file_name)
 
     try:
