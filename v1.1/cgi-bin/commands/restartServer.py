@@ -26,20 +26,16 @@ def is_server_running():
     except Exception:
         return False
 
-def startServer():
+if worldNumber != '0':
     curent_dir = os.getcwd()
     dir = curent_dir + '\\' + localDir
     batch_file = curent_dir + '\\' + batch_file_name
 
-    os.chdir(dir)
-    os.startfile(f"{batch_file}")
-    print(json.dumps(['Success', 'Server Powered!']))
-
-if worldNumber != '0':
     if is_server_running():
         print(json.dumps(['Info', 'Server Already Running!']))
     else:
-        startServer()
+        os.chdir(dir)
+        os.startfile(f"{batch_file}")
         print(json.dumps(['Success', 'Server Powered!']))
 else:
     print(json.dumps(['Error', 'World number wrong!']))
