@@ -1,13 +1,12 @@
 from mcstatus import JavaServer
 import os, cgi, json, sqlite3, psutil, datetime
-import time
 
 def setup_cgi_environment():
     print('Content-type: text/html\n')
     return cgi.FieldStorage()
 
 def get_world_number(params):
-    return params.getfirst('number', '718668614')
+    return params.getfirst('worldNumber', '0')
 
 def get_rcon_password(world_number):
     # Cache or store the password if possible, to avoid frequent database queries
@@ -54,9 +53,11 @@ def getServerStatus():
 
 def getServerLogs(directory):
     try:
-        with open(directory, "r", encoding='utf-8') as file:
-            # Read only last 10 lines for testing
-            return ''.join(file.readlines()[-10:])
+        file = open(directory, 'r', encoding='utf-8')
+        data = file.read()
+        data = data.replace('\n', '&#13;')
+        file.close()
+        return data
     except Exception as e:
         return f"Error reading logs: {str(e)}"
 
@@ -83,18 +84,21 @@ def getUpTime(minecraft_process):
     return "0h 0m 0s"
 
 def main():
+    params = setup_cgi_environment()
+    worldNumber = get_world_number(params)
+
     data = {}
 
     data['serverStatus'] = getServerStatus()
 
-    logDirectory = os.path.join(os.getcwd(), "minecraft_worlds", "718668614", "logs", "latest.log")
+    logDirectory = os.path.join(os.getcwd(), "minecraft_worlds", f"{worldNumber}", "logs", "latest.log")
     data['serverLogs'] = getServerLogs(logDirectory)
 
     jar_name = "1.21.jar"
     minecraft_process = get_minecraft_process(jar_name)
-    data['upTime'] = getUpTime(minecraft_process)
+    data['serverUpTime'] = getUpTime(minecraft_process)
 
     return data
 
 result = main()
-print(json.dumps(result, indent=4))
+print(json.dumps(result))

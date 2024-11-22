@@ -42,8 +42,16 @@ dropdowns.forEach(dropdown => {
         option.addEventListener('click', () => {
             selected.innerText = option.innerText;
 
-            if (selected.innerText == 'Files'){
+            if (selected.innerText == 'Files') {
                 send(`\\cgi-bin\\fileHandler\\serverFilesHandler.py?worldNumber=${worldNumber}&action=firstLoad&folderOrFile=folder`, serverFilesResult);
+            } else if (selected.innerText == 'Console') {
+                fetch(`\\cgi-bin\\commands\\getServerInfo.py?worldNumber=${worldNumber}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        //console.log("Data received:", data);
+                        updateConsole(data)
+                    })
+                    .catch(error => console.error("Error fetching data:", error));
             }
 
             select.classList.remove('select-clicked');
@@ -127,9 +135,9 @@ function saveFile() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lastPath, worldNumber, values: editorValues })
     })
-    .then(response => response.json())
-    .then(data => spawnPopup('Success', data[1]))
-    .catch(error => spawnPopup('Error', error[1]));
+        .then(response => response.json())
+        .then(data => spawnPopup('Success', data[1]))
+        .catch(error => spawnPopup('Error', error[1]));
 }
 
 // Handle server files response and update the display
@@ -193,6 +201,18 @@ function serverInfoResult(e) {
             window.value = server;
         }
     }
+}
+
+function updateConsole(data){
+    serverStatus = data["serverStatus"]
+    serverLogs = data["serverLogs"]
+    serverUpTime = data["serverUpTime"]
+
+    console.log(serverLogs)
+
+    document.querySelector('#textareaConsole').value = serverLogs
+
+    document.getElementById('timer').innerHTML = serverUpTime
 }
 
 // Function to spawn a popup message with given text and description
