@@ -10,12 +10,7 @@
 - Can run and operate one or multiple servers
 - Integraded console, with working commands
 - Files folder view with editing or inner file veiw
-- Works everywhere, doesn't need support
-
-## Future optimizations
-
-- Cool animations and UI/UX design
-- Light/Dark theme mode
+- Works everywhere, doesn't need path support
 
 ## Installation
 
