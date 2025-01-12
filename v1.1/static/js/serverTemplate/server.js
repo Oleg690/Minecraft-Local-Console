@@ -15,6 +15,9 @@ let lastPath = '';
 let divForFolder = document.querySelector('#mainDivForFolders');
 let divForInnerFile = document.querySelector('.mainDivForFilesAndBtn');
 
+// ---------------------------------------
+let clock_running = localStorage.getItem('clock_running')
+
 // Function to load server info and files on page load
 function onLoadFunc() {
     send('\\cgi-bin\\getServers\\getServers.py', serverInfoResult);
@@ -85,6 +88,7 @@ function changeColor(prop, command) {
             document.getElementById(`${n}`).disabled = false;
         });
     } else if (prop == 2 || prop == 3) {
+
         runServerCommand(command);
         document.getElementById('1').classList.add('activeBtn');
         document.getElementById('1').disabled = false;
@@ -203,17 +207,73 @@ function serverInfoResult(e) {
     }
 }
 
-function updateConsole(data){
+const clockDiv = document.getElementById('timer');
+const stopButton = document.getElementById('stop');
+let intervalId = null;
+stopButton.addEventListener('click', stopClock);
+
+function formatTime(seconds) {
+    const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    return `${hrs}h ${mins}m ${secs}s`;
+}
+
+function updateClock(startTime) {
+    const elapsedTime = Math.floor(Date.now() / 1000 - startTime);
+    clockDiv.textContent = formatTime(elapsedTime);
+    console.log('Clock Updated!')
+}
+
+function startClock() {
+
+}
+
+function stopClock() {
+    localStorage.setItem("clock_running", false)
+    
+}
+
+function updateClock(start) {
+
+}
+
+function updateConsole(data) {
     serverStatus = data["serverStatus"]
     serverLogs = data["serverLogs"]
     serverUpTime = data["serverUpTime"]
 
-    console.log(serverLogs)
+    //console.log(serverUpTime['start_time'])
 
     document.querySelector('#textareaConsole').value = serverLogs
 
-    document.getElementById('timer').innerHTML = serverUpTime
+    if (document.getElementById('1').disabled == true || serverIsRunning) {
+        if (localStorage.getItem("clock_running") == true) {
+            intervalId = setInterval(() => updateClock(startTime), 1000);
+        } else {
+            startClock()
+        }
+    } else {
+        stopClock()
+    }
 }
+
+// --------------------------------------------------------------------
+
+function serverIsRunning() {
+    fetch('\\cgi-bin\\commands\\serverRunningCheck.py')
+        .then(response => response.json())
+        .then(data => {
+            if (data == true) {
+                return true
+            } else {
+                return false
+            }
+        })
+        .catch(error => console.error("Error fetching data:", error));
+}
+
+// --------------------------------------------------------------------
 
 // Function to spawn a popup message with given text and description
 function spawnPopup(infoCardText, infoPopupDescription) {

@@ -1,0 +1,43 @@
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\Default Database Creator.exe
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\Default Database Creator.deps.json
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\Default Database Creator.runtimeconfig.json
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\Default Database Creator.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\Default Database Creator.pdb
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\EntityFramework.SqlServer.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\EntityFramework.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\Microsoft.Win32.SystemEvents.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.Data.SQLite.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.CodeDom.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.Data.SqlClient.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.Data.SQLite.EF6.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.Drawing.Common.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.Security.Permissions.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\System.Windows.Extensions.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win\lib\netcoreapp3.0\Microsoft.Win32.SystemEvents.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win-arm64\native\sni.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win-x64\native\sni.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win-x86\native\sni.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\linux-x64\native\SQLite.Interop.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\osx-x64\native\SQLite.Interop.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win-x64\native\SQLite.Interop.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win-x86\native\SQLite.Interop.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\unix\lib\netcoreapp3.0\System.Drawing.Common.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win\lib\netcoreapp3.0\System.Drawing.Common.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\bin\Debug\net8.0\runtimes\win\lib\netcoreapp3.0\System.Windows.Extensions.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.csproj.AssemblyReference.cache
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.GeneratedMSBuildEditorConfig.editorconfig
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.AssemblyInfoInputs.cache
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.AssemblyInfo.cs
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.csproj.CoreCompileInputs.cache
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.sourcelink.json
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default .08057329.Up2Date
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\refint\Default Database Creator.dll
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.pdb
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\Default Database Creator.genruntimeconfig.cache
+D:\Minecraft-Server\important funcs for main aplication\Default Database Creator\Default Database Creator\obj\Debug\net8.0\ref\Default Database Creator.dll

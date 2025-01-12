@@ -1,5 +1,5 @@
 from mcstatus import JavaServer
-import os, cgi, json, sqlite3, psutil, datetime
+import os, cgi, json, sqlite3, psutil, time
 
 def setup_cgi_environment():
     print('Content-type: text/html\n')
@@ -61,27 +61,27 @@ def getServerLogs(directory):
     except Exception as e:
         return f"Error reading logs: {str(e)}"
 
-def get_minecraft_process(jar_name="1.21.jar"):
-    for proc in psutil.process_iter(attrs=["pid", "name", "cmdline", "create_time"]):
-        try:
-            if "java" in proc.info["name"] and jar_name in proc.info["cmdline"]:
-                return proc
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            continue
-    return None
-
-def format_uptime(delta):
-    total_seconds = int(delta.total_seconds())
-    hours, remainder = divmod(total_seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    return f"{hours}h {minutes}m {seconds}s"
-
-def getUpTime(minecraft_process):
-    if minecraft_process:
-        server_start_time = datetime.datetime.fromtimestamp(minecraft_process.info['create_time'])
-        uptime = datetime.datetime.now() - server_start_time
-        return format_uptime(uptime)
-    return "0h 0m 0s"
+#def get_minecraft_process(jar_name="1.21.jar"):
+#    for proc in psutil.process_iter(attrs=["pid", "name", "cmdline", "create_time"]):
+#        try:
+#            if "java" in proc.info["name"] and jar_name in proc.info["cmdline"]:
+#                return proc
+#        except (psutil.NoSuchProcess, psutil.AccessDenied):
+#            continue
+#    return None
+#
+#def format_uptime(delta):
+#    total_seconds = int(delta.total_seconds())
+#    hours, remainder = divmod(total_seconds, 3600)
+#    minutes, seconds = divmod(remainder, 60)
+#    return f"{hours}h {minutes}m {seconds}s"
+#
+#def getUpTime(minecraft_process):
+#    if minecraft_process:
+#        server_start_time = datetime.datetime.fromtimestamp(minecraft_process.info['create_time'])
+#        uptime = datetime.datetime.now() - server_start_time
+#        return format_uptime(uptime)
+#    return "0h 0m 0s"
 
 def main():
     params = setup_cgi_environment()
@@ -89,14 +89,15 @@ def main():
 
     data = {}
 
-    data['serverStatus'] = getServerStatus()
+    #data['serverStatus'] = getServerStatus()
 
     logDirectory = os.path.join(os.getcwd(), "minecraft_worlds", f"{worldNumber}", "logs", "latest.log")
     data['serverLogs'] = getServerLogs(logDirectory)
 
-    jar_name = "1.21.jar"
-    minecraft_process = get_minecraft_process(jar_name)
-    data['serverUpTime'] = getUpTime(minecraft_process)
+    #jar_name = "1.21.jar"
+    ##minecraft_process = get_minecraft_process(jar_name)
+    ##data['serverUpTime'] = getUpTime(minecraft_process)
+    #data['serverUpTime'] = start_clock()
 
     return data
 
