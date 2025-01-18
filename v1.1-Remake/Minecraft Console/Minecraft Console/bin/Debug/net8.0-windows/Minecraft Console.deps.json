@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Minecraft Console/1.0.0": {
+        "runtime": {
+          "Minecraft Console.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Minecraft Console/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

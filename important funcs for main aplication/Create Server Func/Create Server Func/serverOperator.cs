@@ -11,28 +11,53 @@ using serverPropriertiesChanger;
 using databaseChanger;
 using CoreRCON;
 using System.Net;
+using java.nio.file;
+using javax.swing.plaf;
+using com.sun.tools.javadoc;
 
 namespace Server_General_Funcs
 {
     class serverCreator
     {
-        public static string CreateServerFunc(string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, int totalPlayers, int processMemoryAlocation)
+        public static string CreateServerFunc(string rootFolder, string rootWorldsFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port)
         {
-            // string rootFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\worlds";
-            string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootFolder);
-            // string version = "1.20.6";
+            // string rootFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func";
+            string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
 
             // Path to the custom directory where server files will be stored
-            string customDirectory = System.IO.Path.Combine(rootFolder, uniqueNumber);
+            string customDirectory = System.IO.Path.Combine(rootWorldsFolder, uniqueNumber);
 
             Directory.CreateDirectory(customDirectory);
             Console.WriteLine($"Created server directory: {customDirectory}");
 
             // Path to the Minecraft server .jar file
-            string jarFolderPath = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\versions";
-            string versionName = version + ".jar";
-            string jarFilePath = System.IO.Path.Combine(jarFolderPath, versionName);
+            string jarFoldersPath = rootFolder;
+            switch (software)
+            {
+                case "Vanilla":
+                    jarFoldersPath += @"\versions\Vanilla";
+                    break;
+                case "Forge":
+                    jarFoldersPath += @"\versions\Forge";
+                    break;
+            }
 
+            string versionName = version + ".jar";
+            string jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
+
+            // Check if the jar file exists
+            if (!System.IO.File.Exists(jarFilePath))
+            {
+                Console.WriteLine("Server .jar file not found! Check the path.");
+            }
+
+            // Copy the .jar file to the unique folder
+            string destinationJarPath = System.IO.Path.Combine(customDirectory, versionName);
+
+            File.Copy(jarFilePath, destinationJarPath);
+            Console.WriteLine("Server .jar file copied to the custom directory.");
+
+            // RCON Password Generator
             string rconPassword = generatePassword(20);
 
             // RCON Settings array
@@ -44,23 +69,116 @@ namespace Server_General_Funcs
                 { 12, "true" }
             };
 
-            // Check if the jar file exists
-            if (!System.IO.File.Exists(jarFilePath))
+            switch (software)
             {
-                Console.WriteLine("Server .jar file not found! Check the path.");
+                case "Vanilla":
+                    Console.WriteLine("Vanilla Server");
+                    vanillaServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, processMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port);
+                    return uniqueNumber;
+                case "Forge":
+                    Console.WriteLine("Forge Server");
+                    fabricServerInitialisation(destinationJarPath, customDirectory);
+                    return uniqueNumber;
             }
 
-            // Copy the .jar file to the unique folder
-            string destinationJarPath = Path.Combine(customDirectory, versionName);
+            return uniqueNumber;
+        }
 
-            File.Copy(jarFilePath, destinationJarPath);
-            Console.WriteLine("Server .jar file copied to the custom directory.");
+        //-------------------------------------------------------------------------------------
+        // Main Server Type Installators
+        private static void fabricServerInitialisation(string forgeJarPath, string worldPath)
+        {
+            ProcessStartInfo processInfo = new ProcessStartInfo
+            {
+                FileName = "java",
+                Arguments = $"-jar \"{forgeJarPath}\" --installServer", // nogui
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = worldPath // Directory where the server files will be installed
+            };
 
+            try
+            {
+                using (Process process = new Process { StartInfo = processInfo })
+                {
+                    int currentProgress = 0;
+
+                    process.OutputDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            // Determine progress based on output logs and update state
+                            if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
+                            {
+                                currentProgress = 10;
+                                Console.WriteLine($"Progress: {currentProgress}% - Extracting main jar...");
+                            }
+                            else if (e.Data.Contains("Downloading library from") && currentProgress < 30)
+                            {
+                                currentProgress = 30;
+                                Console.WriteLine($"Progress: {currentProgress}% - Downloading libraries...");
+                            }
+                            else if (e.Data.Contains("Checksum validated") && currentProgress < 50)
+                            {
+                                currentProgress = 50;
+                                Console.WriteLine($"Progress: {currentProgress}% - Libraries validated...");
+                            }
+                            else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
+                            {
+                                currentProgress = 70;
+                                Console.WriteLine($"Progress: {currentProgress}% - Extracting server files...");
+                            }
+                            else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
+                            {
+                                currentProgress = 85;
+                                Console.WriteLine($"Progress: {currentProgress}% - Processing bundled files...");
+                            }
+                            else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
+                            {
+                                currentProgress = 100;
+                                Console.WriteLine($"Progress: {currentProgress}% - Installation complete!");
+                            }
+                        }
+                    };
+
+                    process.ErrorDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            Console.WriteLine($"Error: {e.Data}");
+                        }
+                    };
+
+                    // Start the process
+                    process.Start();
+
+                    // Begin asynchronous reading of output and error streams
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                    
+                    Console.WriteLine("Minecraft server installation is starting...");
+
+                    process.WaitForExit();
+
+                    Console.WriteLine("Installation completed!");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        private static void vanillaServerInitialisation(string customDirectory, string destinationJarPath, object[,] rconSettings, object[,] worldSettings, int processMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port)
+        {
             // Set up the process to run the server
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
                 FileName = "java",
-                Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M -jar \"{destinationJarPath}\" nogui",
+                Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M -jar \"{destinationJarPath}\" ", // nogui
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -68,6 +186,9 @@ namespace Server_General_Funcs
                 CreateNoWindow = true,
                 WorkingDirectory = customDirectory // Set the custom working directory
             };
+
+            int totalLibraries = 26;
+            int unpackedLibraries = 0;
 
             try
             {
@@ -80,8 +201,15 @@ namespace Server_General_Funcs
 
                     Console.WriteLine("Minecraft server is starting...");
 
+                    string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
+                    if (!File.Exists(serverPropertiesPath))
+                    {
+                        File.Create(serverPropertiesPath).Close();
+                        Console.WriteLine("Created missing server.properties file.");
+                    }
+
                     // Read server output
-                    while (!process.StandardOutput.EndOfStream)
+                    while (process.StandardOutput.EndOfStream == false)
                     {
                         string? line = process.StandardOutput.ReadLine();
                         Console.WriteLine(line);
@@ -90,24 +218,26 @@ namespace Server_General_Funcs
                         if (line != null && line.Contains("You need to agree to the EULA in order to run the server"))
                         {
                             AcceptEULA(destinationJarPath);
-                            DataChanger.SetInfo(rconSettings, Path.Combine(customDirectory, "server.properties"));
-                            dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                            DataChanger.SetInfo(rconSettings, serverPropertiesPath);
+                            DataChanger.SetInfo(worldSettings, serverPropertiesPath);
+                            dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Vanilla", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                         }
                     }
 
                     process.WaitForExit();
-                    Console.WriteLine("Minecraft server has stopped.");
+                    Console.WriteLine("Starting minecraft server.");
+
+                    serverOperator.Start(destinationJarPath, processMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
             }
-            return uniqueNumber;
         }
 
         //-------------------------------------------------------------------------------------
-
+        // Help Functions
         private static void AcceptEULA(string jarFilePath)
         {
             string serverDir = System.IO.Path.GetDirectoryName(jarFilePath);
@@ -152,13 +282,12 @@ namespace Server_General_Funcs
             return new string(number);
         }
 
-
         private static string GenerateUniqueRandomNumber(int numOfDigits, string rootFolder)
         {
             string randomNumber;
             do
             {
-                // Generate a random 9-digit number
+                // Generate a random numOfDigits-digits number
                 randomNumber = GenerateRandomNumber(numOfDigits);
             }
             while (CheckForMatchingFolder(rootFolder, randomNumber)); // Repeat if match is found
@@ -172,13 +301,22 @@ namespace Server_General_Funcs
             {
                 // Get all folder names in the root directory
                 string[] folders = Directory.GetDirectories(rootFolder);
+                List<object[]> worldExistingNumbers = dbChanger.GetSpecificDataFunc("SELECT worldNumber FROM worlds;");
 
                 foreach (string folder in folders)
                 {
                     // Get the folder name (not the full path)
-                    string currentFolderName = Path.GetFileName(folder);
+                    string currentFolderName = System.IO.Path.GetFileName(folder);
+
 
                     if (currentFolderName == folderName)
+                    {
+                        return true;
+                    }
+                }
+                foreach (object[] number in worldExistingNumbers)
+                {
+                    if (Convert.ToInt64(number[0]) == Convert.ToInt64(folderName))
                     {
                         return true;
                     }
@@ -226,6 +364,8 @@ namespace Server_General_Funcs
 
             return new string(passwordArray);
         }
+
+        //-------------------------------------------------------------------------------------
     }
 
     class serverOperator
@@ -241,7 +381,7 @@ namespace Server_General_Funcs
             ProcessStartInfo serverProcessInfo = new ProcessStartInfo
             {
                 FileName = "java",
-                Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
+                Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " + // nogui
                 $"-Dcom.sun.management.jmxremote " +
                 $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
                 $"-Dcom.sun.management.jmxremote.authenticate=false " +
@@ -266,11 +406,11 @@ namespace Server_General_Funcs
                 Console.WriteLine("Minecraft server started.");
 
                 // Read server output
-                //while (!process.StandardOutput.EndOfStream)
-                //{
+                // while (!process.StandardOutput.EndOfStream)
+                // {
                 //    string line = process.StandardOutput.ReadLine();
                 //    Console.WriteLine(line);
-                //}
+                // }
 
                 process.WaitForExit();
                 Console.WriteLine("Process for the server has stopped.");
@@ -330,6 +470,51 @@ namespace Server_General_Funcs
             }
         }
 
+        public static void DeleteServer(string worldNumber, string serverDirectoryPath, bool deleteFromDB = true, bool deleteWholeDirectory = true)
+        {
+            if (deleteFromDB)
+            {
+                dbChanger.deleteWorldFromDB(worldNumber);
+            }
+            DeleteFiles(serverDirectoryPath, deleteWholeDirectory);
+        }
+
+        //-------------------------------------------------------------------------------------
+        // Help Functions
+        private static void DeleteFiles(string path, bool deleteWholeDirectory)
+        {
+            try
+            {
+                if (deleteWholeDirectory)
+                {
+                    Directory.Delete(path, true); // Deletes the entire directory and its contents
+                    Console.WriteLine($"Deleted entire directory: {path}");
+                }
+                else
+                {
+                    // Delete all files in the directory
+                    foreach (string file in Directory.GetFiles(path))
+                    {
+                        File.Delete(file);
+                        Console.WriteLine($"Deleted file: {file}");
+                    }
+
+                    // Delete all subdirectories and their contents
+                    foreach (string directory in Directory.GetDirectories(path))
+                    {
+                        Directory.Delete(directory, true);
+                        Console.WriteLine($"Deleted directory: {directory}");
+                    }
+
+                    Console.WriteLine("All contents deleted successfully, but the directory itself remains.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
+
         private static void Countdown(int time, string action, string worldNumber, int RCON_Port, string serverIp)
         {
             _ = InputForServer($"say Server will {action} in...", worldNumber, RCON_Port, serverIp);
@@ -360,5 +545,6 @@ namespace Server_General_Funcs
             return !isAvailable;
         }
 
+        //-------------------------------------------------------------------------------------
     }
 }

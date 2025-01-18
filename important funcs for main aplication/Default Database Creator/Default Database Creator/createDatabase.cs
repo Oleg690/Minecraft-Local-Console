@@ -43,6 +43,7 @@ namespace Default_Database_Creator
                         $"worldNumber text," +
                         $"name text," +
                         $"version text," +
+                        $"software text," +
                         $"totalPlayers text," +
                         $"rconPassword text" +
                         $")";

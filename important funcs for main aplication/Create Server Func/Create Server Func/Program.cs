@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Diagnostics.Tracing;
-using System.Reflection.Metadata;
+using System.Threading;
 using Server_General_Funcs;
 using serverPropriertiesChanger;
 using databaseChanger;
 using MinecraftServerStats;
 using fileExplorer;
-using System.Threading;
-using System.Diagnostics;
 
 namespace mainApp
 {
@@ -15,8 +12,23 @@ namespace mainApp
     {
         static void Main(string[] args)
         {
-            object[,] defaultSettings = {
-                { 32, "20" },
+            string currentDirectory = Directory.GetCurrentDirectory();
+            // string rootWorldsFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\worlds";
+            string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
+            string rootFolder = Path.GetDirectoryName(rootWorldsFolder);
+            string version = "1.21";
+            string worldNumber = "";
+            string worldName = "Moldova SMP";
+            string Software = "Vanilla"; // e.g. Vanilla or Forge
+            int totalPlayers = 20;
+            string ipAdress = "192.168.100.106";
+            int JMX_Port = 25562;
+            int RCON_Port = 25575;
+
+            int memoryAlocator = 5000; // in MB
+
+            object[,] worldSettings = {
+                { 32, $"{totalPlayers}" },
                 { 20, "Survival" },
                 { 9, "Normal" },
                 { 63, "false" },
@@ -32,27 +44,15 @@ namespace mainApp
                 { 58, "0" }
             };
 
-            string currentDirectory = Directory.GetCurrentDirectory();
-            // string rootWorldsFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\worlds";
-            string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory)))+ "\\worlds";
-            string version = "1.21";
-            string worldNumber = "241175006405";
-            string worldName = "Moldova SMP";
-            int totalPlayers = 20;
-            string ipAdress = "192.168.100.106";
-            int JMX_Port = 25562;
-            int RCON_Port = 25575;
-
-            int memoryAlocator = 5000; // in MB
-
-            // Create World Func
-            // worldNumber = serverCreator.CreateServerFunc(rootWorldsFolder, 12, version, worldName, totalPlayers, memoryAlocator);
-            // Console.WriteLine($"worldNumber={worldNumber}");
-
             string serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, worldNumber);
             string serverPath = System.IO.Path.Combine(serverDirectoryPath, version + ".jar");
             string serverLogPath = System.IO.Path.Combine(serverDirectoryPath, "logs\\latest.log");
             string serverPropriertiesPath = System.IO.Path.Combine(serverDirectoryPath, "server.proprierties");
+
+            // Create World Func
+            // worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, worldSettings, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
+            // Console.WriteLine($"worldNumber={worldNumber}");
+
 
             // Start Server Func
             // serverOperator.Start(serverPath, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
@@ -62,13 +62,18 @@ namespace mainApp
             // Send Server Command Func
             // _ = serverOperator.InputForServer("give OlegHD6900 diamond 64", worldNumber, RCON_Port, ipAdress);
 
+            // Server Stats Loop
             // while (true)
             // { 
             //     ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, ipAdress, JMX_Port, RCON_Port);
             //     Thread.Sleep(1000);
             // }
 
+            // Server Files Loop
             // List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
+
+            // Delete Server
+            // serverOperator.DeleteServer(worldNumber, serverDirectoryPath);
 
             Console.ReadKey();
         }
