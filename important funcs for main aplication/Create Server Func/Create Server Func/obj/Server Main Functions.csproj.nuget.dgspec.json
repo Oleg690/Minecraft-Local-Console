@@ -66,6 +66,10 @@
             "System.Data.SQLite": {
               "target": "Package",
               "version": "[1.0.119, )"
+            },
+            "System.Management": {
+              "target": "Package",
+              "version": "[9.0.1, )"
             }
           },
           "imports": [

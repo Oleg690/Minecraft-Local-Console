@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using com.sun.org.glassfish.gmbal;
 using java.beans;
 using MCQuery;
+using Server_General_Funcs;
 
 namespace MinecraftServerStats
 {
@@ -79,8 +80,13 @@ namespace MinecraftServerStats
         }
 
         // Method to get server uptime via latest.log
-        public static string GetServerUptime(string logFilePath)
+        public static string GetServerUptime(string logFilePath, string worldNumber)
         {
+            // Simulating database call to get software type
+            List<object[]> software = dbChanger.GetSpecificDataFunc($"SELECT software FROM worlds WHERE worldNumber = '{worldNumber}';");
+
+            string softwareType = software[0][0].ToString();
+
             try
             {
                 // Open the log file with FileShare.ReadWrite to allow other processes to access it
@@ -88,20 +94,51 @@ namespace MinecraftServerStats
                 using (var reader = new StreamReader(fileStream))
                 {
                     string line;
-                    // Regular expression to match the line where the server starts
-                    string pattern = @"\[\d{2}:\d{2}:\d{2}\] \[Server thread/INFO\]: Starting minecraft server version (\d+\.\d+)";
+                    Regex pattern = null;
+
+                    // Select the appropriate log pattern based on software type
+                    if (softwareType == "Vanilla")
+                    {
+                        pattern = new Regex(@"\[(\d{2}:\d{2}:\d{2})\] \[Server thread/INFO\]: Starting minecraft server version (\d+\.\d+)");
+                    }
+                    else if (softwareType == "Forge")
+                    {
+                        pattern = new Regex(@"\[(\d{2}[a-zA-Z]{3}\d{4} \d{2}:\d{2}:\d{2}\.\d{3})\] \[.*?/INFO\] \[.*?DedicatedServer.*?\]: Starting minecraft server version (\d+\.\d+)");
+                    }
+                    else
+                    {
+                        throw new Exception("Unsupported software type.");
+                    }
+
+                    // Read through the log file to find the start timestamp
                     while ((line = reader.ReadLine()) != null)
                     {
-                        var match = Regex.Match(line, pattern);
+                        var match = pattern.Match(line);
                         if (match.Success)
                         {
-                            // Parse the timestamp from the log file
-                            string timestampStr = line.Substring(1, 8);  // Extracts the HH:mm:ss part
-                            DateTime startTime = DateTime.ParseExact(timestampStr, "HH:mm:ss", null);
-                            DateTime currentTime = DateTime.Now;
+                            DateTime startTime;
 
-                            // Calculate uptime in seconds
+                            if (softwareType == "Vanilla")
+                            {
+                                // Parse timestamp for Vanilla
+                                string timestampStr = match.Groups[1].Value; // Extract "HH:mm:ss"
+                                startTime = DateTime.Today.Add(TimeSpan.Parse(timestampStr));
+                            }
+                            else if (softwareType == "Forge")
+                            {
+                                // Parse timestamp for Modded
+                                string timestampStr = match.Groups[1].Value; // Extract "ddMMMyyyy HH:mm:ss.fff"
+                                startTime = DateTime.ParseExact(timestampStr, "ddMMMyyyy HH:mm:ss.fff", null);
+                            }
+                            else
+                            {
+                                throw new Exception("Unhandled software type.");
+                            }
+
+                            // Calculate uptime
+                            DateTime currentTime = DateTime.Now;
                             TimeSpan uptime = currentTime - startTime;
+
                             return FormatTime((int)uptime.TotalSeconds);
                         }
                     }
@@ -118,37 +155,42 @@ namespace MinecraftServerStats
 
         public static void GetServerInfo(string worldFolderPath, string serverLogPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port)
         {
-            Console.WriteLine($"--------------------------------------------------");
-            // Get memory usage
-            var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port);
-            Console.WriteLine($"Memory Usage: {memoryUsage}");
+            if (serverOperator.IsPortInUse(JMX_Port) && serverOperator.IsPortInUse(RCON_Port))
+            {
+                Console.WriteLine($"--------------------------------------------------");
+                // Get memory usage
+                var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port);
+                Console.WriteLine($"Memory Usage: {memoryUsage}");
 
-            // Get world folder size
-            long worldSize = GetFolderSize(worldFolderPath);
-            Console.WriteLine($"World Folder Size: {worldSize / 1024.0 / 1024.0:F2} MB");
+                // Get world folder size
+                long worldSize = GetFolderSize(worldFolderPath);
+                Console.WriteLine($"World Folder Size: {worldSize / 1024.0 / 1024.0:F2} MB");
 
-            // Get online players
-            string PlayersResult = GetOnlinePlayersCount(ipAddress, 25565);
-            Console.WriteLine($"Players Online: {PlayersResult};");
+                // Get online players
+                string PlayersResult = GetOnlinePlayersCount(ipAddress, 25565);
+                Console.WriteLine($"Players Online: {PlayersResult};");
 
-            // Get server uptime
-            string upTime = GetServerUptime(serverLogPath);
-            Console.WriteLine($"UpTime: {upTime}");
-            Console.WriteLine($"--------------------------------------------------");
-            Console.WriteLine("");
+                // Get server uptime
+                string upTime = GetServerUptime(serverLogPath, worldNumber);
+                Console.WriteLine($"UpTime: {upTime}");
+                Console.WriteLine($"--------------------------------------------------");
+                Console.WriteLine("");
+            }
+            else
+            {
+                Console.WriteLine($"--------------------------------------------------");
+                Console.WriteLine("There is no server running!");
+                Console.WriteLine($"--------------------------------------------------");
+            }
         }
 
         //-------------------------------------------------------------------------------------------------------------------------------------------
-
-        private static string FormatTime(int seconds)
+        private static string FormatTime(int totalSeconds)
         {
-            // Calculate hours, minutes, and remaining seconds
-            int hours = seconds / 3600;
-            int minutes = (seconds % 3600) / 60;
-            int remainingSeconds = seconds % 60;
-
-            // Return the formatted string
-            return string.Format("{0:D2}h:{1:D2}m:{2:D2}s", hours, minutes, remainingSeconds);
+            int hours = totalSeconds / 3600;
+            int minutes = (totalSeconds % 3600) / 60;
+            int seconds = totalSeconds % 60;
+            return $"{hours:D2}:{minutes:D2}:{seconds:D2}";
         }
     }
 }

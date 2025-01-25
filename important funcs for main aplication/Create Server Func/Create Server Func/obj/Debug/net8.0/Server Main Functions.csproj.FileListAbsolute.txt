@@ -829,3 +829,5 @@ D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Creat
 D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\obj\Debug\net8.0\Server Main Functions.pdb
 D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\obj\Debug\net8.0\Server Main Functions.genruntimeconfig.cache
 D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\obj\Debug\net8.0\ref\Server Main Functions.dll
+D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\bin\Debug\net8.0\System.Management.dll
+D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Management.dll

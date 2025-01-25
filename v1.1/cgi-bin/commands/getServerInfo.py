@@ -95,8 +95,8 @@ def main():
     data['serverLogs'] = getServerLogs(logDirectory)
 
     #jar_name = "1.21.jar"
-    ##minecraft_process = get_minecraft_process(jar_name)
-    ##data['serverUpTime'] = getUpTime(minecraft_process)
+    #minecraft_process = get_minecraft_process(jar_name)
+    #data['serverUpTime'] = getUpTime(minecraft_process)
     #data['serverUpTime'] = start_clock()
 
     return data

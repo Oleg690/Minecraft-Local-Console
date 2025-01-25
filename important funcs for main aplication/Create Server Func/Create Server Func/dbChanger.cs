@@ -55,11 +55,11 @@ namespace databaseChanger
                 {
                     connection.Open();
 
-                    string selectQuery = $"SELECT id, worldNumber, name, version, totalPlayers FROM worlds WHERE worldNumber = {worldNumber};";
+                    string selectQuery = $"SELECT id, worldNumber, name, version, software, totalPlayers FROM worlds WHERE worldNumber = {worldNumber};";
 
                     if (verificator)
                     {
-                        selectQuery = $"SELECT id, worldNumber, name, version, totalPlayers, rconPassword FROM worlds WHERE worldNumber = {worldNumber};";
+                        selectQuery = $"SELECT id, worldNumber, name, version, software, totalPlayers, rconPassword FROM worlds WHERE worldNumber = {worldNumber};";
                     }
 
                     using (SQLiteCommand selectCommand = new(selectQuery, connection))

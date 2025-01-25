@@ -1,6 +1,11 @@
-﻿using System;
+﻿using com.sun.crypto.provider;
+using com.sun.org.apache.bcel.@internal.classfile;
+using jdk.nashorn.@internal.ir;
+using Microsoft.Extensions.DependencyModel.Resolution;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 
 namespace serverPropriertiesChanger
 {
@@ -39,57 +44,86 @@ namespace serverPropriertiesChanger
         }
 
         // Method to set information in a file
-        public static void SetInfo(object[,] settings, string filePath)
+        public static void SetInfo(object[,] settings, string filePath, bool hardWrite = false)
         {
             try
             {
                 // Validate if the file exists
                 if (!File.Exists(filePath))
                 {
+                    Console.WriteLine("filePath: " + filePath);
                     throw new FileNotFoundException("The specified file does not exist.");
                 }
 
                 List<string> lines = new(File.ReadAllLines(filePath));
-
                 // Process each setting to modify the file content
                 for (int i = 0; i < settings.GetLength(0); i++)
                 {
                     try
                     {
-                        int lineNumber = Convert.ToInt32(settings[i, 0]) - 1;
+                        int lineNumber = FindLineNumber(settings[i, 0].ToString(), lines);
 
-                        // Validate line number range
-                        if (lineNumber < 0 || lineNumber >= lines.Count)
+                        if (hardWrite && lineNumber == -1)
                         {
-                            throw new ArgumentOutOfRangeException($"Line number {lineNumber + 1} is out of bounds.");
+                            File.AppendAllText(filePath, $"{settings[i, 0].ToString()}={settings[i, 1].ToString()}" + Environment.NewLine);
+                            lines = new(File.ReadAllLines(filePath));
+                            lineNumber = FindLineNumber(settings[i, 0].ToString(), lines);
+                            Console.WriteLine($"Created line with number {lineNumber} with the content {settings[i, 0].ToString()}={settings[i, 1].ToString()};");
                         }
-
-                        string[] lineContents = lines[lineNumber].Split("=");
-
-                        // Validate line format (contains '=')
-                        if (lineContents.Length < 2)
+                        else
                         {
-                            throw new FormatException($"Line {lineNumber + 1} does not contain an '=' separator.");
-                        }
+                            string[] lineContents = lines[lineNumber].Split("=");
 
-                        string newContent = lineContents[0] + "=" + settings[i, 1].ToString();
-                        lines[lineNumber] = newContent;
+                            // Validate line number
+                            if (lineNumber > lines.Count)
+                            {
+                                throw new FormatException($"Line {lineNumber + 1} out of bound.");
+                            }
+                            else if (lineNumber < 0)
+                            {
+                                throw new FormatException($"No line found for the content nedeed.");
+                            }
+
+                            // Validate line format (contains '=')
+                            if (lineContents.Length < 2)
+                            {
+                                throw new FormatException($"Line {lineNumber + 1} does not contain an '=' separator.");
+                            }
+
+                            string oldContent = lines[lineNumber]; // For debugging
+                            string newContent = lineContents[0] + "=" + settings[i, 1].ToString();
+                            lines[lineNumber] = newContent;
+
+                            Console.WriteLine($"Line {lineNumber + 1} was changed from: {oldContent}; to: {newContent};");
+                        }
                     }
                     catch (Exception ex)
                     {
-                        // Log error for specific line
-                        Console.WriteLine($"Error at line {i + 1}: {ex.Message}");
+                        Console.WriteLine($"Error at line {i}: {ex.Message}");
                     }
                 }
 
-                // Write all lines back to the file after modification
                 File.WriteAllLines(filePath, lines);
+
+                Console.WriteLine($"Lines updated succeasfully!");
             }
             catch (Exception ex)
             {
                 // Handle general errors (file not found, reading/writing errors)
                 Console.WriteLine($"Error writing to the file: {ex.Message}");
             }
+        }
+
+        private static int FindLineNumber(string textToFind, List<string> lines)
+        {
+            for (int i = 0; i < lines.Count; i++)
+            {
+                if (lines[i].Contains(textToFind))
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 }
