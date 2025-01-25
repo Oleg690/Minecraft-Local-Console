@@ -149,8 +149,10 @@ namespace Server_General_Funcs
                         {
                             if (serverOperator.IsPortInUse(JMX_Port) || serverOperator.IsPortInUse(RCON_Port))
                             {
-                                serverOperator.Stop("stop", uniqueNumber, ipAddress, RCON_Port, JMX_Port, true);
+                                serverOperator.ClosePort(JMX_Port.ToString());
+                                serverOperator.ClosePort(RCON_Port.ToString());
                             }
+
                             AcceptEULA(destinationJarPath);
                             DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                             dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Vanilla", $"{version}", $"{totalPlayers}", $"{rconPassword}");
@@ -536,13 +538,14 @@ namespace Server_General_Funcs
         public static async Task InputForServer(string input, string worldNumber, int RCON_Port, string serverIp)
         {
             // Replace with your server details
-            ushort port = (ushort)RCON_Port;          // Default RCON port
+            ushort port = (ushort)RCON_Port; // RCON port
             string password = "";
             List<object[]> data = dbChanger.GetFunc(worldNumber, true);
 
             foreach (var row in data)
             {
                 password = (string)row[6]; // Your RCON password
+                Console.WriteLine("RCON Password");
             }
 
             try
@@ -739,11 +742,10 @@ namespace Server_General_Funcs
             }
         }
 
-        private static bool ClosePort(string port)
+        public static bool ClosePort(string port)
         {
             try
             {
-                // Step 1: Find the PID using netstat
                 string findPidCommand = $"netstat -ano | findstr :{port}";
                 string output = ExecuteCommand(findPidCommand);
 
@@ -753,16 +755,18 @@ namespace Server_General_Funcs
                     foreach (var line in lines)
                     {
                         string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        if (parts.Length > 4) // Ensure there are enough parts
+                        if (parts.Length > 4)
                         {
-                            string pid = parts[parts.Length - 1]; // PID is the last column
+                            string pid = parts[parts.Length - 1];
 
                             Console.WriteLine($"Found PID: {pid}");
 
-                            // Step 2: Kill the process using taskkill
                             string killCommand = $"taskkill /PID {pid} /F";
+                            Console.WriteLine("SMTH");
                             string killOutput = ExecuteCommand(killCommand);
 
+                            Console.WriteLine("Error!");
+                            
                             if (!string.IsNullOrWhiteSpace(killOutput) && !killOutput.Contains("Error"))
                             {
                                 Console.WriteLine($"Successfully terminated process with PID {pid}.");
