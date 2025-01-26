@@ -21,6 +21,8 @@ using System.Net.NetworkInformation;
 using System.Linq;
 using com.sun.tools.@internal.xjc.reader.gbind;
 using com.sun.xml.@internal.ws.message;
+using sun.tools.jar.resources;
+using javax.sound.midi;
 
 namespace Server_General_Funcs
 {
@@ -161,7 +163,7 @@ namespace Server_General_Funcs
 
                     process.WaitForExit();
                     Console.WriteLine("Starting minecraft server.");
-                    
+
                     DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
                     serverOperator.Start(uniqueNumber, destinationJarPath, processMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
                 }
@@ -250,15 +252,29 @@ namespace Server_General_Funcs
                 }
 
 
-
                 dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Forge", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                 Console.WriteLine("Installation completed!");
 
                 File.Delete(forgeJarPath);
-                File.Delete(customDirectory + "\\run.bat");
-                File.Delete(customDirectory + "\\run.sh");
 
-                serverOperator.Start(uniqueNumber, System.IO.Path.Combine(customDirectory, "libraries"), ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                if (File.Exists(customDirectory + "\\run.bat"))
+                {
+                    File.Delete(customDirectory + "\\run.bat");
+                }
+                if (File.Exists(customDirectory + "\\run.sh"))
+                {
+                    File.Delete(customDirectory + "\\run.sh");
+                }
+                if (File.Exists(customDirectory + "\\user_jvm_args.txt"))
+                {
+                    File.Delete(customDirectory + "\\user_jvm_args.txt");
+                }
+                if (File.Exists(customDirectory + "\\installer.log"))
+                {
+                    File.Delete(customDirectory + "\\installer.log");
+                }
+
+                serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
                 string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
                 string serverPropertiesPresetPath = "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Preset Files\\server.properties";
@@ -271,9 +287,10 @@ namespace Server_General_Funcs
                 AcceptEULA(forgeJarPath);
 
                 DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-                DataChanger.SetInfo(worldSettings, serverPropertiesPath);
+                DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                serverOperator.Start(uniqueNumber, System.IO.Path.Combine(customDirectory, "libraries"), ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                //serverOperator.Start(uniqueNumber, System.IO.Path.Combine(customDirectory, "libraries"), ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
             }
             catch (Exception ex)
             {
@@ -423,6 +440,12 @@ namespace Server_General_Funcs
                 Thread.Sleep(1000);
             }
 
+            string JMX_Server_Settings = $"-Dcom.sun.management.jmxremote " +
+                                         $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
+                                         $"-Dcom.sun.management.jmxremote.authenticate=false " +
+                                         $"-Dcom.sun.management.jmxremote.ssl=false " +
+                                         $"-Djava.rmi.server.hostname={ipAddress} "; // Replace with actual server IP if necessary
+
             List<object[]> software = dbChanger.GetSpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';");
 
             ProcessStartInfo? serverProcessInfo = null;
@@ -436,11 +459,7 @@ namespace Server_General_Funcs
                     {
                         FileName = "java",
                         Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " + // nogui
-                                    $"-Dcom.sun.management.jmxremote " +
-                                    $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
-                                    $"-Dcom.sun.management.jmxremote.authenticate=false " +
-                                    $"-Dcom.sun.management.jmxremote.ssl=false " +
-                                    $"-Djava.rmi.server.hostname={ipAddress} " + // Replace with actual server IP if necessary
+                                    JMX_Server_Settings +
                                     $"-jar \"{serverPath}\"",
                         RedirectStandardInput = true,
                         RedirectStandardOutput = true,
@@ -453,20 +472,38 @@ namespace Server_General_Funcs
                 case "Forge":
                     Console.WriteLine("Starting Forge Server!");
 
-                    serverPath = System.IO.Path.GetDirectoryName(serverPath);
-                    string closestMatch = FindClosestJarFile(serverPath, "forge-");
+                    if (System.IO.Path.GetFileName(serverPath).Contains(".jar"))
+                    {
+                        serverPath = System.IO.Path.GetDirectoryName(serverPath);
+                    }
+
+                    string winArgsPath = FindFileInFolder(System.IO.Path.Combine(serverPath, "libraries"), "win_args.txt");
+
+                    if (winArgsPath != "")
+                    {
+                        winArgsPath = $"@\"{winArgsPath}\" ";
+                    }
+
+                    string toRunJarFile = "";
+
+                    toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
+
+                    if (toRunJarFile == null)
+                    {
+                        toRunJarFile = FindClosestJarFile(serverPath, "forge-");
+                    }
+                    if (toRunJarFile == null)
+                    {
+                        Console.WriteLine("No server file found");
+                    }
 
                     serverProcessInfo = new ProcessStartInfo
                     {
                         FileName = "java",
                         Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
-                                    $"-Dcom.sun.management.jmxremote " +
-                                    $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
-                                    $"-Dcom.sun.management.jmxremote.authenticate=false " +
-                                    $"-Dcom.sun.management.jmxremote.ssl=false " +
-                                    $"-Djava.rmi.server.hostname={ipAddress} " + // Replace with actual server IP if necessary
-                                    $"@\"{serverPath}\\libraries\\net\\minecraftforge\\forge\\{ExtractVersion(closestMatch)}\\win_args.txt\" " +
-                                    $"-jar \"{serverPath}\\{closestMatch}\"",
+                                    JMX_Server_Settings +
+                                    $"{winArgsPath}" +
+                                    $"{toRunJarFile} %*", // nogui
                         RedirectStandardInput = true,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
@@ -512,14 +549,14 @@ namespace Server_General_Funcs
             }
         }
 
-        public static void Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, int JMX_Port, bool instantStop = false)
+        public static async void Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, int JMX_Port, bool instantStop = false)
         {
             if (!instantStop)
             {
                 Countdown(5, operation, worldNumber, RCON_Port, ipAddress);
             }
 
-            _ = InputForServer("stop", worldNumber, RCON_Port, ipAddress);
+            await InputForServer("stop", worldNumber, RCON_Port, ipAddress);
 
             bool RCON_Port_Closed = ClosePort(RCON_Port.ToString());
             bool JMX_Port_Closed = ClosePort(JMX_Port.ToString());
@@ -684,7 +721,8 @@ namespace Server_General_Funcs
                     }
                 }
 
-                return bestMatch; // Return the best matching file name
+                return $"-jar \"{folderPath}\\{bestMatch}\"";
+
             }
             catch (Exception ex)
             {
@@ -762,11 +800,8 @@ namespace Server_General_Funcs
                             Console.WriteLine($"Found PID: {pid}");
 
                             string killCommand = $"taskkill /PID {pid} /F";
-                            Console.WriteLine("SMTH");
                             string killOutput = ExecuteCommand(killCommand);
 
-                            Console.WriteLine("Error!");
-                            
                             if (!string.IsNullOrWhiteSpace(killOutput) && !killOutput.Contains("Error"))
                             {
                                 Console.WriteLine($"Successfully terminated process with PID {pid}.");
@@ -822,6 +857,26 @@ namespace Server_General_Funcs
             catch (Exception ex)
             {
                 return $"Exception: {ex.Message}";
+            }
+        }
+
+        private static string FindFileInFolder(string folderPath, string fileName)
+        {
+            try
+            {
+                string[] files = Directory.GetFiles(folderPath, fileName, SearchOption.AllDirectories);
+
+                return files.Length > 0 ? files[0] : "";
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine($"Access denied to folder: {folderPath}. Error: {ex.Message}");
+                return "";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return "";
             }
         }
 

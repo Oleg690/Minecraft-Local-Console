@@ -17,11 +17,11 @@ namespace mainApp
             // e.g. string rootWorldsFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\worlds";
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
-            string version = "";  // e.g. 1.21
-            string worldNumber = "";
+            string version = "1.21";  // e.g. 1.21
+            string worldNumber = "823659724973";
             string worldName = "Moldova SMP";
-            string Software = ""; // e.g. Vanilla or Forge
-            int totalPlayers = 25;
+            string Software = "Vanilla"; // e.g. Vanilla or Forge
+            int totalPlayers = 15;
             string ExternalIPAdress = "127.0.0.1";
             string ipAdress = "192.168.100.106"; // "0.0.0.0"
             int JMX_Port = 25562;
@@ -53,7 +53,6 @@ namespace mainApp
 
             // ↓ Create World Func ↓
             //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
-            //Console.WriteLine($"worldNumber={worldNumber}");
 
             // ↓ Start Server Func ↓
             //serverOperator.Start(worldNumber, serverPath, memoryAlocator, ipAdress, JMX_Port, RCON_Port);

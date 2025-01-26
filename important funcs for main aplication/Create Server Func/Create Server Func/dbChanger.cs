@@ -121,7 +121,7 @@ namespace databaseChanger
                     connection.Close();
                 }
             }
-            Console.WriteLine("Done!");
+            Console.WriteLine("Data set succeasfully to database!");
         }
 
         public static void deleteWorldFromDB(string worldNumber)
