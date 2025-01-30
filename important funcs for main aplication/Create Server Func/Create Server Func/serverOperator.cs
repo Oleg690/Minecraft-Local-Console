@@ -30,7 +30,6 @@ namespace Server_General_Funcs
     {
         public static string CreateServerFunc(string rootFolder, string rootWorldsFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port)
         {
-            // string rootFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func";
             string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
 
             // Path to the custom directory where server files will be stored
@@ -92,8 +91,7 @@ namespace Server_General_Funcs
             return uniqueNumber;
         }
 
-        //-------------------------------------------------------------------------------------
-        // Main Server Type Installators
+        // ------------------------ Main Server Type Installators ------------------------
         private static void VanillaServerInitialisation(string customDirectory, string destinationJarPath, object[,] rconSettings, object[,] worldSettings, int processMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port)
         {
             // Set up the process to run the server
@@ -179,7 +177,7 @@ namespace Server_General_Funcs
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
                 FileName = "java",
-                Arguments = $"-jar \"{forgeJarPath}\" --installServer", // nogui
+                Arguments = $"-jar \"{forgeJarPath}\" --installServer",
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -257,27 +255,24 @@ namespace Server_General_Funcs
 
                 File.Delete(forgeJarPath);
 
-                if (File.Exists(customDirectory + "\\run.bat"))
+                object[,] filesToDelete = {
+                { "run.bat", "run.sh", "user_jvm_args.txt", "installer.log"}
+                };
+
+                foreach (var file in filesToDelete)
                 {
-                    File.Delete(customDirectory + "\\run.bat");
-                }
-                if (File.Exists(customDirectory + "\\run.sh"))
-                {
-                    File.Delete(customDirectory + "\\run.sh");
-                }
-                if (File.Exists(customDirectory + "\\user_jvm_args.txt"))
-                {
-                    File.Delete(customDirectory + "\\user_jvm_args.txt");
-                }
-                if (File.Exists(customDirectory + "\\installer.log"))
-                {
-                    File.Delete(customDirectory + "\\installer.log");
+                    if (File.Exists(customDirectory + $"\\{file}"))
+                    {
+                        File.Delete(customDirectory + $"\\{file}");
+                    }
                 }
 
                 serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                
+                string currentDirectory = Directory.GetCurrentDirectory();
 
                 string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Preset Files\\server.properties";
+                string serverPropertiesPresetPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
                 if (!File.Exists(serverPropertiesPath))
                 {
                     File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
@@ -289,7 +284,6 @@ namespace Server_General_Funcs
                 DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                //serverOperator.Start(uniqueNumber, System.IO.Path.Combine(customDirectory, "libraries"), ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
                 serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
             }
             catch (Exception ex)
@@ -298,8 +292,7 @@ namespace Server_General_Funcs
             }
         }
 
-        //-------------------------------------------------------------------------------------
-        // Help Functions
+        // -------------------------------- Help Functions --------------------------------
         private static void AcceptEULA(string jarFilePath)
         {
             string serverDir = System.IO.Path.GetDirectoryName(jarFilePath);
@@ -427,11 +420,12 @@ namespace Server_General_Funcs
             return new string(passwordArray);
         }
 
-        //-------------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------
     }
 
     class serverOperator
     {
+        // ------------------------- Main Server Operator Commands -------------------------
         public static void Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port)
         {
             while (IsPortInUse(RCON_Port) || IsPortInUse(JMX_Port))
@@ -572,6 +566,15 @@ namespace Server_General_Funcs
             Start(worldNumber, serverPath, processMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
         }
 
+        public static void Kill(int RCON_Port, int JMX_Port)
+        {
+            bool RCON_Port_Closed = ClosePort(RCON_Port.ToString());
+            bool JMX_Port_Closed = ClosePort(JMX_Port.ToString());
+
+            Console.WriteLine("JMX_Port_Closed: " + JMX_Port_Closed);
+            Console.WriteLine("RCON_Port_Closed: " + RCON_Port_Closed);
+        }
+
         public static async Task InputForServer(string input, string worldNumber, int RCON_Port, string serverIp)
         {
             // Replace with your server details
@@ -582,7 +585,6 @@ namespace Server_General_Funcs
             foreach (var row in data)
             {
                 password = (string)row[6]; // Your RCON password
-                Console.WriteLine("RCON Password");
             }
 
             try
@@ -619,8 +621,7 @@ namespace Server_General_Funcs
             DeleteFiles(serverDirectoryPath, deleteWholeDirectory);
         }
 
-        //-------------------------------------------------------------------------------------
-        // Help Functions
+        // -------------------------------- Help Functions --------------------------------
         private static void DeleteFiles(string path, bool deleteWholeDirectory)
         {
             try
@@ -751,35 +752,6 @@ namespace Server_General_Funcs
             return matchLength;
         }
 
-        private static string ExtractVersion(string fileName)
-        {
-            try
-            {
-                // Ensure the file name starts with "forge-" and ends with ".jar"
-                if (!fileName.StartsWith("forge-") || !fileName.EndsWith(".jar"))
-                {
-                    return null; // Not a valid format
-                }
-
-                // Remove "forge-" prefix and ".jar" suffix
-                string trimmed = fileName.Substring(6, fileName.Length - 10);
-
-                // Split by "-" and return the first two parts joined by "-"
-                string[] parts = trimmed.Split('-');
-                if (parts.Length >= 2)
-                {
-                    return $"{parts[0]}-{parts[1]}"; // Combine the two parts
-                }
-
-                return null; // Version not found
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                return null;
-            }
-        }
-
         public static bool ClosePort(string port)
         {
             try
@@ -880,6 +852,6 @@ namespace Server_General_Funcs
             }
         }
 
-        //-------------------------------------------------------------------------------------
+        // --------------------------------------------------------------------------------
     }
 }

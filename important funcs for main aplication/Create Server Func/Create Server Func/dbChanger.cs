@@ -13,7 +13,8 @@ namespace databaseChanger
         {
             List<object[]> data = [];
 
-            string dbPath = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\database\worlds.db";
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
             string connectionString = $"Data Source={dbPath};Version=3;";
 
             using (SQLiteConnection connection = new(connectionString))
@@ -46,7 +47,8 @@ namespace databaseChanger
         {
             List<object[]> data = [];
 
-            string dbPath = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\database\worlds.db";
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
             string connectionString = $"Data Source={dbPath};Version=3;";
 
             using (SQLiteConnection connection = new(connectionString))
@@ -84,7 +86,8 @@ namespace databaseChanger
         public static void SetFunc(string worldNumber, string worldName, string Software, string version, string totalPlayers, string rconPassword)
         {
             // Specify the full path for the database file
-            string dbPath = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\database\worlds.db";
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
 
             // Ensure the directory exists
             string directory = Path.GetDirectoryName(dbPath);
@@ -127,7 +130,8 @@ namespace databaseChanger
         public static void deleteWorldFromDB(string worldNumber)
         {
             // Specify the full path for the database file
-            string dbPath = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\database\worlds.db";
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
 
             // Ensure the directory exists
             string directory = Path.GetDirectoryName(dbPath);

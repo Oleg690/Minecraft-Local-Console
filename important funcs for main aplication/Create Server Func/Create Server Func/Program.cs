@@ -17,10 +17,10 @@ namespace mainApp
             // e.g. string rootWorldsFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\worlds";
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
-            string version = "1.21";  // e.g. 1.21
-            string worldNumber = "823659724973";
+            string version = "1.8.8";  // e.g. 1.21
+            string worldNumber = "813272034929";
             string worldName = "Moldova SMP";
-            string Software = "Vanilla"; // e.g. Vanilla or Forge
+            string Software = "Forge"; // e.g. Vanilla or Forge
             int totalPlayers = 15;
             string ExternalIPAdress = "127.0.0.1";
             string ipAdress = "192.168.100.106"; // "0.0.0.0"
@@ -58,10 +58,11 @@ namespace mainApp
             //serverOperator.Start(worldNumber, serverPath, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
             //serverOperator.Stop("stop", worldNumber, ipAdress, RCON_Port, JMX_Port);
             //serverOperator.Restart(serverPath, worldNumber, memoryAlocator, ipAdress, RCON_Port, JMX_Port);
+            //serverOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
-            //_ = serverOperator.InputForServer("give OlegHD6900 diamond 64", worldNumber, RCON_Port, ipAdress);
-            //_ = serverOperator.InputForServer("op OlegHD6900", worldNumber, RCON_Port, ipAdress);
+            //_ = serverOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, ipAdress);
+            //_ = serverOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, ipAdress);
 
             // ↓ Server Stats Loop ↓
             //while (true)
