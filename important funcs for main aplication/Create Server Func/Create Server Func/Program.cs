@@ -17,11 +17,11 @@ namespace mainApp
             // e.g. string rootWorldsFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\worlds";
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
-            string version = "1.8.8";  // e.g. 1.21
-            string worldNumber = "813272034929";
+            string version = "1.21";  // e.g. 1.21
+            string worldNumber = "";
             string worldName = "Moldova SMP";
-            string Software = "Forge"; // e.g. Vanilla or Forge
-            int totalPlayers = 15;
+            string Software = "Vanilla"; // e.g. Vanilla or Forge
+            int totalPlayers = 20;
             string ExternalIPAdress = "127.0.0.1";
             string ipAdress = "192.168.100.106"; // "0.0.0.0"
             int JMX_Port = 25562;
@@ -50,19 +50,24 @@ namespace mainApp
             string serverPath = System.IO.Path.Combine(serverDirectoryPath, version + ".jar");
             string serverLogPath = System.IO.Path.Combine(serverDirectoryPath, "logs\\latest.log");
             string serverPropriertiesPath = System.IO.Path.Combine(serverDirectoryPath, "server.properties");
+            string serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions");
+            string tempFolderPath = System.IO.Path.Combine(rootFolder, "temp");
 
             // ↓ Create World Func ↓
             //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
 
             // ↓ Start Server Func ↓
             //serverOperator.Start(worldNumber, serverPath, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
-            //serverOperator.Stop("stop", worldNumber, ipAdress, RCON_Port, JMX_Port);
+            //serverOperator.Stop("stop", worldNumber, ipAdress, RCON_Port, JMX_Port, true);
             //serverOperator.Restart(serverPath, worldNumber, memoryAlocator, ipAdress, RCON_Port, JMX_Port);
             //serverOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
             //_ = serverOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, ipAdress);
             //_ = serverOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, ipAdress);
+
+            // ↓ Change Version Func ↓
+            //serverOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
 
             // ↓ Server Stats Loop ↓
             //while (true)

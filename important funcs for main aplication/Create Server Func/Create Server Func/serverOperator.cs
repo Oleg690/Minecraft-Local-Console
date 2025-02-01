@@ -23,23 +23,29 @@ using com.sun.tools.@internal.xjc.reader.gbind;
 using com.sun.xml.@internal.ws.message;
 using sun.tools.jar.resources;
 using javax.sound.midi;
+using javax.xml.crypto;
+using sun.security.util;
 
 namespace Server_General_Funcs
 {
     class serverCreator
     {
-        public static string CreateServerFunc(string rootFolder, string rootWorldsFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port)
+        public static string CreateServerFunc(string rootFolder, string rootWorldsFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
         {
             string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
 
-            // Path to the custom directory where server files will be stored
+            if (worldNumber != null)
+            {
+                uniqueNumber = worldNumber;
+            }
+
             string customDirectory = System.IO.Path.Combine(rootWorldsFolder, uniqueNumber);
 
             Directory.CreateDirectory(customDirectory);
             Console.WriteLine($"Created server directory: {customDirectory}");
 
-            // Path to the Minecraft server .jar file
             string jarFoldersPath = rootFolder;
+
             switch (software)
             {
                 case "Vanilla":
@@ -53,22 +59,29 @@ namespace Server_General_Funcs
             string versionName = version + ".jar";
             string jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
 
-            // Check if the jar file exists
             if (!System.IO.File.Exists(jarFilePath))
             {
                 Console.WriteLine("Server .jar file not found! Check the path.");
             }
 
-            // Copy the .jar file to the unique folder
             string destinationJarPath = System.IO.Path.Combine(customDirectory, versionName);
 
             File.Copy(jarFilePath, destinationJarPath);
             Console.WriteLine("Server .jar file copied to the custom directory.");
-
-            // RCON Password Generator
+            
             string rconPassword = generatePassword(20);
 
-            // RCON Settings array
+            if (worldNumber != null)
+            {
+                List<object[]> data = dbChanger.GetFunc(worldNumber, true);
+
+                foreach (var row in data)
+                {
+                    rconPassword = (string)row[6]; // Your RCON password
+                    Console.WriteLine("Password: " + rconPassword);
+                }
+            }
+
             object[,] rconSettings = {
                 { "enable-rcon", "true" },
                 { "rcon.password", $"{rconPassword}" },
@@ -78,27 +91,26 @@ namespace Server_General_Funcs
             };
 
             Console.WriteLine($"{software} Server");
-
             if (software == "Vanilla")
             {
-                VanillaServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port);
+                VanillaServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB, Auto_Stop_After_Start);
             }
             else if (software == "Forge")
             {
-                ForgeServerInitialisation(destinationJarPath, customDirectory, uniqueNumber, worldName, version, totalPlayers, rconPassword, worldSettings, rconSettings, ipAddress, JMX_Port, RCON_Port, ProcessMemoryAlocation);
+                ForgeServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB, Auto_Stop_After_Start);
             }
 
             return uniqueNumber;
         }
 
         // ------------------------ Main Server Type Installators ------------------------
-        private static void VanillaServerInitialisation(string customDirectory, string destinationJarPath, object[,] rconSettings, object[,] worldSettings, int processMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port)
+        private static void VanillaServerInitialisation(string customDirectory, string destinationJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB, bool Auto_Stop_After_Start)
         {
             // Set up the process to run the server
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
                 FileName = "java",
-                Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " + // nogui
+                Arguments = $"-Xmx{ProcessMemoryAlocation}M -Xms{ProcessMemoryAlocation}M " + // nogui
                                     $"-Dcom.sun.management.jmxremote " +
                                     $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
                                     $"-Dcom.sun.management.jmxremote.authenticate=false " +
@@ -155,7 +167,10 @@ namespace Server_General_Funcs
 
                             AcceptEULA(destinationJarPath);
                             DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-                            dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Vanilla", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                            if (Insert_Into_DB)
+                            {
+                                dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Vanilla", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                            }
                         }
                     }
 
@@ -163,7 +178,11 @@ namespace Server_General_Funcs
                     Console.WriteLine("Starting minecraft server.");
 
                     DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
-                    serverOperator.Start(uniqueNumber, destinationJarPath, processMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+
+                    if (Server_Auto_Start)
+                    {
+                        serverOperator.Start(uniqueNumber, destinationJarPath, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, Auto_Stop_After_Start);
+                    }
                 }
             }
             catch (Exception ex)
@@ -172,7 +191,7 @@ namespace Server_General_Funcs
             }
         }
 
-        private static void ForgeServerInitialisation(string forgeJarPath, string customDirectory, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, object[,] worldSettings, object[,] rconSettings, string ipAddress, int JMX_Port, int RCON_Port, int ProcessMemoryAlocation)
+        private static void ForgeServerInitialisation(string customDirectory, string forgeJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword,  string ipAddress, int JMX_Port, int RCON_Port,  bool Server_Auto_Start, bool Insert_Into_DB, bool Auto_Stop_After_Start)
         {
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
@@ -249,8 +268,10 @@ namespace Server_General_Funcs
                     process.WaitForExit();
                 }
 
-
-                dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Forge", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                if (Insert_Into_DB)
+                {
+                    dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Forge", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                }
                 Console.WriteLine("Installation completed!");
 
                 File.Delete(forgeJarPath);
@@ -268,7 +289,7 @@ namespace Server_General_Funcs
                 }
 
                 serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
-                
+
                 string currentDirectory = Directory.GetCurrentDirectory();
 
                 string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
@@ -278,13 +299,15 @@ namespace Server_General_Funcs
                     File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
                     Console.WriteLine("Created missing server.properties file.");
                 }
-
                 AcceptEULA(forgeJarPath);
 
                 DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                if (Server_Auto_Start)
+                {
+                    serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, Auto_Stop_After_Start);
+                }
             }
             catch (Exception ex)
             {
@@ -426,7 +449,7 @@ namespace Server_General_Funcs
     class serverOperator
     {
         // ------------------------- Main Server Operator Commands -------------------------
-        public static void Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port)
+        public static void Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Auto_Stop = false)
         {
             while (IsPortInUse(RCON_Port) || IsPortInUse(JMX_Port))
             {
@@ -518,11 +541,20 @@ namespace Server_General_Funcs
                 Console.WriteLine("Minecraft server started!");
 
                 //          ↓ For output traking ↓
-                process.OutputDataReceived += (sender, e) =>
+                process.OutputDataReceived += async (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
-                    {
+                    {   
                         Console.WriteLine($"{e.Data}"); // For debugging
+
+                        if (e.Data.Contains("You need to agree to the EULA"))
+                        {
+                            Kill(RCON_Port, JMX_Port);
+                        }
+                        if (Auto_Stop == true && e.Data.Contains("RCON running on"))
+                        {
+                            await Stop("stop", worldNumber, ipAddress, RCON_Port, JMX_Port, true);
+                        }
                     }
                 };
 
@@ -543,7 +575,7 @@ namespace Server_General_Funcs
             }
         }
 
-        public static async void Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, int JMX_Port, bool instantStop = false)
+        public static async Task Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, int JMX_Port, bool instantStop = false)
         {
             if (!instantStop)
             {
@@ -612,6 +644,46 @@ namespace Server_General_Funcs
             }
         }
 
+        public static async void ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port)
+        {
+            string rootWorldsFolder = System.IO.Path.Combine(rootFolder, "worlds");
+
+            string rootWorldFilesFolder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(tempFolderPath), $"worlds\\{worldNumber}\\world");
+
+            Console.WriteLine("Copying world...");
+            CopyFiles("region", tempFolderPath, rootWorldFilesFolder);
+            CopyFiles("DIM-1", tempFolderPath, rootWorldFilesFolder);
+            CopyFiles("DIM1", tempFolderPath, rootWorldFilesFolder);
+
+            DeleteFiles(worldPath, false);
+
+            dbChanger.GetSpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
+
+            Console.WriteLine("Creating New Server...");
+            serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+
+            //object[,] filesToDelete = {
+            //    { "region", "DIM-1", "DIM1"}
+            //    };
+
+            object[,] filesToDelete = {
+                { "region" }
+                };
+
+            foreach (string file in filesToDelete)
+            {
+                string deletedFolderPath = DeleteFolderAndReturnPath(System.IO.Path.Combine(rootWorldFilesFolder, file));
+
+                if (!string.IsNullOrEmpty(deletedFolderPath))
+                {
+                    Directory.CreateDirectory(deletedFolderPath);
+                    CopyFolderToDirectory(System.IO.Path.Combine(tempFolderPath, file), deletedFolderPath);
+                }
+            }
+
+            DeleteFiles(tempFolderPath, false);
+        }
+
         public static void DeleteServer(string worldNumber, string serverDirectoryPath, bool deleteFromDB = true, bool deleteWholeDirectory = true)
         {
             if (deleteFromDB)
@@ -622,7 +694,54 @@ namespace Server_General_Funcs
         }
 
         // -------------------------------- Help Functions --------------------------------
-        private static void DeleteFiles(string path, bool deleteWholeDirectory)
+
+        private static string DeleteFolderAndReturnPath(string folderPath)
+        {
+            if (Directory.Exists(folderPath))
+            {
+                Directory.Delete(folderPath, true); // Delete folder and all contents
+                Console.WriteLine($"Folder '{folderPath}' deleted successfully.");
+                return folderPath; // Return the deleted folder path
+            }
+            else
+            {
+                Console.WriteLine($"Folder '{folderPath}' not found.");
+                return string.Empty; // Return empty string if not found
+            }
+        }
+
+        private static void CopyFolderToDirectory(string sourceFolder, string destinationFolder)
+        {
+            if (!Directory.Exists(sourceFolder))
+            {
+                Console.WriteLine($"Folder '{sourceFolder}' not found.");
+                return;
+            }
+
+            CopyAll(new DirectoryInfo(sourceFolder), new DirectoryInfo(destinationFolder));
+            Console.WriteLine($"Folder '{sourceFolder}' copied to '{destinationFolder}'.");
+        }
+
+        private static void CopyAll(DirectoryInfo source, DirectoryInfo target)
+        {
+            Directory.CreateDirectory(target.FullName); // Ensure target directory exists
+
+            // Copy each file in the folder
+            foreach (FileInfo file in source.GetFiles())
+            {
+                string destFilePath = System.IO.Path.Combine(target.FullName, file.Name);
+                file.CopyTo(destFilePath, true);
+            }
+
+            // Copy each subdirectory
+            foreach (DirectoryInfo subDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(subDir.Name);
+                CopyAll(subDir, nextTargetSubDir); // Recursively copy subdirectories
+            }
+        }
+
+        private static void DeleteFiles(string path, bool deleteWholeDirectory = true)
         {
             try
             {
@@ -849,6 +968,34 @@ namespace Server_General_Funcs
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
                 return "";
+            }
+        }
+
+        private static void CopyFiles(string folderName, string destinationDir, string rootDir)
+        {
+            Console.WriteLine(folderName);
+            Console.WriteLine(destinationDir);
+            Console.WriteLine(rootDir);
+
+            string[] directories = Directory.GetDirectories(rootDir, folderName, SearchOption.AllDirectories);
+
+            if (directories.Length == 0)
+            {
+                Console.WriteLine($"Folder '{folderName}' was NOT found inside '{rootDir}'.");
+                return;
+            }
+
+            string sourcePath = directories[0]; // Take the first found match
+            string destinationPath = System.IO.Path.Combine(destinationDir, folderName);
+
+            Directory.CreateDirectory(destinationPath); // Ensure destination exists
+
+            foreach (string file in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                string relativePath = file.Substring(sourcePath.Length + 1); // Get relative path
+                string destFile = System.IO.Path.Combine(destinationPath, relativePath);
+                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFile)); // Ensure subdirectory exists
+                File.Copy(file, destFile, true); // Copy file
             }
         }
 
