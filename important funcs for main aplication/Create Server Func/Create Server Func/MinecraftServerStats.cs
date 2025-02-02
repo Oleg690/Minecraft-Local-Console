@@ -19,10 +19,39 @@ namespace MinecraftServerStats
 {
     class ServerStats
     {
-        private static readonly HashSet<string> OnlinePlayers = new HashSet<string>();
+        public static void GetServerInfo(string worldFolderPath, string serverLogPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port)
+        {
+            if (serverOperator.IsPortInUse(JMX_Port) && serverOperator.IsPortInUse(RCON_Port))
+            {
+                Console.WriteLine($"--------------------------------------------------");
+                // Get memory usage
+                var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port);
+                Console.WriteLine($"Memory Usage: {memoryUsage}");
+
+                // Get world folder size
+                long worldSize = GetFolderSize(worldFolderPath);
+                Console.WriteLine($"World Folder Size: {worldSize / 1024.0 / 1024.0:F2} MB");
+
+                // Get online players
+                string PlayersResult = GetOnlinePlayersCount(ipAddress, 25565);
+                Console.WriteLine($"Players Online: {PlayersResult};");
+
+                // Get server uptime
+                string upTime = GetServerUptime(serverLogPath, worldNumber);
+                Console.WriteLine($"UpTime: {upTime}");
+                Console.WriteLine($"--------------------------------------------------");
+                Console.WriteLine("");
+            }
+            else
+            {
+                Console.WriteLine($"--------------------------------------------------");
+                Console.WriteLine("There is no server running!");
+                Console.WriteLine($"--------------------------------------------------");
+            }
+        }
 
         // Method to get memory usage of Minecraft server
-        public static string GetUsedHeapMemory(string host, int port)
+        private static string GetUsedHeapMemory(string host, int port)
         {
             try
             {
@@ -59,7 +88,7 @@ namespace MinecraftServerStats
         }
 
         // Method to get folder size of the Minecraft world
-        public static long GetFolderSize(string folderPath)
+        private static long GetFolderSize(string folderPath)
         {
             var directoryInfo = new DirectoryInfo(folderPath);
             long totalSize = directoryInfo.GetFiles("*", SearchOption.AllDirectories).Sum(file => file.Length);
@@ -67,7 +96,7 @@ namespace MinecraftServerStats
         }
 
         // Method to get list of online players via CoreRCON
-        public static string GetOnlinePlayersCount(string address, int port)
+        private static string GetOnlinePlayersCount(string address, int port)
         {
             MCServer server = new MCServer(address, port);
             ServerStatus status = server.Status();
@@ -80,7 +109,7 @@ namespace MinecraftServerStats
         }
 
         // Method to get server uptime via latest.log
-        public static string GetServerUptime(string logFilePath, string worldNumber)
+        private static string GetServerUptime(string logFilePath, string worldNumber)
         {
             // Simulating database call to get software type
             List<object[]> software = dbChanger.GetSpecificDataFunc($"SELECT software FROM worlds WHERE worldNumber = '{worldNumber}';");
@@ -153,38 +182,7 @@ namespace MinecraftServerStats
             }
         }
 
-        public static void GetServerInfo(string worldFolderPath, string serverLogPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port)
-        {
-            if (serverOperator.IsPortInUse(JMX_Port) && serverOperator.IsPortInUse(RCON_Port))
-            {
-                Console.WriteLine($"--------------------------------------------------");
-                // Get memory usage
-                var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port);
-                Console.WriteLine($"Memory Usage: {memoryUsage}");
-
-                // Get world folder size
-                long worldSize = GetFolderSize(worldFolderPath);
-                Console.WriteLine($"World Folder Size: {worldSize / 1024.0 / 1024.0:F2} MB");
-
-                // Get online players
-                string PlayersResult = GetOnlinePlayersCount(ipAddress, 25565);
-                Console.WriteLine($"Players Online: {PlayersResult};");
-
-                // Get server uptime
-                string upTime = GetServerUptime(serverLogPath, worldNumber);
-                Console.WriteLine($"UpTime: {upTime}");
-                Console.WriteLine($"--------------------------------------------------");
-                Console.WriteLine("");
-            }
-            else
-            {
-                Console.WriteLine($"--------------------------------------------------");
-                Console.WriteLine("There is no server running!");
-                Console.WriteLine($"--------------------------------------------------");
-            }
-        }
-
-        //-------------------------------------------------------------------------------------------------------------------------------------------
+        // -------------------------------- Help Functions --------------------------------
         private static string FormatTime(int totalSeconds)
         {
             int hours = totalSeconds / 3600;

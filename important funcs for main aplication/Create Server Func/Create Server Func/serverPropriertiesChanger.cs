@@ -11,7 +11,7 @@ namespace serverPropriertiesChanger
 {
     class DataChanger
     {
-        // Method to get the information from a file
+        // Function to get the information from a file
         public static string GetInfo(string filePath)
         {
             string data = "";
@@ -43,7 +43,7 @@ namespace serverPropriertiesChanger
             return data;
         }
 
-        // Method to set information in a file
+        // Function to set information in a file
         public static void SetInfo(object[,] settings, string filePath, bool hardWrite = false)
         {
             try
@@ -113,6 +113,8 @@ namespace serverPropriertiesChanger
                 Console.WriteLine($"Error writing to the file: {ex.Message}");
             }
         }
+
+        // -------------------------------- Help Functions --------------------------------
 
         private static int FindLineNumber(string textToFind, List<string> lines)
         {

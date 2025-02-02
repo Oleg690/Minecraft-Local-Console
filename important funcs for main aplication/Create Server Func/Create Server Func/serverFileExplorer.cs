@@ -77,8 +77,8 @@ namespace fileExplorer
             return []; // Return an empty list if the loop ends
         }
 
-
-        public static List<string> GetFoldersAndFiles(string folderPath)
+        // -------------------------------- Help Functions --------------------------------
+        private static List<string> GetFoldersAndFiles(string folderPath)
         {
             List<string> allItems = new List<string>();
 
@@ -115,7 +115,7 @@ namespace fileExplorer
 
             return allItems;
         }
-        public static string GetLastPartOfPath(string path)
+        private static string GetLastPartOfPath(string path)
         {
             // Use Path.GetFileName to get the last part of the path (folder name or file name)
             return Path.GetFileName(path);
