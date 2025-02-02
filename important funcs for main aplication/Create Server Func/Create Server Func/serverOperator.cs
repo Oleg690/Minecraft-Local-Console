@@ -68,7 +68,7 @@ namespace Server_General_Funcs
 
             File.Copy(jarFilePath, destinationJarPath);
             Console.WriteLine("Server .jar file copied to the custom directory.");
-            
+
             string rconPassword = generatePassword(20);
 
             if (worldNumber != null)
@@ -78,7 +78,6 @@ namespace Server_General_Funcs
                 foreach (var row in data)
                 {
                     rconPassword = (string)row[6]; // Your RCON password
-                    Console.WriteLine("Password: " + rconPassword);
                 }
             }
 
@@ -191,7 +190,7 @@ namespace Server_General_Funcs
             }
         }
 
-        private static void ForgeServerInitialisation(string customDirectory, string forgeJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword,  string ipAddress, int JMX_Port, int RCON_Port,  bool Server_Auto_Start, bool Insert_Into_DB, bool Auto_Stop_After_Start)
+        private static void ForgeServerInitialisation(string customDirectory, string forgeJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB, bool Auto_Stop_After_Start)
         {
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
@@ -544,7 +543,7 @@ namespace Server_General_Funcs
                 process.OutputDataReceived += async (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
-                    {   
+                    {
                         Console.WriteLine($"{e.Data}"); // For debugging
 
                         if (e.Data.Contains("You need to agree to the EULA"))
@@ -591,9 +590,9 @@ namespace Server_General_Funcs
             Console.WriteLine("JMX_Port_Closed: " + JMX_Port_Closed);
         }
 
-        public static void Restart(string serverPath, string worldNumber, int processMemoryAlocation, string ipAddress, int RCON_Port, int JMX_Port)
+        public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string ipAddress, int RCON_Port, int JMX_Port)
         {
-            Stop("restart", worldNumber, ipAddress, RCON_Port, JMX_Port);
+            await Stop("restart", worldNumber, ipAddress, RCON_Port, JMX_Port);
 
             Start(worldNumber, serverPath, processMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
         }
@@ -644,44 +643,61 @@ namespace Server_General_Funcs
             }
         }
 
-        public static async void ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port)
+        public static void ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Keep_World_On_Version_Change = false)
         {
-            string rootWorldsFolder = System.IO.Path.Combine(rootFolder, "worlds");
+            if (Keep_World_On_Version_Change)
+            {
+                string rootWorldsFolder = System.IO.Path.Combine(rootFolder, "worlds");
 
-            string rootWorldFilesFolder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(tempFolderPath), $"worlds\\{worldNumber}\\world");
+                string rootWorldFilesFolder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(tempFolderPath), $"worlds\\{worldNumber}\\world");
 
-            Console.WriteLine("Copying world...");
-            CopyFiles("region", tempFolderPath, rootWorldFilesFolder);
-            CopyFiles("DIM-1", tempFolderPath, rootWorldFilesFolder);
-            CopyFiles("DIM1", tempFolderPath, rootWorldFilesFolder);
+                Console.WriteLine("Copying world...");
+                CopyFiles("region", tempFolderPath, rootWorldFilesFolder);
+                CopyFiles("DIM-1", tempFolderPath, rootWorldFilesFolder);
+                CopyFiles("DIM1", tempFolderPath, rootWorldFilesFolder);
 
-            DeleteFiles(worldPath, false);
+                DeleteFiles(worldPath, false);
 
-            dbChanger.GetSpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
+                dbChanger.GetSpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
-            Console.WriteLine("Creating New Server...");
-            serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                Console.WriteLine("Creating New Server...");
+                serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
 
-            //object[,] filesToDelete = {
-            //    { "region", "DIM-1", "DIM1"}
-            //    };
-
-            object[,] filesToDelete = {
-                { "region" }
+                object[,] filesToDelete = {
+                { "region", "DIM-1", "DIM1"}
                 };
 
-            foreach (string file in filesToDelete)
-            {
-                string deletedFolderPath = DeleteFolderAndReturnPath(System.IO.Path.Combine(rootWorldFilesFolder, file));
-
-                if (!string.IsNullOrEmpty(deletedFolderPath))
+                foreach (string file in filesToDelete)
                 {
-                    Directory.CreateDirectory(deletedFolderPath);
-                    CopyFolderToDirectory(System.IO.Path.Combine(tempFolderPath, file), deletedFolderPath);
-                }
-            }
+                    try
+                    {
+                        string deletedFolderPath = DeleteFolderAndReturnPath(System.IO.Path.Combine(rootWorldFilesFolder, file));
 
-            DeleteFiles(tempFolderPath, false);
+                        if (!string.IsNullOrEmpty(deletedFolderPath))
+                        {
+                            Directory.CreateDirectory(deletedFolderPath);
+                            CopyFolderToDirectory(System.IO.Path.Combine(tempFolderPath, file), deletedFolderPath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error: {ex.Message}");
+                    }
+                }
+
+                DeleteFiles(tempFolderPath, false);
+            }
+            else
+            {
+                string rootWorldsFolder = System.IO.Path.Combine(rootFolder, "worlds");
+
+                DeleteFiles(worldPath, false);
+
+                dbChanger.GetSpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
+
+                Console.WriteLine("Creating New Server...");
+                serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+            }
         }
 
         public static void DeleteServer(string worldNumber, string serverDirectoryPath, bool deleteFromDB = true, bool deleteWholeDirectory = true)
@@ -973,29 +989,51 @@ namespace Server_General_Funcs
 
         private static void CopyFiles(string folderName, string destinationDir, string rootDir)
         {
-            Console.WriteLine(folderName);
-            Console.WriteLine(destinationDir);
-            Console.WriteLine(rootDir);
-
-            string[] directories = Directory.GetDirectories(rootDir, folderName, SearchOption.AllDirectories);
-
-            if (directories.Length == 0)
+            try
             {
-                Console.WriteLine($"Folder '{folderName}' was NOT found inside '{rootDir}'.");
-                return;
+                string[] directories = Directory.GetDirectories(rootDir, folderName, SearchOption.AllDirectories);
+
+                if (directories.Length == 0)
+                {
+                    Console.WriteLine($"Folder '{folderName}' was NOT found inside '{rootDir}'.");
+                    return;
+                }
+
+                string sourcePath = directories[0]; // Take the first found match
+                string destinationPath = System.IO.Path.Combine(destinationDir, folderName);
+
+                Directory.CreateDirectory(destinationPath); // Ensure destination exists
+
+                foreach (string file in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
+                {
+                    try
+                    {
+                        string relativePath = file.Substring(sourcePath.Length + 1); // Get relative path
+                        string destFile = System.IO.Path.Combine(destinationPath, relativePath);
+                        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFile)); // Ensure subdirectory exists
+                        File.Copy(file, destFile, true); // Copy file
+                    }
+                    catch (FileNotFoundException ex)
+                    {
+                        Console.WriteLine($"File not found: {ex.FileName}");
+                    }
+                    catch (DirectoryNotFoundException ex)
+                    {
+                        Console.WriteLine($"Directory not found: {ex.Message}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"An error occurred: {ex.Message}");
+                    }
+                }
             }
-
-            string sourcePath = directories[0]; // Take the first found match
-            string destinationPath = System.IO.Path.Combine(destinationDir, folderName);
-
-            Directory.CreateDirectory(destinationPath); // Ensure destination exists
-
-            foreach (string file in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
+            catch (DirectoryNotFoundException ex)
             {
-                string relativePath = file.Substring(sourcePath.Length + 1); // Get relative path
-                string destFile = System.IO.Path.Combine(destinationPath, relativePath);
-                Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFile)); // Ensure subdirectory exists
-                File.Copy(file, destFile, true); // Copy file
+                Console.WriteLine($"Directory not found: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
             }
         }
 

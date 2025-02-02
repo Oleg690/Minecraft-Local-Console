@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Threading;
+using System.Diagnostics;
 using Server_General_Funcs;
-using serverPropriertiesChanger;
-using databaseChanger;
 using MinecraftServerStats;
 using fileExplorer;
-using System.Diagnostics;
 
 namespace mainApp
 {
@@ -20,12 +18,14 @@ namespace mainApp
             string version = "1.21";  // e.g. 1.21
             string worldNumber = "";
             string worldName = "Moldova SMP";
-            string Software = "Vanilla"; // e.g. Vanilla or Forge
+            string Software = "Forge"; // e.g. Vanilla or Forge
             int totalPlayers = 20;
             string ExternalIPAdress = "127.0.0.1";
             string ipAdress = "192.168.100.106"; // "0.0.0.0"
             int JMX_Port = 25562;
             int RCON_Port = 25575;
+
+            bool Keep_World_On_Version_Change = false;
 
             int memoryAlocator = 5000; // in MB
 
@@ -58,8 +58,8 @@ namespace mainApp
 
             // ↓ Start Server Func ↓
             //serverOperator.Start(worldNumber, serverPath, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
-            //serverOperator.Stop("stop", worldNumber, ipAdress, RCON_Port, JMX_Port, true);
-            //serverOperator.Restart(serverPath, worldNumber, memoryAlocator, ipAdress, RCON_Port, JMX_Port);
+            //_ = serverOperator.Stop("stop", worldNumber, ipAdress, RCON_Port, JMX_Port);
+            //_ = serverOperator.Restart(serverPath, worldNumber, memoryAlocator, ipAdress, RCON_Port, JMX_Port);
             //serverOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
@@ -67,7 +67,14 @@ namespace mainApp
             //_ = serverOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, ipAdress);
 
             // ↓ Change Version Func ↓
-            //serverOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, ipAdress, JMX_Port, RCON_Port);
+            //serverOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, ipAdress, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
+
+
+            // ↓ Server Files Loop ↓
+            //List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
+
+            // ↓ Delete Server ↓
+            //serverOperator.DeleteServer(worldNumber, serverDirectoryPath);
 
             // ↓ Server Stats Loop ↓
             //while (true)
@@ -75,12 +82,6 @@ namespace mainApp
             //    ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, ipAdress, JMX_Port, RCON_Port);
             //    Thread.Sleep(1000);
             //}
-
-            // ↓ Server Files Loop ↓
-            //List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
-
-            // ↓ Delete Server ↓
-            //serverOperator.DeleteServer(worldNumber, serverDirectoryPath);
 
             Console.ReadKey();
         }
