@@ -592,7 +592,7 @@ namespace Server_General_Funcs
 
         public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string ipAddress, int RCON_Port, int JMX_Port)
         {
-            await Stop("restart", worldNumber, ipAddress, RCON_Port, JMX_Port);
+            await Stop("restart", worldNumber, "192.168.100.106", RCON_Port, JMX_Port);
 
             Start(worldNumber, serverPath, processMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
         }
