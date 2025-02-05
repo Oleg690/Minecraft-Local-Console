@@ -4,12 +4,14 @@ using System.Diagnostics;
 using Server_General_Funcs;
 using MinecraftServerStats;
 using fileExplorer;
-using Server_Network_Enabler;
+using NetworkConfig;
+using System.Security.Principal;
 
 namespace mainApp
 {
     internal class Program
     {
+        //static async Task Main(string[] args)
         static void Main(string[] args)
         {
             // Public Address Ranges
@@ -23,12 +25,12 @@ namespace mainApp
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
             string version = "1.21";  // e.g. 1.21
-            string worldNumber = "145791512891";
+            string worldNumber = "554206782712";
             string worldName = "Moldova SMP";
             string Software = "Vanilla"; // e.g. Vanilla or Forge
             int totalPlayers = 20;
             string ExternalIPAdress = "127.0.0.1";
-            //string ipAdress = "192.168.100.106"; // "0.0.0.0"
+            //string ipAddress = "192.168.100.106"; // "0.0.0.0"
             string ipAddress = "109.185.75.45"; // "0.0.0.0"
             int Server_Port = 25565;
             int JMX_Port = 25562;
@@ -62,6 +64,8 @@ namespace mainApp
             string serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions");
             string tempFolderPath = System.IO.Path.Combine(rootFolder, "temp");
 
+            string ngrokPath = System.IO.Path.Combine(rootFolder, "ngrok\\ngrok.exe");
+
             // ↓ Create World Func ↓
             //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, ipAddress, JMX_Port, RCON_Port);
 
@@ -91,7 +95,7 @@ namespace mainApp
             //    Thread.Sleep(1000);
             //}
 
-            PortForward.EnablePublicServer(ipAddress, Server_Port); // TODO
+            //await NetworkConfigSetup.Setup(25565);
 
             Console.ReadKey();
         }
