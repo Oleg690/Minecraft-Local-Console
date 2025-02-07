@@ -671,6 +671,19 @@
           }
         }
       },
+      "Open.NAT/2.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Open.Nat.dll": {
+            "related": ".XML"
+          }
+        },
+        "runtime": {
+          "lib/net45/Open.Nat.dll": {
+            "related": ".XML"
+          }
+        }
+      },
       "runtime.native.System.Data.SqlClient.sni/4.7.0": {
         "type": "package",
         "dependencies": {
@@ -8126,6 +8139,23 @@
         "packageIcon.png"
       ]
     },
+    "Open.NAT/2.1.0": {
+      "sha512": "cFa5GY3a1LYpgyCkCfi4kY3XyArNNGjx36tQVfY9bQEXQBo8zx9rFKkDrDjOEupy31FPPH/mqLClddLNUl41hQ==",
+      "type": "package",
+      "path": "open.nat/2.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net35/Open.Nat.XML",
+        "lib/net35/Open.Nat.dll",
+        "lib/net35/System.Threading.dll",
+        "lib/net35/System.Threading.xml",
+        "lib/net45/Open.Nat.XML",
+        "lib/net45/Open.Nat.dll",
+        "open.nat.2.1.0.nupkg.sha512",
+        "open.nat.nuspec"
+      ]
+    },
     "runtime.native.System.Data.SqlClient.sni/4.7.0": {
       "sha512": "9kyFSIdN3T0qjDQ2R0HRXYIhS3l5psBzQi6qqhdLz+SzFyEy4sVxNOke+yyYv8Cu8rPER12c3RDjLT8wF3WBYQ==",
       "type": "package",
@@ -9160,6 +9190,7 @@
       "CoreRCON >= 5.4.2",
       "IKVM >= 8.11.0",
       "MCQuery >= 2022.7.13.192844",
+      "Open.Nat >= 2.1.0",
       "System.Data.SQLite >= 1.0.119",
       "System.Management >= 9.0.1"
     ]
@@ -9227,6 +9258,10 @@
             "target": "Package",
             "version": "[2022.7.13.192844, )"
           },
+          "Open.Nat": {
+            "target": "Package",
+            "version": "[2.1.0, )"
+          },
           "System.Data.SQLite": {
             "target": "Package",
             "version": "[1.0.119, )"
@@ -9255,5 +9290,17 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Open.NAT 2.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Open.NAT",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
 }

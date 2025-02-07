@@ -25,6 +25,7 @@ using sun.tools.jar.resources;
 using javax.sound.midi;
 using javax.xml.crypto;
 using sun.security.util;
+using NetworkConfig;
 
 namespace Server_General_Funcs
 {
@@ -448,12 +449,18 @@ namespace Server_General_Funcs
     class serverOperator
     {
         // ------------------------- Main Server Operator Commands -------------------------
-        public static void Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Auto_Stop = false)
+        public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Auto_Stop = false)
         {
             while (IsPortInUse(RCON_Port) || IsPortInUse(JMX_Port))
             {
                 Console.WriteLine("Port not closed! Closing Port");
                 Thread.Sleep(1000);
+            }
+
+            if (!CheckFirewallRuleExists("MinecraftServer_TCP_25565") && !CheckFirewallRuleExists("MinecraftServer_UDP_25565"))
+            {
+                await NetworkConfigSetup.Setup(25565);
+                return;
             }
 
             string JMX_Server_Settings = $"-Dcom.sun.management.jmxremote " +
@@ -1035,6 +1042,39 @@ namespace Server_General_Funcs
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
             }
+        }
+
+        private static bool CheckFirewallRuleExists(string portName)
+        {
+            try
+            {
+                // Create a process to run the netsh command
+                Process process = new Process();
+                process.StartInfo.FileName = "netsh";
+                process.StartInfo.Arguments = $"advfirewall firewall show rule name={portName}";
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.CreateNoWindow = true;
+
+                // Start the process
+                process.Start();
+
+                // Read the output of the command
+                string output = process.StandardOutput.ReadToEnd();
+                process.WaitForExit();
+
+                // Check if the output contains the rule and port 25565
+                if (output.Contains("MinecraftServer_TCP_25565") && output.Contains("25565"))
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error: " + ex.Message);
+            }
+
+            return false;
         }
 
         // --------------------------------------------------------------------------------

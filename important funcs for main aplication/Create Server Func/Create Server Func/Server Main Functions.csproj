@@ -18,6 +18,7 @@
     <PackageReference Include="CoreRCON" Version="5.4.2" />
     <PackageReference Include="IKVM" Version="8.11.0" />
     <PackageReference Include="MCQuery" Version="2022.7.13.192844" />
+    <PackageReference Include="Open.Nat" Version="2.1.0" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.119" />
     <PackageReference Include="System.Management" Version="9.0.1" />
   </ItemGroup>

@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Open.Nat;
+using System;
 using System.Diagnostics;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Principal;
@@ -29,6 +31,12 @@ namespace NetworkConfig
 
             // Step 3: Open Firewall Port
             FirewallRules.OpenFirewallPort(port);
+
+            if (IsAdministrator())
+            {
+
+                return;
+            }
 
             Console.WriteLine("Network setup completed!");
         }
@@ -62,9 +70,52 @@ namespace NetworkConfig
         }
     }
 
-    public class NetworkTunnel
+    public class UPnP_Port_Mapping
     {
+        public static async Task UPnP_Configuration_Async(int port)
+        {
+            try
+            {
+                // Discover a UPnP-enabled router
+                var nat = new NatDiscoverer();
+                var device = await nat.DiscoverDeviceAsync();
 
+                // Get the local IP address of the machine
+                string localIp = GetLocalIpAddress();
+                Console.WriteLine(localIp);
+
+                // Define the port mapping
+                int externalPort = port;
+                int internalPort = port;
+                string description = "Minecraft Server Port Forwarding";
+
+                // Add the port mapping for TCP
+                await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, internalPort, externalPort, description));
+
+                Console.WriteLine($"Port mapping successful! External port {externalPort} is now forwarded to {localIp}:{internalPort}.");
+            }
+            catch (NatDeviceNotFoundException)
+            {
+                Console.WriteLine("Device not found. You probably don't have UPnP enabled in the router settings or the router doesn't support it! You need to set port mapping manually!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        static string GetLocalIpAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address found.");
+        }
     }
 
     public class StaticIPConfig
@@ -226,6 +277,150 @@ namespace NetworkConfig
             string result = process.StandardOutput.ReadToEnd();
             process.WaitForExit();
             return result;
+        }
+    }
+
+    class DomainName
+    {
+        private static readonly string[] Combinations = {
+        "skilfish", "cleverfox", "swiftdeer", "bravebear", "quietmouse", "loyalwolf",
+        "wildhorse", "tinyant", "buzzingbee", "soaringhawk", "playfuldolphin",
+        "gentlelamb", "roaringlion", "brightstar", "goldenkey", "silvercoin",
+        "woodenbox", "ironwheel", "glassbottle", "paperplane", "stonebridge",
+        "metalgate", "velvetcurtain", "crystalball", "rainbowarch", "sweetberry",
+        "juicyapple", "freshmint", "spicychili", "creamycoffee", "goldenhoney",
+        "crispbread", "warmmilk", "coolwater", "ripeplum", "deepthought",
+        "brightidea", "strongwill", "kindheart", "truefriend", "braveheart",
+        "quickwit", "sharpfocus", "calmspirit", "wilddream", "newhope",
+        "greenfield", "blueocean", "tallmountain", "deepforest", "clearriver",
+        "sunnyvale", "quietcove", "hiddenpath", "secretgarden", "rockycoast",
+        "codingape", "singingbird", "dancingbear", "readingworm", "writingowl",
+        "thinkingcap", "buildingblock", "exploringfox", "dreamingdog", "learningbee",
+        "happycat", "sleepybear", "grumpyfrog", "sillygoose", "cleverdog", "wiseowl",
+        "darkknight", "loudlion", "swiftbluefish", "goldenkeybox", "sweetberryfield",
+        "deepthoughtwell", "braveheartlion", "cuddlykoala", "mischievousmonkey",
+        "sneakycat", "gracefulswan", "proudpeacock", "hungryhippo", "jollygiraffe",
+        "lazyiguana", "quickrabbit", "slowsloth", "wiseelephant", "tinyhummingbird",
+        "giantwhale", "fierydragon", "icequeen", "stormbringer", "shadowwalker",
+        "sunriser", "moonwhisper", "stargazer", "dreamweaver", "lifeforce",
+        "timebender", "spacejumper", "wordmaster", "artlover", "musicmaker",
+        "codebreaker", "peacemaker", "storyteller", "adventurer", "explorer",
+        "innovator", "creator", "leader", "follower", "teacher", "student",
+        "friend", "lover", "hater", "winner", "loser", "beginner", "expert",
+        "hero", "villain", "angel", "demon", "ghost", "zombie", "vampire",
+        "werewolf", "mermaid", "unicorn", "phoenix", "griffin", "sphinx",
+        "chimera", "hydra", "cerberus", "minotaur", "cyclops", "medusa",
+        "poseidon", "hades", "zeus", "hera", "apollo", "artemis", "athena",
+        "aphrodite", "ares", "hephaestus", "dionysus", "hermes", "demeter",
+        "hestia", "eros", "psyche", "pan", "morpheus", "hypnos", "thanatos",
+        "nemesis", "hecate", "tyche", "nike", "iris", "ganymede", "hebe",
+        "asclepius", "hygieia", "panacea", "telesphorus", "machon", "podalirius",
+        "achaon", "proteus", "triton", "nereus", "amphitrite", "thetis",
+        "galatea", "polyphemus", "scylla", "charybdis", "siren", "harpy",
+        "gorgon", "centaur", "satyr", "nymph", "dryad", "naiad", "nereid",
+        "oceanid", "titan", "giant", "cyclops", "hecatoncheires", "argonaut",
+        "heracleidae", "trojan", "odyssean", "aeneid", "iliad", "odyssey",
+        "aeneid", "metamorphoses", "deorum", "fabulis", "astronomica",
+        "geographica", "historia", "naturalis", "bibliotheca", "mythologica",
+        "etymologiae", "chronicon", "paschale", "alexandrinum", "chronographia",
+        "breviarium", "historiae", "augustae", "annales", "prudentii", "psychomachia",
+        "somnium", "scipionis", "consolatio", "philosophiae", "de", "civitate",
+        "de", "trinitate", "dialogi", "de", "libero", "arbitrio", "confessiones",
+        "enchiridion", "de", "doctrina", "christiana", "de", "genesi", "ad", "litteram",
+        "de", "trinitate", "contra", "faustum", "manichaeum", "de", "vera", "religione",
+        "de", "immortalitate", "animae", "de", "quantitate", "animae", "musica",
+        "disciplinae", "mathematicae", "de", "magistro", "de", "beata", "vita",
+        "de", "ordine", "de", "vera", "religione", "contra", "academicos", "de",
+        "divinatione", "de", "natura", "deorum", "de", "officiis", "de", "amicitia",
+        "de", "senectute", "paradoxa", "stoicorum", "epistulae", "ad", "atticum",
+        "ad", "familiares", "ad", "brutum", "ad", "quintum", "in", "catilinam",
+        "pro", "caelio", "pro", "milone", "pro", "plancio", "pro", "rege", "deiotaro",
+        "philippicae", "topica", "de", "inventione", "orator", "brutus", "laelius",
+        "de", "oratore", "partitiones", "oratoriae", "de", "finibus", "bonorum",
+        "et", "malorum", "tusculanae", "disputationes", "academica", "priora", "analytica",
+        "posteriora", "topica", "de", "interpretatione", "de", "anima", "de", "categoriis",
+        "physica", "metaphysica", "ethica", "nicomachea", "magna", "moralia", "eudemian",
+        "politica", "poetica", "rhetorica", "de", "caelo", "de", "generatione", "et",
+        "corruptione", "meteorologica", "historia", "animalium", "de", "partibus", "animalium",
+        "de", "motu", "animalium", "de", "incessu", "animalium", "de", "generatione", "animalium",
+        "de", "sensu", "et", "sensibilibus", "de", "memoria", "et", "reminiscentia", "de",
+        "somno", "et", "vigilia", "de", "insomniis", "de", "divinatione", "per", "somnia",
+        "de", "longitudine", "et", "brevitate", "vitae", "de", "iuventute", "et", "senectute",
+        "de", "vita", "et", "morte", "de", "respiratione", "de", "spiritu", "de", "malo",
+        "de", "vegetabilibus", "de", "lapidibus", "de", "plantis", "de", "mirabilibus",
+        "de", "melodia", "de", "poetica", "de", "rhetorica", "ad", "alexandrum", "de",
+        "mundo", "de", "virtutibus", "de", "vitiis", "oecumonica", "magna", "quaestio",
+        "mechanica", "optica", "catoptrica", "musica", "problematum", "mechanicorum",
+        "physiognomonica", "ethica", "eudemica", "politica", "oecumonica", "magna", "moralia"
+    };
+
+        public static string GetRandomDomainName()
+        {
+            string domain;
+            do
+            {
+                string randomCombination = DomainName.Combinations[new Random().Next(DomainName.Combinations.Length)];
+                domain = $"{randomCombination}.olehost.me.host";
+            }
+            while (IsMinecraftServerDomain(domain).Result);
+
+            return domain;
+        }
+
+        private static async Task<bool> IsMinecraftServerDomain(string domain, int defaultPort = 25565)
+        {
+            try
+            {
+                Console.WriteLine($"Checking {domain} domain name.");
+
+                // 1. Resolve the domain name to an IP address
+                IPAddress[] addresses = await Dns.GetHostAddressesAsync(domain);
+
+                if (addresses.Length == 0)
+                {
+                    Console.WriteLine($"Domain {domain} could not be resolved.");
+                    return false; // Domain doesn't exist
+                }
+
+                // 2. Try to connect to the resolved IP address on the Minecraft default port
+                foreach (IPAddress address in addresses)
+                {
+                    try
+                    {
+                        using (TcpClient client = new TcpClient())
+                        {
+                            // Use a timeout to prevent indefinite blocking
+                            var connectTask = client.ConnectAsync(address, defaultPort);
+                            var timeoutTask = Task.Delay(TimeSpan.FromSeconds(2)); // 2-second timeout
+
+                            var completedTask = await Task.WhenAny(connectTask, timeoutTask);
+
+                            if (completedTask == timeoutTask)
+                            {
+                                Console.WriteLine($"Connection to {domain} timed out.");
+                                continue; // Try the next IP address
+                            }
+
+                            await connectTask; // Wait for the connection to complete (if it didn't time out)
+                            Console.WriteLine($"Successfully connected to {domain} ({address}) on port {defaultPort}.");
+                            return true; // Minecraft server is likely running
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Catch exceptions like connection refused, etc.
+                        Console.WriteLine($"Error connecting to {domain} ({address}): {ex.Message}");
+                        // Don't immediately return false; try other IP addresses first
+                    }
+                }
+
+                return false; // Could not connect to any resolved IP address
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error resolving or checking domain {domain}: {ex.Message}");
+                return false;
+            }
         }
     }
 }

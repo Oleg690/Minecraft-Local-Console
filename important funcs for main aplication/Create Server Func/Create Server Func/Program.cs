@@ -5,14 +5,13 @@ using Server_General_Funcs;
 using MinecraftServerStats;
 using fileExplorer;
 using NetworkConfig;
-using System.Security.Principal;
 
 namespace mainApp
 {
     internal class Program
     {
-        //static async Task Main(string[] args)
-        static void Main(string[] args)
+        static async Task Main()
+        //static void Main()
         {
             // Public Address Ranges
             // 1.0.0.0 – 9.255.255.255
@@ -25,13 +24,13 @@ namespace mainApp
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
             string version = "1.21";  // e.g. 1.21
-            string worldNumber = "554206782712";
+            string worldNumber = "520447327878";
             string worldName = "Moldova SMP";
             string Software = "Vanilla"; // e.g. Vanilla or Forge
-            int totalPlayers = 20;
-            string ExternalIPAdress = "127.0.0.1";
-            //string ipAddress = "192.168.100.106"; // "0.0.0.0"
-            string ipAddress = "109.185.75.45"; // "0.0.0.0"
+            int totalPlayers = 15;
+            string localServerIp = "127.0.0.1";
+            string LocalIPAddress = "192.168.100.106"; // "0.0.0.0"
+            string PublicIPAddress = "109.185.75.45"; // "0.0.0.0"
             int Server_Port = 25565;
             int JMX_Port = 25562;
             int RCON_Port = 25575;
@@ -64,23 +63,21 @@ namespace mainApp
             string serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions");
             string tempFolderPath = System.IO.Path.Combine(rootFolder, "temp");
 
-            string ngrokPath = System.IO.Path.Combine(rootFolder, "ngrok\\ngrok.exe");
-
             // ↓ Create World Func ↓
-            //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, ipAddress, JMX_Port, RCON_Port);
+            //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, LocalIPAddress, JMX_Port, RCON_Port);
 
             // ↓ Start Server Func ↓
-            //serverOperator.Start(worldNumber, serverPath, memoryAlocator, ipAddress, JMX_Port, RCON_Port);
-            //_ = serverOperator.Stop("stop", worldNumber, "192.168.100.106", RCON_Port, JMX_Port);
-            //_ = serverOperator.Restart(serverPath, worldNumber, memoryAlocator, ipAddress, RCON_Port, JMX_Port);
+            //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, PublicIPAddress, JMX_Port, RCON_Port);
+            //await serverOperator.Stop("stop", worldNumber, LocalIPAddress, RCON_Port, JMX_Port, true);
+            //await serverOperator.Restart(serverPath, worldNumber, memoryAlocator, LocalIPAddress, RCON_Port, JMX_Port);
             //serverOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
-            //_ = serverOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, ipAddress);
-            //_ = serverOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, ipAddress);
+            //_ = serverOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, LocalIPAddress);
+            //_ = serverOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, LocalIPAddress);
 
             // ↓ Change Version Func ↓
-            //serverOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, ipAddress, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
+            //serverOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, LocalIPAddress, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
 
             // ↓ Server Files Loop ↓
             //List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
@@ -91,11 +88,16 @@ namespace mainApp
             // ↓ Server Stats Loop ↓
             //while (true)
             //{
-            //    ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, ipAddress, JMX_Port, RCON_Port);
+            //    ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, LocalIPAddress, JMX_Port, RCON_Port);
             //    Thread.Sleep(1000);
             //}
 
-            //await NetworkConfigSetup.Setup(25565);
+            // ↓ Test Network Config ↓
+
+            //await UPnP_Port_Mapping.UPnP_Configuration_Async(25565);
+
+            //string domainName = DomainName.GetRandomDomainName();
+            //Console.WriteLine(domainName);
 
             Console.ReadKey();
         }

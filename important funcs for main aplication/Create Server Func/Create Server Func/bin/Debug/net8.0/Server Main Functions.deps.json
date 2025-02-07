@@ -11,6 +11,7 @@
           "CoreRCON": "5.4.2",
           "IKVM": "8.11.0",
           "MCQuery": "2022.7.13.192844",
+          "Open.NAT": "2.1.0",
           "System.Data.SQLite": "1.0.119",
           "System.Management": "9.0.1"
         },
@@ -385,6 +386,14 @@
           "lib/netstandard2.0/Newtonsoft.Json.dll": {
             "assemblyVersion": "13.0.0.0",
             "fileVersion": "13.0.1.25517"
+          }
+        }
+      },
+      "Open.NAT/2.1.0": {
+        "runtime": {
+          "lib/net45/Open.Nat.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.1.0.0"
           }
         }
       },
@@ -985,6 +994,13 @@
       "sha512": "sha512-ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A==",
       "path": "newtonsoft.json/13.0.1",
       "hashPath": "newtonsoft.json.13.0.1.nupkg.sha512"
+    },
+    "Open.NAT/2.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-cFa5GY3a1LYpgyCkCfi4kY3XyArNNGjx36tQVfY9bQEXQBo8zx9rFKkDrDjOEupy31FPPH/mqLClddLNUl41hQ==",
+      "path": "open.nat/2.1.0",
+      "hashPath": "open.nat.2.1.0.nupkg.sha512"
     },
     "runtime.native.System.Data.SqlClient.sni/4.7.0": {
       "type": "package",
