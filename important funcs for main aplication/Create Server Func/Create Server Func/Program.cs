@@ -24,10 +24,10 @@ namespace mainApp
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
             string version = "1.21";  // e.g. 1.21
-            string worldNumber = "520447327878";
+            string worldNumber = "971281057395";
             string worldName = "Moldova SMP";
             string Software = "Vanilla"; // e.g. Vanilla or Forge
-            int totalPlayers = 15;
+            int totalPlayers = 20;
             string localServerIp = "127.0.0.1";
             string LocalIPAddress = "192.168.100.106"; // "0.0.0.0"
             string PublicIPAddress = "109.185.75.45"; // "0.0.0.0"
@@ -35,7 +35,7 @@ namespace mainApp
             int JMX_Port = 25562;
             int RCON_Port = 25575;
 
-            bool Keep_World_On_Version_Change = false;
+            bool Keep_World_On_Version_Change = true;
 
             int memoryAlocator = 5000; // in MB
 
@@ -67,7 +67,7 @@ namespace mainApp
             //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, LocalIPAddress, JMX_Port, RCON_Port);
 
             // ↓ Start Server Func ↓
-            //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, PublicIPAddress, JMX_Port, RCON_Port);
+            //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, LocalIPAddress, JMX_Port, RCON_Port);
             //await serverOperator.Stop("stop", worldNumber, LocalIPAddress, RCON_Port, JMX_Port, true);
             //await serverOperator.Restart(serverPath, worldNumber, memoryAlocator, LocalIPAddress, RCON_Port, JMX_Port);
             //serverOperator.Kill(RCON_Port, JMX_Port);
