@@ -750,7 +750,7 @@
           }
         }
       },
-      "System.CodeDom/9.0.1": {
+      "System.CodeDom/9.0.2": {
         "type": "package",
         "compile": {
           "lib/net8.0/System.CodeDom.dll": {
@@ -975,10 +975,10 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Management/9.0.1": {
+      "System.Management/9.0.2": {
         "type": "package",
         "dependencies": {
-          "System.CodeDom": "9.0.1"
+          "System.CodeDom": "9.0.2"
         },
         "compile": {
           "lib/net8.0/System.Management.dll": {
@@ -8240,10 +8240,10 @@
         "stub.system.data.sqlite.core.netstandard.nuspec"
       ]
     },
-    "System.CodeDom/9.0.1": {
-      "sha512": "2J5uq+2smnj+u1jlyVJ6BGGqaK9fHcK/EwN7mbsuPqTI6dZr86br8Cg6o/5B+icQ9ANTvTDpJjnhDNtYYZijHQ==",
+    "System.CodeDom/9.0.2": {
+      "sha512": "VnlzS7afE8LaXXwKdHOe2D6FcDekqThzU1E67CONV7gp71q3zposqcSeXH+PxARMXC5j31efwXrxP8VGvD70Ug==",
       "type": "package",
-      "path": "system.codedom/9.0.1",
+      "path": "system.codedom/9.0.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -8263,7 +8263,7 @@
         "lib/net9.0/System.CodeDom.xml",
         "lib/netstandard2.0/System.CodeDom.dll",
         "lib/netstandard2.0/System.CodeDom.xml",
-        "system.codedom.9.0.1.nupkg.sha512",
+        "system.codedom.9.0.2.nupkg.sha512",
         "system.codedom.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -8722,10 +8722,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Management/9.0.1": {
-      "sha512": "CLEo9O6FuO4GQ3ZQkGssg9CJ2w2TN7GMFf3wHTc7YVWJV4xoyJRPw+XIDQnCcSUJCrHhrAWOO60cAX29EV5LFQ==",
+    "System.Management/9.0.2": {
+      "sha512": "U6SXFe1kfJySAvcPPdbdb+fycaY+3c/KV0PwTjurvrALMnlSm37s5z8zcoI7qbkV2kYhxiLfsZRGiF0XeSsqSQ==",
       "type": "package",
-      "path": "system.management/9.0.1",
+      "path": "system.management/9.0.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -8746,7 +8746,7 @@
         "runtimes/win/lib/net8.0/System.Management.xml",
         "runtimes/win/lib/net9.0/System.Management.dll",
         "runtimes/win/lib/net9.0/System.Management.xml",
-        "system.management.9.0.1.nupkg.sha512",
+        "system.management.9.0.2.nupkg.sha512",
         "system.management.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -9192,7 +9192,7 @@
       "MCQuery >= 2022.7.13.192844",
       "Open.Nat >= 2.1.0",
       "System.Data.SQLite >= 1.0.119",
-      "System.Management >= 9.0.1"
+      "System.Management >= 9.0.2"
     ]
   },
   "packageFolders": {
@@ -9268,7 +9268,7 @@
           },
           "System.Management": {
             "target": "Package",
-            "version": "[9.0.1, )"
+            "version": "[9.0.2, )"
           }
         },
         "imports": [

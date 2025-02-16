@@ -23,7 +23,7 @@ namespace mainApp
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
             string version = "1.21";  // e.g. 1.21
-            string worldNumber = "115904950099";
+            string worldNumber = "285808385616";
             string worldName = "Minecraft Server";
             string Software = "Forge"; // e.g. Vanilla or Forge
             int totalPlayers = 20;
@@ -55,19 +55,19 @@ namespace mainApp
                 { "spawn-protection", "0" }
             };
 
-            string serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, worldNumber);
-            string serverPath = System.IO.Path.Combine(serverDirectoryPath, version + ".jar");
-            string serverLogPath = System.IO.Path.Combine(serverDirectoryPath, "logs\\latest.log");
-            string serverPropriertiesPath = System.IO.Path.Combine(serverDirectoryPath, "server.properties");
-            string serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions");
-            string tempFolderPath = System.IO.Path.Combine(rootFolder, "temp");
+            string serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
+            string serverPath = Path.Combine(serverDirectoryPath, version + ".jar");
+            string serverLogPath = Path.Combine(serverDirectoryPath, "logs\\latest.log");
+            string serverPropriertiesPath = Path.Combine(serverDirectoryPath, "server.properties");
+            string serverVersionsPath = Path.Combine(rootFolder, "versions");
+            string tempFolderPath = Path.Combine(rootFolder, "temp");
 
             // ↓ Create World Func ↓
-            //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port);
+            //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
 
             // ↓ Start Server Func ↓
-            //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
-            //await serverOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, true);
+            //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port);
+            //await serverOperator.Stop("stop", worldNumber, Server_PublicComputerIP, RCON_Port, JMX_Port, true);
             //await serverOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, RCON_Port, JMX_Port);
             //serverOperator.Kill(RCON_Port, JMX_Port);
 

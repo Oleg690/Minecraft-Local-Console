@@ -47,17 +47,12 @@ namespace Server_General_Funcs
 
             string jarFoldersPath = rootFolder;
 
-            //switch (software)
-            //{
-            //    case "Vanilla":
-            //        jarFoldersPath += @"\versions\Vanilla";
-            //        break;
-            //    case "Forge":
-            //        jarFoldersPath += @"\versions\Forge";
-            //        break;
-            //}
-
-            if (software == "Vanilla")
+            if (software == "")
+            {
+                Console.WriteLine("Software not selected!");
+                return "Software not selected!";
+            }
+            else if (software == "Vanilla")
             {
                 jarFoldersPath += @"\versions\Vanilla";
             }
@@ -87,7 +82,7 @@ namespace Server_General_Funcs
 
                 foreach (var row in data)
                 {
-                    rconPassword = (string)row[6]; // Your RCON password
+                    rconPassword = (string)row[6]; // Servers RCON password
                 }
             }
 
@@ -201,7 +196,7 @@ namespace Server_General_Funcs
             }
         }
 
-        private static void ForgeServerInitialisation(string customDirectory, string forgeJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB, bool Auto_Stop_After_Start)
+        private static async Task ForgeServerInitialisation(string customDirectory, string forgeJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB, bool Auto_Stop_After_Start)
         {
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
@@ -303,7 +298,7 @@ namespace Server_General_Funcs
                     Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
-                serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -329,6 +324,7 @@ namespace Server_General_Funcs
                 Console.WriteLine($"Error: {ex.Message}");
             }
         }
+
 
         // -------------------------------- Help Functions --------------------------------
         private static void AcceptEULA(string jarFilePath)
@@ -482,74 +478,79 @@ namespace Server_General_Funcs
                                          $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
                                          $"-Dcom.sun.management.jmxremote.authenticate=false " +
                                          $"-Dcom.sun.management.jmxremote.ssl=false " +
-                                         $"-Djava.rmi.server.hostname={ipAddress} "; // Replace with actual server IP if necessary
+                                         $"-Djava.rmi.server.hostname={ipAddress} ";
 
-            List<object[]> software = dbChanger.GetSpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';");
+            List<object[]> softwareList = dbChanger.GetSpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';");
 
             ProcessStartInfo? serverProcessInfo = null;
 
-            switch (software[0][0])
+            string software = string.Join("\n", softwareList.Select(arr => string.Join(", ", arr)));
+
+            //Console.WriteLine($"Software: '{software}'");
+            //Console.WriteLine(software == "Vanilla");       -> For debugging!
+            //Console.WriteLine(software == "Forge");
+
+            if (software == "Vanilla")
             {
-                case "Vanilla":
-                    Console.WriteLine("Starting Vanilla Server!");
+                Console.WriteLine("Starting Vanilla Server!");
 
-                    serverProcessInfo = new ProcessStartInfo
-                    {
-                        FileName = "java",
-                        Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " + // nogui
-                                    JMX_Server_Settings +
-                                    $"-jar \"{serverPath}\"",
-                        RedirectStandardInput = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WorkingDirectory = System.IO.Path.GetDirectoryName(serverPath) // Set the custom working directory
-                    };
-                    break;
-                case "Forge":
-                    Console.WriteLine("Starting Forge Server!");
+                serverProcessInfo = new ProcessStartInfo
+                {
+                    FileName = "java",
+                    Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " + // nogui
+                                JMX_Server_Settings +
+                                $"-jar \"{serverPath}\"",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = System.IO.Path.GetDirectoryName(serverPath) // Set the custom working directory
+                };
+            }
+            else if (software == "Forge")
+            {
+                Console.WriteLine("Starting Forge Server!");
 
-                    if (System.IO.Path.GetFileName(serverPath).Contains(".jar"))
-                    {
-                        serverPath = System.IO.Path.GetDirectoryName(serverPath);
-                    }
+                if (System.IO.Path.GetFileName(serverPath).Contains(".jar"))
+                {
+                    serverPath = System.IO.Path.GetDirectoryName(serverPath);
+                }
 
-                    string winArgsPath = FindFileInFolder(System.IO.Path.Combine(serverPath, "libraries"), "win_args.txt");
+                string winArgsPath = FindFileInFolder(System.IO.Path.Combine(serverPath, "libraries"), "win_args.txt");
 
-                    if (winArgsPath != "")
-                    {
-                        winArgsPath = $"@\"{winArgsPath}\" ";
-                    }
+                if (winArgsPath != "")
+                {
+                    winArgsPath = $"@\"{winArgsPath}\" ";
+                }
 
-                    string toRunJarFile = "";
+                string toRunJarFile = "";
 
-                    toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
+                toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
 
-                    if (toRunJarFile == null)
-                    {
-                        toRunJarFile = FindClosestJarFile(serverPath, "forge-");
-                    }
-                    if (toRunJarFile == null)
-                    {
-                        Console.WriteLine("No server file found");
-                    }
+                if (toRunJarFile == null)
+                {
+                    toRunJarFile = FindClosestJarFile(serverPath, "forge-");
+                }
+                if (toRunJarFile == null)
+                {
+                    Console.WriteLine("No server file found");
+                }
 
-                    serverProcessInfo = new ProcessStartInfo
-                    {
-                        FileName = "java",
-                        Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
-                                    JMX_Server_Settings +
-                                    $"{winArgsPath}" +
-                                    $"{toRunJarFile} %*", // nogui
-                        RedirectStandardInput = true,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                        WorkingDirectory = serverPath
-                    };
-                    break;
+                serverProcessInfo = new ProcessStartInfo
+                {
+                    FileName = "java",
+                    Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
+                                JMX_Server_Settings +
+                                $"{winArgsPath}" +
+                                $"{toRunJarFile} %*", // nogui
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = serverPath
+                };
             }
 
             using (Process process = Process.Start(serverProcessInfo))
@@ -730,6 +731,7 @@ namespace Server_General_Funcs
             }
             DeleteFiles(serverDirectoryPath, deleteWholeDirectory);
         }
+
 
         // -------------------------------- Help Functions --------------------------------
 
