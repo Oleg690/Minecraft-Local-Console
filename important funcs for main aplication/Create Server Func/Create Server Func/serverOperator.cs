@@ -47,14 +47,23 @@ namespace Server_General_Funcs
 
             string jarFoldersPath = rootFolder;
 
-            switch (software)
+            //switch (software)
+            //{
+            //    case "Vanilla":
+            //        jarFoldersPath += @"\versions\Vanilla";
+            //        break;
+            //    case "Forge":
+            //        jarFoldersPath += @"\versions\Forge";
+            //        break;
+            //}
+
+            if (software == "Vanilla")
             {
-                case "Vanilla":
-                    jarFoldersPath += @"\versions\Vanilla";
-                    break;
-                case "Forge":
-                    jarFoldersPath += @"\versions\Forge";
-                    break;
+                jarFoldersPath += @"\versions\Vanilla";
+            }
+            else if (software == "Forge")
+            {
+                jarFoldersPath += @"\versions\Forge";
             }
 
             string versionName = version + ".jar";
@@ -91,6 +100,7 @@ namespace Server_General_Funcs
             };
 
             Console.WriteLine($"{software} Server");
+
             if (software == "Vanilla")
             {
                 VanillaServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB, Auto_Stop_After_Start);
@@ -286,6 +296,11 @@ namespace Server_General_Funcs
                     {
                         File.Delete(customDirectory + $"\\{file}");
                     }
+                }
+
+                if (!File.Exists(customDirectory + $"\\mods"))
+                {
+                    Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
                 serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);

@@ -20,17 +20,16 @@ namespace mainApp
             // 10.0.0.0 to 10.255.255.255
 
             string currentDirectory = Directory.GetCurrentDirectory();
-            // e.g. string rootWorldsFolder = @"D:\Minecraft-Server\important funcs for main aplication\Create Server Func\Create Server Func\worlds";
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
             string version = "1.21";  // e.g. 1.21
-            string worldNumber = "971281057395";
-            string worldName = "Moldova SMP";
-            string Software = "Vanilla"; // e.g. Vanilla or Forge
+            string worldNumber = "115904950099";
+            string worldName = "Minecraft Server";
+            string Software = "Forge"; // e.g. Vanilla or Forge
             int totalPlayers = 20;
-            string localServerIp = "127.0.0.1";
-            string LocalIPAddress = "192.168.100.106"; // "0.0.0.0"
-            string PublicIPAddress = "109.185.75.45"; // "0.0.0.0"
+            string Server_LocalIp = "127.0.0.1";
+            string Server_LocalComputerIP = "192.168.100.106"; // "0.0.0.0"
+            string Server_PublicComputerIP = "109.185.75.45"; // "0.0.0.0"
             int Server_Port = 25565;
             int JMX_Port = 25562;
             int RCON_Port = 25575;
@@ -64,20 +63,20 @@ namespace mainApp
             string tempFolderPath = System.IO.Path.Combine(rootFolder, "temp");
 
             // ↓ Create World Func ↓
-            //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, LocalIPAddress, JMX_Port, RCON_Port);
+            //worldNumber = serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port);
 
             // ↓ Start Server Func ↓
-            //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, LocalIPAddress, JMX_Port, RCON_Port);
-            //await serverOperator.Stop("stop", worldNumber, LocalIPAddress, RCON_Port, JMX_Port, true);
-            //await serverOperator.Restart(serverPath, worldNumber, memoryAlocator, LocalIPAddress, RCON_Port, JMX_Port);
+            //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
+            //await serverOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, true);
+            //await serverOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, RCON_Port, JMX_Port);
             //serverOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
-            //_ = serverOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, LocalIPAddress);
-            //_ = serverOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, LocalIPAddress);
+            //_ = serverOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, Server_LocalComputerIP);
+            //_ = serverOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, Server_LocalComputerIP);
 
             // ↓ Change Version Func ↓
-            //serverOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, LocalIPAddress, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
+            //serverOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
 
             // ↓ Server Files Loop ↓
             //List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
@@ -88,7 +87,7 @@ namespace mainApp
             // ↓ Server Stats Loop ↓
             //while (true)
             //{
-            //    ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, LocalIPAddress, JMX_Port, RCON_Port);
+            //    ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, Server_PublicComputerIP, JMX_Port, RCON_Port);
             //    Thread.Sleep(1000);
             //}
 
