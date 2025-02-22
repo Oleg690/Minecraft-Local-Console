@@ -32,7 +32,7 @@ namespace Server_General_Funcs
 {
     class serverCreator
     {
-        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
+        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
         {
             string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
 
@@ -90,7 +90,7 @@ namespace Server_General_Funcs
             else if (software == "Quilt")
             {
                 jarFoldersPath += @"\versions\Quilt";
-                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName); // TODO
+                jarFilePath = FindClosestJarFile(jarFoldersPath, "installer");
             }
 
             Console.WriteLine("jarFilePath: " + jarFilePath);
@@ -114,7 +114,7 @@ namespace Server_General_Funcs
 
                 foreach (var row in data)
                 {
-                    rconPassword = (string)row[6]; // Servers RCON password
+                    rconPassword = (string)row[6];
                 }
             }
 
@@ -138,7 +138,6 @@ namespace Server_General_Funcs
             }
             else if (software == "Fabric")
             {
-                // TO DO
                 await FabricServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
             }
             else if (software == "NeoForge")
@@ -157,8 +156,7 @@ namespace Server_General_Funcs
             }
             else if (software == "Quilt")
             {
-                // TO DO
-                await QuiltServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
+                await QuiltServerInitialisation(customDirectory, destinationJarPath, tempFolderPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
             }
 
             return uniqueNumber;
@@ -638,9 +636,133 @@ namespace Server_General_Funcs
             // TO DO
         }
 
-        private static async Task QuiltServerInitialisation(string customDirectory, string quiltJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
+        private static async Task QuiltServerInitialisation(string customDirectory, string quiltJarPath, string tempFolderPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
         {
-            // TO DO
+            ProcessStartInfo processInfo = new ProcessStartInfo
+            {
+                FileName = "java",
+                Arguments = $"-jar \"{quiltJarPath}\" install server {version} --download-server",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = tempFolderPath // Directory where the server files will be installed
+            };
+            try
+            {
+                using (Process process = new Process { StartInfo = processInfo })
+                {
+                    int currentProgress = 0;
+
+                    process.OutputDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            // Determine progress based on output logs and update state
+                            if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
+                            {
+                                currentProgress = 10;
+                                Console.WriteLine($"Progress: {currentProgress}% - Extracting main jar...");
+                            }
+                            else if (e.Data.Contains("Downloading library from") && currentProgress < 30)
+                            {
+                                currentProgress = 30;
+                                Console.WriteLine($"Progress: {currentProgress}% - Downloading libraries...");
+                            }
+                            else if (e.Data.Contains("Checksum validated") && currentProgress < 50)
+                            {
+                                currentProgress = 50;
+                                Console.WriteLine($"Progress: {currentProgress}% - Libraries validated...");
+                            }
+                            else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
+                            {
+                                currentProgress = 70;
+                                Console.WriteLine($"Progress: {currentProgress}% - Extracting server files...");
+                            }
+                            else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
+                            {
+                                currentProgress = 85;
+                                Console.WriteLine($"Progress: {currentProgress}% - Processing bundled files...");
+                            }
+                            else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
+                            {
+                                currentProgress = 100;
+                                Console.WriteLine($"Progress: {currentProgress}% - Files installation complete!");
+                            }
+                        }
+                    };
+
+                    process.ErrorDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            Console.WriteLine($"Error: {e.Data}");
+                        }
+                    };
+
+                    // Start the process
+                    process.Start();
+
+                    // Begin asynchronous reading of output and error streams
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+
+                    Console.WriteLine("Minecraft server installation is starting...");
+
+                    process.WaitForExit();
+                }
+
+                if (Insert_Into_DB)
+                {
+                    dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Quilt", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                }
+                Console.WriteLine("Installation completed!");
+
+                CopyFiles(System.IO.Path.Combine(tempFolderPath, "server"), customDirectory);
+
+                object[,] filesToDelete = {
+                { "quilt-server-launch.jar", "quilt-server-launcher.properties", ".cache" }
+                };
+
+                foreach (var file in filesToDelete)
+                {
+                    if (File.Exists(customDirectory + $"\\{file}"))
+                    {
+                        File.Delete(customDirectory + $"\\{file}");
+                    }
+                }
+                
+                serverOperator.DeleteFiles(tempFolderPath, false);
+
+                if (!File.Exists(customDirectory + $"\\mods"))
+                {
+                    Directory.CreateDirectory(customDirectory + $"\\mods");
+                }
+
+                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+
+                string currentDirectory = Directory.GetCurrentDirectory();                
+
+                string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
+                string serverPropertiesPresetPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
+                if (!File.Exists(serverPropertiesPath))
+                {
+                    File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
+                    Console.WriteLine("Created missing server.properties file.");
+                }
+
+                AcceptEULA(quiltJarPath);
+
+                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
+                DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+
+                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
         }
 
         // -------------------------------- Help Functions --------------------------------
@@ -835,6 +957,29 @@ namespace Server_General_Funcs
 
             return matchLength;
         }
+       
+        private static void CopyFiles(string sourceFolder, string destinationFolder)
+        {
+            if (!Directory.Exists(sourceFolder))
+            {
+                throw new DirectoryNotFoundException($"Source folder not found: {sourceFolder}");
+            }
+
+            // Ensure destination folder exists
+            Directory.CreateDirectory(destinationFolder);
+
+            // Get all files in the source folder
+            string[] files = Directory.GetFiles(sourceFolder);
+
+            foreach (string file in files)
+            {
+                string fileName = System.IO.Path.GetFileName(file);
+                string destinationPath = System.IO.Path.Combine(destinationFolder, fileName);
+
+                File.Copy(file, destinationPath, true); // Overwrite if exists
+            }
+        }
+
 
         // --------------------------------------------------------------------------------
     }
@@ -1000,6 +1145,31 @@ namespace Server_General_Funcs
                     WorkingDirectory = serverPath
                 };
             }
+            else if (software == "Quilt")
+            {
+                Console.WriteLine("Starting Quilt Server!");
+
+                string toRunJarFile = FindClosestJarFile(serverPath, "server");
+
+                if (toRunJarFile == null)
+                {
+                    Console.WriteLine("No server file found");
+                }
+
+                serverProcessInfo = new ProcessStartInfo
+                {
+                    FileName = "java",
+                    Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
+                                JMX_Server_Settings +
+                                $"{toRunJarFile} ", // nogui
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = serverPath
+                };
+            }
 
             using (Process process = Process.Start(serverProcessInfo))
             {
@@ -1114,7 +1284,7 @@ namespace Server_General_Funcs
             }
         }
 
-        public static void ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Keep_World_On_Version_Change = false)
+        public static async Task ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Keep_World_On_Version_Change = false)
         {
             if (Keep_World_On_Version_Change)
             {
@@ -1132,7 +1302,7 @@ namespace Server_General_Funcs
                 dbChanger.GetSpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                 Console.WriteLine("Creating New Server...");
-                serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
 
                 object[,] filesToDelete = {
                 { "region", "DIM-1", "DIM1"}
@@ -1167,7 +1337,7 @@ namespace Server_General_Funcs
                 dbChanger.GetSpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                 Console.WriteLine("Creating New Server...");
-                serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
             }
         }
 
@@ -1230,7 +1400,7 @@ namespace Server_General_Funcs
             }
         }
 
-        private static void DeleteFiles(string path, bool deleteWholeDirectory = true)
+        public static void DeleteFiles(string path, bool deleteWholeDirectory = true)
         {
             try
             {

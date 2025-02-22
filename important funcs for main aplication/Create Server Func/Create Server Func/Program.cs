@@ -23,9 +23,9 @@ namespace mainApp
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
             string version = "1.21";  // e.g. 1.21
-            string worldNumber = "797465734164";
+            string worldNumber = "249231482508";
             string worldName = "Minecraft Server";
-            string Software = "Fabric"; // e.g. Vanilla, Forge, NeoForge, Fabric
+            string Software = "Quilt"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt
             int totalPlayers = 20;
             string Server_LocalIp = "127.0.0.1";
             string Server_LocalComputerIP = "192.168.100.106"; // "0.0.0.0"
@@ -64,7 +64,7 @@ namespace mainApp
             string tempFolderPath = Path.Combine(rootFolder, "temp");
 
             // ↓ Create World Func ↓
-            //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
+            //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
 
             //string path = serverOperator.FindClosestJarFile("D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\worlds\\596387740478\\", "server"); // To test
             //Console.WriteLine(path);
@@ -91,7 +91,7 @@ namespace mainApp
             // ↓ Server Stats Loop ↓
             //while (true)
             //{
-            //    ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, Server_PublicComputerIP, JMX_Port, RCON_Port);
+            //    ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, Server_LocalComputerIP, JMX_Port, RCON_Port);
             //    Thread.Sleep(1000);
             //}
 
