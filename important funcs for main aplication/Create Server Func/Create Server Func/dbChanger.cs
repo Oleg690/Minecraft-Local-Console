@@ -169,7 +169,6 @@ namespace databaseChanger
                     connection.Close();
                 }
             }
-            Console.WriteLine("Done!");
         }
     }
 }

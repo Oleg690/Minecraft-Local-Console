@@ -26,12 +26,13 @@ using javax.sound.midi;
 using javax.xml.crypto;
 using sun.security.util;
 using NetworkConfig;
+using sun.awt.windows;
 
 namespace Server_General_Funcs
 {
     class serverCreator
     {
-        public static string CreateServerFunc(string rootFolder, string rootWorldsFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
+        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
         {
             string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
 
@@ -47,6 +48,9 @@ namespace Server_General_Funcs
 
             string jarFoldersPath = rootFolder;
 
+            string versionName = version + ".jar";
+            string jarFilePath = "";
+
             if (software == "")
             {
                 Console.WriteLine("Software not selected!");
@@ -55,18 +59,46 @@ namespace Server_General_Funcs
             else if (software == "Vanilla")
             {
                 jarFoldersPath += @"\versions\Vanilla";
+                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
             }
             else if (software == "Forge")
             {
                 jarFoldersPath += @"\versions\Forge";
+                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
+            }
+            else if (software == "Fabric")
+            {
+                jarFoldersPath += @"\versions\Fabric";
+                jarFilePath = FindClosestJarFile(jarFoldersPath, "installer");
+                Console.WriteLine("jarFilePath: " + jarFilePath);
+            }
+            else if (software == "NeoForge")
+            {
+                jarFoldersPath += @"\versions\NeoForge";
+                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
+            }
+            else if (software == "Purpur")
+            {
+                jarFoldersPath += @"\versions\Purpur";
+                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName); // TODO
+            }
+            else if (software == "Spigot")
+            {
+                jarFoldersPath += @"\versions\Spigot";
+                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName); // TODO
+            }
+            else if (software == "Quilt")
+            {
+                jarFoldersPath += @"\versions\Quilt";
+                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName); // TODO
             }
 
-            string versionName = version + ".jar";
-            string jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
+            Console.WriteLine("jarFilePath: " + jarFilePath);
 
-            if (!System.IO.File.Exists(jarFilePath))
+            if (!File.Exists(jarFilePath))
             {
                 Console.WriteLine("Server .jar file not found! Check the path.");
+                return "";
             }
 
             string destinationJarPath = System.IO.Path.Combine(customDirectory, versionName);
@@ -98,18 +130,42 @@ namespace Server_General_Funcs
 
             if (software == "Vanilla")
             {
-                VanillaServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB, Auto_Stop_After_Start);
+                await VanillaServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
             }
             else if (software == "Forge")
             {
-                ForgeServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB, Auto_Stop_After_Start);
+                await ForgeServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
+            }
+            else if (software == "Fabric")
+            {
+                // TO DO
+                await FabricServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
+            }
+            else if (software == "NeoForge")
+            {
+                await NeoForgeServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
+            }
+            else if (software == "Purpur")
+            {
+                // TO DO
+                await PurpurServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
+            }
+            else if (software == "Spigot")
+            {
+                // TO DO
+                await SpigotServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
+            }
+            else if (software == "Quilt")
+            {
+                // TO DO
+                await QuiltServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
             }
 
             return uniqueNumber;
         }
 
         // ------------------------ Main Server Type Installators ------------------------
-        private static void VanillaServerInitialisation(string customDirectory, string destinationJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB, bool Auto_Stop_After_Start)
+        private static async Task VanillaServerInitialisation(string customDirectory, string vanillaJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
         {
             // Set up the process to run the server
             ProcessStartInfo processInfo = new ProcessStartInfo
@@ -121,13 +177,13 @@ namespace Server_General_Funcs
                                     $"-Dcom.sun.management.jmxremote.authenticate=false " +
                                     $"-Dcom.sun.management.jmxremote.ssl=false " +
                                     $"-Djava.rmi.server.hostname={ipAddress} " + // Replace with actual server IP if necessary
-                                    $"-jar \"{destinationJarPath}\"",
+                                    $"-jar \"{vanillaJarPath}\"",
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WorkingDirectory = System.IO.Path.GetDirectoryName(destinationJarPath) // Set the custom working directory
+                WorkingDirectory = System.IO.Path.GetDirectoryName(vanillaJarPath) // Set the custom working directory
             };
 
             try
@@ -170,7 +226,7 @@ namespace Server_General_Funcs
                                 serverOperator.ClosePort(RCON_Port.ToString());
                             }
 
-                            AcceptEULA(destinationJarPath);
+                            AcceptEULA(vanillaJarPath);
                             DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                             if (Insert_Into_DB)
                             {
@@ -184,10 +240,7 @@ namespace Server_General_Funcs
 
                     DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                    if (Server_Auto_Start)
-                    {
-                        serverOperator.Start(uniqueNumber, destinationJarPath, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, Auto_Stop_After_Start);
-                    }
+                    await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
             }
             catch (Exception ex)
@@ -196,7 +249,7 @@ namespace Server_General_Funcs
             }
         }
 
-        private static async Task ForgeServerInitialisation(string customDirectory, string forgeJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB, bool Auto_Stop_After_Start)
+        private static async Task ForgeServerInitialisation(string customDirectory, string forgeJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
         {
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
@@ -309,15 +362,13 @@ namespace Server_General_Funcs
                     File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
                     Console.WriteLine("Created missing server.properties file.");
                 }
+
                 AcceptEULA(forgeJarPath);
 
                 DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                if (Server_Auto_Start)
-                {
-                    serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, Auto_Stop_After_Start);
-                }
+                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
             catch (Exception ex)
             {
@@ -325,6 +376,272 @@ namespace Server_General_Funcs
             }
         }
 
+        private static async Task FabricServerInitialisation(string customDirectory, string fabricJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
+        {
+            ProcessStartInfo processInfo = new ProcessStartInfo
+            {
+                FileName = "java",
+                Arguments = $"-jar \"{fabricJarPath}\" server -mcversion {version} -downloadMinecraft",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = customDirectory // Directory where the server files will be installed
+            };
+            try
+            {
+                using (Process process = new Process { StartInfo = processInfo })
+                {
+                    int currentProgress = 0;
+
+                    process.OutputDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            // Determine progress based on output logs and update state
+                            if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
+                            {
+                                currentProgress = 10;
+                                Console.WriteLine($"Progress: {currentProgress}% - Extracting main jar...");
+                            }
+                            else if (e.Data.Contains("Downloading library from") && currentProgress < 30)
+                            {
+                                currentProgress = 30;
+                                Console.WriteLine($"Progress: {currentProgress}% - Downloading libraries...");
+                            }
+                            else if (e.Data.Contains("Checksum validated") && currentProgress < 50)
+                            {
+                                currentProgress = 50;
+                                Console.WriteLine($"Progress: {currentProgress}% - Libraries validated...");
+                            }
+                            else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
+                            {
+                                currentProgress = 70;
+                                Console.WriteLine($"Progress: {currentProgress}% - Extracting server files...");
+                            }
+                            else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
+                            {
+                                currentProgress = 85;
+                                Console.WriteLine($"Progress: {currentProgress}% - Processing bundled files...");
+                            }
+                            else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
+                            {
+                                currentProgress = 100;
+                                Console.WriteLine($"Progress: {currentProgress}% - Files installation complete!");
+                            }
+                        }
+                    };
+
+                    process.ErrorDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            Console.WriteLine($"Error: {e.Data}");
+                        }
+                    };
+
+                    // Start the process
+                    process.Start();
+
+                    // Begin asynchronous reading of output and error streams
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+
+                    Console.WriteLine("Minecraft server installation is starting...");
+
+                    process.WaitForExit();
+                }
+
+                if (Insert_Into_DB)
+                {
+                    dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Fabric", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                }
+                Console.WriteLine("Installation completed!");
+
+                object[,] filesToDelete = {
+                { "fabric-server-launch.jar", "fabric-server-launcher.properties" }
+                };
+
+                foreach (var file in filesToDelete)
+                {
+                    if (File.Exists(customDirectory + $"\\{file}"))
+                    {
+                        File.Delete(customDirectory + $"\\{file}");
+                    }
+                }
+
+                if (!File.Exists(customDirectory + $"\\mods"))
+                {
+                    Directory.CreateDirectory(customDirectory + $"\\mods");
+                }
+
+                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+
+                string currentDirectory = Directory.GetCurrentDirectory();
+
+                string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
+                string serverPropertiesPresetPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
+                if (!File.Exists(serverPropertiesPath))
+                {
+                    File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
+                    Console.WriteLine("Created missing server.properties file.");
+                }
+
+                AcceptEULA(fabricJarPath);
+
+                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
+                DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+
+                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        private static async Task NeoForgeServerInitialisation(string customDirectory, string neoForgeJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
+        {
+            ProcessStartInfo processInfo = new ProcessStartInfo
+            {
+                FileName = "java",
+                Arguments = $"-jar \"{neoForgeJarPath}\" --installServer",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = customDirectory // Directory where the server files will be installed
+            };
+            try
+            {
+                using (Process process = new Process { StartInfo = processInfo })
+                {
+                    int currentProgress = 0;
+
+                    process.OutputDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            // Determine progress based on output logs and update state
+                            if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
+                            {
+                                currentProgress = 10;
+                                Console.WriteLine($"Progress: {currentProgress}% - Extracting main jar...");
+                            }
+                            else if (e.Data.Contains("Downloading library from") && currentProgress < 30)
+                            {
+                                currentProgress = 30;
+                                Console.WriteLine($"Progress: {currentProgress}% - Downloading libraries...");
+                            }
+                            else if (e.Data.Contains("Checksum validated") && currentProgress < 50)
+                            {
+                                currentProgress = 50;
+                                Console.WriteLine($"Progress: {currentProgress}% - Libraries validated...");
+                            }
+                            else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
+                            {
+                                currentProgress = 70;
+                                Console.WriteLine($"Progress: {currentProgress}% - Extracting server files...");
+                            }
+                            else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
+                            {
+                                currentProgress = 85;
+                                Console.WriteLine($"Progress: {currentProgress}% - Processing bundled files...");
+                            }
+                            else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
+                            {
+                                currentProgress = 100;
+                                Console.WriteLine($"Progress: {currentProgress}% - Files installation complete!");
+                            }
+                        }
+                    };
+
+                    process.ErrorDataReceived += (sender, e) =>
+                    {
+                        if (!string.IsNullOrEmpty(e.Data))
+                        {
+                            Console.WriteLine($"Error: {e.Data}");
+                        }
+                    };
+
+                    // Start the process
+                    process.Start();
+
+                    // Begin asynchronous reading of output and error streams
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+
+                    Console.WriteLine("Minecraft server installation is starting...");
+
+                    process.WaitForExit();
+                }
+
+                if (Insert_Into_DB)
+                {
+                    dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "NeoForge", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                }
+                Console.WriteLine("Installation completed!");
+
+                File.Delete(neoForgeJarPath);
+
+                object[,] filesToDelete = {
+                { "run.bat", "run.sh", "user_jvm_args.txt", "installer.log" }
+                };
+
+                foreach (var file in filesToDelete)
+                {
+                    if (File.Exists(customDirectory + $"\\{file}"))
+                    {
+                        File.Delete(customDirectory + $"\\{file}");
+                    }
+                }
+
+                if (!File.Exists(customDirectory + $"\\mods"))
+                {
+                    Directory.CreateDirectory(customDirectory + $"\\mods");
+                }
+
+                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+
+                string currentDirectory = Directory.GetCurrentDirectory();
+
+                string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
+                string serverPropertiesPresetPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
+                if (!File.Exists(serverPropertiesPath))
+                {
+                    File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
+                    Console.WriteLine("Created missing server.properties file.");
+                }
+
+                AcceptEULA(neoForgeJarPath);
+
+                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
+                DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+
+                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        private static async Task PurpurServerInitialisation(string customDirectory, string purpurJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
+        {
+            // TO DO
+        }
+
+        private static async Task SpigotServerInitialisation(string customDirectory, string spigotJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
+        {
+            // TO DO
+        }
+
+        private static async Task QuiltServerInitialisation(string customDirectory, string quiltJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
+        {
+            // TO DO
+        }
 
         // -------------------------------- Help Functions --------------------------------
         private static void AcceptEULA(string jarFilePath)
@@ -454,6 +771,71 @@ namespace Server_General_Funcs
             return new string(passwordArray);
         }
 
+        private static string FindClosestJarFile(string folderPath, string targetPattern)
+        {
+            try
+            {
+                // Ensure the folder exists
+                if (!Directory.Exists(folderPath))
+                {
+                    Console.WriteLine("The specified folder does not exist.");
+                    return null;
+                }
+
+                // Get all .jar files in the folder
+                string[] jarFiles = Directory.GetFiles(folderPath, "*.jar");
+
+                // Search for the closest match
+                string bestMatch = null;
+                int bestScore = int.MinValue;
+
+                foreach (string file in jarFiles)
+                {
+                    string fileName = System.IO.Path.GetFileName(file); // Extract only the file name
+
+                    // Check if the file name contains the target pattern
+                    if (fileName.Contains(targetPattern, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Calculate a score based on similarity (e.g., length or exact pattern match)
+                        int score = CalculateMatchScore(fileName, targetPattern);
+
+                        if (score > bestScore)
+                        {
+                            bestScore = score;
+                            bestMatch = fileName; // Store only the file name
+                        }
+                    }
+                }
+
+                return $"{folderPath}\\{bestMatch}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static int CalculateMatchScore(string fileName, string targetPattern)
+        {
+            // Simple scoring: the more characters the file name matches with the pattern, the higher the score
+            int matchLength = 0;
+
+            for (int i = 0; i < Math.Min(fileName.Length, targetPattern.Length); i++)
+            {
+                if (fileName[i] == targetPattern[i])
+                {
+                    matchLength++;
+                }
+                else
+                {
+                    break; // Stop counting when characters differ
+                }
+            }
+
+            return matchLength;
+        }
+
         // --------------------------------------------------------------------------------
     }
 
@@ -485,14 +867,22 @@ namespace Server_General_Funcs
             ProcessStartInfo? serverProcessInfo = null;
 
             string software = string.Join("\n", softwareList.Select(arr => string.Join(", ", arr)));
-
+            //           ↓ For debugging! ↓
             //Console.WriteLine($"Software: '{software}'");
-            //Console.WriteLine(software == "Vanilla");       -> For debugging!
+            //Console.WriteLine(software == "Vanilla");
             //Console.WriteLine(software == "Forge");
+            //Console.WriteLine(software == "NeoForge");
+            //Console.WriteLine(software == "Fabric");
 
             if (software == "Vanilla")
             {
                 Console.WriteLine("Starting Vanilla Server!");
+
+                if (!serverPath.Contains(".jar"))
+                {
+                    string version = dbChanger.GetSpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar";
+                    serverPath = System.IO.Path.Combine(serverPath, version);
+                }
 
                 serverProcessInfo = new ProcessStartInfo
                 {
@@ -512,10 +902,43 @@ namespace Server_General_Funcs
             {
                 Console.WriteLine("Starting Forge Server!");
 
-                if (System.IO.Path.GetFileName(serverPath).Contains(".jar"))
+                string winArgsPath = FindFileInFolder(System.IO.Path.Combine(serverPath, "libraries"), "win_args.txt");
+
+                if (winArgsPath != "")
                 {
-                    serverPath = System.IO.Path.GetDirectoryName(serverPath);
+                    winArgsPath = $"@\"{winArgsPath}\" ";
                 }
+
+                string toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
+
+                if (toRunJarFile == null)
+                {
+                    toRunJarFile = FindClosestJarFile(serverPath, "forge-");
+
+                    if (toRunJarFile == null)
+                    {
+                        Console.WriteLine("No server file found");
+                    }
+                }
+
+                serverProcessInfo = new ProcessStartInfo
+                {
+                    FileName = "java",
+                    Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
+                                JMX_Server_Settings +
+                                $"{winArgsPath}" +
+                                $"{toRunJarFile} %*", // nogui
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = serverPath
+                };
+            }
+            else if (software == "NeoForge")
+            {
+                Console.WriteLine("Starting NeoForge Server!");
 
                 string winArgsPath = FindFileInFolder(System.IO.Path.Combine(serverPath, "libraries"), "win_args.txt");
 
@@ -524,14 +947,40 @@ namespace Server_General_Funcs
                     winArgsPath = $"@\"{winArgsPath}\" ";
                 }
 
-                string toRunJarFile = "";
-
-                toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
+                string toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
 
                 if (toRunJarFile == null)
                 {
-                    toRunJarFile = FindClosestJarFile(serverPath, "forge-");
+                    toRunJarFile = FindClosestJarFile(serverPath, "server");
+
+                    if (toRunJarFile == null)
+                    {
+                        Console.WriteLine("No server file found");
+                    }
                 }
+
+
+                serverProcessInfo = new ProcessStartInfo
+                {
+                    FileName = "java",
+                    Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
+                                JMX_Server_Settings +
+                                $"{winArgsPath}" +
+                                $"{toRunJarFile} %*", // nogui
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = serverPath
+                };
+            }
+            else if (software == "Fabric")
+            {
+                Console.WriteLine("Starting Fabric Server!");
+
+                string toRunJarFile = FindClosestJarFile(serverPath, "server");
+
                 if (toRunJarFile == null)
                 {
                     Console.WriteLine("No server file found");
@@ -542,8 +991,7 @@ namespace Server_General_Funcs
                     FileName = "java",
                     Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                 JMX_Server_Settings +
-                                $"{winArgsPath}" +
-                                $"{toRunJarFile} %*", // nogui
+                                $"{toRunJarFile} ", // nogui
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -609,8 +1057,8 @@ namespace Server_General_Funcs
             bool RCON_Port_Closed = ClosePort(RCON_Port.ToString());
             bool JMX_Port_Closed = ClosePort(JMX_Port.ToString());
 
-            Console.WriteLine("RCON_Port_Closed: " + RCON_Port_Closed);
-            Console.WriteLine("JMX_Port_Closed: " + JMX_Port_Closed);
+            //Console.WriteLine("RCON_Port_Closed: " + RCON_Port_Closed);
+            //Console.WriteLine("JMX_Port_Closed: " + JMX_Port_Closed);
         }
 
         public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string ipAddress, int RCON_Port, int JMX_Port)
@@ -730,6 +1178,7 @@ namespace Server_General_Funcs
                 dbChanger.deleteWorldFromDB(worldNumber);
             }
             DeleteFiles(serverDirectoryPath, deleteWholeDirectory);
+            Console.WriteLine("Done!");
         }
 
 
@@ -845,7 +1294,7 @@ namespace Server_General_Funcs
             return !isAvailable;
         }
 
-        private static string FindClosestJarFile(string folderPath, string targetPattern)
+        public static string FindClosestJarFile(string folderPath, string targetPattern)
         {
             try
             {
@@ -882,7 +1331,6 @@ namespace Server_General_Funcs
                 }
 
                 return $"-jar \"{folderPath}\\{bestMatch}\"";
-
             }
             catch (Exception ex)
             {

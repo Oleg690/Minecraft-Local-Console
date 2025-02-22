@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <Folder Include="database\" />
+    <Folder Include="worlds\" />
     <Folder Include="temp\" />
     <Folder Include="versions\Vanilla\" />
   </ItemGroup>
