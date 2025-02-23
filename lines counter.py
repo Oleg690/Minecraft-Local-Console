@@ -21,7 +21,7 @@ def count_lines_in_files(directory, filenames):
     return results
 
 directory = "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func"
-file_list = ["dbChanger.cs", "MinecraftServerStats.cs", "serverFileExplorer.cs", "ServerNetworkEnable.cs", "serverOperator.cs", "serverPropriertiesChanger.cs"]
+file_list = ["dbChanger.cs", "MinecraftServerStats.cs", "serverFileExplorer.cs", "ServerNetworkEnable.cs", "serverOperator.cs", "serverPropriertiesChanger.cs", "versionsUpdater.cs"]
 couner = 0
 
 results = count_lines_in_files(directory, file_list)

@@ -40,7 +40,6 @@ namespace MinecraftServerStats
                 string upTime = GetServerUptime(serverLogPath, worldNumber);
                 Console.WriteLine($"UpTime: {upTime}");
                 Console.WriteLine($"--------------------------------------------------");
-                Console.WriteLine("");
             }
             else
             {
@@ -112,7 +111,7 @@ namespace MinecraftServerStats
         private static string GetServerUptime(string logFilePath, string worldNumber)
         {
             // Simulating database call to get software type
-            List<object[]> software = dbChanger.GetSpecificDataFunc($"SELECT software FROM worlds WHERE worldNumber = '{worldNumber}';");
+            List<object[]> software = dbChanger.SpecificDataFunc($"SELECT software FROM worlds WHERE worldNumber = '{worldNumber}';");
 
             string softwareType = software[0][0].ToString();
 
@@ -126,13 +125,17 @@ namespace MinecraftServerStats
                     Regex pattern = null;
 
                     // Select the appropriate log pattern based on software type
-                    if (softwareType == "Vanilla")
+                    if (softwareType == "Vanilla" || softwareType == "Fabric" || softwareType == "Quilt" || softwareType == "Purpur")
                     {
-                        pattern = new Regex(@"\[(\d{2}:\d{2}:\d{2})\] \[Server thread/INFO\]: Starting minecraft server version (\d+\.\d+)");
+                        pattern = new Regex(@"\[(\d{2}:\d{2}:\d{2})\] \[Server thread/INFO\]: Starting minecraft server version");
                     }
                     else if (softwareType == "Forge")
                     {
-                        pattern = new Regex(@"\[(\d{2}[a-zA-Z]{3}\d{4} \d{2}:\d{2}:\d{2}\.\d{3})\] \[.*?/INFO\] \[.*?DedicatedServer.*?\]: Starting minecraft server version (\d+\.\d+)");
+                        pattern = new Regex(@"\[(\d{2}[a-zA-Z]{3}\d{4} \d{2}:\d{2}:\d{2}\.\d{3})\] \[.*?/INFO\] \[.*?DedicatedServer.*?\]: Starting minecraft server version");
+                    }
+                    else if (softwareType == "NeoForge")
+                    {
+                        pattern = new Regex(@"\[(\d{2}[a-zA-Z]{3}\d{4} \d{2}:\d{2}:\d{2}\.\d{3})\] \[.*?/INFO\] \[.*?DedicatedServer.*?\]: Starting minecraft server version");
                     }
                     else
                     {
@@ -146,17 +149,21 @@ namespace MinecraftServerStats
                         if (match.Success)
                         {
                             DateTime startTime;
+                            string timestampStr = match.Groups[1].Value;
 
-                            if (softwareType == "Vanilla")
+                            if (softwareType == "Vanilla" || softwareType == "Fabric" || softwareType == "Quilt" || softwareType == "Purpur")
                             {
                                 // Parse timestamp for Vanilla
-                                string timestampStr = match.Groups[1].Value; // Extract "HH:mm:ss"
                                 startTime = DateTime.Today.Add(TimeSpan.Parse(timestampStr));
                             }
                             else if (softwareType == "Forge")
                             {
-                                // Parse timestamp for Modded
-                                string timestampStr = match.Groups[1].Value; // Extract "ddMMMyyyy HH:mm:ss.fff"
+                                // Parse timestamp for Forge
+                                startTime = DateTime.ParseExact(timestampStr, "ddMMMyyyy HH:mm:ss.fff", null);
+                            }
+                            else if (softwareType == "NeoForge")
+                            {
+                                // Parse timestamp for NeoForge
                                 startTime = DateTime.ParseExact(timestampStr, "ddMMMyyyy HH:mm:ss.fff", null);
                             }
                             else

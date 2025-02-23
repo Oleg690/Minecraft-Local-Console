@@ -9,7 +9,7 @@ namespace databaseChanger
 {
     class dbChanger
     {
-        public static List<object[]> GetSpecificDataFunc(string sqlQuery)
+        public static List<object[]> SpecificDataFunc(string sqlQuery)
         {
             List<object[]> data = [];
 
