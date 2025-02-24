@@ -23,10 +23,10 @@ namespace mainApp
             string currentDirectory = Directory.GetCurrentDirectory();
             string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
-            string version = "";  // e.g. 1.21
+            string version = "1.21.4";  // e.g. 1.21
             string worldNumber = "";
             string worldName = "Minecraft Server";
-            string Software = ""; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
+            string Software = "Vanilla"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
             int totalPlayers = 20;
             string Server_LocalIp = "127.0.0.1";
             string Server_LocalComputerIP = "192.168.100.106"; // "0.0.0.0"
@@ -66,12 +66,10 @@ namespace mainApp
 
             // ↓ Update Available Versions ↓ TODO
             //await versionsUpdater.UpdateAvailableVersions(serverVersionsPath); 
+            //await versionsUpdater.UpdateAvailableVersions(serverVersionsPath, "Purpur"); 
 
             // ↓ Create World Func ↓
             //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
-
-            //string path = serverOperator.FindClosestJarFile("D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\worlds\\596387740478\\", "server"); // To test
-            //Console.WriteLine(path);
 
             // ↓ Start Server Func ↓
             //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);

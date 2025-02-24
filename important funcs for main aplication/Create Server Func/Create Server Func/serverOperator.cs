@@ -28,6 +28,7 @@ using sun.security.util;
 using NetworkConfig;
 using sun.awt.windows;
 using com.sun.media.sound;
+using System.Reflection.PortableExecutable;
 
 namespace Server_General_Funcs
 {
@@ -50,6 +51,8 @@ namespace Server_General_Funcs
             string jarFoldersPath = rootFolder;
 
             string versionName = version + ".jar";
+            string versionPath = "";
+            string[] versionData = [];
             string jarFilePath = "";
 
             if (software == "")
@@ -79,8 +82,11 @@ namespace Server_General_Funcs
             }
             else if (software == "Purpur")
             {
-                jarFoldersPath += @"\versions\Purpur";
-                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName); // TODO
+                jarFoldersPath = rootFolder + "\\versions\\Purpur\\";
+                versionData = FindJarFile(jarFoldersPath, version);
+                versionPath = versionData[0];
+                versionName = versionData[1];
+                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
             }
             else if (software == "Spigot")
             {
@@ -93,6 +99,8 @@ namespace Server_General_Funcs
                 jarFilePath = FindClosestJarFile(jarFoldersPath, "installer");
             }
 
+            Console.WriteLine(jarFilePath);
+
             if (!File.Exists(jarFilePath))
             {
                 Console.WriteLine("Server .jar file not found! Check the path.");
@@ -102,6 +110,9 @@ namespace Server_General_Funcs
             string destinationJarPath = System.IO.Path.Combine(customDirectory, versionName);
 
             File.Copy(jarFilePath, destinationJarPath);
+            RenameFile(destinationJarPath, System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destinationJarPath), version + ".jar"));
+            destinationJarPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destinationJarPath), version + ".jar");
+
             Console.WriteLine("Server .jar file copied to the custom directory.");
 
             string rconPassword = generatePassword(20);
@@ -144,7 +155,6 @@ namespace Server_General_Funcs
             }
             else if (software == "Purpur")
             {
-                // TO DO
                 await PurpurServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
             }
             else if (software == "Spigot")
@@ -843,6 +853,56 @@ namespace Server_General_Funcs
         }
 
         // -------------------------------- Help Functions --------------------------------
+
+        private static void RenameFile(string fileName, string newName)
+        {
+            try
+            {
+                // Create a FileInfo object from the source file path.
+                FileInfo fileInfo = new FileInfo(fileName);
+
+                // Rename the file using File.Move method.
+                File.Move(fileName, newName);
+
+                // Print a success message.
+                Console.WriteLine($"File has been renamed successfully from {fileName} to {newName}.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to rename the file. Error: {ex.Message}");
+            }
+        }
+
+        private static string[] FindJarFile(string rootPath, string targetVersion)
+        {
+            string? jarPath = null;
+
+            // Get all files in the specified directory
+            string[] files = Directory.GetFiles(rootPath, "*.jar");
+
+            foreach (string file in files)
+            {
+                string fileName = System.IO.Path.GetFileName(file);
+                string[] parts = fileName.Split('-');
+
+                if (parts.Length >= 2 && parts[1].Trim() == targetVersion)
+                {
+                    // Found the matching jar file
+                    jarPath = System.IO.Path.Combine(rootPath, fileName);
+                    // Use or copy the jar file as needed
+                    return [jarPath, fileName];
+                }
+            }
+
+            // Handle exceptions, such as no matching jar found
+            if (jarPath == null)
+            {
+                
+                throw new Exception("No jar file found with the specified version.");
+            }
+            return ["0"];
+        }
+
         private static void AcceptEULA(string jarFilePath)
         {
             string serverDir = System.IO.Path.GetDirectoryName(jarFilePath);
@@ -900,7 +960,7 @@ namespace Server_General_Funcs
             return randomNumber;
         }
 
-        private static bool CheckForMatchingFolder(string rootFolder, string folderName)
+        public static bool CheckForMatchingFolder(string rootFolder, string folderName)
         {
             try
             {
@@ -1090,13 +1150,16 @@ namespace Server_General_Funcs
 
             string software = string.Join("\n", softwareList.Select(arr => string.Join(", ", arr)));
 
+            
+
             //           ↓ For debugging! ↓
-            //Console.WriteLine($"Software: '{software}'");
-            //Console.WriteLine(software == "Vanilla");
-            //Console.WriteLine(software == "Forge");
-            //Console.WriteLine(software == "NeoForge");
-            //Console.WriteLine(software == "Fabric");
-            //Console.WriteLine(software == "Purpur");
+            Console.WriteLine($"worldNumber: '{worldNumber}'");
+            Console.WriteLine($"Software: '{software}'");
+            Console.WriteLine(software == "Vanilla");
+            Console.WriteLine(software == "Forge");
+            Console.WriteLine(software == "NeoForge");
+            Console.WriteLine(software == "Fabric");
+            Console.WriteLine(software == "Purpur");
 
             if (software == "Vanilla")
             {
