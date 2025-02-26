@@ -65,8 +65,9 @@ namespace mainApp
             string tempFolderPath = Path.Combine(rootFolder, "temp");
 
             // ↓ Update Available Versions ↓ TODO
-            //await versionsUpdater.UpdateAvailableVersions(serverVersionsPath); 
-            //await versionsUpdater.UpdateAvailableVersions(serverVersionsPath, "Purpur"); 
+            //await versionsUpdater.UpdateAllSoftwaresVersions(serverVersionsPath);
+            //await versionsUpdater.UpdateSoftwareVersions(serverVersionsPath, "Purpur"); 
+            await versionsUpdater.UpdateSoftwareVersion(serverVersionsPath, "Vanilla", "1.21"); // TODO 
 
             // ↓ Create World Func ↓
             //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);

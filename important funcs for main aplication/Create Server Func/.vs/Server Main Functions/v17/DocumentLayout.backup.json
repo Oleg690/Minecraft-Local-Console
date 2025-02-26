@@ -3,16 +3,12 @@
   "WorkspaceRootPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\serveroperator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\serveroperator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\versionsupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\versionsupdater.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,17 +18,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Program.cs",
               "RelativeDocumentMoniker": "Create Server Func\\Program.cs",
-              "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Program.cs*",
-              "RelativeToolTip": "Create Server Func\\Program.cs*",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAAwBoAAAAuAAAAAAAAAA==",
+              "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Program.cs",
+              "RelativeToolTip": "Create Server Func\\Program.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAkwEUAAABTAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-23T18:50:48.411Z",
               "IsPinned": true,
@@ -44,28 +40,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "versionsUpdater.cs",
               "DocumentMoniker": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\versionsUpdater.cs",
               "RelativeDocumentMoniker": "Create Server Func\\versionsUpdater.cs",
               "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\versionsUpdater.cs",
               "RelativeToolTip": "Create Server Func\\versionsUpdater.cs",
-              "ViewState": "AgIAANIAAAAAAAAAAAAwwO4AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAJ8AAAAAAAAAAADgv/AAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-24T18:58:34.213Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "serverOperator.cs",
-              "DocumentMoniker": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\serverOperator.cs",
-              "RelativeDocumentMoniker": "Create Server Func\\serverOperator.cs",
-              "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\serverOperator.cs",
-              "RelativeToolTip": "Create Server Func\\serverOperator.cs",
-              "ViewState": "AgIAAFYAAAAAAAAAAAAWwHIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-24T14:40:03.681Z",
+              "WhenOpened": "2025-02-26T14:32:59.022Z",
               "EditorCaption": ""
             }
           ]

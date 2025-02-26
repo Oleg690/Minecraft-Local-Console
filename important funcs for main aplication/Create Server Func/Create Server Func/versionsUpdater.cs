@@ -11,38 +11,31 @@ namespace updater
 {
     class versionsUpdater
     {
+        private static readonly string FabricApiBaseUrl = "";
+        private static readonly string ForgeApiBaseUrl = "";
+        private static readonly string NeoForgeApiBaseUrl = "";
         private static readonly string PurpurApiBaseUrl = "https://api.purpurmc.org/v2/purpur/";
+        private static readonly string QuiltApiBaseUrl = "";
+        private static readonly string VanillaApiBaseUrl = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
+
         private static readonly HttpClient HttpClient = new HttpClient();
 
-        public static async Task CheckAndUpdatePurpurAsync(string downloadDirectory)
+        public static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string selectedVersion)
         {
             Console.WriteLine($"Checking Purpur versions in: {downloadDirectory}");
             Directory.CreateDirectory(downloadDirectory);
-
-            var availableVersions = await GetAvailableVersionsAsync();
-            if (availableVersions == null || availableVersions.Length == 0)
-            {
-                Console.WriteLine("No available versions found.");
-                return;
-            }
-
-            Console.WriteLine($"Found {availableVersions.Length} versions.");
 
             // Get local versions and builds
             var localFiles = Directory.GetFiles(downloadDirectory, "purpur-*.jar");
 
             Console.WriteLine("Local files detected:");
-            foreach (var file in localFiles)
-            {
-                Console.WriteLine($" - {file}");
-            }
 
             var localVersions = new Dictionary<string, int>();
 
             foreach (var file in localFiles)
             {
                 string fileName = Path.GetFileNameWithoutExtension(file);
-                Console.WriteLine($"Processing local file: {fileName}");
+                //Console.WriteLine($"Processing local file: {fileName}");
 
                 var parts = fileName.Replace("purpur-", "").Split('-');
                 if (parts.Length == 1) // Handle filenames without build numbers
@@ -62,18 +55,20 @@ namespace updater
                 }
             }
 
-            Console.WriteLine("Local versions detected:");
-            foreach (var kvp in localVersions)
+            var availableVersions = await GetAvailablePurpurVersionsAsync(selectedVersion);
+            if (availableVersions == null || availableVersions.Length == 0)
             {
-                Console.WriteLine($" - Version: {kvp.Key}, Build: {kvp.Value}");
+                Console.WriteLine("No available versions found.");
+                return;
             }
 
+            Console.WriteLine($"Found {availableVersions.Length} versions.");
             foreach (var version in availableVersions)
             {
-                Console.WriteLine($"Processing version {version}...");
+                //Console.WriteLine($"Processing version {version}...");
 
                 // Fetch the latest build for the version
-                int? latestBuild = await GetLatestBuildAsync(version);
+                int? latestBuild = await GetPurpurLatestBuildAsync(version);
 
                 if (latestBuild == null)
                 {
@@ -94,13 +89,13 @@ namespace updater
 
                     // Download the latest version and rename it to include the build number
                     Console.WriteLine($"Purpur {version} is missing or outdated. Downloading...");
-                    await DownloadLatestVersionAsync(version, downloadDirectory, latestBuild.Value);
+                    await DownloadPurpurVersionAsync(version, downloadDirectory, latestBuild.Value);
                 }
                 else
                 {
                     // Compare builds
                     int currentBuild = localVersions[version];
-                    Console.WriteLine($"Local build for {version}: {currentBuild}, Latest build: {latestBuild}");
+                    //Console.WriteLine($"Local build for {version}: {currentBuild}, Latest build: {latestBuild}");
 
                     if (currentBuild < latestBuild)
                     {
@@ -111,7 +106,7 @@ namespace updater
                             Console.WriteLine($"Deleting old version: {oldFile}");
                             File.Delete(oldFile);
                         }
-                        await DownloadLatestVersionAsync(version, downloadDirectory, latestBuild.Value);
+                        await DownloadPurpurVersionAsync(version, downloadDirectory, latestBuild.Value);
                     }
                     else
                     {
@@ -119,17 +114,84 @@ namespace updater
                     }
                 }
             }
+
+            Console.WriteLine("--------------------------------");
+            Console.WriteLine("All Purpur versions are updated.");
+            Console.WriteLine("--------------------------------");
         }
 
-        private static async Task<string[]> GetAvailableVersionsAsync()
+        public static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string selectedVersion)
+        {
+            Console.WriteLine($"Checking Vanilla Minecraft versions in: {downloadDirectory}");
+            Directory.CreateDirectory(downloadDirectory);
+
+            var availableVersions = await GetAvailableVanillaVersionsAsync(selectedVersion);
+
+            if (availableVersions == null || availableVersions.Count == 0)
+            {
+                Console.WriteLine("No available versions found.");
+                return;
+            }
+
+            Console.WriteLine($"Found {availableVersions.Count} versions.");
+
+            var localFiles = Directory.GetFiles(downloadDirectory, "vanilla-*.jar");
+
+            var localVersions = localFiles.Select(f => Path.GetFileNameWithoutExtension(f).Replace("vanilla-", "")).ToHashSet();
+
+            foreach (var version in availableVersions.Keys)
+            {
+                if (!localVersions.Contains(version))
+                {
+                    Console.WriteLine($"Vanilla {version} is missing. Downloading...");
+                    await DownloadVanillaVersionAsync(availableVersions[version], downloadDirectory, version);
+                }
+                else
+                {
+                    Console.WriteLine($"Vanilla {version} is up to date.");
+                }
+            }
+
+            Console.WriteLine("---------------------------------");
+            Console.WriteLine("All Vanilla versions are updated.");
+            Console.WriteLine("---------------------------------");
+        }
+
+        //----------------------------------------------------------------------------------------------------------------------------
+
+        private static async Task<Dictionary<string, string>> GetAvailableVanillaVersionsAsync(string? selectedVersion = null)
         {
             try
             {
-                Console.WriteLine("Fetching available Purpur versions...");
-                var response = await HttpClient.GetStringAsync(PurpurApiBaseUrl);
-                Console.WriteLine($"API Response: {response}");
+                Console.WriteLine("Fetching available Vanilla Minecraft versions...");
+                var response = await HttpClient.GetStringAsync(VanillaApiBaseUrl);
                 using var jsonDoc = JsonDocument.Parse(response);
-                return jsonDoc.RootElement.GetProperty("versions").EnumerateArray().Select(e => e.GetString()).ToArray();
+
+                var availableVersions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray()
+                                    .Where(v => v.GetProperty("type").GetString() == "release")
+                                    .ToDictionary(
+                                        v => v.GetProperty("id").GetString(),
+                                        v => v.GetProperty("url").GetString()
+                                    );
+
+                if (selectedVersion != null)
+                {
+                    availableVersions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray()
+                                    .Where(v => v.GetProperty("type").GetString() == "release" && v.GetProperty("id").GetString() == $"{selectedVersion}")
+                                    .ToDictionary(
+                                        v => v.GetProperty("id").GetString(),
+                                        v => v.GetProperty("url").GetString()
+                                    );
+                }
+
+
+
+                foreach (var version in availableVersions)
+                {
+                    Console.WriteLine($"Detected version: {version.Key}");
+                }
+
+                return availableVersions;
             }
             catch (Exception ex)
             {
@@ -138,13 +200,62 @@ namespace updater
             }
         }
 
-        private static async Task<int?> GetLatestBuildAsync(string version)
+        private static async Task DownloadVanillaVersionAsync(string versionUrl, string downloadDirectory, string version)
         {
             try
             {
-                Console.WriteLine($"Fetching latest build for {version}...");
+                var response = await HttpClient.GetStringAsync(versionUrl);
+                using var jsonDoc = JsonDocument.Parse(response);
+                string jarUrl = jsonDoc.RootElement.GetProperty("downloads").GetProperty("client").GetProperty("url").GetString();
+
+                string savePath = Path.Combine(downloadDirectory, $"vanilla-{version}.jar");
+                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
+                using var fileStream = File.Create(savePath);
+                await jarResponse.CopyToAsync(fileStream);
+
+                Console.WriteLine($"Downloaded Minecraft {version} successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download Minecraft {version}: {ex.Message}");
+            }
+        }
+
+        private static async Task<string[]> GetAvailablePurpurVersionsAsync(string? selectedVersion = null)
+        {
+            try
+            {
+                //Console.WriteLine("Fetching available Purpur versions...");
+                var response = await HttpClient.GetStringAsync(PurpurApiBaseUrl);
+                
+                using var jsonDoc = JsonDocument.Parse(response);
+                var versions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray().Select(e => e.GetString()).ToArray();
+
+                if (selectedVersion != null)
+                {
+                    versions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray().Where(v => v.GetString() == $"{selectedVersion}").Select(e => e.GetString()).ToArray();
+                }
+                Console.WriteLine($"API Response: ");
+                foreach (var version in versions)
+                {
+                    Console.WriteLine($"Detected version: {version}");
+                }
+
+                return versions;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching versions: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static async Task<int?> GetPurpurLatestBuildAsync(string version)
+        {
+            try
+            {
                 var response = await HttpClient.GetStringAsync($"{PurpurApiBaseUrl}{version}");
-                Console.WriteLine($"API Response for {version}: {response}");
+                //Console.WriteLine($"API Response for {version}: {response}");
 
                 using var jsonDoc = JsonDocument.Parse(response);
 
@@ -163,7 +274,7 @@ namespace updater
             }
         }
 
-        private static async Task DownloadLatestVersionAsync(string version, string downloadDirectory, int latestBuild)
+        private static async Task DownloadPurpurVersionAsync(string version, string downloadDirectory, int latestBuild)
         {
             try
             {
@@ -184,7 +295,7 @@ namespace updater
                     try
                     {
                         File.Move(tempFilePath, finalFilePath);
-                        Console.WriteLine($"Successfully renamed Purpur {version} to {finalFilePath}");
+                        //Console.WriteLine($"Successfully renamed Purpur {version} to {finalFilePath}");
                     }
                     catch (Exception ex)
                     {
@@ -195,6 +306,7 @@ namespace updater
                         File.Delete(tempFilePath);
                     }
                 }
+                Console.WriteLine($"Downloaded Purpur {version} successfully!");
             }
             catch (Exception ex)
             {
@@ -202,9 +314,14 @@ namespace updater
             }
         }
 
-        public static async Task UpdateAvailableVersions(string serverVersionsPath)
+        // ------------------------ Main Updater Funcs ------------------------
+
+        public static async Task UpdateAllSoftwaresVersions(string serverVersionsPath)
         {
+            Console.WriteLine("--------------------------------------------");
             Console.WriteLine("Starting versions updater for all softwares.");
+            Console.WriteLine("--------------------------------------------");
+            Console.WriteLine();
 
             object[,] softwareTypes = {
                 { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur" },
@@ -213,46 +330,73 @@ namespace updater
             foreach (string software in softwareTypes)
             {
                 string versionDirectory = Path.Combine(serverVersionsPath, software);
-                switch (software)
-                {
-                    case "Vanilla":
-                        break;
-                    case "Forge":
-                        break;
-                    case "NeoForge":
-                        break;
-                    case "Fabric":
-                        break;
-                    case "Quilt":
-                        break;
-                    case "Purpur":
-                        await CheckAndUpdatePurpurAsync(versionDirectory);
-                        break;
-                    default:
-                        Console.WriteLine($"Unknown version type: {software}");
-                        break;
-                }
+                await RunUpdaterForSoftware(versionDirectory, software);
             }
 
+            Console.WriteLine();
+            Console.WriteLine("-------------------------");
             Console.WriteLine("All versions are updated!");
+            Console.WriteLine("-------------------------");
         }
 
-        public static async Task UpdateAvailableVersions(string serverVersionsPath, string software)
+        public static async Task UpdateSoftwareVersions(string serverVersionsPath, string software)
         {
+            Console.WriteLine("--------------------------------------------");
             Console.WriteLine($"Starting versions updater for {software}.");
+            Console.WriteLine("--------------------------------------------");
+            Console.WriteLine();
 
             string versionDirectory = Path.Combine(serverVersionsPath, software);
+
+            await RunUpdaterForSoftware(versionDirectory, software);
+
+            Console.WriteLine();
+            Console.WriteLine("-------------------------");
+            Console.WriteLine("All versions are updated!");
+            Console.WriteLine("-------------------------");
+        }
+
+        public static async Task UpdateSoftwareVersion(string serverVersionsPath, string software, string version)
+        {
+            Console.WriteLine("--------------------------------------------");
+            Console.WriteLine($"Starting versions updater for {software}.");
+            Console.WriteLine("--------------------------------------------");
+            Console.WriteLine();
+
+            string versionDirectory = Path.Combine(serverVersionsPath, software);
+
+            await RunUpdaterForSoftware(versionDirectory, software, version);
+
+            Console.WriteLine();
+            Console.WriteLine("-------------------------");
+            Console.WriteLine("All versions are updated!");
+            Console.WriteLine("-------------------------");
+        }
+
+        // ------------------------ Main Updater Funcs Helpers ------------------------
+
+        private static async Task RunUpdaterForSoftware(string versionDirectory, string software, string? version = null)
+        {
             switch (software)
             {
+                case "Vanilla":
+                    await CheckAndUpdateVanillaAsync(versionDirectory, version);
+                    break;
+                case "Forge":
+                    break;
+                case "NeoForge":
+                    break;
+                case "Fabric":
+                    break;
+                case "Quilt":
+                    break;
                 case "Purpur":
-                    await CheckAndUpdatePurpurAsync(versionDirectory);
+                    await CheckAndUpdatePurpurAsync(versionDirectory, version);
                     break;
                 default:
                     Console.WriteLine($"Unknown version type: {software}");
                     break;
             }
-
-            Console.WriteLine("All versions are updated!");
         }
     }
 }
