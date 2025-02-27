@@ -9,7 +9,7 @@ using System.Net.Http;
 
 namespace updater
 {
-    class versionsUpdater
+    class VersionsUpdater
     {
         private static readonly string FabricApiBaseUrl = "";
         private static readonly string ForgeApiBaseUrl = "";
@@ -20,6 +20,120 @@ namespace updater
 
         private static readonly HttpClient HttpClient = new HttpClient();
 
+        // ------------------------ ↓ Vanilla Updater Funcs ↓ ------------------------
+        public static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string selectedVersion = null)
+        {
+            Console.WriteLine($"Checking Vanilla Minecraft Server versions in: {downloadDirectory}");
+            Directory.CreateDirectory(downloadDirectory);
+
+            var availableVersions = await GetAvailableVanillaServerVersionsAsync(selectedVersion);
+            if (availableVersions == null || availableVersions.Count == 0)
+            {
+                Console.WriteLine("No available server versions found.");
+                return;
+            }
+
+            Console.WriteLine($"Found {availableVersions.Count} versions.");
+
+            var localFiles = Directory.GetFiles(downloadDirectory, "vanilla-*.jar");
+            var localVersions = localFiles.Select(f => Path.GetFileNameWithoutExtension(f).Replace("vanilla-", "")).ToHashSet();
+
+            foreach (var version in availableVersions.Keys)
+            {
+                if (!localVersions.Contains(version))
+                {
+                    Console.WriteLine($"Vanilla Server {version} is missing. Downloading...");
+                    await DownloadServerJarAsync(availableVersions[version], downloadDirectory, version);
+                }
+                else
+                {
+                    Console.WriteLine($"Vanilla Server {version} is up to date.");
+                }
+            }
+
+            Console.WriteLine("---------------------------------");
+            Console.WriteLine("All Vanilla Server versions are updated.");
+            Console.WriteLine("---------------------------------");
+        }
+
+        // ------------------------ ↓ Help Vanilla Updater Funcs ↓ ------------------------
+
+        private static async Task<Dictionary<string, string>> GetAvailableVanillaServerVersionsAsync(string selectedVersion = null)
+        {
+            try
+            {
+                Console.WriteLine("Fetching available Vanilla Minecraft Server versions...");
+                var response = await HttpClient.GetStringAsync(VanillaApiBaseUrl);
+                using var jsonDoc = JsonDocument.Parse(response);
+
+                var availableVersions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray()
+                    .Where(v => v.GetProperty("type").GetString() == "release")
+                    .ToDictionary(
+                        v => v.GetProperty("id").GetString(),
+                        v => v.GetProperty("url").GetString()
+                    );
+
+                if (!string.IsNullOrEmpty(selectedVersion))
+                {
+                    availableVersions = availableVersions
+                        .Where(v => v.Key == selectedVersion)
+                        .ToDictionary(v => v.Key, v => v.Value);
+                }
+
+                foreach (var version in availableVersions)
+                {
+                    Console.WriteLine($"Detected server version: {version.Key}");
+                }
+
+                return availableVersions;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching versions: {ex.Message}");
+                return null;
+            }
+        }
+
+        private static async Task DownloadServerJarAsync(string versionUrl, string downloadDirectory, string version)
+        {
+            try
+            {
+                var response = await HttpClient.GetStringAsync(versionUrl);
+                using var jsonDoc = JsonDocument.Parse(response);
+
+                string jarUrl = jsonDoc.RootElement.GetProperty("downloads")
+                                                  .GetProperty("server")
+                                                  .GetProperty("url")
+                                                  .GetString();
+
+                string savePath = Path.Combine(downloadDirectory, $"vanilla-{version}.jar");
+
+                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
+                using var fileStream = File.Create(savePath);
+                await jarResponse.CopyToAsync(fileStream);
+
+                Console.WriteLine($"Downloaded Minecraft Server {version} successfully!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download Minecraft Server {version}: {ex.Message}");
+            }
+        }
+
+
+        // ------------------------ ↓ Forge Updater Funcs ↓ ------------------------
+        // ------------------------ ↓ Help Forge Updater Funcs ↓ ------------------------
+
+        // ------------------------ ↓ NeoForge Updater Funcs ↓ ------------------------
+        // ------------------------ ↓ Help NeoForge Updater Funcs ↓ ------------------------
+
+        // ------------------------ ↓ Fabric Updater Funcs ↓ ------------------------
+        // ------------------------ ↓ Help Fabric Updater Funcs ↓ ------------------------
+
+        // ------------------------ ↓ Quilt Updater Funcs ↓ ------------------------
+        // ------------------------ ↓ Help Quilt Updater Funcs ↓ ------------------------
+
+        // ------------------------ ↓ Purpur Updater Funcs ↓ ------------------------
         public static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string selectedVersion)
         {
             Console.WriteLine($"Checking Purpur versions in: {downloadDirectory}");
@@ -120,114 +234,14 @@ namespace updater
             Console.WriteLine("--------------------------------");
         }
 
-        public static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string selectedVersion)
-        {
-            Console.WriteLine($"Checking Vanilla Minecraft versions in: {downloadDirectory}");
-            Directory.CreateDirectory(downloadDirectory);
-
-            var availableVersions = await GetAvailableVanillaVersionsAsync(selectedVersion);
-
-            if (availableVersions == null || availableVersions.Count == 0)
-            {
-                Console.WriteLine("No available versions found.");
-                return;
-            }
-
-            Console.WriteLine($"Found {availableVersions.Count} versions.");
-
-            var localFiles = Directory.GetFiles(downloadDirectory, "vanilla-*.jar");
-
-            var localVersions = localFiles.Select(f => Path.GetFileNameWithoutExtension(f).Replace("vanilla-", "")).ToHashSet();
-
-            foreach (var version in availableVersions.Keys)
-            {
-                if (!localVersions.Contains(version))
-                {
-                    Console.WriteLine($"Vanilla {version} is missing. Downloading...");
-                    await DownloadVanillaVersionAsync(availableVersions[version], downloadDirectory, version);
-                }
-                else
-                {
-                    Console.WriteLine($"Vanilla {version} is up to date.");
-                }
-            }
-
-            Console.WriteLine("---------------------------------");
-            Console.WriteLine("All Vanilla versions are updated.");
-            Console.WriteLine("---------------------------------");
-        }
-
-        //----------------------------------------------------------------------------------------------------------------------------
-
-        private static async Task<Dictionary<string, string>> GetAvailableVanillaVersionsAsync(string? selectedVersion = null)
-        {
-            try
-            {
-                Console.WriteLine("Fetching available Vanilla Minecraft versions...");
-                var response = await HttpClient.GetStringAsync(VanillaApiBaseUrl);
-                using var jsonDoc = JsonDocument.Parse(response);
-
-                var availableVersions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray()
-                                    .Where(v => v.GetProperty("type").GetString() == "release")
-                                    .ToDictionary(
-                                        v => v.GetProperty("id").GetString(),
-                                        v => v.GetProperty("url").GetString()
-                                    );
-
-                if (selectedVersion != null)
-                {
-                    availableVersions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray()
-                                    .Where(v => v.GetProperty("type").GetString() == "release" && v.GetProperty("id").GetString() == $"{selectedVersion}")
-                                    .ToDictionary(
-                                        v => v.GetProperty("id").GetString(),
-                                        v => v.GetProperty("url").GetString()
-                                    );
-                }
-
-
-
-                foreach (var version in availableVersions)
-                {
-                    Console.WriteLine($"Detected version: {version.Key}");
-                }
-
-                return availableVersions;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error fetching versions: {ex.Message}");
-                return null;
-            }
-        }
-
-        private static async Task DownloadVanillaVersionAsync(string versionUrl, string downloadDirectory, string version)
-        {
-            try
-            {
-                var response = await HttpClient.GetStringAsync(versionUrl);
-                using var jsonDoc = JsonDocument.Parse(response);
-                string jarUrl = jsonDoc.RootElement.GetProperty("downloads").GetProperty("client").GetProperty("url").GetString();
-
-                string savePath = Path.Combine(downloadDirectory, $"vanilla-{version}.jar");
-                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
-                using var fileStream = File.Create(savePath);
-                await jarResponse.CopyToAsync(fileStream);
-
-                Console.WriteLine($"Downloaded Minecraft {version} successfully!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to download Minecraft {version}: {ex.Message}");
-            }
-        }
-
+        // ------------------------ ↓ Help Purpur Updater Funcs ↓ ------------------------
         private static async Task<string[]> GetAvailablePurpurVersionsAsync(string? selectedVersion = null)
         {
             try
             {
                 //Console.WriteLine("Fetching available Purpur versions...");
                 var response = await HttpClient.GetStringAsync(PurpurApiBaseUrl);
-                
+
                 using var jsonDoc = JsonDocument.Parse(response);
                 var versions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray().Select(e => e.GetString()).ToArray();
 
@@ -314,7 +328,10 @@ namespace updater
             }
         }
 
-        // ------------------------ Main Updater Funcs ------------------------
+        // ------------------------ ↓ Spigot Updater Funcs ↓ ------------------------
+        // ------------------------ ↓ Help Spigot Updater Funcs ↓ ------------------------
+
+        // ------------------------ ↓ Main Updater Funcs ↓ ------------------------
 
         public static async Task UpdateAllSoftwaresVersions(string serverVersionsPath)
         {
@@ -373,7 +390,7 @@ namespace updater
             Console.WriteLine("-------------------------");
         }
 
-        // ------------------------ Main Updater Funcs Helpers ------------------------
+        // ------------------------ ↓ Main Updater Funcs Helpers ↓ ------------------------
 
         private static async Task RunUpdaterForSoftware(string versionDirectory, string software, string? version = null)
         {

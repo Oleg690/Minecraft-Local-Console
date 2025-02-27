@@ -12,7 +12,6 @@ namespace mainApp
     internal class Program
     {
         static async Task Main()
-        //static void Main()
         {
             // Public Address Ranges
             // 1.0.0.0 – 9.255.255.255
@@ -20,13 +19,11 @@ namespace mainApp
             // Public Address Ranges
             // 10.0.0.0 to 10.255.255.255
 
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
-            string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
-            string version = "1.21.4";  // e.g. 1.21
+            // ↓ Server Settings ↓
+            string version = "1.21";  // e.g. 1.21
             string worldNumber = "";
             string worldName = "Minecraft Server";
-            string Software = "Vanilla"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
+            string software = "Vanilla"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
             int totalPlayers = 20;
             string Server_LocalIp = "127.0.0.1";
             string Server_LocalComputerIP = "192.168.100.106"; // "0.0.0.0"
@@ -56,6 +53,10 @@ namespace mainApp
                 { "spawn-protection", "0" }
             };
 
+            // ↓ All needed directories ↓
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
+            string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
             string serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
             string serverPath = Path.Combine(serverDirectoryPath);
             string serverJarPath = Path.Combine(serverDirectoryPath, version + ".jar");
@@ -64,32 +65,49 @@ namespace mainApp
             string serverVersionsPath = Path.Combine(rootFolder, "versions");
             string tempFolderPath = Path.Combine(rootFolder, "temp");
 
+            var localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
+            bool _contiune = false;
+
+            foreach ( var localVersion in localFiles)
+            {
+                if (localVersion.Contains(version))
+                {
+                    _contiune = true;
+                    break;
+                }
+            }
+            if (!_contiune)
+            {
+                Console.WriteLine("Version not found in local files! Downloading it...");
+                await VersionsUpdater.UpdateSoftwareVersion(serverVersionsPath, software, version);
+            }
+
             // ↓ Update Available Versions ↓ TODO
-            //await versionsUpdater.UpdateAllSoftwaresVersions(serverVersionsPath);
-            //await versionsUpdater.UpdateSoftwareVersions(serverVersionsPath, "Purpur"); 
-            await versionsUpdater.UpdateSoftwareVersion(serverVersionsPath, "Vanilla", "1.21"); // TODO 
+            //await VersionsUpdater.UpdateAllSoftwaresVersions(serverVersionsPath);
+            //await VersionsUpdater.UpdateSoftwareVersions(serverVersionsPath, "Vanilla");
+            //await VersionsUpdater.UpdateSoftwareVersion(serverVersionsPath, "Vanilla", "1.21");
 
             // ↓ Create World Func ↓
-            //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
+            //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
 
             // ↓ Start Server Func ↓
-            //await serverOperator.Start(worldNumber, serverPath, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
-            //await serverOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, true);
-            //await serverOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, RCON_Port, JMX_Port);
-            //serverOperator.Kill(RCON_Port, JMX_Port);
+            //await ServerOperator.Start(worldNumber, serverPath, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
+            //await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, true);
+            //await ServerOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, RCON_Port, JMX_Port);
+            //ServerOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
-            //_ = serverOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, Server_LocalComputerIP);
-            //_ = serverOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, Server_LocalComputerIP);
+            //_ = ServerOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, Server_LocalComputerIP);
+            //_ = ServerOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, Server_LocalComputerIP);
 
             // ↓ Change Version Func ↓
-            //await serverOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, Software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
+            //await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
 
             // ↓ Server Files Loop ↓
             //List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
 
             // ↓ Delete Server ↓
-            //serverOperator.DeleteServer(worldNumber, serverDirectoryPath);
+            ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
 
             // ↓ Server Stats Loop ↓
             //while (true)
@@ -105,7 +123,7 @@ namespace mainApp
             //string domainName = DomainName.GetRandomDomainName();
             //Console.WriteLine(domainName);
 
-            Console.ReadKey();
+            //Console.ReadKey();
         }
     }
 }

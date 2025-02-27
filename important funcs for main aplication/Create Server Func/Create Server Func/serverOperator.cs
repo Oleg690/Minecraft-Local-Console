@@ -51,7 +51,6 @@ namespace Server_General_Funcs
             string jarFoldersPath = rootFolder;
 
             string versionName = version + ".jar";
-            string versionPath = "";
             string[] versionData = [];
             string jarFilePath = "";
 
@@ -62,7 +61,9 @@ namespace Server_General_Funcs
             }
             else if (software == "Vanilla")
             {
-                jarFoldersPath += @"\versions\Vanilla";
+                jarFoldersPath = rootFolder + "\\versions\\Vanilla\\";
+                versionData = FindJarFile(jarFoldersPath, version);
+                versionName = versionData[1];
                 jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
             }
             else if (software == "Forge")
@@ -84,7 +85,6 @@ namespace Server_General_Funcs
             {
                 jarFoldersPath = rootFolder + "\\versions\\Purpur\\";
                 versionData = FindJarFile(jarFoldersPath, version);
-                versionPath = versionData[0];
                 versionName = versionData[1];
                 jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
             }
@@ -113,6 +113,8 @@ namespace Server_General_Funcs
             RenameFile(destinationJarPath, System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destinationJarPath), version + ".jar"));
             destinationJarPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destinationJarPath), version + ".jar");
 
+            Console.WriteLine("destinationJarPath: " + destinationJarPath);
+
             Console.WriteLine("Server .jar file copied to the custom directory.");
 
             string rconPassword = generatePassword(20);
@@ -136,6 +138,8 @@ namespace Server_General_Funcs
             };
 
             Console.WriteLine($"{software} Server");
+
+            //return "";
 
             if (software == "Vanilla")
             {
@@ -173,6 +177,7 @@ namespace Server_General_Funcs
         // ------------------------ Main Server Type Installators ------------------------
         private static async Task VanillaServerInitialisation(string customDirectory, string vanillaJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
         {
+            Console.WriteLine($"vanillaJarPath: '{vanillaJarPath}'");
             // Set up the process to run the server
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
@@ -210,13 +215,6 @@ namespace Server_General_Funcs
                         Console.WriteLine("Created missing server.properties file.");
                     }
 
-                    string eulaPath = System.IO.Path.Combine(customDirectory, "eula.txt");
-                    if (!File.Exists(serverPropertiesPath))
-                    {
-                        File.Create(serverPropertiesPath).Close();
-                        Console.WriteLine("Created missing eula.txt file.");
-                    }
-
                     // Read server output
                     while (process.StandardOutput.EndOfStream == false)
                     {
@@ -226,14 +224,17 @@ namespace Server_General_Funcs
                         // Accept EULA if prompted
                         if (line != null && line.Contains("You need to agree to the EULA in order to run the server"))
                         {
-                            if (serverOperator.IsPortInUse(JMX_Port) || serverOperator.IsPortInUse(RCON_Port))
+                            if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
                             {
-                                serverOperator.ClosePort(JMX_Port.ToString());
-                                serverOperator.ClosePort(RCON_Port.ToString());
+                                ServerOperator.ClosePort(JMX_Port.ToString());
+                                ServerOperator.ClosePort(RCON_Port.ToString());
                             }
 
                             AcceptEULA(vanillaJarPath);
                             DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
+                            
+                            Console.WriteLine("Insert_Into_DB: " + Insert_Into_DB);
+
                             if (Insert_Into_DB)
                             {
                                 dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Vanilla", $"{version}", $"{totalPlayers}", $"{rconPassword}");
@@ -242,11 +243,12 @@ namespace Server_General_Funcs
                     }
 
                     process.WaitForExit();
-                    Console.WriteLine("Starting minecraft server.");
 
                     DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                    await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                    Console.WriteLine("Starting minecraft server.");
+
+                    await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
             }
             catch (Exception ex)
@@ -357,7 +359,7 @@ namespace Server_General_Funcs
                     Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
-                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -374,7 +376,7 @@ namespace Server_General_Funcs
                 DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
             catch (Exception ex)
             {
@@ -482,7 +484,7 @@ namespace Server_General_Funcs
                     Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
-                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -499,7 +501,7 @@ namespace Server_General_Funcs
                 DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
             catch (Exception ex)
             {
@@ -609,7 +611,7 @@ namespace Server_General_Funcs
                     Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
-                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -626,7 +628,7 @@ namespace Server_General_Funcs
                 DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
             catch (Exception ex)
             {
@@ -672,14 +674,7 @@ namespace Server_General_Funcs
                         File.Create(serverPropertiesPath).Close();
                         Console.WriteLine("Created missing server.properties file.");
                     }
-
-                    string eulaPath = System.IO.Path.Combine(customDirectory, "eula.txt");
-                    if (!File.Exists(serverPropertiesPath))
-                    {
-                        File.Create(serverPropertiesPath).Close();
-                        Console.WriteLine("Created missing eula.txt file.");
-                    }
-
+                    
                     // Read server output
                     while (process.StandardOutput.EndOfStream == false)
                     {
@@ -689,10 +684,10 @@ namespace Server_General_Funcs
                         // Accept EULA if prompted
                         if (line != null && line.Contains("You need to agree to the EULA in order to run the server"))
                         {
-                            if (serverOperator.IsPortInUse(JMX_Port) || serverOperator.IsPortInUse(RCON_Port))
+                            if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
                             {
-                                serverOperator.ClosePort(JMX_Port.ToString());
-                                serverOperator.ClosePort(RCON_Port.ToString());
+                                ServerOperator.ClosePort(JMX_Port.ToString());
+                                ServerOperator.ClosePort(RCON_Port.ToString());
                             }
 
                             AcceptEULA(purpurJarPath);
@@ -709,7 +704,7 @@ namespace Server_General_Funcs
 
                     DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                    await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                    await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
             }
             catch (Exception ex)
@@ -820,14 +815,14 @@ namespace Server_General_Funcs
                     }
                 }
 
-                serverOperator.DeleteFiles(tempFolderPath, false);
+                ServerOperator.DeleteFiles(tempFolderPath, false);
 
                 if (!File.Exists(customDirectory + $"\\mods"))
                 {
                     Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
-                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -844,7 +839,7 @@ namespace Server_General_Funcs
                 DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
-                await serverOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
             catch (Exception ex)
             {
@@ -873,7 +868,7 @@ namespace Server_General_Funcs
             }
         }
 
-        private static string[] FindJarFile(string rootPath, string targetVersion)
+        public static string[] FindJarFile(string rootPath, string targetVersion)
         {
             string? jarPath = null;
 
@@ -885,7 +880,11 @@ namespace Server_General_Funcs
                 string fileName = System.IO.Path.GetFileName(file);
                 string[] parts = fileName.Split('-');
 
-                if (parts.Length >= 2 && parts[1].Trim() == targetVersion)
+                if (parts[1].Contains(".jar"))
+                {
+                    parts[1] = parts[1].Replace(".jar", "");
+                }
+                if (parts.Length >= 1 && parts[1].Trim() == targetVersion)
                 {
                     // Found the matching jar file
                     jarPath = System.IO.Path.Combine(rootPath, fileName);
@@ -1121,7 +1120,7 @@ namespace Server_General_Funcs
         // --------------------------------------------------------------------------------
     }
 
-    class serverOperator
+    class ServerOperator
     {
         // ------------------------- Main Server Operator Commands -------------------------
         public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Auto_Stop = false)
@@ -1149,8 +1148,6 @@ namespace Server_General_Funcs
             ProcessStartInfo? serverProcessInfo = null;
 
             string software = string.Join("\n", softwareList.Select(arr => string.Join(", ", arr)));
-
-            
 
             //           ↓ For debugging! ↓
             Console.WriteLine($"worldNumber: '{worldNumber}'");

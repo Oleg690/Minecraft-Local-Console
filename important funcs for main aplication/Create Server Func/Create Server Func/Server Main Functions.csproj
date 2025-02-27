@@ -11,6 +11,7 @@
   <ItemGroup>
     <Folder Include="database\" />
     <Folder Include="temp\" />
+    <Folder Include="versions\Purpur\" />
     <Folder Include="versions\Vanilla\" />
     <Folder Include="worlds\" />
   </ItemGroup>

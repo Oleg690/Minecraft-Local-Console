@@ -21,7 +21,7 @@ namespace MinecraftServerStats
     {
         public static void GetServerInfo(string worldFolderPath, string serverLogPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port)
         {
-            if (serverOperator.IsPortInUse(JMX_Port) && serverOperator.IsPortInUse(RCON_Port))
+            if (ServerOperator.IsPortInUse(JMX_Port) && ServerOperator.IsPortInUse(RCON_Port))
             {
                 Console.WriteLine($"--------------------------------------------------");
                 // Get memory usage
