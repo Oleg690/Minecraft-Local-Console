@@ -6,22 +6,26 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.IO;
 using System.Net.Http;
+using com.sun.xml.@internal.ws.util;
+using static jdk.jfr.@internal.SecuritySupport;
+using System.Xml.Linq;
 
 namespace updater
 {
     class VersionsUpdater
     {
-        private static readonly string FabricApiBaseUrl = "";
+        private static readonly string VanillaApiBaseUrl = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
         private static readonly string ForgeApiBaseUrl = "";
         private static readonly string NeoForgeApiBaseUrl = "";
+        private static readonly string FabricApiBaseUrl = "https://meta.fabricmc.net/v2/versions/installer";
+        private static readonly string QuiltApiBaseUrl = "https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/";
         private static readonly string PurpurApiBaseUrl = "https://api.purpurmc.org/v2/purpur/";
-        private static readonly string QuiltApiBaseUrl = "";
-        private static readonly string VanillaApiBaseUrl = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
+        private static readonly string SpigotApiBaseUrl = "";
 
         private static readonly HttpClient HttpClient = new HttpClient();
 
         // ------------------------ ↓ Vanilla Updater Funcs ↓ ------------------------
-        public static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string selectedVersion = null)
+        public static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string? selectedVersion = null)
         {
             Console.WriteLine($"Checking Vanilla Minecraft Server versions in: {downloadDirectory}");
             Directory.CreateDirectory(downloadDirectory);
@@ -43,7 +47,7 @@ namespace updater
                 if (!localVersions.Contains(version))
                 {
                     Console.WriteLine($"Vanilla Server {version} is missing. Downloading...");
-                    await DownloadServerJarAsync(availableVersions[version], downloadDirectory, version);
+                    await DownloadVannillaServerJarAsync(availableVersions[version], downloadDirectory, version);
                 }
                 else
                 {
@@ -56,9 +60,7 @@ namespace updater
             Console.WriteLine("---------------------------------");
         }
 
-        // ------------------------ ↓ Help Vanilla Updater Funcs ↓ ------------------------
-
-        private static async Task<Dictionary<string, string>> GetAvailableVanillaServerVersionsAsync(string selectedVersion = null)
+        private static async Task<Dictionary<string, string>> GetAvailableVanillaServerVersionsAsync(string? selectedVersion = null)
         {
             try
             {
@@ -94,7 +96,7 @@ namespace updater
             }
         }
 
-        private static async Task DownloadServerJarAsync(string versionUrl, string downloadDirectory, string version)
+        private static async Task DownloadVannillaServerJarAsync(string versionUrl, string downloadDirectory, string version)
         {
             try
             {
@@ -120,21 +122,140 @@ namespace updater
             }
         }
 
+        // ------------------------ ↓ Fabric Updater Funcs ↓ ------------------------
 
-        // ------------------------ ↓ Forge Updater Funcs ↓ ------------------------
-        // ------------------------ ↓ Help Forge Updater Funcs ↓ ------------------------
+        public static async Task CheckAndUpdateLatestFabricAsync(string downloadDirectory)
+        {
+            try
+            {
+                Console.WriteLine("Fetching the latest Fabric Minecraft Server Installer...");
+                Directory.CreateDirectory(downloadDirectory);
+
+                // Get the latest stable Fabric Loader version
+                var loaderResponse = await HttpClient.GetStringAsync(FabricApiBaseUrl);
+                using var loaderJson = JsonDocument.Parse(loaderResponse);
+
+                // Filter to get only the latest stable version
+                var latestLoader = loaderJson.RootElement.EnumerateArray()
+                    .Where(v => v.GetProperty("stable").GetBoolean() == true)
+                    .ToDictionary(
+                        v => v.GetProperty("version").GetString(),
+                        v => v.GetProperty("url").GetString()
+                    );
+
+                if (latestLoader.TryGetValue == null)
+                {
+                    Console.WriteLine("Failed to retrieve the latest Fabric Loader version.");
+                    return;
+                }
+
+                foreach (var loader in latestLoader)
+                {
+                    //Console.WriteLine($"{loader.Key}");
+                    //Console.WriteLine($"{loader.Value}");
+
+                    string localFilePath = Path.Combine(downloadDirectory, $"fabric-installer-{loader.Key}.jar");
+                    if (File.Exists(localFilePath))
+                    {
+                        Console.WriteLine($"Latest Fabric Universal Server Installer {loader.Key} is already downloaded.");
+                        return;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Downloading Fabric Universal Server Installer {loader.Key}...");
+                        await DownloadFabricServerJarAsync(loader.Value, localFilePath);
+                        DeleteFiles(downloadDirectory, false);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching the latest Fabric version: {ex.Message}");
+            }
+        }
+
+        private static async Task DownloadFabricServerJarAsync(string jarUrl, string savePath)
+        {
+            try
+            {
+                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
+                using var fileStream = File.Create(savePath);
+                await jarResponse.CopyToAsync(fileStream);
+
+                Console.WriteLine($"Fabric Server downloaded successfully: {Path.GetFileName(savePath)}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download Fabric Server: {ex.Message}");
+            }
+        }
 
         // ------------------------ ↓ NeoForge Updater Funcs ↓ ------------------------
-        // ------------------------ ↓ Help NeoForge Updater Funcs ↓ ------------------------
 
-        // ------------------------ ↓ Fabric Updater Funcs ↓ ------------------------
-        // ------------------------ ↓ Help Fabric Updater Funcs ↓ ------------------------
+        // ------------------------ ↓ Forge Updater Funcs ↓ ------------------------
 
         // ------------------------ ↓ Quilt Updater Funcs ↓ ------------------------
-        // ------------------------ ↓ Help Quilt Updater Funcs ↓ ------------------------
+
+        public static async Task CheckAndUpdateLatestQuiltAsync(string downloadDirectory)
+        {
+            try
+            {
+                Console.WriteLine("Fetching the latest Quilt Minecraft Server Installer...");
+                Directory.CreateDirectory(downloadDirectory);
+
+                // Get the latest stable Fabric Loader version
+                string xmlContent = await HttpClient.GetStringAsync($"{QuiltApiBaseUrl}maven-metadata.xml");
+
+                // Filter to get only the latest stable version
+                XDocument doc = XDocument.Parse(xmlContent);
+                string latestVersion = doc.Descendants("latest").FirstOrDefault()?.Value ?? "Unknown";
+
+                if (doc == null)
+                {
+                    Console.WriteLine("Failed to retrieve the latest Quilt Loader version.");
+                    return;
+                }
+
+                //Console.WriteLine($"{latestVersion}");
+
+                string localFilePath = Path.Combine(downloadDirectory, $"quilt-installer-{latestVersion}.jar");
+                if (File.Exists(localFilePath))
+                {
+                    Console.WriteLine($"Latest Quilt Universal Server Installer {latestVersion} is already downloaded.");
+                    return;
+                }
+                else
+                {
+                    Console.WriteLine($"Downloading Quilt Universal Server Installer {latestVersion}...");
+                    string jarUrl = $"{QuiltApiBaseUrl}{latestVersion}/quilt-installer-{latestVersion}.jar";
+                    await DownloadQuiltServerJarAsync(jarUrl, localFilePath);
+                    DeleteFiles(downloadDirectory, false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching the latest Quilt version: {ex.Message}");
+            }
+        }
+
+        private static async Task DownloadQuiltServerJarAsync(string jarUrl, string savePath)
+        {
+            try
+            {
+                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
+                using var fileStream = File.Create(savePath);
+                await jarResponse.CopyToAsync(fileStream);
+
+                Console.WriteLine($"Fabric Server downloaded successfully: {Path.GetFileName(savePath)}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download Fabric Server: {ex.Message}");
+            }
+        }
 
         // ------------------------ ↓ Purpur Updater Funcs ↓ ------------------------
-        public static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string selectedVersion)
+        public static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string? selectedVersion = null)
         {
             Console.WriteLine($"Checking Purpur versions in: {downloadDirectory}");
             Directory.CreateDirectory(downloadDirectory);
@@ -234,7 +355,6 @@ namespace updater
             Console.WriteLine("--------------------------------");
         }
 
-        // ------------------------ ↓ Help Purpur Updater Funcs ↓ ------------------------
         private static async Task<string[]> GetAvailablePurpurVersionsAsync(string? selectedVersion = null)
         {
             try
@@ -329,16 +449,14 @@ namespace updater
         }
 
         // ------------------------ ↓ Spigot Updater Funcs ↓ ------------------------
-        // ------------------------ ↓ Help Spigot Updater Funcs ↓ ------------------------
 
         // ------------------------ ↓ Main Updater Funcs ↓ ------------------------
 
-        public static async Task UpdateAllSoftwaresVersions(string serverVersionsPath)
+        public static async Task Update(string serverVersionsPath)
         {
             Console.WriteLine("--------------------------------------------");
             Console.WriteLine("Starting versions updater for all softwares.");
             Console.WriteLine("--------------------------------------------");
-            Console.WriteLine();
 
             object[,] softwareTypes = {
                 { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur" },
@@ -350,41 +468,36 @@ namespace updater
                 await RunUpdaterForSoftware(versionDirectory, software);
             }
 
-            Console.WriteLine();
             Console.WriteLine("-------------------------");
             Console.WriteLine("All versions are updated!");
             Console.WriteLine("-------------------------");
         }
 
-        public static async Task UpdateSoftwareVersions(string serverVersionsPath, string software)
+        public static async Task Update(string serverVersionsPath, string software)
         {
             Console.WriteLine("--------------------------------------------");
             Console.WriteLine($"Starting versions updater for {software}.");
             Console.WriteLine("--------------------------------------------");
-            Console.WriteLine();
 
             string versionDirectory = Path.Combine(serverVersionsPath, software);
 
             await RunUpdaterForSoftware(versionDirectory, software);
 
-            Console.WriteLine();
             Console.WriteLine("-------------------------");
             Console.WriteLine("All versions are updated!");
             Console.WriteLine("-------------------------");
         }
 
-        public static async Task UpdateSoftwareVersion(string serverVersionsPath, string software, string version)
+        public static async Task Update(string serverVersionsPath, string software, string version)
         {
             Console.WriteLine("--------------------------------------------");
             Console.WriteLine($"Starting versions updater for {software}.");
             Console.WriteLine("--------------------------------------------");
-            Console.WriteLine();
 
             string versionDirectory = Path.Combine(serverVersionsPath, software);
 
-            await RunUpdaterForSoftware(versionDirectory, software, version);
+            await RunUpdaterForSoftware(versionDirectory, software, version, true);
 
-            Console.WriteLine();
             Console.WriteLine("-------------------------");
             Console.WriteLine("All versions are updated!");
             Console.WriteLine("-------------------------");
@@ -392,27 +505,78 @@ namespace updater
 
         // ------------------------ ↓ Main Updater Funcs Helpers ↓ ------------------------
 
-        private static async Task RunUpdaterForSoftware(string versionDirectory, string software, string? version = null)
+        private static async Task RunUpdaterForSoftware(string versionDirectory, string software, string? version = null, bool skipCheckForInstallers = false)
         {
-            switch (software)
+            if (skipCheckForInstallers && (software == "Fabric" || software == "Quilt"))
             {
-                case "Vanilla":
-                    await CheckAndUpdateVanillaAsync(versionDirectory, version);
-                    break;
-                case "Forge":
-                    break;
-                case "NeoForge":
-                    break;
-                case "Fabric":
-                    break;
-                case "Quilt":
-                    break;
-                case "Purpur":
-                    await CheckAndUpdatePurpurAsync(versionDirectory, version);
-                    break;
-                default:
-                    Console.WriteLine($"Unknown version type: {software}");
-                    break;
+                Console.WriteLine("This is an universal Installer, there aren't versions, checking the installer...");
+            }
+            if (software == "Vanilla")
+            {
+                await CheckAndUpdateVanillaAsync(versionDirectory, version);
+            }
+            else if (software == "Forge")
+            {
+                // TODO
+            }
+            else if (software == "NeoForge")
+            {
+                // TODO
+            }
+            else if (software == "Fabric")
+            {
+                await CheckAndUpdateLatestFabricAsync(versionDirectory);
+            }
+            else if (software == "Quilt")
+            {
+                await CheckAndUpdateLatestQuiltAsync(versionDirectory);
+            }
+            else if (software == "Purpur")
+            {
+                await CheckAndUpdatePurpurAsync(versionDirectory, version);
+            }
+
+            else if (software == "Spigot")
+            {
+                // TODO
+            }
+            else
+            {
+                Console.WriteLine($"Unknown version type: {software}");
+            }
+        }
+
+        public static void DeleteFiles(string path, bool deleteWholeDirectory = true)
+        {
+            try
+            {
+                if (deleteWholeDirectory)
+                {
+                    Directory.Delete(path, true); // Deletes the entire directory and its contents
+                    Console.WriteLine($"Deleted entire directory: {path}");
+                }
+                else
+                {
+                    // Delete all files in the directory
+                    foreach (string file in Directory.GetFiles(path))
+                    {
+                        File.Delete(file);
+                        Console.WriteLine($"Deleted file: {file}");
+                    }
+
+                    // Delete all subdirectories and their contents
+                    foreach (string directory in Directory.GetDirectories(path))
+                    {
+                        Directory.Delete(directory, true);
+                        Console.WriteLine($"Deleted directory: {directory}");
+                    }
+
+                    Console.WriteLine("All contents deleted successfully, but the directory itself remains.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
             }
         }
     }

@@ -11,6 +11,9 @@ namespace mainApp
 {
     internal class Program
     {
+        private const string TimestampFile = "lastQuiltorFabricCheck.txt";
+        private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
+
         static async Task Main()
         {
             // Public Address Ranges
@@ -23,7 +26,7 @@ namespace mainApp
             string version = "1.21";  // e.g. 1.21
             string worldNumber = "";
             string worldName = "Minecraft Server";
-            string software = "Vanilla"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
+            string software = "Fabric"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
             int totalPlayers = 20;
             string Server_LocalIp = "127.0.0.1";
             string Server_LocalComputerIP = "192.168.100.106"; // "0.0.0.0"
@@ -66,26 +69,38 @@ namespace mainApp
             string tempFolderPath = Path.Combine(rootFolder, "temp");
 
             var localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
-            bool _contiune = false;
+            bool _contiune = true;
 
-            foreach ( var localVersion in localFiles)
+            if (software != "Quilt" || software != "Fabric")
             {
-                if (localVersion.Contains(version))
+                if (ShouldRunNow())
                 {
-                    _contiune = true;
-                    break;
+                    Console.WriteLine("Checking for updates...");
+                    await VersionsUpdater.Update(serverVersionsPath, software);
+                    File.WriteAllText(TimestampFile, DateTime.UtcNow.ToString("o"));
                 }
             }
-            if (!_contiune)
+            else
             {
-                Console.WriteLine("Version not found in local files! Downloading it...");
-                await VersionsUpdater.UpdateSoftwareVersion(serverVersionsPath, software, version);
+                foreach (var localVersion in localFiles)
+                {
+                    if (localVersion.Contains(version))
+                    {
+                        _contiune = true;
+                        break;
+                    }
+                }
+                if (!_contiune)
+                {
+                    Console.WriteLine("Version not found in local files! Downloading it...");
+                    await VersionsUpdater.Update(serverVersionsPath, software, version);
+                }
             }
 
             // ↓ Update Available Versions ↓ TODO
-            //await VersionsUpdater.UpdateAllSoftwaresVersions(serverVersionsPath);
-            //await VersionsUpdater.UpdateSoftwareVersions(serverVersionsPath, "Vanilla");
-            //await VersionsUpdater.UpdateSoftwareVersion(serverVersionsPath, "Vanilla", "1.21");
+            //await VersionsUpdater.Update(serverVersionsPath);
+            //await VersionsUpdater.Update(serverVersionsPath, "Quilt");
+            //await VersionsUpdater.Update(serverVersionsPath, "Fabric", "1.21");
 
             // ↓ Create World Func ↓
             //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
@@ -107,7 +122,7 @@ namespace mainApp
             //List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
 
             // ↓ Delete Server ↓
-            ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
+            //ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
 
             // ↓ Server Stats Loop ↓
             //while (true)
@@ -123,7 +138,23 @@ namespace mainApp
             //string domainName = DomainName.GetRandomDomainName();
             //Console.WriteLine(domainName);
 
-            //Console.ReadKey();
+            Console.ReadKey();
+        }
+
+        private static bool ShouldRunNow()
+        {
+            if (!File.Exists(TimestampFile))
+            {
+                return true; // First run
+            }
+
+            string lastRunTimeStr = File.ReadAllText(TimestampFile);
+            if (DateTime.TryParse(lastRunTimeStr, out DateTime lastRunTime))
+            {
+                return DateTime.UtcNow - lastRunTime >= DelayTime;
+            }
+
+            return true; // Run if the timestamp is corrupted
         }
     }
 }
