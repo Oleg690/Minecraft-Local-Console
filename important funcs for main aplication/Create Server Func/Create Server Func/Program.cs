@@ -11,9 +11,6 @@ namespace mainApp
 {
     internal class Program
     {
-        private const string TimestampFile = "lastQuiltorFabricCheck.txt";
-        private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
-
         static async Task Main()
         {
             // Public Address Ranges
@@ -23,10 +20,10 @@ namespace mainApp
             // 10.0.0.0 to 10.255.255.255
 
             // ↓ Server Settings ↓
-            string version = "1.21";  // e.g. 1.21
+            string version = "";  // e.g. 1.21
             string worldNumber = "";
-            string worldName = "Minecraft Server";
-            string software = "Fabric"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
+            string worldName = "";
+            string software = ""; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
             int totalPlayers = 20;
             string Server_LocalIp = "127.0.0.1";
             string Server_LocalComputerIP = "192.168.100.106"; // "0.0.0.0"
@@ -68,39 +65,10 @@ namespace mainApp
             string serverVersionsPath = Path.Combine(rootFolder, "versions");
             string tempFolderPath = Path.Combine(rootFolder, "temp");
 
-            var localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
-            bool _contiune = true;
-
-            if (software != "Quilt" || software != "Fabric")
-            {
-                if (ShouldRunNow())
-                {
-                    Console.WriteLine("Checking for updates...");
-                    await VersionsUpdater.Update(serverVersionsPath, software);
-                    File.WriteAllText(TimestampFile, DateTime.UtcNow.ToString("o"));
-                }
-            }
-            else
-            {
-                foreach (var localVersion in localFiles)
-                {
-                    if (localVersion.Contains(version))
-                    {
-                        _contiune = true;
-                        break;
-                    }
-                }
-                if (!_contiune)
-                {
-                    Console.WriteLine("Version not found in local files! Downloading it...");
-                    await VersionsUpdater.Update(serverVersionsPath, software, version);
-                }
-            }
-
-            // ↓ Update Available Versions ↓ TODO
+            // ↓ Update Available Versions ↓
             //await VersionsUpdater.Update(serverVersionsPath);
-            //await VersionsUpdater.Update(serverVersionsPath, "Quilt");
-            //await VersionsUpdater.Update(serverVersionsPath, "Fabric", "1.21");
+            //await VersionsUpdater.Update(serverVersionsPath, "Forge");
+            //await VersionsUpdater.Update(serverVersionsPath, "Forge", "1.21.1");
 
             // ↓ Create World Func ↓
             //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
@@ -139,22 +107,6 @@ namespace mainApp
             //Console.WriteLine(domainName);
 
             Console.ReadKey();
-        }
-
-        private static bool ShouldRunNow()
-        {
-            if (!File.Exists(TimestampFile))
-            {
-                return true; // First run
-            }
-
-            string lastRunTimeStr = File.ReadAllText(TimestampFile);
-            if (DateTime.TryParse(lastRunTimeStr, out DateTime lastRunTime))
-            {
-                return DateTime.UtcNow - lastRunTime >= DelayTime;
-            }
-
-            return true; // Run if the timestamp is corrupted
         }
     }
 }

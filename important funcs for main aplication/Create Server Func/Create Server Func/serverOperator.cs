@@ -29,13 +29,67 @@ using NetworkConfig;
 using sun.awt.windows;
 using com.sun.media.sound;
 using System.Reflection.PortableExecutable;
+using updater;
 
 namespace Server_General_Funcs
 {
     class serverCreator
     {
+        private const string TimestampFile = "lastQuiltorFabricCheck.txt";
+        private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
+
         public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
         {
+            string serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions");
+            var localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
+            bool _contiune = false;
+
+            if (software == "Quilt" || software == "Fabric")
+            {
+                if (ShouldRunNow() || localFiles.Length == 0)
+                {
+                    Console.WriteLine("Checking for updates...");
+                    await VersionsUpdater.Update(serverVersionsPath, software);
+                    File.WriteAllText(TimestampFile, DateTime.UtcNow.ToString("o"));
+                    if (localFiles.Length == 0)
+                    {
+                        Console.WriteLine("Error downloading the server file.");
+                        return "";
+                    }
+                }
+            }
+            else
+            {
+                foreach (var localVersion in localFiles)
+                {
+                    if (localVersion.Contains(version))
+                    {
+                        _contiune = true;
+                        break;
+                    }
+                }
+                if (!_contiune)
+                {
+                    Console.WriteLine("Version not found in local files! Downloading it...");
+                    await VersionsUpdater.Update(serverVersionsPath, software, version);
+
+                    localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
+                    foreach (var localVersion in localFiles)
+                    {
+                        if (localVersion.Contains(version))
+                        {
+                            _contiune = true;
+                            break;
+                        }
+                    }
+                    if (!_contiune)
+                    {
+                        Console.WriteLine($"Error downloading the server file with the version {version}.");
+                        return "";
+                    }
+                }
+            }
+
             string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
 
             if (worldNumber != null)
@@ -51,7 +105,6 @@ namespace Server_General_Funcs
             string jarFoldersPath = rootFolder;
 
             string versionName = version + ".jar";
-            string[] versionData = [];
             string jarFilePath = "";
 
             if (software == "")
@@ -62,13 +115,15 @@ namespace Server_General_Funcs
             else if (software == "Vanilla")
             {
                 jarFoldersPath = rootFolder + "\\versions\\Vanilla\\";
-                versionData = FindJarFile(jarFoldersPath, version);
-                versionName = versionData[1];
+                versionName = FindJarFile(jarFoldersPath, version)[1];
                 jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
             }
             else if (software == "Forge")
             {
                 jarFoldersPath += @"\versions\Forge";
+                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
+
+                versionName = FindJarFile(jarFoldersPath, version)[1];
                 jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
             }
             else if (software == "Fabric")
@@ -84,8 +139,7 @@ namespace Server_General_Funcs
             else if (software == "Purpur")
             {
                 jarFoldersPath = rootFolder + "\\versions\\Purpur\\";
-                versionData = FindJarFile(jarFoldersPath, version);
-                versionName = versionData[1];
+                versionName = FindJarFile(jarFoldersPath, version)[1];
                 jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
             }
             else if (software == "Spigot")
@@ -134,12 +188,9 @@ namespace Server_General_Funcs
                 { "rcon.password", $"{rconPassword}" },
                 { "rcon.port", $"{RCON_Port}" },
                 { "enable-query", "true" },
-                { "online-mode", "false" }
             };
 
             Console.WriteLine($"{software} Server");
-
-            //return "";
 
             if (software == "Vanilla")
             {
@@ -232,7 +283,7 @@ namespace Server_General_Funcs
 
                             AcceptEULA(vanillaJarPath);
                             DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-                            
+
                             Console.WriteLine("Insert_Into_DB: " + Insert_Into_DB);
 
                             if (Insert_Into_DB)
@@ -343,7 +394,7 @@ namespace Server_General_Funcs
                 File.Delete(forgeJarPath);
 
                 object[,] filesToDelete = {
-                { "run.bat", "run.sh", "user_jvm_args.txt", "installer.log"}
+                { "run.bat", "run.sh", "user_jvm_args.txt", "installer.log", "README.txt"}
                 };
 
                 foreach (var file in filesToDelete)
@@ -674,7 +725,7 @@ namespace Server_General_Funcs
                         File.Create(serverPropertiesPath).Close();
                         Console.WriteLine("Created missing server.properties file.");
                     }
-                    
+
                     // Read server output
                     while (process.StandardOutput.EndOfStream == false)
                     {
@@ -896,7 +947,7 @@ namespace Server_General_Funcs
             // Handle exceptions, such as no matching jar found
             if (jarPath == null)
             {
-                
+
                 throw new Exception("No jar file found with the specified version.");
             }
             return ["0"];
@@ -1116,6 +1167,21 @@ namespace Server_General_Funcs
             }
         }
 
+        private static bool ShouldRunNow()
+        {
+            if (!File.Exists(TimestampFile))
+            {
+                return true; // First run
+            }
+
+            string lastRunTimeStr = File.ReadAllText(TimestampFile);
+            if (DateTime.TryParse(lastRunTimeStr, out DateTime lastRunTime))
+            {
+                return DateTime.UtcNow - lastRunTime >= DelayTime;
+            }
+
+            return true; // Run if the timestamp is corrupted
+        }
 
         // --------------------------------------------------------------------------------
     }
@@ -1150,13 +1216,14 @@ namespace Server_General_Funcs
             string software = string.Join("\n", softwareList.Select(arr => string.Join(", ", arr)));
 
             //           ↓ For debugging! ↓
-            Console.WriteLine($"worldNumber: '{worldNumber}'");
-            Console.WriteLine($"Software: '{software}'");
-            Console.WriteLine(software == "Vanilla");
-            Console.WriteLine(software == "Forge");
-            Console.WriteLine(software == "NeoForge");
-            Console.WriteLine(software == "Fabric");
-            Console.WriteLine(software == "Purpur");
+            Console.WriteLine($"World Number: '{worldNumber}'");
+            //Console.WriteLine($"Software: '{software}'");
+            //Console.WriteLine(software == "Vanilla");
+            //Console.WriteLine(software == "Forge");
+            //Console.WriteLine(software == "NeoForge");
+            //Console.WriteLine(software == "Fabric");
+            //Console.WriteLine(software == "Quilt");
+            //Console.WriteLine(software == "Purpur");
 
             if (software == "Vanilla")
             {
@@ -1332,6 +1399,11 @@ namespace Server_General_Funcs
                     CreateNoWindow = true,
                     WorkingDirectory = System.IO.Path.GetDirectoryName(serverPath) // Set the custom working directory
                 };
+            }
+            else
+            {
+                Console.WriteLine("No world number was supplied!");
+                return;
             }
 
             using (Process process = Process.Start(serverProcessInfo))

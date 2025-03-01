@@ -9,20 +9,23 @@ using System.Net.Http;
 using com.sun.xml.@internal.ws.util;
 using static jdk.jfr.@internal.SecuritySupport;
 using System.Xml.Linq;
+using Newtonsoft.Json.Linq;
+using System.Net.NetworkInformation;
 
 namespace updater
 {
     class VersionsUpdater
     {
         private static readonly string VanillaApiBaseUrl = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
-        private static readonly string ForgeApiBaseUrl = "";
+        private static readonly string ForgeApiVersionsUrl = "https://files.minecraftforge.net/net/minecraftforge/forge/";
+        private static readonly string ForgeApiBaseUrl = "https://maven.minecraftforge.net/net/minecraftforge/forge/";
         private static readonly string NeoForgeApiBaseUrl = "";
-        private static readonly string FabricApiBaseUrl = "https://meta.fabricmc.net/v2/versions/installer";
+        private static readonly string FabricApiBaseUrl = "https://meta.fabricmc.net/v2/versions/installer/";
         private static readonly string QuiltApiBaseUrl = "https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/";
         private static readonly string PurpurApiBaseUrl = "https://api.purpurmc.org/v2/purpur/";
         private static readonly string SpigotApiBaseUrl = "";
 
-        private static readonly HttpClient HttpClient = new HttpClient();
+        private static readonly HttpClient HttpClient = new();
 
         // ------------------------ ↓ Vanilla Updater Funcs ↓ ------------------------
         public static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string? selectedVersion = null)
@@ -124,7 +127,7 @@ namespace updater
 
         // ------------------------ ↓ Fabric Updater Funcs ↓ ------------------------
 
-        public static async Task CheckAndUpdateLatestFabricAsync(string downloadDirectory)
+        private static async Task CheckAndUpdateLatestFabricAsync(string downloadDirectory)
         {
             try
             {
@@ -162,9 +165,9 @@ namespace updater
                     }
                     else
                     {
+                        DeleteFiles(downloadDirectory, false);
                         Console.WriteLine($"Downloading Fabric Universal Server Installer {loader.Key}...");
                         await DownloadFabricServerJarAsync(loader.Value, localFilePath);
-                        DeleteFiles(downloadDirectory, false);
                     }
                 }
             }
@@ -190,9 +193,176 @@ namespace updater
             }
         }
 
-        // ------------------------ ↓ NeoForge Updater Funcs ↓ ------------------------
-
         // ------------------------ ↓ Forge Updater Funcs ↓ ------------------------
+
+        private static async Task CheckAndUpdateForgeAsync(string downloadDirectory, string? selectedVersion = null)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    // Fetch the promotions JSON
+                    string json = await client.GetStringAsync($"{ForgeApiVersionsUrl}promotions_slim.json");
+                    JObject promotions = JObject.Parse(json);
+
+                    // Get the list of stable versions
+                    JObject promos = (JObject)promotions["promos"];
+                    List<string> stableVersions = new List<string>();
+
+                    foreach (var promo in promos)
+                    {
+                        if (promo.Key.EndsWith("-latest"))
+                        {
+                            string version = promo.Key.Replace("-latest", "");
+                            stableVersions.Add(version);
+                        }
+                    }
+
+                    // Ensure the download directory exists
+                    if (!Directory.Exists(downloadDirectory))
+                    {
+                        Directory.CreateDirectory(downloadDirectory);
+                    }
+
+                    // Process versions
+                    if (selectedVersion != null)
+                    {
+                        // If a specific version is provided, only process that version
+                        if (stableVersions.Contains(selectedVersion))
+                        {
+                            await ProcessVersion(client, downloadDirectory, promos, selectedVersion);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Version {selectedVersion} not found in the list of stable versions.");
+                        }
+                    }
+                    else
+                    {
+                        // If no specific version is provided, process all versions
+                        foreach (string version in stableVersions)
+                        {
+                            await ProcessVersion(client, downloadDirectory, promos, version);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                }
+            }
+        }
+
+        private static async Task ProcessVersion(HttpClient client, string downloadDirectory, JObject promos, string version)
+        {
+            string build = promos[$"{version}-latest"].ToString();
+            string actualDownloadUrl = $"{ForgeApiBaseUrl}{version}-{build}/forge-{version}-{build}-installer.jar";
+
+            string fileName = $"forge-{version}-{build}.jar"; // File name without "installer"
+            string destinationPath = Path.Combine(downloadDirectory, fileName);
+
+            // Check if a file for this version already exists locally
+            string[] existingFiles = Directory.GetFiles(downloadDirectory, $"forge-{version}-*.jar");
+            if (existingFiles.Length > 0)
+            {
+                // Extract the build number from the existing file name
+                string existingFileName = Path.GetFileNameWithoutExtension(existingFiles[0]);
+                string[] existingFileParts = existingFileName.Split('-');
+                if (existingFileParts.Length >= 3)
+                {
+                    string existingBuild = existingFileParts[2]; // Get the build number as a string
+
+                    // Compare build numbers as strings
+                    if (CompareBuildNumbers(build, existingBuild)) // Check if the new build is greater
+                    {
+                        Console.WriteLine($"Newer build found for version {version}. Existing build: {existingBuild}, New build: {build}");
+
+                        // Delete the old file
+                        File.Delete(existingFiles[0]);
+                        Console.WriteLine($"Deleted old file: {existingFileName}.jar");
+
+                        // Download the new file
+                        await DownloadForgeServerJarAsync(client, actualDownloadUrl, destinationPath);
+                        Console.WriteLine($"Downloaded {fileName}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Skipping download for version {version}. Existing build ({existingBuild}) is up to date.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Unable to parse build number from existing file: {existingFileName}");
+                }
+            }
+            else
+            {
+                // If no local file exists, download the new file
+                Console.WriteLine($"No local file found for version {version}. Downloading new build: {build}");
+
+                // Download the new file
+                await DownloadForgeServerJarAsync(client, actualDownloadUrl, destinationPath);
+                Console.WriteLine($"Downloaded {fileName}");
+            }
+        }
+
+        private static async Task DownloadForgeServerJarAsync(HttpClient client, string url, string destinationPath)
+        {
+            //Console.WriteLine("URL: " + url);
+            try
+            {
+                using (HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode(); // Ensure the request was successful
+
+                    using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
+                    {
+                        using (FileStream streamToWriteTo = File.Open(destinationPath, FileMode.Create))
+                        {
+                            await streamToReadFrom.CopyToAsync(streamToWriteTo);
+                            await streamToWriteTo.FlushAsync(); // Ensure all data is written to disk
+                        }
+                    }
+                }
+                Console.WriteLine($"Successfully downloaded to {destinationPath}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download {url}: {ex.Message}");
+                if (File.Exists(destinationPath))
+                {
+                    File.Delete(destinationPath); // Delete the incomplete file
+                }
+            }
+        }
+
+        private static bool CompareBuildNumbers(string newBuild, string existingBuild)
+        {
+            // Split the build numbers into parts (e.g., "7.8.1.738" -> ["7", "8", "1", "738"])
+            string[] newBuildParts = newBuild.Split('.');
+            string[] existingBuildParts = existingBuild.Split('.');
+
+            // Compare each part of the build numbers
+            for (int i = 0; i < Math.Min(newBuildParts.Length, existingBuildParts.Length); i++)
+            {
+                if (int.TryParse(newBuildParts[i], out int newPart) && int.TryParse(existingBuildParts[i], out int existingPart))
+                {
+                    if (newPart > existingPart)
+                    {
+                        return true; // New build is greater
+                    }
+                    else if (newPart < existingPart)
+                    {
+                        return false; // Existing build is greater
+                    }
+                }
+            }
+
+            // If all parts are equal, the longer build number is considered greater
+            return newBuildParts.Length > existingBuildParts.Length;
+        }
+
+        // ------------------------ ↓ NeoForge Updater Funcs ↓ ------------------------
 
         // ------------------------ ↓ Quilt Updater Funcs ↓ ------------------------
 
@@ -226,10 +396,10 @@ namespace updater
                 }
                 else
                 {
+                    DeleteFiles(downloadDirectory, false);
                     Console.WriteLine($"Downloading Quilt Universal Server Installer {latestVersion}...");
                     string jarUrl = $"{QuiltApiBaseUrl}{latestVersion}/quilt-installer-{latestVersion}.jar";
                     await DownloadQuiltServerJarAsync(jarUrl, localFilePath);
-                    DeleteFiles(downloadDirectory, false);
                 }
             }
             catch (Exception ex)
@@ -459,7 +629,7 @@ namespace updater
             Console.WriteLine("--------------------------------------------");
 
             object[,] softwareTypes = {
-                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur" },
+                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur", "Spigot" },
             };
 
             foreach (string software in softwareTypes)
@@ -517,7 +687,7 @@ namespace updater
             }
             else if (software == "Forge")
             {
-                // TODO
+                await CheckAndUpdateForgeAsync(versionDirectory, version);
             }
             else if (software == "NeoForge")
             {

@@ -12,6 +12,7 @@
     <Folder Include="database\" />
     <Folder Include="temp\" />
     <Folder Include="versions\Fabric\" />
+    <Folder Include="versions\Forge\" />
     <Folder Include="versions\Quilt\" />
     <Folder Include="versions\Spigot\" />
     <Folder Include="versions\Purpur\" />
