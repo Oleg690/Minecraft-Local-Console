@@ -20,10 +20,10 @@ namespace mainApp
             // 10.0.0.0 to 10.255.255.255
 
             // ↓ Server Settings ↓
-            string version = "";  // e.g. 1.21
+            string version = "1.16.5";  // e.g. 1.21
             string worldNumber = "";
-            string worldName = "";
-            string software = ""; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
+            string worldName = "Minecraft Server";
+            string software = "Quilt"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
             int totalPlayers = 20;
             string Server_LocalIp = "127.0.0.1";
             string Server_LocalComputerIP = "192.168.100.106"; // "0.0.0.0"
@@ -65,10 +65,10 @@ namespace mainApp
             string serverVersionsPath = Path.Combine(rootFolder, "versions");
             string tempFolderPath = Path.Combine(rootFolder, "temp");
 
-            // ↓ Update Available Versions ↓
+            // ↓ Update Available Versions ↓-0
             //await VersionsUpdater.Update(serverVersionsPath);
-            //await VersionsUpdater.Update(serverVersionsPath, "Forge");
-            //await VersionsUpdater.Update(serverVersionsPath, "Forge", "1.21.1");
+            //await VersionsUpdater.Update(serverVersionsPath, software);
+            //await VersionsUpdater.Update(serverVersionsPath, software, version);
 
             // ↓ Create World Func ↓
             //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);

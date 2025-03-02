@@ -19,7 +19,8 @@ namespace updater
         private static readonly string VanillaApiBaseUrl = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
         private static readonly string ForgeApiVersionsUrl = "https://files.minecraftforge.net/net/minecraftforge/forge/";
         private static readonly string ForgeApiBaseUrl = "https://maven.minecraftforge.net/net/minecraftforge/forge/";
-        private static readonly string NeoForgeApiBaseUrl = "";
+        private static readonly string NeoForgeVersionsUrl = "https://maven.neoforged.net/mojang-meta/net/neoforged/minecraft-dependencies/maven-metadata.xml";
+        private static readonly string NeoForgeVersionInfoUrl = "https://maven.neoforged.net/mojang-meta/net/minecraft/{0}.json";
         private static readonly string FabricApiBaseUrl = "https://meta.fabricmc.net/v2/versions/installer/";
         private static readonly string QuiltApiBaseUrl = "https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/";
         private static readonly string PurpurApiBaseUrl = "https://api.purpurmc.org/v2/purpur/";
@@ -28,7 +29,7 @@ namespace updater
         private static readonly HttpClient HttpClient = new();
 
         // ------------------------ ↓ Vanilla Updater Funcs ↓ ------------------------
-        public static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string? selectedVersion = null)
+        private static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string? selectedVersion = null)
         {
             Console.WriteLine($"Checking Vanilla Minecraft Server versions in: {downloadDirectory}");
             Directory.CreateDirectory(downloadDirectory);
@@ -273,7 +274,7 @@ namespace updater
                     string existingBuild = existingFileParts[2]; // Get the build number as a string
 
                     // Compare build numbers as strings
-                    if (CompareBuildNumbers(build, existingBuild)) // Check if the new build is greater
+                    if (CompareForgeBuildNumbers(build, existingBuild)) // Check if the new build is greater
                     {
                         Console.WriteLine($"Newer build found for version {version}. Existing build: {existingBuild}, New build: {build}");
 
@@ -336,7 +337,7 @@ namespace updater
             }
         }
 
-        private static bool CompareBuildNumbers(string newBuild, string existingBuild)
+        private static bool CompareForgeBuildNumbers(string newBuild, string existingBuild)
         {
             // Split the build numbers into parts (e.g., "7.8.1.738" -> ["7", "8", "1", "738"])
             string[] newBuildParts = newBuild.Split('.');
@@ -364,9 +365,137 @@ namespace updater
 
         // ------------------------ ↓ NeoForge Updater Funcs ↓ ------------------------
 
+        private static async Task CheckAndUpdateNeoForgeAsync(string downloadDirectory, string? selectedVersion = null)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    // Fetch the list of available Minecraft versions
+                    string versionsXml = await client.GetStringAsync(NeoForgeVersionsUrl);
+                    XDocument versionsDoc = XDocument.Parse(versionsXml);
+
+                    // Extract version numbers from the XML
+                    var versions = versionsDoc.Descendants("version")
+                                              .Select(v => v.Value)
+                                              .Where(v => IsStableVersion(v)) // Filter out unstable versions
+                                              .ToList();
+
+                    // Ensure the download directory exists
+                    if (!Directory.Exists(downloadDirectory))
+                    {
+                        Directory.CreateDirectory(downloadDirectory);
+                    }
+
+                    // Process versions
+                    if (selectedVersion != null)
+                    {
+                        // If a specific version is provided, only process that version
+                        if (versions.Contains(selectedVersion))
+                        {
+                            await ProcessNeoForgeVersion(client, downloadDirectory, selectedVersion);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Version {selectedVersion} not found in the list of available versions.");
+                        }
+                    }
+                    else
+                    {
+                        // If no specific version is provided, process all versions
+                        foreach (string version in versions)
+                        {
+                            await ProcessNeoForgeVersion(client, downloadDirectory, version);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                }
+            }
+        }
+
+        private static bool IsStableVersion(string version)
+        {
+            // Filter out versions with "-pre", "-rc", or snapshot-like versions (e.g., "25w09b")
+            return !version.Contains("-pre") && !version.Contains("-rc") && !version.Contains("w");
+        }
+
+        private static async Task ProcessNeoForgeVersion(HttpClient client, string downloadDirectory, string version)
+        {
+            try
+            {
+                // Fetch the version info JSON
+                string versionInfoUrl = string.Format(NeoForgeVersionInfoUrl, version);
+                string versionInfoJson = await client.GetStringAsync(versionInfoUrl);
+                JObject versionInfo = JObject.Parse(versionInfoJson);
+
+                // Get the server download URL
+                string serverUrl = versionInfo["downloads"]?["server"]?["url"]?.ToString();
+
+                if (!string.IsNullOrEmpty(serverUrl))
+                {
+                    // Define the destination file path with the new filename pattern
+                    string fileName = $"neoforge-{version}.jar";
+                    string destinationPath = Path.Combine(downloadDirectory, fileName);
+
+                    // Check if a file for this version already exists locally
+                    if (File.Exists(destinationPath))
+                    {
+                        Console.WriteLine($"Skipping download for version {version}. File already exists.");
+                    }
+                    else
+                    {
+                        // Download the server file
+                        await DownloadNeoForgeServerFileAsync(client, serverUrl, destinationPath);
+                        Console.WriteLine($"Downloaded {fileName}");
+                        //Console.WriteLine($"Downloaded {fileName} to {downloadDirectory}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"Could not find server download URL for version {version}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to process version {version}: {ex.Message}");
+            }
+        }
+
+        private static async Task DownloadNeoForgeServerFileAsync(HttpClient client, string url, string destinationPath)
+        {
+            //Console.WriteLine("URL: " + url);
+            try
+            {
+                using (HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode(); // Ensure the request was successful
+
+                    using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
+                    {
+                        using (FileStream streamToWriteTo = File.Open(destinationPath, FileMode.Create))
+                        {
+                            await streamToReadFrom.CopyToAsync(streamToWriteTo);
+                            await streamToWriteTo.FlushAsync(); // Ensure all data is written to disk
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download {url}: {ex.Message}");
+                if (File.Exists(destinationPath))
+                {
+                    File.Delete(destinationPath); // Delete the incomplete file
+                }
+            }
+        }
+
         // ------------------------ ↓ Quilt Updater Funcs ↓ ------------------------
 
-        public static async Task CheckAndUpdateLatestQuiltAsync(string downloadDirectory)
+        private static async Task CheckAndUpdateLatestQuiltAsync(string downloadDirectory)
         {
             try
             {
@@ -425,7 +554,7 @@ namespace updater
         }
 
         // ------------------------ ↓ Purpur Updater Funcs ↓ ------------------------
-        public static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string? selectedVersion = null)
+        private static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string? selectedVersion = null)
         {
             Console.WriteLine($"Checking Purpur versions in: {downloadDirectory}");
             Directory.CreateDirectory(downloadDirectory);
@@ -691,7 +820,7 @@ namespace updater
             }
             else if (software == "NeoForge")
             {
-                // TODO
+                await CheckAndUpdateNeoForgeAsync(versionDirectory, version);
             }
             else if (software == "Fabric")
             {
@@ -716,7 +845,7 @@ namespace updater
             }
         }
 
-        public static void DeleteFiles(string path, bool deleteWholeDirectory = true)
+        private static void DeleteFiles(string path, bool deleteWholeDirectory = true)
         {
             try
             {

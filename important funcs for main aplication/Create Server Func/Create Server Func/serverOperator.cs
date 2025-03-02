@@ -30,65 +30,19 @@ using sun.awt.windows;
 using com.sun.media.sound;
 using System.Reflection.PortableExecutable;
 using updater;
+using com.sun.tools.javah.resources;
+using IKVM.Reflection.Emit;
 
 namespace Server_General_Funcs
 {
-    class serverCreator
+    class ServerCreator
     {
         private const string TimestampFile = "lastQuiltorFabricCheck.txt";
         private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
 
         public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
         {
-            string serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions");
-            var localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
-            bool _contiune = false;
-
-            if (software == "Quilt" || software == "Fabric")
-            {
-                if (ShouldRunNow() || localFiles.Length == 0)
-                {
-                    Console.WriteLine("Checking for updates...");
-                    await VersionsUpdater.Update(serverVersionsPath, software);
-                    File.WriteAllText(TimestampFile, DateTime.UtcNow.ToString("o"));
-                    if (localFiles.Length == 0)
-                    {
-                        Console.WriteLine("Error downloading the server file.");
-                        return "";
-                    }
-                }
-            }
-            else
-            {
-                foreach (var localVersion in localFiles)
-                {
-                    if (localVersion.Contains(version))
-                    {
-                        _contiune = true;
-                        break;
-                    }
-                }
-                if (!_contiune)
-                {
-                    Console.WriteLine("Version not found in local files! Downloading it...");
-                    await VersionsUpdater.Update(serverVersionsPath, software, version);
-
-                    localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
-                    foreach (var localVersion in localFiles)
-                    {
-                        if (localVersion.Contains(version))
-                        {
-                            _contiune = true;
-                            break;
-                        }
-                    }
-                    if (!_contiune)
-                    {
-                        Console.WriteLine($"Error downloading the server file with the version {version}.");
-                        return "";
-                    }
-                }
-            }
+            await CheckVersions(rootFolder, software, version);
 
             string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
 
@@ -102,8 +56,7 @@ namespace Server_General_Funcs
             Directory.CreateDirectory(customDirectory);
             Console.WriteLine($"Created server directory: {customDirectory}");
 
-            string jarFoldersPath = rootFolder;
-
+            string jarFoldersPath = rootFolder + $"\\versions\\{software}\\";
             string versionName = version + ".jar";
             string jarFilePath = "";
 
@@ -112,48 +65,25 @@ namespace Server_General_Funcs
                 Console.WriteLine("Software not selected!");
                 return "Software not selected!";
             }
-            else if (software == "Vanilla")
-            {
-                jarFoldersPath = rootFolder + "\\versions\\Vanilla\\";
-                versionName = FindJarFile(jarFoldersPath, version)[1];
-                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
-            }
-            else if (software == "Forge")
-            {
-                jarFoldersPath += @"\versions\Forge";
-                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
+            
+            object[,] softwareTypes = {
+                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur", "Spigot" },
+            };
 
-                versionName = FindJarFile(jarFoldersPath, version)[1];
-                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
-            }
-            else if (software == "Fabric")
+            foreach (string softwareType in softwareTypes)
             {
-                jarFoldersPath += @"\versions\Fabric";
-                jarFilePath = FindClosestJarFile(jarFoldersPath, "installer");
+                if (softwareType != "Fabric" && softwareType != "Quilt" && softwareType == software)
+                {
+                    versionName = FindJarFile(jarFoldersPath, version)[1];
+                    jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
+                    break;
+                }
+                else if ((softwareType == "Fabric" || softwareType == "Quilt") && softwareType == software)
+                {
+                    jarFilePath = FindClosestJarFile(jarFoldersPath, "installer");
+                    break;
+                }
             }
-            else if (software == "NeoForge")
-            {
-                jarFoldersPath += @"\versions\NeoForge";
-                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
-            }
-            else if (software == "Purpur")
-            {
-                jarFoldersPath = rootFolder + "\\versions\\Purpur\\";
-                versionName = FindJarFile(jarFoldersPath, version)[1];
-                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
-            }
-            else if (software == "Spigot")
-            {
-                jarFoldersPath += @"\versions\Spigot";
-                jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName); // TODO
-            }
-            else if (software == "Quilt")
-            {
-                jarFoldersPath += @"\versions\Quilt";
-                jarFilePath = FindClosestJarFile(jarFoldersPath, "installer");
-            }
-
-            Console.WriteLine(jarFilePath);
 
             if (!File.Exists(jarFilePath))
             {
@@ -166,8 +96,6 @@ namespace Server_General_Funcs
             File.Copy(jarFilePath, destinationJarPath);
             RenameFile(destinationJarPath, System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destinationJarPath), version + ".jar"));
             destinationJarPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destinationJarPath), version + ".jar");
-
-            Console.WriteLine("destinationJarPath: " + destinationJarPath);
 
             Console.WriteLine("Server .jar file copied to the custom directory.");
 
@@ -565,7 +493,7 @@ namespace Server_General_Funcs
             ProcessStartInfo processInfo = new ProcessStartInfo
             {
                 FileName = "java",
-                Arguments = $"-jar \"{neoForgeJarPath}\" --installServer",
+                Arguments = $"-jar \"{neoForgeJarPath}\"",
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -643,8 +571,6 @@ namespace Server_General_Funcs
                 }
                 Console.WriteLine("Installation completed!");
 
-                File.Delete(neoForgeJarPath);
-
                 object[,] filesToDelete = {
                 { "run.bat", "run.sh", "user_jvm_args.txt", "installer.log" }
                 };
@@ -662,7 +588,7 @@ namespace Server_General_Funcs
                     Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+                //await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
@@ -911,7 +837,7 @@ namespace Server_General_Funcs
                 File.Move(fileName, newName);
 
                 // Print a success message.
-                Console.WriteLine($"File has been renamed successfully from {fileName} to {newName}.");
+                Console.WriteLine($"File has been renamed successfully from {System.IO.Path.GetFileName(fileName)} to {System.IO.Path.GetFileName(newName)}.");
             }
             catch (Exception ex)
             {
@@ -925,7 +851,6 @@ namespace Server_General_Funcs
 
             // Get all files in the specified directory
             string[] files = Directory.GetFiles(rootPath, "*.jar");
-
             foreach (string file in files)
             {
                 string fileName = System.IO.Path.GetFileName(file);
@@ -947,10 +872,9 @@ namespace Server_General_Funcs
             // Handle exceptions, such as no matching jar found
             if (jarPath == null)
             {
-
-                throw new Exception("No jar file found with the specified version.");
+                Console.WriteLine("No jar file found with the specified version.");
             }
-            return ["0"];
+            return ["0", "No jar file found with the specified version."];
         }
 
         private static void AcceptEULA(string jarFilePath)
@@ -1183,6 +1107,60 @@ namespace Server_General_Funcs
             return true; // Run if the timestamp is corrupted
         }
 
+        private static async Task CheckVersions(string rootFolder, string software, string version)
+        {
+            string serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions");
+            var localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
+            bool _contiune = false;
+
+            if (software == "Quilt" || software == "Fabric")
+            {
+                if (ShouldRunNow() || localFiles.Length == 0)
+                {
+                    Console.WriteLine("Checking for updates...");
+                    await VersionsUpdater.Update(serverVersionsPath, software);
+                    File.WriteAllText(TimestampFile, DateTime.UtcNow.ToString("o"));
+                    localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
+                    if (localFiles.Length == 0)
+                    {
+                        Console.WriteLine("Error downloading the server file.");
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var localVersion in localFiles)
+                {
+                    if (localVersion.Contains(version))
+                    {
+                        _contiune = true;
+                        break;
+                    }
+                }
+                if (!_contiune)
+                {
+                    Console.WriteLine("Version not found in local files! Downloading it...");
+                    await VersionsUpdater.Update(serverVersionsPath, software, version);
+
+                    localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
+                    foreach (var localVersion in localFiles)
+                    {
+                        if (localVersion.Contains(version))
+                        {
+                            _contiune = true;
+                            break;
+                        }
+                    }
+                    if (!_contiune)
+                    {
+                        Console.WriteLine($"Error downloading the server file with the version {version}.");
+                        return;
+                    }
+                }
+            }
+        }
+
         // --------------------------------------------------------------------------------
     }
 
@@ -1291,39 +1269,24 @@ namespace Server_General_Funcs
             {
                 Console.WriteLine("Starting NeoForge Server!");
 
-                string winArgsPath = FindFileInFolder(System.IO.Path.Combine(serverPath, "libraries"), "win_args.txt");
-
-                if (winArgsPath != "")
+                if (!serverPath.Contains(".jar"))
                 {
-                    winArgsPath = $"@\"{winArgsPath}\" ";
+                    string version = dbChanger.SpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar";
+                    serverPath = System.IO.Path.Combine(serverPath, version);
                 }
-
-                string toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
-
-                if (toRunJarFile == null)
-                {
-                    toRunJarFile = FindClosestJarFile(serverPath, "server");
-
-                    if (toRunJarFile == null)
-                    {
-                        Console.WriteLine("No server file found");
-                    }
-                }
-
 
                 serverProcessInfo = new ProcessStartInfo
                 {
                     FileName = "java",
                     Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                 JMX_Server_Settings +
-                                $"{winArgsPath}" +
-                                $"{toRunJarFile} %*", // nogui
+                                $"-jar \"{serverPath}\" %*", // nogui
                     RedirectStandardInput = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = serverPath
+                    WorkingDirectory = System.IO.Path.GetDirectoryName(serverPath)
                 };
             }
             else if (software == "Fabric")
@@ -1539,7 +1502,7 @@ namespace Server_General_Funcs
                     dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                     Console.WriteLine("Creating New Server...");
-                    await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
 
                     object[,] filesToDelete = {
                         { "world" }
@@ -1570,7 +1533,7 @@ namespace Server_General_Funcs
                     dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                     Console.WriteLine("Creating New Server...");
-                    await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
                 }
 
                 DeleteFiles(tempFolderPath, false);
@@ -1584,7 +1547,7 @@ namespace Server_General_Funcs
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                 Console.WriteLine("Creating New Server...");
-                await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
             }
         }
 
