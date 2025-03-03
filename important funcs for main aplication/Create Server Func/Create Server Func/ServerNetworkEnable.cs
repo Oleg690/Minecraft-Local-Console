@@ -89,8 +89,9 @@ namespace NetworkConfig
                 int internalPort = port;
                 string description = "Minecraft Server Port Forwarding";
 
-                // Add the port mapping for TCP
-                await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, internalPort, externalPort, description));
+                // Add the port mapping for TCP and UDP
+                await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, internalPort, externalPort, description + " TCP"));
+                await device.CreatePortMapAsync(new Mapping(Protocol.Udp, internalPort, externalPort, description + " UDP"));
 
                 Console.WriteLine($"Port mapping successful! External port {externalPort} is now forwarded to {localIp}:{internalPort}.");
             }

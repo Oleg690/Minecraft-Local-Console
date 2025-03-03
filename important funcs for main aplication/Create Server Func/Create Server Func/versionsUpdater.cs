@@ -12,7 +12,7 @@ using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 using System.Net.NetworkInformation;
 
-namespace updater
+namespace Updater
 {
     class VersionsUpdater
     {

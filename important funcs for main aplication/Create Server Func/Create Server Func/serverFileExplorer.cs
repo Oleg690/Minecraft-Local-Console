@@ -1,12 +1,4 @@
-﻿using com.sun.tools.javac.jvm;
-using sun.java2d.loops;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace fileExplorer
+﻿namespace FileExplorer
 {
     class ServerFileExplorer
     {

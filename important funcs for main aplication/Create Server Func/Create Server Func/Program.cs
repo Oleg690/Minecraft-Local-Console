@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Net.Sockets;
+using System.Net;
 using System.Threading;
 using System.Diagnostics;
-using Server_General_Funcs;
 using MinecraftServerStats;
-using fileExplorer;
+using FileExplorer;
 using NetworkConfig;
-using updater;
+using Updater;
+using Create_Server_Func;
 
 namespace mainApp
 {
@@ -16,18 +18,14 @@ namespace mainApp
             // Public Address Ranges
             // 1.0.0.0 – 9.255.255.255
 
-            // Public Address Ranges
-            // 10.0.0.0 to 10.255.255.255
-
             // ↓ Server Settings ↓
-            string version = "1.16.5";  // e.g. 1.21
+            string version = "";  // e.g. 1.21
             string worldNumber = "";
-            string worldName = "Minecraft Server";
-            string software = "Quilt"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
+            string worldName = ""; // e.g. Minecfraft Server
+            string software = ""; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
             int totalPlayers = 20;
-            string Server_LocalIp = "127.0.0.1";
-            string Server_LocalComputerIP = "192.168.100.106"; // "0.0.0.0"
-            string Server_PublicComputerIP = "109.185.75.45"; // "0.0.0.0"
+            string Server_LocalComputerIP = GetLocalMachineIP(); // "192.168.100.106"
+            string Server_PublicComputerIP = await GetPublicIP(); // "109.185.75.45"
             int Server_Port = 25565;
             int JMX_Port = 25562;
             int RCON_Port = 25575;
@@ -65,41 +63,41 @@ namespace mainApp
             string serverVersionsPath = Path.Combine(rootFolder, "versions");
             string tempFolderPath = Path.Combine(rootFolder, "temp");
 
-            // ↓ Update Available Versions ↓-0
-            //await VersionsUpdater.Update(serverVersionsPath);
-            //await VersionsUpdater.Update(serverVersionsPath, software);
-            //await VersionsUpdater.Update(serverVersionsPath, software, version);
+            // ↓ Update Available Versions ↓
+            await VersionsUpdater.Update(serverVersionsPath);
+            await VersionsUpdater.Update(serverVersionsPath, software);
+            await VersionsUpdater.Update(serverVersionsPath, software, version);
 
             // ↓ Create World Func ↓
-            //worldNumber = await serverCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
+            worldNumber = await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
 
             // ↓ Start Server Func ↓
-            //await ServerOperator.Start(worldNumber, serverPath, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port);
-            //await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, true);
-            //await ServerOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, RCON_Port, JMX_Port);
-            //ServerOperator.Kill(RCON_Port, JMX_Port);
+            await ServerOperator.Start(worldNumber, serverPath, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port);
+            await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, true);
+            await ServerOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, RCON_Port, JMX_Port);
+            ServerOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
-            //_ = ServerOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, Server_LocalComputerIP);
-            //_ = ServerOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, Server_LocalComputerIP);
+            _ = ServerOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, Server_LocalComputerIP);
+            _ = ServerOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, Server_LocalComputerIP);
 
             // ↓ Change Version Func ↓
-            //await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
+            await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
 
             // ↓ Server Files Loop ↓
-            //List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
+            List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
 
             // ↓ Delete Server ↓
-            //ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
+            ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
 
             // ↓ Server Stats Loop ↓
-            //while (true)
-            //{
-            //    ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, Server_LocalComputerIP, JMX_Port, RCON_Port);
-            //    Thread.Sleep(1000);
-            //}
+            while (true)
+            {
+                ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, Server_LocalComputerIP, JMX_Port, RCON_Port);
+                Thread.Sleep(1000);
+            }
 
-            // ↓ Test Network Config ↓
+            // ↓ Network Configuration ↓ Testing
 
             //await UPnP_Port_Mapping.UPnP_Configuration_Async(25565);
 
@@ -107,6 +105,36 @@ namespace mainApp
             //Console.WriteLine(domainName);
 
             Console.ReadKey();
+        }
+        private static string GetLocalMachineIP()
+        {
+            try
+            {
+                using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
+                {
+                    socket.Connect("8.8.8.8", 80); // Connect to Google's DNS
+                    IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                    return endPoint?.Address.ToString() ?? "Unable to determine local IP";
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+        }
+        private static async Task<string> GetPublicIP()
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    return await client.GetStringAsync("https://api64.ipify.org");
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
         }
     }
 }

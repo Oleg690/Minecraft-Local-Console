@@ -1,48 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.Diagnostics;
-using System.Threading.Channels;
-using System.IO;
-using System.Reflection.Emit;
 using serverPropriertiesChanger;
 using databaseChanger;
 using CoreRCON;
 using System.Net;
-using java.nio.file;
-using javax.swing.plaf;
-using com.sun.tools.javadoc;
-using jdk.nashorn.@internal.ir;
-using System.Management;
 using System.Net.Sockets;
-using System.Net.NetworkInformation;
-using System.Linq;
-using com.sun.tools.@internal.xjc.reader.gbind;
-using com.sun.xml.@internal.ws.message;
-using sun.tools.jar.resources;
-using javax.sound.midi;
-using javax.xml.crypto;
-using sun.security.util;
 using NetworkConfig;
-using sun.awt.windows;
-using com.sun.media.sound;
-using System.Reflection.PortableExecutable;
-using updater;
-using com.sun.tools.javah.resources;
-using IKVM.Reflection.Emit;
+using Updater;
 
-namespace Server_General_Funcs
+namespace Create_Server_Func
 {
     class ServerCreator
     {
         private const string TimestampFile = "lastQuiltorFabricCheck.txt";
         private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
 
-        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
+        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress,int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
         {
             await CheckVersions(rootFolder, software, version);
+
+            if (!ServerOperator.CheckFirewallRuleExists("MinecraftServer_TCP_25565") && !ServerOperator.CheckFirewallRuleExists("MinecraftServer_UDP_25565"))
+            {
+                await NetworkConfigSetup.Setup(25565);
+                return "";
+            }
 
             string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
 
@@ -51,7 +32,7 @@ namespace Server_General_Funcs
                 uniqueNumber = worldNumber;
             }
 
-            string customDirectory = System.IO.Path.Combine(rootWorldsFolder, uniqueNumber);
+            string customDirectory = Path.Combine(rootWorldsFolder, uniqueNumber);
 
             Directory.CreateDirectory(customDirectory);
             Console.WriteLine($"Created server directory: {customDirectory}");
@@ -75,7 +56,7 @@ namespace Server_General_Funcs
                 if (softwareType != "Fabric" && softwareType != "Quilt" && softwareType == software)
                 {
                     versionName = FindJarFile(jarFoldersPath, version)[1];
-                    jarFilePath = System.IO.Path.Combine(jarFoldersPath, versionName);
+                    jarFilePath = Path.Combine(jarFoldersPath, versionName);
                     break;
                 }
                 else if ((softwareType == "Fabric" || softwareType == "Quilt") && softwareType == software)
@@ -91,11 +72,11 @@ namespace Server_General_Funcs
                 return "";
             }
 
-            string destinationJarPath = System.IO.Path.Combine(customDirectory, versionName);
+            string destinationJarPath = Path.Combine(customDirectory, versionName);
 
             File.Copy(jarFilePath, destinationJarPath);
-            RenameFile(destinationJarPath, System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destinationJarPath), version + ".jar"));
-            destinationJarPath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(destinationJarPath), version + ".jar");
+            RenameFile(destinationJarPath, Path.Combine(Path.GetDirectoryName(destinationJarPath), version + ".jar"));
+            destinationJarPath = Path.Combine(Path.GetDirectoryName(destinationJarPath), version + ".jar");
 
             Console.WriteLine("Server .jar file copied to the custom directory.");
 
@@ -115,7 +96,7 @@ namespace Server_General_Funcs
                 { "enable-rcon", "true" },
                 { "rcon.password", $"{rconPassword}" },
                 { "rcon.port", $"{RCON_Port}" },
-                { "enable-query", "true" },
+                { "enable-query", "true" }
             };
 
             Console.WriteLine($"{software} Server");
@@ -173,7 +154,7 @@ namespace Server_General_Funcs
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WorkingDirectory = System.IO.Path.GetDirectoryName(vanillaJarPath) // Set the custom working directory
+                WorkingDirectory = Path.GetDirectoryName(vanillaJarPath) // Set the custom working directory
             };
 
             try
@@ -187,7 +168,7 @@ namespace Server_General_Funcs
 
                     Console.WriteLine("Minecraft server is starting...");
 
-                    string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
+                    string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
                     if (!File.Exists(serverPropertiesPath))
                     {
                         File.Create(serverPropertiesPath).Close();
@@ -342,8 +323,8 @@ namespace Server_General_Funcs
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
-                string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
+                string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
+                string serverPropertiesPresetPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
                 if (!File.Exists(serverPropertiesPath))
                 {
                     File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
@@ -467,8 +448,8 @@ namespace Server_General_Funcs
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
-                string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
+                string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
+                string serverPropertiesPresetPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
                 if (!File.Exists(serverPropertiesPath))
                 {
                     File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
@@ -592,8 +573,8 @@ namespace Server_General_Funcs
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
-                string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
+                string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
+                string serverPropertiesPresetPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
                 if (!File.Exists(serverPropertiesPath))
                 {
                     File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
@@ -631,7 +612,7 @@ namespace Server_General_Funcs
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WorkingDirectory = System.IO.Path.GetDirectoryName(purpurJarPath) // Set the custom working directory
+                WorkingDirectory = Path.GetDirectoryName(purpurJarPath) // Set the custom working directory
             };
 
             try
@@ -645,7 +626,7 @@ namespace Server_General_Funcs
 
                     Console.WriteLine("Minecraft server is starting...");
 
-                    string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
+                    string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
                     if (!File.Exists(serverPropertiesPath))
                     {
                         File.Create(serverPropertiesPath).Close();
@@ -778,7 +759,7 @@ namespace Server_General_Funcs
                 }
                 Console.WriteLine("Installation completed!");
 
-                CopyFiles(System.IO.Path.Combine(tempFolderPath, "server"), customDirectory);
+                CopyFiles(Path.Combine(tempFolderPath, "server"), customDirectory);
 
                 object[,] filesToDelete = {
                 { "quilt-server-launch.jar", "quilt-server-launcher.properties", ".cache" }
@@ -803,8 +784,8 @@ namespace Server_General_Funcs
 
                 string currentDirectory = Directory.GetCurrentDirectory();
 
-                string serverPropertiesPath = System.IO.Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
+                string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
+                string serverPropertiesPresetPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
                 if (!File.Exists(serverPropertiesPath))
                 {
                     File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
@@ -837,7 +818,7 @@ namespace Server_General_Funcs
                 File.Move(fileName, newName);
 
                 // Print a success message.
-                Console.WriteLine($"File has been renamed successfully from {System.IO.Path.GetFileName(fileName)} to {System.IO.Path.GetFileName(newName)}.");
+                Console.WriteLine($"File has been renamed successfully from {Path.GetFileName(fileName)} to {Path.GetFileName(newName)}.");
             }
             catch (Exception ex)
             {
@@ -853,7 +834,7 @@ namespace Server_General_Funcs
             string[] files = Directory.GetFiles(rootPath, "*.jar");
             foreach (string file in files)
             {
-                string fileName = System.IO.Path.GetFileName(file);
+                string fileName = Path.GetFileName(file);
                 string[] parts = fileName.Split('-');
 
                 if (parts[1].Contains(".jar"))
@@ -863,7 +844,7 @@ namespace Server_General_Funcs
                 if (parts.Length >= 1 && parts[1].Trim() == targetVersion)
                 {
                     // Found the matching jar file
-                    jarPath = System.IO.Path.Combine(rootPath, fileName);
+                    jarPath = Path.Combine(rootPath, fileName);
                     // Use or copy the jar file as needed
                     return [jarPath, fileName];
                 }
@@ -879,12 +860,12 @@ namespace Server_General_Funcs
 
         private static void AcceptEULA(string jarFilePath)
         {
-            string serverDir = System.IO.Path.GetDirectoryName(jarFilePath);
-            string eulaFile = System.IO.Path.Combine(serverDir, "eula.txt");
+            string serverDir = Path.GetDirectoryName(jarFilePath);
+            string eulaFile = Path.Combine(serverDir, "eula.txt");
 
             try
             {
-                System.IO.File.WriteAllText(eulaFile, "eula=true");
+                File.WriteAllText(eulaFile, "eula=true");
                 Console.WriteLine("EULA accepted. Restart the server.");
             }
             catch (Exception ex)
@@ -910,11 +891,11 @@ namespace Server_General_Funcs
                 // The first digit must be non-zero if numDigits > 1
                 if (i == 0 && numDigits > 1)
                 {
-                    number[i] = (char)random.Next(1, 10).ToString()[0]; // 1 to 9
+                    number[i] = random.Next(1, 10).ToString()[0]; // 1 to 9
                 }
                 else
                 {
-                    number[i] = (char)random.Next(0, 10).ToString()[0]; // 0 to 9
+                    number[i] = random.Next(0, 10).ToString()[0]; // 0 to 9
                 }
             }
 
@@ -945,7 +926,7 @@ namespace Server_General_Funcs
                 foreach (string folder in folders)
                 {
                     // Get the folder name (not the full path)
-                    string currentFolderName = System.IO.Path.GetFileName(folder);
+                    string currentFolderName = Path.GetFileName(folder);
 
 
                     if (currentFolderName == folderName)
@@ -1024,7 +1005,7 @@ namespace Server_General_Funcs
 
                 foreach (string file in jarFiles)
                 {
-                    string fileName = System.IO.Path.GetFileName(file); // Extract only the file name
+                    string fileName = Path.GetFileName(file); // Extract only the file name
 
                     // Check if the file name contains the target pattern
                     if (fileName.Contains(targetPattern, StringComparison.OrdinalIgnoreCase))
@@ -1084,8 +1065,8 @@ namespace Server_General_Funcs
 
             foreach (string file in files)
             {
-                string fileName = System.IO.Path.GetFileName(file);
-                string destinationPath = System.IO.Path.Combine(destinationFolder, fileName);
+                string fileName = Path.GetFileName(file);
+                string destinationPath = Path.Combine(destinationFolder, fileName);
 
                 File.Copy(file, destinationPath, true); // Overwrite if exists
             }
@@ -1109,8 +1090,8 @@ namespace Server_General_Funcs
 
         private static async Task CheckVersions(string rootFolder, string software, string version)
         {
-            string serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions");
-            var localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
+            string serverVersionsPath = Path.Combine(rootFolder, "versions");
+            var localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
             bool _contiune = false;
 
             if (software == "Quilt" || software == "Fabric")
@@ -1120,7 +1101,7 @@ namespace Server_General_Funcs
                     Console.WriteLine("Checking for updates...");
                     await VersionsUpdater.Update(serverVersionsPath, software);
                     File.WriteAllText(TimestampFile, DateTime.UtcNow.ToString("o"));
-                    localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
+                    localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
                     if (localFiles.Length == 0)
                     {
                         Console.WriteLine("Error downloading the server file.");
@@ -1143,7 +1124,7 @@ namespace Server_General_Funcs
                     Console.WriteLine("Version not found in local files! Downloading it...");
                     await VersionsUpdater.Update(serverVersionsPath, software, version);
 
-                    localFiles = Directory.GetFiles(System.IO.Path.Combine(serverVersionsPath, software), "*.jar");
+                    localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
                     foreach (var localVersion in localFiles)
                     {
                         if (localVersion.Contains(version))
@@ -1210,7 +1191,7 @@ namespace Server_General_Funcs
                 if (!serverPath.Contains(".jar"))
                 {
                     string version = dbChanger.SpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar";
-                    serverPath = System.IO.Path.Combine(serverPath, version);
+                    serverPath = Path.Combine(serverPath, version);
                 }
 
                 serverProcessInfo = new ProcessStartInfo
@@ -1224,14 +1205,14 @@ namespace Server_General_Funcs
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = System.IO.Path.GetDirectoryName(serverPath) // Set the custom working directory
+                    WorkingDirectory = Path.GetDirectoryName(serverPath) // Set the custom working directory
                 };
             }
             else if (software == "Forge")
             {
                 Console.WriteLine("Starting Forge Server!");
 
-                string winArgsPath = FindFileInFolder(System.IO.Path.Combine(serverPath, "libraries"), "win_args.txt");
+                string winArgsPath = FindFileInFolder(Path.Combine(serverPath, "libraries"), "win_args.txt");
 
                 if (winArgsPath != "")
                 {
@@ -1272,7 +1253,7 @@ namespace Server_General_Funcs
                 if (!serverPath.Contains(".jar"))
                 {
                     string version = dbChanger.SpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar";
-                    serverPath = System.IO.Path.Combine(serverPath, version);
+                    serverPath = Path.Combine(serverPath, version);
                 }
 
                 serverProcessInfo = new ProcessStartInfo
@@ -1286,7 +1267,7 @@ namespace Server_General_Funcs
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = System.IO.Path.GetDirectoryName(serverPath)
+                    WorkingDirectory = Path.GetDirectoryName(serverPath)
                 };
             }
             else if (software == "Fabric")
@@ -1346,7 +1327,7 @@ namespace Server_General_Funcs
                 if (!serverPath.Contains(".jar"))
                 {
                     string version = dbChanger.SpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar";
-                    serverPath = System.IO.Path.Combine(serverPath, version);
+                    serverPath = Path.Combine(serverPath, version);
                 }
 
                 serverProcessInfo = new ProcessStartInfo
@@ -1360,7 +1341,7 @@ namespace Server_General_Funcs
                     RedirectStandardError = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    WorkingDirectory = System.IO.Path.GetDirectoryName(serverPath) // Set the custom working directory
+                    WorkingDirectory = Path.GetDirectoryName(serverPath) // Set the custom working directory
                 };
             }
             else
@@ -1391,7 +1372,7 @@ namespace Server_General_Funcs
                         }
                         if (Auto_Stop == true && e.Data.Contains("RCON running on"))
                         {
-                            await Stop("stop", worldNumber, ipAddress, RCON_Port, JMX_Port, true);
+                            await Stop("stop", worldNumber, "0.0.0.0", RCON_Port, JMX_Port, true);
                         }
                     }
                 };
@@ -1422,18 +1403,15 @@ namespace Server_General_Funcs
 
             await InputForServer("stop", worldNumber, RCON_Port, ipAddress);
 
-            bool RCON_Port_Closed = ClosePort(RCON_Port.ToString());
-            bool JMX_Port_Closed = ClosePort(JMX_Port.ToString());
-
-            //Console.WriteLine("RCON_Port_Closed: " + RCON_Port_Closed);
-            //Console.WriteLine("JMX_Port_Closed: " + JMX_Port_Closed);
+            ClosePort(RCON_Port.ToString());
+            ClosePort(JMX_Port.ToString());
         }
 
-        public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string ipAddress, int RCON_Port, int JMX_Port)
+        public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string StopIPAddress, string StartIPAddress, int RCON_Port, int JMX_Port)
         {
-            await Stop("restart", worldNumber, "192.168.100.106", RCON_Port, JMX_Port);
+            await Stop("restart", worldNumber, StopIPAddress, RCON_Port, JMX_Port);
 
-            Start(worldNumber, serverPath, processMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
+            await Start(worldNumber, serverPath, processMemoryAlocation, StartIPAddress, JMX_Port, RCON_Port);
         }
 
         public static void Kill(int RCON_Port, int JMX_Port)
@@ -1486,13 +1464,13 @@ namespace Server_General_Funcs
         {
             if (Keep_World_On_Version_Change)
             {
-                string rootWorldsFolder = System.IO.Path.Combine(rootFolder, "worlds");
+                string rootWorldsFolder = Path.Combine(rootFolder, "worlds");
 
-                string curentSoftware = dbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';").ToString();
+                string? curentSoftware = dbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';").ToString();
 
                 if (software == "Vanilla" || software == "Fabric" || software == "Forge" || software == "NeoForge" || software == "Quilt" && curentSoftware != "Purpur")
                 {
-                    string rootWorldFilesFolder = System.IO.Path.Combine(rootFolder, $"worlds\\{worldNumber}");
+                    string rootWorldFilesFolder = Path.Combine(rootFolder, $"worlds\\{worldNumber}");
 
                     Console.WriteLine("Copying world...");
                     CopyFiles("world", tempFolderPath, rootWorldFilesFolder);
@@ -1512,12 +1490,12 @@ namespace Server_General_Funcs
                     {
                         try
                         {
-                            string deletedFolderPath = DeleteFolderAndReturnPath(System.IO.Path.Combine(rootWorldFilesFolder, file));
+                            string deletedFolderPath = DeleteFolderAndReturnPath(Path.Combine(rootWorldFilesFolder, file));
 
                             if (!string.IsNullOrEmpty(deletedFolderPath))
                             {
                                 Directory.CreateDirectory(deletedFolderPath);
-                                CopyFolderToDirectory(System.IO.Path.Combine(tempFolderPath, file), deletedFolderPath);
+                                CopyFolderToDirectory(Path.Combine(tempFolderPath, file), deletedFolderPath);
                             }
                         }
                         catch (Exception ex)
@@ -1540,7 +1518,7 @@ namespace Server_General_Funcs
             }
             else
             {
-                string rootWorldsFolder = System.IO.Path.Combine(rootFolder, "worlds");
+                string rootWorldsFolder = Path.Combine(rootFolder, "worlds");
 
                 DeleteFiles(worldPath, false);
 
@@ -1598,7 +1576,7 @@ namespace Server_General_Funcs
             // Copy each file in the folder
             foreach (FileInfo file in source.GetFiles())
             {
-                string destFilePath = System.IO.Path.Combine(target.FullName, file.Name);
+                string destFilePath = Path.Combine(target.FullName, file.Name);
                 file.CopyTo(destFilePath, true);
             }
 
@@ -1662,7 +1640,7 @@ namespace Server_General_Funcs
 
             try
             {
-                var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Any, port);
+                var listener = new TcpListener(IPAddress.Any, port);
                 listener.Start();
                 listener.Stop();
             }
@@ -1694,7 +1672,7 @@ namespace Server_General_Funcs
 
                 foreach (string file in jarFiles)
                 {
-                    string fileName = System.IO.Path.GetFileName(file); // Extract only the file name
+                    string fileName = Path.GetFileName(file); // Extract only the file name
 
                     // Check if the file name contains the target pattern
                     if (fileName.Contains(targetPattern, StringComparison.OrdinalIgnoreCase))
@@ -1852,7 +1830,7 @@ namespace Server_General_Funcs
                 }
 
                 string sourcePath = directories[0]; // Take the first found match
-                string destinationPath = System.IO.Path.Combine(destinationDir, folderName);
+                string destinationPath = Path.Combine(destinationDir, folderName);
 
                 Directory.CreateDirectory(destinationPath); // Ensure destination exists
 
@@ -1861,8 +1839,8 @@ namespace Server_General_Funcs
                     try
                     {
                         string relativePath = file.Substring(sourcePath.Length + 1); // Get relative path
-                        string destFile = System.IO.Path.Combine(destinationPath, relativePath);
-                        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(destFile)); // Ensure subdirectory exists
+                        string destFile = Path.Combine(destinationPath, relativePath);
+                        Directory.CreateDirectory(Path.GetDirectoryName(destFile)); // Ensure subdirectory exists
                         File.Copy(file, destFile, true); // Copy file
                     }
                     catch (FileNotFoundException ex)
@@ -1889,7 +1867,7 @@ namespace Server_General_Funcs
             }
         }
 
-        private static bool CheckFirewallRuleExists(string portName)
+        public static bool CheckFirewallRuleExists(string portName)
         {
             try
             {
