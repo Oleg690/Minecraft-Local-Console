@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Net;
-using System.Threading;
-using System.Diagnostics;
 using MinecraftServerStats;
 using FileExplorer;
 using NetworkConfig;
@@ -22,10 +20,10 @@ namespace mainApp
             string version = "";  // e.g. 1.21
             string worldNumber = "";
             string worldName = ""; // e.g. Minecfraft Server
-            string software = ""; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur
+            string software = ""; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur, Paper
             int totalPlayers = 20;
-            string Server_LocalComputerIP = GetLocalMachineIP(); // "192.168.100.106"
-            string Server_PublicComputerIP = await GetPublicIP(); // "109.185.75.45"
+            string Server_LocalComputerIP = GetLocalMachineIP();
+            string Server_PublicComputerIP = await GetPublicIP();
             int Server_Port = 25565;
             int JMX_Port = 25562;
             int RCON_Port = 25575;
@@ -90,20 +88,16 @@ namespace mainApp
             // ↓ Delete Server ↓
             ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
 
+            // ↓ Network Configuration ↓ Testing
+            await UPnP_Port_Mapping.UPnP_Configuration_Async(25565);
+
             // ↓ Server Stats Loop ↓
             while (true)
             {
                 ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, Server_LocalComputerIP, JMX_Port, RCON_Port);
                 Thread.Sleep(1000);
             }
-
-            // ↓ Network Configuration ↓ Testing
-
-            //await UPnP_Port_Mapping.UPnP_Configuration_Async(25565);
-
-            //string domainName = DomainName.GetRandomDomainName();
-            //Console.WriteLine(domainName);
-
+            
             Console.ReadKey();
         }
         private static string GetLocalMachineIP()

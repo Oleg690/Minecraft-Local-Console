@@ -48,7 +48,7 @@ namespace Create_Server_Func
             }
             
             object[,] softwareTypes = {
-                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur", "Spigot" },
+                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur", "Paper" },
             };
 
             foreach (string softwareType in softwareTypes)
@@ -121,10 +121,9 @@ namespace Create_Server_Func
             {
                 await PurpurServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
             }
-            else if (software == "Spigot")
+            else if (software == "Paper")
             {
-                // TO DO
-                await SpigotServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
+                await PaperServerInitialisation(customDirectory, destinationJarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
             }
             else if (software == "Quilt")
             {
@@ -671,9 +670,81 @@ namespace Create_Server_Func
             }
         }
 
-        private static async Task SpigotServerInitialisation(string customDirectory, string spigotJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
+        private static async Task PaperServerInitialisation(string customDirectory, string paperJarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
         {
-            // TO DO
+            // Set up the process to run the server
+            ProcessStartInfo processInfo = new ProcessStartInfo
+            {
+                FileName = "java",
+                Arguments = $"-Xmx{ProcessMemoryAlocation}M -Xms{ProcessMemoryAlocation}M " + // nogui
+                                    $"-Dcom.sun.management.jmxremote " +
+                                    $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
+                                    $"-Dcom.sun.management.jmxremote.authenticate=false " +
+                                    $"-Dcom.sun.management.jmxremote.ssl=false " +
+                                    $"-Djava.rmi.server.hostname={ipAddress} " + // Replace with actual server IP if necessary
+                                    $"-jar \"{paperJarPath}\"",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(paperJarPath) // Set the custom working directory
+            };
+
+            try
+            {
+                using (Process process = Process.Start(processInfo))
+                {
+                    if (process == null)
+                    {
+                        Console.WriteLine("Failed to start the Minecraft server.");
+                    }
+
+                    Console.WriteLine("Minecraft server is starting...");
+
+                    string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
+                    if (!File.Exists(serverPropertiesPath))
+                    {
+                        File.Create(serverPropertiesPath).Close();
+                        Console.WriteLine("Created missing server.properties file.");
+                    }
+
+                    // Read server output
+                    while (process.StandardOutput.EndOfStream == false)
+                    {
+                        string? line = process.StandardOutput.ReadLine();
+                        Console.WriteLine(line);
+
+                        // Accept EULA if prompted
+                        if (line != null && line.Contains("You need to agree to the EULA in order to run the server"))
+                        {
+                            if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
+                            {
+                                ServerOperator.ClosePort(JMX_Port.ToString());
+                                ServerOperator.ClosePort(RCON_Port.ToString());
+                            }
+
+                            AcceptEULA(paperJarPath);
+                            DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
+                            if (Insert_Into_DB)
+                            {
+                                dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Paper", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                            }
+                        }
+                    }
+
+                    process.WaitForExit();
+                    Console.WriteLine("Starting minecraft server.");
+
+                    DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+
+                    await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
         }
 
         private static async Task QuiltServerInitialisation(string customDirectory, string quiltJarPath, string tempFolderPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int JMX_Port, int RCON_Port, bool Server_Auto_Start, bool Insert_Into_DB)
@@ -1323,6 +1394,30 @@ namespace Create_Server_Func
             else if (software == "Purpur")
             {
                 Console.WriteLine("Starting Purpur Server!");
+
+                if (!serverPath.Contains(".jar"))
+                {
+                    string version = dbChanger.SpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar";
+                    serverPath = Path.Combine(serverPath, version);
+                }
+
+                serverProcessInfo = new ProcessStartInfo
+                {
+                    FileName = "java",
+                    Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " + // nogui
+                                JMX_Server_Settings +
+                                $"-jar \"{serverPath}\"",
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    WorkingDirectory = Path.GetDirectoryName(serverPath) // Set the custom working directory
+                };
+            }
+            else if (software == "Paper")
+            {
+                Console.WriteLine("Starting Paper Server!");
 
                 if (!serverPath.Contains(".jar"))
                 {

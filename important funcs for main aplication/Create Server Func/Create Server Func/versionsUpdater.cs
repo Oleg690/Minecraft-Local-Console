@@ -11,6 +11,10 @@ using static jdk.jfr.@internal.SecuritySupport;
 using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 using System.Net.NetworkInformation;
+using com.sun.tools.jdeps.resources;
+using com.sun.security.ntlm;
+using System.Runtime.CompilerServices;
+using jdk.nashorn.@internal.ir;
 
 namespace Updater
 {
@@ -24,7 +28,7 @@ namespace Updater
         private static readonly string FabricApiBaseUrl = "https://meta.fabricmc.net/v2/versions/installer/";
         private static readonly string QuiltApiBaseUrl = "https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/";
         private static readonly string PurpurApiBaseUrl = "https://api.purpurmc.org/v2/purpur/";
-        private static readonly string SpigotApiBaseUrl = "";
+        private static readonly string PaperApiBaseUrl = "https://api.papermc.io/v2/projects/paper";
 
         private static readonly HttpClient HttpClient = new();
 
@@ -747,7 +751,146 @@ namespace Updater
             }
         }
 
-        // ------------------------ ↓ Spigot Updater Funcs ↓ ------------------------
+        // ------------------------ ↓ Paper Updater Funcs ↓ ------------------------
+
+        public static async Task CheckAndUpdatePaperAsync(string downloadDirectory, string? version)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    if (version != null)
+                    {
+                        string latestBuild = await GetLatestBuild(client, version);
+
+                        if (string.IsNullOrEmpty(latestBuild))
+                        {
+                            Console.WriteLine("Failed to retrieve latest build number.");
+                            return;
+                        }
+
+                        string[] existingFiles = Directory.GetFiles(downloadDirectory, $"paper-{version}-*.jar");
+                        if (existingFiles.Length > 0)
+                        {
+                            await CheckLocalFiles(client, existingFiles, latestBuild, version, downloadDirectory);
+                        }
+                        else
+                        {
+                            string fileName = $"paper-{version}-{latestBuild}.jar";
+                            string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/{fileName}";
+                            string destinationPath = Path.Combine(downloadDirectory, fileName);
+                            await DownloadJarAsync(client, jarUrl, destinationPath);
+                        }
+                    }
+                    else
+                    {
+                        var response = await HttpClient.GetStringAsync(PaperApiBaseUrl);
+
+                        using var jsonDoc = JsonDocument.Parse(response);
+                        var versions = jsonDoc.RootElement.GetProperty("versions")
+                                                           .EnumerateArray()
+                                                           .Select(e => e.GetString())
+                                                           .Where(v => v != null && !v.Contains("pre") && !v.Contains("beta"))
+                                                           .ToArray();
+
+                        if (versions.Length == 0)
+                        {
+                            Console.WriteLine("No versions found.");
+                            return;
+                        }
+
+                        foreach (string? versionAvaliable in versions)
+                        {
+                            Console.WriteLine($"-{versionAvaliable}");
+                        }
+
+                        foreach (string? versionAvaliable in versions)
+                        {
+                            string latestBuild = await GetLatestBuild(client, versionAvaliable);
+
+                            string[] existingFiles = Directory.GetFiles(downloadDirectory, $"paper-{versionAvaliable}-*.jar");
+                            if (existingFiles.Length > 0)
+                            {
+                                await CheckLocalFiles(client, existingFiles, latestBuild, versionAvaliable, downloadDirectory);
+                            }
+                            else
+                            {
+                                string fileName = $"paper-{versionAvaliable}-{latestBuild}.jar";
+                                string jarUrl = $"{PaperApiBaseUrl}/versions/{versionAvaliable}/builds/{latestBuild}/downloads/{fileName}";
+                                string destinationPath = Path.Combine(downloadDirectory, fileName);
+                                await DownloadJarAsync(client, jarUrl, destinationPath);
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"An error occurred: {ex.Message}");
+                }
+            }
+        }
+
+        private static async Task CheckLocalFiles(HttpClient client, string[] existingFiles, string latestBuild, string? version, string downloadDirectory)
+        {
+            foreach (string file in existingFiles)
+            {
+                string[] parts = Path.GetFileNameWithoutExtension(file).Split('-');
+                string existingBuild = parts[2];
+                if (latestBuild != existingBuild)
+                {
+                    Console.WriteLine($"Newer build found for version {version}. Existing build: {existingBuild}, New build: {latestBuild}");
+                    File.Delete(file);
+                    Console.WriteLine($"Deleted old file: {file}");
+                    string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/paper-{version}-{latestBuild}.jar";
+                    string fileName = $"paper-{version}-{latestBuild}.jar";
+                    string destinationPath = Path.Combine(downloadDirectory, fileName);
+                    await DownloadJarAsync(client, jarUrl, destinationPath);
+                }
+                else
+                {
+                    Console.WriteLine($"Skipping download for version {version}. Existing build ({existingBuild}) is up to date.");
+                }
+            }
+        }
+
+        private static async Task<string> GetLatestBuild(HttpClient client, string? version)
+        {
+            string apiUrl = $"{PaperApiBaseUrl}/versions/{version}/builds";
+            HttpResponseMessage response = await client.GetAsync(apiUrl);
+            if (response.IsSuccessStatusCode)
+            {
+                string json = await response.Content.ReadAsStringAsync();
+                JObject data = JObject.Parse(json);
+                JArray builds = (JArray)data["builds"];
+                return builds.Last?["build"]?.ToString() ?? "";
+            }
+            return "";
+        }
+
+        private static async Task DownloadJarAsync(HttpClient client, string url, string destinationPath)
+        {
+            try
+            {
+                using (HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+                    using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
+                    using (FileStream streamToWriteTo = File.Open(destinationPath, FileMode.Create))
+                    {
+                        await streamToReadFrom.CopyToAsync(streamToWriteTo);
+                    }
+                }
+                Console.WriteLine($"Successfully downloaded {Path.GetFileName(destinationPath)}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download {url}: {ex.Message}");
+                if (File.Exists(destinationPath))
+                {
+                    File.Delete(destinationPath);
+                }
+            }
+        }
 
         // ------------------------ ↓ Main Updater Funcs ↓ ------------------------
 
@@ -758,7 +901,7 @@ namespace Updater
             Console.WriteLine("--------------------------------------------");
 
             object[,] softwareTypes = {
-                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur", "Spigot" },
+                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur", "Paper" },
             };
 
             foreach (string software in softwareTypes)
@@ -834,10 +977,9 @@ namespace Updater
             {
                 await CheckAndUpdatePurpurAsync(versionDirectory, version);
             }
-
-            else if (software == "Spigot")
+            else if (software == "Paper")
             {
-                // TODO
+                await CheckAndUpdatePaperAsync(versionDirectory, version);
             }
             else
             {
