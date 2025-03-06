@@ -1,20 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using System.IO;
-using System.Net.Http;
-using com.sun.xml.@internal.ws.util;
-using static jdk.jfr.@internal.SecuritySupport;
 using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
-using System.Net.NetworkInformation;
-using com.sun.tools.jdeps.resources;
-using com.sun.security.ntlm;
-using System.Runtime.CompilerServices;
-using jdk.nashorn.@internal.ir;
 
 namespace Updater
 {
@@ -24,7 +11,7 @@ namespace Updater
         private static readonly string ForgeApiVersionsUrl = "https://files.minecraftforge.net/net/minecraftforge/forge/";
         private static readonly string ForgeApiBaseUrl = "https://maven.minecraftforge.net/net/minecraftforge/forge/";
         private static readonly string NeoForgeVersionsUrl = "https://maven.neoforged.net/mojang-meta/net/neoforged/minecraft-dependencies/maven-metadata.xml";
-        private static readonly string NeoForgeVersionInfoUrl = "https://maven.neoforged.net/mojang-meta/net/minecraft/{0}.json";
+        private static readonly string NeoForgeVersionInfoUrl = "https://maven.neoforged.net/mojang-meta/net/minecraft/";
         private static readonly string FabricApiBaseUrl = "https://meta.fabricmc.net/v2/versions/installer/";
         private static readonly string QuiltApiBaseUrl = "https://maven.quiltmc.org/repository/release/org/quiltmc/quilt-installer/";
         private static readonly string PurpurApiBaseUrl = "https://api.purpurmc.org/v2/purpur/";
@@ -55,7 +42,24 @@ namespace Updater
                 if (!localVersions.Contains(version))
                 {
                     Console.WriteLine($"Vanilla Server {version} is missing. Downloading...");
-                    await DownloadVannillaServerJarAsync(availableVersions[version], downloadDirectory, version);
+
+                    var response = await HttpClient.GetStringAsync(availableVersions[version]);
+                    using var jsonDoc = JsonDocument.Parse(response);
+
+                    try
+                    {
+                        string? jarUrl = jsonDoc.RootElement.GetProperty("downloads")
+                                                    .GetProperty("server")
+                                                    .GetProperty("url")
+                                                    .GetString();
+
+                        string savePath = Path.Combine(downloadDirectory, $"vanilla-{version}.jar");
+                        await DownloadServerJarAsync(jarUrl, savePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Version not found. Error: {ex.Message}");
+                    }
                 }
                 else
                 {
@@ -104,32 +108,6 @@ namespace Updater
             }
         }
 
-        private static async Task DownloadVannillaServerJarAsync(string versionUrl, string downloadDirectory, string version)
-        {
-            try
-            {
-                var response = await HttpClient.GetStringAsync(versionUrl);
-                using var jsonDoc = JsonDocument.Parse(response);
-
-                string jarUrl = jsonDoc.RootElement.GetProperty("downloads")
-                                                  .GetProperty("server")
-                                                  .GetProperty("url")
-                                                  .GetString();
-
-                string savePath = Path.Combine(downloadDirectory, $"vanilla-{version}.jar");
-
-                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
-                using var fileStream = File.Create(savePath);
-                await jarResponse.CopyToAsync(fileStream);
-
-                Console.WriteLine($"Downloaded Minecraft Server {version} successfully!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to download Minecraft Server {version}: {ex.Message}");
-            }
-        }
-
         // ------------------------ ↓ Fabric Updater Funcs ↓ ------------------------
 
         private static async Task CheckAndUpdateLatestFabricAsync(string downloadDirectory)
@@ -159,9 +137,6 @@ namespace Updater
 
                 foreach (var loader in latestLoader)
                 {
-                    //Console.WriteLine($"{loader.Key}");
-                    //Console.WriteLine($"{loader.Value}");
-
                     string localFilePath = Path.Combine(downloadDirectory, $"fabric-installer-{loader.Key}.jar");
                     if (File.Exists(localFilePath))
                     {
@@ -172,7 +147,7 @@ namespace Updater
                     {
                         DeleteFiles(downloadDirectory, false);
                         Console.WriteLine($"Downloading Fabric Universal Server Installer {loader.Key}...");
-                        await DownloadFabricServerJarAsync(loader.Value, localFilePath);
+                        await DownloadServerJarAsync(loader.Value, localFilePath);
                     }
                 }
             }
@@ -182,88 +157,61 @@ namespace Updater
             }
         }
 
-        private static async Task DownloadFabricServerJarAsync(string jarUrl, string savePath)
-        {
-            try
-            {
-                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
-                using var fileStream = File.Create(savePath);
-                await jarResponse.CopyToAsync(fileStream);
-
-                Console.WriteLine($"Fabric Server downloaded successfully: {Path.GetFileName(savePath)}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to download Fabric Server: {ex.Message}");
-            }
-        }
-
         // ------------------------ ↓ Forge Updater Funcs ↓ ------------------------
 
         private static async Task CheckAndUpdateForgeAsync(string downloadDirectory, string? selectedVersion = null)
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                try
+                // Fetch the promotions JSON
+                string json = await HttpClient.GetStringAsync($"{ForgeApiVersionsUrl}promotions_slim.json");
+                JObject promotions = JObject.Parse(json);
+
+                // Get the list of stable versions
+                JObject promos = (JObject)promotions["promos"];
+                List<string> stableVersions = new List<string>();
+
+                foreach (var promo in promos)
                 {
-                    // Fetch the promotions JSON
-                    string json = await client.GetStringAsync($"{ForgeApiVersionsUrl}promotions_slim.json");
-                    JObject promotions = JObject.Parse(json);
-
-                    // Get the list of stable versions
-                    JObject promos = (JObject)promotions["promos"];
-                    List<string> stableVersions = new List<string>();
-
-                    foreach (var promo in promos)
+                    if (promo.Key.EndsWith("-latest"))
                     {
-                        if (promo.Key.EndsWith("-latest"))
-                        {
-                            string version = promo.Key.Replace("-latest", "");
-                            stableVersions.Add(version);
-                        }
+                        string version = promo.Key.Replace("-latest", "");
+                        stableVersions.Add(version);
                     }
+                }
 
-                    // Ensure the download directory exists
-                    if (!Directory.Exists(downloadDirectory))
+                if (selectedVersion != null)
+                {
+                    if (stableVersions.Contains(selectedVersion))
                     {
-                        Directory.CreateDirectory(downloadDirectory);
-                    }
-
-                    // Process versions
-                    if (selectedVersion != null)
-                    {
-                        // If a specific version is provided, only process that version
-                        if (stableVersions.Contains(selectedVersion))
-                        {
-                            await ProcessVersion(client, downloadDirectory, promos, selectedVersion);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Version {selectedVersion} not found in the list of stable versions.");
-                        }
+                        await ProcessVersion(downloadDirectory, promos, selectedVersion);
                     }
                     else
                     {
-                        // If no specific version is provided, process all versions
-                        foreach (string version in stableVersions)
-                        {
-                            await ProcessVersion(client, downloadDirectory, promos, version);
-                        }
+                        Console.WriteLine($"Version {selectedVersion} not found in the list of stable versions.");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    // If no specific version is provided, process all versions
+                    foreach (string version in stableVersions)
+                    {
+                        await ProcessVersion(downloadDirectory, promos, version);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
             }
         }
 
-        private static async Task ProcessVersion(HttpClient client, string downloadDirectory, JObject promos, string version)
+        private static async Task ProcessVersion(string downloadDirectory, JObject promos, string version)
         {
             string build = promos[$"{version}-latest"].ToString();
             string actualDownloadUrl = $"{ForgeApiBaseUrl}{version}-{build}/forge-{version}-{build}-installer.jar";
 
-            string fileName = $"forge-{version}-{build}.jar"; // File name without "installer"
+            string fileName = $"forge-{version}-{build}.jar";
             string destinationPath = Path.Combine(downloadDirectory, fileName);
 
             // Check if a file for this version already exists locally
@@ -287,8 +235,7 @@ namespace Updater
                         Console.WriteLine($"Deleted old file: {existingFileName}.jar");
 
                         // Download the new file
-                        await DownloadForgeServerJarAsync(client, actualDownloadUrl, destinationPath);
-                        Console.WriteLine($"Downloaded {fileName}");
+                        await DownloadServerJarAsync(actualDownloadUrl, destinationPath);
                     }
                     else
                     {
@@ -305,39 +252,7 @@ namespace Updater
                 // If no local file exists, download the new file
                 Console.WriteLine($"No local file found for version {version}. Downloading new build: {build}");
 
-                // Download the new file
-                await DownloadForgeServerJarAsync(client, actualDownloadUrl, destinationPath);
-                Console.WriteLine($"Downloaded {fileName}");
-            }
-        }
-
-        private static async Task DownloadForgeServerJarAsync(HttpClient client, string url, string destinationPath)
-        {
-            //Console.WriteLine("URL: " + url);
-            try
-            {
-                using (HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
-                {
-                    response.EnsureSuccessStatusCode(); // Ensure the request was successful
-
-                    using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
-                    {
-                        using (FileStream streamToWriteTo = File.Open(destinationPath, FileMode.Create))
-                        {
-                            await streamToReadFrom.CopyToAsync(streamToWriteTo);
-                            await streamToWriteTo.FlushAsync(); // Ensure all data is written to disk
-                        }
-                    }
-                }
-                Console.WriteLine($"Successfully downloaded to {destinationPath}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to download {url}: {ex.Message}");
-                if (File.Exists(destinationPath))
-                {
-                    File.Delete(destinationPath); // Delete the incomplete file
-                }
+                await DownloadServerJarAsync(actualDownloadUrl, destinationPath);
             }
         }
 
@@ -371,52 +286,42 @@ namespace Updater
 
         private static async Task CheckAndUpdateNeoForgeAsync(string downloadDirectory, string? selectedVersion = null)
         {
-            using (HttpClient client = new HttpClient())
+            try
             {
-                try
+                // Fetch the list of available Minecraft versions
+                string versionsXml = await HttpClient.GetStringAsync(NeoForgeVersionsUrl);
+                XDocument versionsDoc = XDocument.Parse(versionsXml);
+
+                // Extract version numbers from the XML
+                var versions = versionsDoc.Descendants("version")
+                                          .Select(v => v.Value)
+                                          .Where(v => IsStableVersion(v)) // Filter out unstable versions
+                                          .ToList();
+
+                if (selectedVersion != null)
                 {
-                    // Fetch the list of available Minecraft versions
-                    string versionsXml = await client.GetStringAsync(NeoForgeVersionsUrl);
-                    XDocument versionsDoc = XDocument.Parse(versionsXml);
-
-                    // Extract version numbers from the XML
-                    var versions = versionsDoc.Descendants("version")
-                                              .Select(v => v.Value)
-                                              .Where(v => IsStableVersion(v)) // Filter out unstable versions
-                                              .ToList();
-
-                    // Ensure the download directory exists
-                    if (!Directory.Exists(downloadDirectory))
+                    // If a specific version is provided, only process that version
+                    if (versions.Contains(selectedVersion))
                     {
-                        Directory.CreateDirectory(downloadDirectory);
-                    }
-
-                    // Process versions
-                    if (selectedVersion != null)
-                    {
-                        // If a specific version is provided, only process that version
-                        if (versions.Contains(selectedVersion))
-                        {
-                            await ProcessNeoForgeVersion(client, downloadDirectory, selectedVersion);
-                        }
-                        else
-                        {
-                            Console.WriteLine($"Version {selectedVersion} not found in the list of available versions.");
-                        }
+                        await ProcessNeoForgeVersion(downloadDirectory, selectedVersion);
                     }
                     else
                     {
-                        // If no specific version is provided, process all versions
-                        foreach (string version in versions)
-                        {
-                            await ProcessNeoForgeVersion(client, downloadDirectory, version);
-                        }
+                        Console.WriteLine($"Version {selectedVersion} not found in the list of available versions.");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
+                    // If no specific version is provided, process all versions
+                    foreach (string version in versions)
+                    {
+                        await ProcessNeoForgeVersion(downloadDirectory, version);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
             }
         }
 
@@ -426,13 +331,12 @@ namespace Updater
             return !version.Contains("-pre") && !version.Contains("-rc") && !version.Contains("w");
         }
 
-        private static async Task ProcessNeoForgeVersion(HttpClient client, string downloadDirectory, string version)
+        private static async Task ProcessNeoForgeVersion(string downloadDirectory, string version)
         {
             try
             {
-                // Fetch the version info JSON
-                string versionInfoUrl = string.Format(NeoForgeVersionInfoUrl, version);
-                string versionInfoJson = await client.GetStringAsync(versionInfoUrl);
+                // Fetch the version info from JSON
+                string versionInfoJson = await HttpClient.GetStringAsync($"{NeoForgeVersionInfoUrl}{version}.json");
                 JObject versionInfo = JObject.Parse(versionInfoJson);
 
                 // Get the server download URL
@@ -440,7 +344,6 @@ namespace Updater
 
                 if (!string.IsNullOrEmpty(serverUrl))
                 {
-                    // Define the destination file path with the new filename pattern
                     string fileName = $"neoforge-{version}.jar";
                     string destinationPath = Path.Combine(downloadDirectory, fileName);
 
@@ -452,9 +355,7 @@ namespace Updater
                     else
                     {
                         // Download the server file
-                        await DownloadNeoForgeServerFileAsync(client, serverUrl, destinationPath);
-                        Console.WriteLine($"Downloaded {fileName}");
-                        //Console.WriteLine($"Downloaded {fileName} to {downloadDirectory}");
+                        await DownloadServerJarAsync(serverUrl, destinationPath);
                     }
                 }
                 else
@@ -465,35 +366,6 @@ namespace Updater
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to process version {version}: {ex.Message}");
-            }
-        }
-
-        private static async Task DownloadNeoForgeServerFileAsync(HttpClient client, string url, string destinationPath)
-        {
-            //Console.WriteLine("URL: " + url);
-            try
-            {
-                using (HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
-                {
-                    response.EnsureSuccessStatusCode(); // Ensure the request was successful
-
-                    using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
-                    {
-                        using (FileStream streamToWriteTo = File.Open(destinationPath, FileMode.Create))
-                        {
-                            await streamToReadFrom.CopyToAsync(streamToWriteTo);
-                            await streamToWriteTo.FlushAsync(); // Ensure all data is written to disk
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to download {url}: {ex.Message}");
-                if (File.Exists(destinationPath))
-                {
-                    File.Delete(destinationPath); // Delete the incomplete file
-                }
             }
         }
 
@@ -519,8 +391,6 @@ namespace Updater
                     return;
                 }
 
-                //Console.WriteLine($"{latestVersion}");
-
                 string localFilePath = Path.Combine(downloadDirectory, $"quilt-installer-{latestVersion}.jar");
                 if (File.Exists(localFilePath))
                 {
@@ -532,7 +402,7 @@ namespace Updater
                     DeleteFiles(downloadDirectory, false);
                     Console.WriteLine($"Downloading Quilt Universal Server Installer {latestVersion}...");
                     string jarUrl = $"{QuiltApiBaseUrl}{latestVersion}/quilt-installer-{latestVersion}.jar";
-                    await DownloadQuiltServerJarAsync(jarUrl, localFilePath);
+                    await DownloadServerJarAsync(jarUrl, localFilePath);
                 }
             }
             catch (Exception ex)
@@ -541,45 +411,38 @@ namespace Updater
             }
         }
 
-        private static async Task DownloadQuiltServerJarAsync(string jarUrl, string savePath)
-        {
-            try
-            {
-                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
-                using var fileStream = File.Create(savePath);
-                await jarResponse.CopyToAsync(fileStream);
-
-                Console.WriteLine($"Fabric Server downloaded successfully: {Path.GetFileName(savePath)}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to download Fabric Server: {ex.Message}");
-            }
-        }
-
         // ------------------------ ↓ Purpur Updater Funcs ↓ ------------------------
         private static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string? selectedVersion = null)
         {
             Console.WriteLine($"Checking Purpur versions in: {downloadDirectory}");
-            Directory.CreateDirectory(downloadDirectory);
 
             // Get local versions and builds
             var localFiles = Directory.GetFiles(downloadDirectory, "purpur-*.jar");
 
-            Console.WriteLine("Local files detected:");
+            if (localFiles.Length == 0)
+            {
+                Console.WriteLine("No local files found.");
+                return;
+            }
+            else
+            {
+                foreach (var file in localFiles)
+                {
+                    Console.WriteLine("Local files detected:");
+                }
+            }
 
             var localVersions = new Dictionary<string, int>();
 
             foreach (var file in localFiles)
             {
                 string fileName = Path.GetFileNameWithoutExtension(file);
-                //Console.WriteLine($"Processing local file: {fileName}");
 
                 var parts = fileName.Replace("purpur-", "").Split('-');
                 if (parts.Length == 1) // Handle filenames without build numbers
                 {
                     string version = parts[0];
-                    localVersions[version] = 0; // Assume build number is 0 or handle as needed
+                    localVersions[version] = 0;
                     Console.WriteLine($"Detected version: {version}, Build: 0 (assumed)");
                 }
                 else if (parts.Length == 2 && int.TryParse(parts[1], out int build)) // Handle filenames with build numbers
@@ -603,8 +466,6 @@ namespace Updater
             Console.WriteLine($"Found {availableVersions.Length} versions.");
             foreach (var version in availableVersions)
             {
-                //Console.WriteLine($"Processing version {version}...");
-
                 // Fetch the latest build for the version
                 int? latestBuild = await GetPurpurLatestBuildAsync(version);
 
@@ -613,6 +474,9 @@ namespace Updater
                     Console.WriteLine($"Skipping {version} because no latest build was found.");
                     continue;
                 }
+
+                string url = $"{PurpurApiBaseUrl}{version}/latest/download";
+                string finalFilePath = Path.Combine(downloadDirectory, $"purpur-{version}-{latestBuild}.jar");
 
                 // Check if the version is missing or if the local file doesn't have a build number
                 if (!localVersions.ContainsKey(version) || localVersions[version] == 0)
@@ -627,13 +491,11 @@ namespace Updater
 
                     // Download the latest version and rename it to include the build number
                     Console.WriteLine($"Purpur {version} is missing or outdated. Downloading...");
-                    await DownloadPurpurVersionAsync(version, downloadDirectory, latestBuild.Value);
+                    await DownloadServerJarAsync(url, finalFilePath);
                 }
                 else
                 {
-                    // Compare builds
                     int currentBuild = localVersions[version];
-                    //Console.WriteLine($"Local build for {version}: {currentBuild}, Latest build: {latestBuild}");
 
                     if (currentBuild < latestBuild)
                     {
@@ -644,7 +506,7 @@ namespace Updater
                             Console.WriteLine($"Deleting old version: {oldFile}");
                             File.Delete(oldFile);
                         }
-                        await DownloadPurpurVersionAsync(version, downloadDirectory, latestBuild.Value);
+                        await DownloadServerJarAsync(url, finalFilePath);
                     }
                     else
                     {
@@ -662,7 +524,6 @@ namespace Updater
         {
             try
             {
-                //Console.WriteLine("Fetching available Purpur versions...");
                 var response = await HttpClient.GetStringAsync(PurpurApiBaseUrl);
 
                 using var jsonDoc = JsonDocument.Parse(response);
@@ -672,10 +533,9 @@ namespace Updater
                 {
                     versions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray().Where(v => v.GetString() == $"{selectedVersion}").Select(e => e.GetString()).ToArray();
                 }
-                Console.WriteLine($"API Response: ");
                 foreach (var version in versions)
                 {
-                    Console.WriteLine($"Detected version: {version}");
+                    Console.WriteLine($"Avaliable version: {version}");
                 }
 
                 return versions;
@@ -692,7 +552,6 @@ namespace Updater
             try
             {
                 var response = await HttpClient.GetStringAsync($"{PurpurApiBaseUrl}{version}");
-                //Console.WriteLine($"API Response for {version}: {response}");
 
                 using var jsonDoc = JsonDocument.Parse(response);
 
@@ -711,126 +570,84 @@ namespace Updater
             }
         }
 
-        private static async Task DownloadPurpurVersionAsync(string version, string downloadDirectory, int latestBuild)
+        // ------------------------ ↓ Paper Updater Funcs ↓ ------------------------
+
+        private static async Task CheckAndUpdatePaperAsync(string downloadDirectory, string? version)
         {
             try
             {
-                string url = $"{PurpurApiBaseUrl}{version}/latest/download";
-                string tempFilePath = Path.Combine(downloadDirectory, $"purpur-{version}.jar");
-                string finalFilePath = Path.Combine(downloadDirectory, $"purpur-{version}-{latestBuild}.jar");
-
-                using (var response = await HttpClient.GetStreamAsync(url))
+                if (version != null)
                 {
-                    using (var fileStream = File.Create(tempFilePath))
+                    string latestBuild = await GetLatestBuild(version);
+
+                    if (string.IsNullOrEmpty(latestBuild))
                     {
-                        await response.CopyToAsync(fileStream);
+                        Console.WriteLine("Failed to retrieve latest build number.");
+                        return;
                     }
-                }
 
-                if (!File.Exists(finalFilePath))
-                {
-                    try
+                    string[] existingFiles = Directory.GetFiles(downloadDirectory, $"paper-{version}-*.jar");
+                    if (existingFiles.Length > 0)
                     {
-                        File.Move(tempFilePath, finalFilePath);
-                        //Console.WriteLine($"Successfully renamed Purpur {version} to {finalFilePath}");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to rename Purpur {version}: {ex.Message}");
-                        // Clean up both files if move fails
-                        if (File.Exists(finalFilePath))
-                            File.Delete(finalFilePath);
-                        File.Delete(tempFilePath);
-                    }
-                }
-                Console.WriteLine($"Downloaded Purpur {version} successfully!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to download Purpur {version}: {ex.Message}");
-            }
-        }
-
-        // ------------------------ ↓ Paper Updater Funcs ↓ ------------------------
-
-        public static async Task CheckAndUpdatePaperAsync(string downloadDirectory, string? version)
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                try
-                {
-                    if (version != null)
-                    {
-                        string latestBuild = await GetLatestBuild(client, version);
-
-                        if (string.IsNullOrEmpty(latestBuild))
-                        {
-                            Console.WriteLine("Failed to retrieve latest build number.");
-                            return;
-                        }
-
-                        string[] existingFiles = Directory.GetFiles(downloadDirectory, $"paper-{version}-*.jar");
-                        if (existingFiles.Length > 0)
-                        {
-                            await CheckLocalFiles(client, existingFiles, latestBuild, version, downloadDirectory);
-                        }
-                        else
-                        {
-                            string fileName = $"paper-{version}-{latestBuild}.jar";
-                            string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/{fileName}";
-                            string destinationPath = Path.Combine(downloadDirectory, fileName);
-                            await DownloadJarAsync(client, jarUrl, destinationPath);
-                        }
+                        await CheckLocalFiles(existingFiles, latestBuild, version, downloadDirectory);
                     }
                     else
                     {
-                        var response = await HttpClient.GetStringAsync(PaperApiBaseUrl);
+                        string fileName = $"paper-{version}-{latestBuild}.jar";
+                        string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/{fileName}";
+                        string destinationPath = Path.Combine(downloadDirectory, fileName);
+                        Console.WriteLine($"Downloading version: {version}");
+                        await DownloadServerJarAsync(jarUrl, destinationPath);
+                    }
+                }
+                else
+                {
+                    var response = await HttpClient.GetStringAsync(PaperApiBaseUrl);
 
-                        using var jsonDoc = JsonDocument.Parse(response);
-                        var versions = jsonDoc.RootElement.GetProperty("versions")
-                                                           .EnumerateArray()
-                                                           .Select(e => e.GetString())
-                                                           .Where(v => v != null && !v.Contains("pre") && !v.Contains("beta"))
-                                                           .ToArray();
+                    using var jsonDoc = JsonDocument.Parse(response);
+                    var versions = jsonDoc.RootElement.GetProperty("versions")
+                                                       .EnumerateArray()
+                                                       .Select(e => e.GetString())
+                                                       .Where(v => v != null && !v.Contains("pre") && !v.Contains("beta"))
+                                                       .ToArray();
 
-                        if (versions.Length == 0)
+                    if (versions.Length == 0)
+                    {
+                        Console.WriteLine("No versions found.");
+                        return;
+                    }
+
+                    foreach (string? versionAvaliable in versions)
+                    {
+                        Console.WriteLine($"-{versionAvaliable}");
+                    }
+
+                    foreach (string? versionAvaliable in versions)
+                    {
+                        string latestBuild = await GetLatestBuild(versionAvaliable);
+
+                        string[] existingFiles = Directory.GetFiles(downloadDirectory, $"paper-{versionAvaliable}-*.jar");
+                        if (existingFiles.Length > 0)
                         {
-                            Console.WriteLine("No versions found.");
-                            return;
+                            await CheckLocalFiles(existingFiles, latestBuild, versionAvaliable, downloadDirectory);
                         }
-
-                        foreach (string? versionAvaliable in versions)
+                        else
                         {
-                            Console.WriteLine($"-{versionAvaliable}");
-                        }
-
-                        foreach (string? versionAvaliable in versions)
-                        {
-                            string latestBuild = await GetLatestBuild(client, versionAvaliable);
-
-                            string[] existingFiles = Directory.GetFiles(downloadDirectory, $"paper-{versionAvaliable}-*.jar");
-                            if (existingFiles.Length > 0)
-                            {
-                                await CheckLocalFiles(client, existingFiles, latestBuild, versionAvaliable, downloadDirectory);
-                            }
-                            else
-                            {
-                                string fileName = $"paper-{versionAvaliable}-{latestBuild}.jar";
-                                string jarUrl = $"{PaperApiBaseUrl}/versions/{versionAvaliable}/builds/{latestBuild}/downloads/{fileName}";
-                                string destinationPath = Path.Combine(downloadDirectory, fileName);
-                                await DownloadJarAsync(client, jarUrl, destinationPath);
-                            }
+                            string fileName = $"paper-{versionAvaliable}-{latestBuild}.jar";
+                            string jarUrl = $"{PaperApiBaseUrl}/versions/{versionAvaliable}/builds/{latestBuild}/downloads/{fileName}";
+                            string destinationPath = Path.Combine(downloadDirectory, fileName);
+                            await DownloadServerJarAsync(jarUrl, destinationPath);
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
             }
         }
 
-        private static async Task CheckLocalFiles(HttpClient client, string[] existingFiles, string latestBuild, string? version, string downloadDirectory)
+        private static async Task CheckLocalFiles(string[] existingFiles, string latestBuild, string? version, string downloadDirectory)
         {
             foreach (string file in existingFiles)
             {
@@ -841,10 +658,10 @@ namespace Updater
                     Console.WriteLine($"Newer build found for version {version}. Existing build: {existingBuild}, New build: {latestBuild}");
                     File.Delete(file);
                     Console.WriteLine($"Deleted old file: {file}");
-                    string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/paper-{version}-{latestBuild}.jar";
                     string fileName = $"paper-{version}-{latestBuild}.jar";
+                    string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/{fileName}";
                     string destinationPath = Path.Combine(downloadDirectory, fileName);
-                    await DownloadJarAsync(client, jarUrl, destinationPath);
+                    await DownloadServerJarAsync(jarUrl, destinationPath);
                 }
                 else
                 {
@@ -853,10 +670,10 @@ namespace Updater
             }
         }
 
-        private static async Task<string> GetLatestBuild(HttpClient client, string? version)
+        private static async Task<string> GetLatestBuild(string? version)
         {
             string apiUrl = $"{PaperApiBaseUrl}/versions/{version}/builds";
-            HttpResponseMessage response = await client.GetAsync(apiUrl);
+            HttpResponseMessage response = await HttpClient.GetAsync(apiUrl);
             if (response.IsSuccessStatusCode)
             {
                 string json = await response.Content.ReadAsStringAsync();
@@ -867,31 +684,6 @@ namespace Updater
             return "";
         }
 
-        private static async Task DownloadJarAsync(HttpClient client, string url, string destinationPath)
-        {
-            try
-            {
-                using (HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
-                {
-                    response.EnsureSuccessStatusCode();
-                    using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
-                    using (FileStream streamToWriteTo = File.Open(destinationPath, FileMode.Create))
-                    {
-                        await streamToReadFrom.CopyToAsync(streamToWriteTo);
-                    }
-                }
-                Console.WriteLine($"Successfully downloaded {Path.GetFileName(destinationPath)}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to download {url}: {ex.Message}");
-                if (File.Exists(destinationPath))
-                {
-                    File.Delete(destinationPath);
-                }
-            }
-        }
-
         // ------------------------ ↓ Main Updater Funcs ↓ ------------------------
 
         public static async Task Update(string serverVersionsPath)
@@ -900,13 +692,19 @@ namespace Updater
             Console.WriteLine("Starting versions updater for all softwares.");
             Console.WriteLine("--------------------------------------------");
 
-            object[,] softwareTypes = {
-                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur", "Paper" },
-            };
+            object[,] softwareTypes = GetFoldersAsArray(serverVersionsPath);
 
             foreach (string software in softwareTypes)
             {
                 string versionDirectory = Path.Combine(serverVersionsPath, software);
+                Console.WriteLine($"Checking {software} versions in: {versionDirectory}");
+
+                // Ensure the download directory exists
+                if (!Directory.Exists(versionDirectory))
+                {
+                    Directory.CreateDirectory(versionDirectory);
+                }
+
                 await RunUpdaterForSoftware(versionDirectory, software);
             }
 
@@ -923,6 +721,12 @@ namespace Updater
 
             string versionDirectory = Path.Combine(serverVersionsPath, software);
 
+            // Ensure the download directory exists
+            if (!Directory.Exists(versionDirectory))
+            {
+                Directory.CreateDirectory(versionDirectory);
+            }
+
             await RunUpdaterForSoftware(versionDirectory, software);
 
             Console.WriteLine("-------------------------");
@@ -938,6 +742,12 @@ namespace Updater
 
             string versionDirectory = Path.Combine(serverVersionsPath, software);
 
+            // Ensure the download directory exists
+            if (!Directory.Exists(versionDirectory))
+            {
+                Directory.CreateDirectory(versionDirectory);
+            }
+
             await RunUpdaterForSoftware(versionDirectory, software, version, true);
 
             Console.WriteLine("-------------------------");
@@ -945,7 +755,7 @@ namespace Updater
             Console.WriteLine("-------------------------");
         }
 
-        // ------------------------ ↓ Main Updater Funcs Helpers ↓ ------------------------
+        // ------------------------ ↓ Helpers for Updater Funcs ↓ ------------------------
 
         private static async Task RunUpdaterForSoftware(string versionDirectory, string software, string? version = null, bool skipCheckForInstallers = false)
         {
@@ -1011,13 +821,51 @@ namespace Updater
                         Directory.Delete(directory, true);
                         Console.WriteLine($"Deleted directory: {directory}");
                     }
-
-                    Console.WriteLine("All contents deleted successfully, but the directory itself remains.");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
+
+        private static object[,] GetFoldersAsArray(string rootDirectory)
+        {
+            if (!Directory.Exists(rootDirectory))
+            {
+                Console.WriteLine("Root directory does not exist.");
+                return new object[0, 0];
+            }
+
+            string[] folders = Directory.GetDirectories(rootDirectory);
+            object[,] softwareTypes = new object[folders.Length, 1];
+
+            for (int i = 0; i < folders.Length; i++)
+            {
+                softwareTypes[i, 0] = Path.GetFileName(folders[i]);
+            }
+
+            return softwareTypes;
+        }
+
+        // ------------------------ ↓ Download Function ↓ ------------------------
+        private static async Task DownloadServerJarAsync(string? jarUrl, string savePath)
+        {
+            try
+            {
+                using var jarResponse = await HttpClient.GetStreamAsync(jarUrl);
+                using var fileStream = File.Create(savePath);
+                await jarResponse.CopyToAsync(fileStream);
+
+                Console.WriteLine($"Downloaded successfully: {Path.GetFileName(savePath)}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to download {jarUrl}: {ex.Message}");
+                if (File.Exists(savePath))
+                {
+                    File.Delete(savePath);
+                }
             }
         }
     }

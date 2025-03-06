@@ -20,7 +20,7 @@ namespace mainApp
             string version = "";  // e.g. 1.21
             string worldNumber = "";
             string worldName = ""; // e.g. Minecfraft Server
-            string software = ""; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur, Paper
+            string software = "Fabric"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur, Paper
             int totalPlayers = 20;
             string Server_LocalComputerIP = GetLocalMachineIP();
             string Server_PublicComputerIP = await GetPublicIP();
@@ -76,14 +76,13 @@ namespace mainApp
             ServerOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
-            _ = ServerOperator.InputForServer("give Oleg6900 diamond 64", worldNumber, RCON_Port, Server_LocalComputerIP);
-            _ = ServerOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, Server_LocalComputerIP);
+            _ = ServerOperator.InputForServer("", worldNumber, RCON_Port, Server_LocalComputerIP);
 
             // ↓ Change Version Func ↓
             await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
 
             // ↓ Server Files Loop ↓
-            List<string> items = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
+            List<string> files = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
 
             // ↓ Delete Server ↓
             ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
@@ -97,8 +96,6 @@ namespace mainApp
                 ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, Server_LocalComputerIP, JMX_Port, RCON_Port);
                 Thread.Sleep(1000);
             }
-            
-            Console.ReadKey();
         }
         private static string GetLocalMachineIP()
         {

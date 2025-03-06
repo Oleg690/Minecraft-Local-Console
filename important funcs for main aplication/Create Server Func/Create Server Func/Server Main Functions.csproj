@@ -9,15 +9,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="versions\Forge\**" />
+    <Compile Remove="versions\NeoForge\**" />
+    <Compile Remove="versions\Paper\**" />
+    <Compile Remove="versions\Purpur\**" />
+    <Compile Remove="versions\Quilt\**" />
+    <Compile Remove="versions\Vanilla\**" />
+    <EmbeddedResource Remove="versions\Forge\**" />
+    <EmbeddedResource Remove="versions\NeoForge\**" />
+    <EmbeddedResource Remove="versions\Paper\**" />
+    <EmbeddedResource Remove="versions\Purpur\**" />
+    <EmbeddedResource Remove="versions\Quilt\**" />
+    <EmbeddedResource Remove="versions\Vanilla\**" />
+    <None Remove="versions\Forge\**" />
+    <None Remove="versions\NeoForge\**" />
+    <None Remove="versions\Paper\**" />
+    <None Remove="versions\Purpur\**" />
+    <None Remove="versions\Quilt\**" />
+    <None Remove="versions\Vanilla\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="database\" />
     <Folder Include="temp\" />
-    <Folder Include="versions\Fabric\" />
-    <Folder Include="versions\Forge\" />
-    <Folder Include="versions\NeoForge\" />
-    <Folder Include="versions\Paper\" />
-    <Folder Include="versions\Quilt\" />
-    <Folder Include="versions\Purpur\" />
-    <Folder Include="versions\Vanilla\" />
+    <Folder Include="versions\" />
     <Folder Include="worlds\" />
   </ItemGroup>
 
