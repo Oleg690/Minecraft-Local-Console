@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json;
+using System.Xml;
 using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -7,6 +8,10 @@ namespace Updater
 {
     class VersionsUpdater
     {
+        private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
+        private static readonly string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) ?? string.Empty;
+        private static readonly string? versionsSupprortListXML = Path.Combine(rootFolder, "SupportedVersions.xml");
+
         private static readonly string VanillaApiBaseUrl = "https://piston-meta.mojang.com/mc/game/version_manifest.json";
         private static readonly string ForgeApiVersionsUrl = "https://files.minecraftforge.net/net/minecraftforge/forge/";
         private static readonly string ForgeApiBaseUrl = "https://maven.minecraftforge.net/net/minecraftforge/forge/";
@@ -22,9 +27,6 @@ namespace Updater
         // ------------------------ ↓ Vanilla Updater Funcs ↓ ------------------------
         private static async Task CheckAndUpdateVanillaAsync(string downloadDirectory, string? selectedVersion = null)
         {
-            Console.WriteLine($"Checking Vanilla Minecraft Server versions in: {downloadDirectory}");
-            Directory.CreateDirectory(downloadDirectory);
-
             var availableVersions = await GetAvailableVanillaServerVersionsAsync(selectedVersion);
             if (availableVersions == null || availableVersions.Count == 0)
             {
@@ -32,13 +34,16 @@ namespace Updater
                 return;
             }
 
-            Console.WriteLine($"Found {availableVersions.Count} versions.");
-
             var localFiles = Directory.GetFiles(downloadDirectory, "vanilla-*.jar");
             var localVersions = localFiles.Select(f => Path.GetFileNameWithoutExtension(f).Replace("vanilla-", "")).ToHashSet();
 
             foreach (var version in availableVersions.Keys)
             {
+                if (CheckVersionExists("Vanilla", version) == false)
+                {
+                    continue;
+                }
+
                 if (!localVersions.Contains(version))
                 {
                     Console.WriteLine($"Vanilla Server {version} is missing. Downloading...");
@@ -54,6 +59,7 @@ namespace Updater
                                                     .GetString();
 
                         string savePath = Path.Combine(downloadDirectory, $"vanilla-{version}.jar");
+
                         await DownloadServerJarAsync(jarUrl, savePath);
                     }
                     catch (Exception ex)
@@ -63,20 +69,15 @@ namespace Updater
                 }
                 else
                 {
-                    Console.WriteLine($"Vanilla Server {version} is up to date.");
+                    Console.WriteLine($"Skipping download for version {version}. Existing build is up to date.");
                 }
             }
-
-            Console.WriteLine("---------------------------------");
-            Console.WriteLine("All Vanilla Server versions are updated.");
-            Console.WriteLine("---------------------------------");
         }
 
         private static async Task<Dictionary<string, string>> GetAvailableVanillaServerVersionsAsync(string? selectedVersion = null)
         {
             try
             {
-                Console.WriteLine("Fetching available Vanilla Minecraft Server versions...");
                 var response = await HttpClient.GetStringAsync(VanillaApiBaseUrl);
                 using var jsonDoc = JsonDocument.Parse(response);
 
@@ -93,12 +94,6 @@ namespace Updater
                         .Where(v => v.Key == selectedVersion)
                         .ToDictionary(v => v.Key, v => v.Value);
                 }
-
-                foreach (var version in availableVersions)
-                {
-                    Console.WriteLine($"Detected server version: {version.Key}");
-                }
-
                 return availableVersions;
             }
             catch (Exception ex)
@@ -114,9 +109,6 @@ namespace Updater
         {
             try
             {
-                Console.WriteLine("Fetching the latest Fabric Minecraft Server Installer...");
-                Directory.CreateDirectory(downloadDirectory);
-
                 // Get the latest stable Fabric Loader version
                 var loaderResponse = await HttpClient.GetStringAsync(FabricApiBaseUrl);
                 using var loaderJson = JsonDocument.Parse(loaderResponse);
@@ -196,6 +188,10 @@ namespace Updater
                     // If no specific version is provided, process all versions
                     foreach (string version in stableVersions)
                     {
+                        if (CheckVersionExists("Forge", version) == false)
+                        {
+                            continue;
+                        }
                         await ProcessVersion(downloadDirectory, promos, version);
                     }
                 }
@@ -315,6 +311,11 @@ namespace Updater
                     // If no specific version is provided, process all versions
                     foreach (string version in versions)
                     {
+                        if (CheckVersionExists("NeoForge", version) == false)
+                        {
+                            continue;
+                        }
+                        
                         await ProcessNeoForgeVersion(downloadDirectory, version);
                     }
                 }
@@ -350,11 +351,12 @@ namespace Updater
                     // Check if a file for this version already exists locally
                     if (File.Exists(destinationPath))
                     {
-                        Console.WriteLine($"Skipping download for version {version}. File already exists.");
+                        Console.WriteLine($"Skipping download for version {version}. Existing build is up to date.");
                     }
                     else
                     {
                         // Download the server file
+                        Console.WriteLine($"No local file found for version {version}. Downloading...");
                         await DownloadServerJarAsync(serverUrl, destinationPath);
                     }
                 }
@@ -375,9 +377,6 @@ namespace Updater
         {
             try
             {
-                Console.WriteLine("Fetching the latest Quilt Minecraft Server Installer...");
-                Directory.CreateDirectory(downloadDirectory);
-
                 // Get the latest stable Fabric Loader version
                 string xmlContent = await HttpClient.GetStringAsync($"{QuiltApiBaseUrl}maven-metadata.xml");
 
@@ -414,22 +413,11 @@ namespace Updater
         // ------------------------ ↓ Purpur Updater Funcs ↓ ------------------------
         private static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string? selectedVersion = null)
         {
-            Console.WriteLine($"Checking Purpur versions in: {downloadDirectory}");
-
-            // Get local versions and builds
             var localFiles = Directory.GetFiles(downloadDirectory, "purpur-*.jar");
 
             if (localFiles.Length == 0)
             {
                 Console.WriteLine("No local files found.");
-                return;
-            }
-            else
-            {
-                foreach (var file in localFiles)
-                {
-                    Console.WriteLine("Local files detected:");
-                }
             }
 
             var localVersions = new Dictionary<string, int>();
@@ -439,16 +427,14 @@ namespace Updater
                 string fileName = Path.GetFileNameWithoutExtension(file);
 
                 var parts = fileName.Replace("purpur-", "").Split('-');
-                if (parts.Length == 1) // Handle filenames without build numbers
+                if (parts.Length == 1)
                 {
                     string version = parts[0];
                     localVersions[version] = 0;
-                    Console.WriteLine($"Detected version: {version}, Build: 0 (assumed)");
                 }
                 else if (parts.Length == 2 && int.TryParse(parts[1], out int build)) // Handle filenames with build numbers
                 {
                     localVersions[parts[0]] = build;
-                    Console.WriteLine($"Detected version: {parts[0]}, Build: {build}");
                 }
                 else
                 {
@@ -463,9 +449,12 @@ namespace Updater
                 return;
             }
 
-            Console.WriteLine($"Found {availableVersions.Length} versions.");
             foreach (var version in availableVersions)
             {
+                if (CheckVersionExists("Purpur", version) == false)
+                {
+                    continue;
+                }
                 // Fetch the latest build for the version
                 int? latestBuild = await GetPurpurLatestBuildAsync(version);
 
@@ -490,7 +479,7 @@ namespace Updater
                     }
 
                     // Download the latest version and rename it to include the build number
-                    Console.WriteLine($"Purpur {version} is missing or outdated. Downloading...");
+                    Console.WriteLine($"Purpur {version} is missing. Downloading...");
                     await DownloadServerJarAsync(url, finalFilePath);
                 }
                 else
@@ -510,14 +499,10 @@ namespace Updater
                     }
                     else
                     {
-                        Console.WriteLine($"Purpur {version} is up to date.");
+                        Console.WriteLine($"Skipping download for version {version}. Existing is up to date.");
                     }
                 }
             }
-
-            Console.WriteLine("--------------------------------");
-            Console.WriteLine("All Purpur versions are updated.");
-            Console.WriteLine("--------------------------------");
         }
 
         private static async Task<string[]> GetAvailablePurpurVersionsAsync(string? selectedVersion = null)
@@ -532,10 +517,6 @@ namespace Updater
                 if (selectedVersion != null)
                 {
                     versions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray().Where(v => v.GetString() == $"{selectedVersion}").Select(e => e.GetString()).ToArray();
-                }
-                foreach (var version in versions)
-                {
-                    Console.WriteLine($"Avaliable version: {version}");
                 }
 
                 return versions;
@@ -596,7 +577,7 @@ namespace Updater
                         string fileName = $"paper-{version}-{latestBuild}.jar";
                         string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/{fileName}";
                         string destinationPath = Path.Combine(downloadDirectory, fileName);
-                        Console.WriteLine($"Downloading version: {version}");
+                        Console.WriteLine($"Paper Server {version} is missing. Downloading...");
                         await DownloadServerJarAsync(jarUrl, destinationPath);
                     }
                 }
@@ -619,11 +600,11 @@ namespace Updater
 
                     foreach (string? versionAvaliable in versions)
                     {
-                        Console.WriteLine($"-{versionAvaliable}");
-                    }
+                        if (CheckVersionExists("Paper", versionAvaliable) == false)
+                        {
+                            continue;
+                        }
 
-                    foreach (string? versionAvaliable in versions)
-                    {
                         string latestBuild = await GetLatestBuild(versionAvaliable);
 
                         string[] existingFiles = Directory.GetFiles(downloadDirectory, $"paper-{versionAvaliable}-*.jar");
@@ -636,6 +617,7 @@ namespace Updater
                             string fileName = $"paper-{versionAvaliable}-{latestBuild}.jar";
                             string jarUrl = $"{PaperApiBaseUrl}/versions/{versionAvaliable}/builds/{latestBuild}/downloads/{fileName}";
                             string destinationPath = Path.Combine(downloadDirectory, fileName);
+                            Console.WriteLine($"Paper Server {versionAvaliable} is missing. Downloading...");
                             await DownloadServerJarAsync(jarUrl, destinationPath);
                         }
                     }
@@ -692,25 +674,29 @@ namespace Updater
             Console.WriteLine("Starting versions updater for all softwares.");
             Console.WriteLine("--------------------------------------------");
 
-            object[,] softwareTypes = GetFoldersAsArray(serverVersionsPath);
+            object[,] softwareTypes = GetAvailableSoftwares();
 
             foreach (string software in softwareTypes)
             {
                 string versionDirectory = Path.Combine(serverVersionsPath, software);
-                Console.WriteLine($"Checking {software} versions in: {versionDirectory}");
+                Console.WriteLine($"Checking {software} versions in: {versionDirectory} \n");
 
-                // Ensure the download directory exists
                 if (!Directory.Exists(versionDirectory))
                 {
                     Directory.CreateDirectory(versionDirectory);
                 }
 
                 await RunUpdaterForSoftware(versionDirectory, software);
+
+                Console.WriteLine("----------------------------------------------");
+                Console.WriteLine($"All {software} Server versions are updated!"); 
+                Console.WriteLine("----------------------------------------------");
+
             }
 
-            Console.WriteLine("-------------------------");
-            Console.WriteLine("All versions are updated!");
-            Console.WriteLine("-------------------------");
+            Console.WriteLine("--------------------------");
+            Console.WriteLine("All softwares are updated!");
+            Console.WriteLine("--------------------------");
         }
 
         public static async Task Update(string serverVersionsPath, string software)
@@ -759,6 +745,14 @@ namespace Updater
 
         private static async Task RunUpdaterForSoftware(string versionDirectory, string software, string? version = null, bool skipCheckForInstallers = false)
         {
+            if (version != null)
+            {
+                if (CheckVersionExists(software, version) == false)
+                {
+                    Console.WriteLine($"Version {version} not found in the list of supported versions.");
+                    return;
+                }
+            }
             if (skipCheckForInstallers && (software == "Fabric" || software == "Quilt"))
             {
                 Console.WriteLine("This is an universal Installer, there aren't versions, checking the installer...");
@@ -829,23 +823,53 @@ namespace Updater
             }
         }
 
-        private static object[,] GetFoldersAsArray(string rootDirectory)
+        static object[,] GetAvailableSoftwares()
         {
-            if (!Directory.Exists(rootDirectory))
+            XmlDocument doc = new XmlDocument();
+            doc.Load(versionsSupprortListXML);
+
+            XmlNodeList softwareNodes = doc.SelectNodes("/minecraft_softwares/software");
+            List<object> softwareList = new List<object>();
+
+            foreach (XmlNode softwareNode in softwareNodes)
             {
-                Console.WriteLine("Root directory does not exist.");
-                return new object[0, 0];
+                string softwareName = softwareNode.Attributes["name"]?.Value;
+                if (!string.IsNullOrEmpty(softwareName) && !softwareList.Contains(softwareName))
+                {
+                    softwareList.Add(softwareName);
+                }
             }
 
-            string[] folders = Directory.GetDirectories(rootDirectory);
-            object[,] softwareTypes = new object[folders.Length, 1];
-
-            for (int i = 0; i < folders.Length; i++)
+            // Convert List<object> to object[,]
+            object[,] result = new object[softwareList.Count, 1];
+            for (int i = 0; i < softwareList.Count; i++)
             {
-                softwareTypes[i, 0] = Path.GetFileName(folders[i]);
+                result[i, 0] = softwareList[i];
             }
 
-            return softwareTypes;
+            return result;
+        }
+
+        private static bool CheckVersionExists(string softwareName, string version)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(versionsSupprortListXML);
+
+            XmlNode softwareNode = doc.SelectSingleNode($"/minecraft_softwares/software[@name='{softwareName}']");
+            if (softwareNode == null)
+            {
+                return false; // Software not found
+            }
+
+            foreach (XmlNode versionNode in softwareNode.SelectNodes("version"))
+            {
+                if (versionNode.InnerText == version)
+                {
+                    return true; // Version found
+                }
+            }
+
+            return false; // Version not found
         }
 
         // ------------------------ ↓ Download Function ↓ ------------------------

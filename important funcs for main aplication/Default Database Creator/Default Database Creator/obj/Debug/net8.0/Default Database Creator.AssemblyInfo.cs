@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Default Database Creator")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bd9bee41151a5f5474084acae8adbbde2b25b241")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b7898b6fe21eb487275d101f67c23b817a68ceac")]
 [assembly: System.Reflection.AssemblyProductAttribute("Default Database Creator")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Default Database Creator")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

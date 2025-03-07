@@ -7,20 +7,17 @@ using NetworkConfig;
 using Updater;
 using Create_Server_Func;
 
-namespace mainApp
+namespace MainApp
 {
     internal class Program
     {
         static async Task Main()
         {
-            // Public Address Ranges
-            // 1.0.0.0 – 9.255.255.255
-
             // ↓ Server Settings ↓
             string version = "";  // e.g. 1.21
             string worldNumber = "";
             string worldName = ""; // e.g. Minecfraft Server
-            string software = "Fabric"; // e.g. Vanilla, Forge, NeoForge, Fabric, Quilt, Purpur, Paper
+            string software = "Paper"; // e.g. Vanilla
             int totalPlayers = 20;
             string Server_LocalComputerIP = GetLocalMachineIP();
             string Server_PublicComputerIP = await GetPublicIP();
@@ -50,16 +47,17 @@ namespace mainApp
             };
 
             // ↓ All needed directories ↓
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
+            string? currentDirectory = Directory.GetCurrentDirectory();
+            string? rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
             string? rootFolder = Path.GetDirectoryName(rootWorldsFolder);
-            string serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
-            string serverPath = Path.Combine(serverDirectoryPath);
-            string serverJarPath = Path.Combine(serverDirectoryPath, version + ".jar");
-            string serverLogPath = Path.Combine(serverDirectoryPath, "logs\\latest.log");
-            string serverPropriertiesPath = Path.Combine(serverDirectoryPath, "server.properties");
-            string serverVersionsPath = Path.Combine(rootFolder, "versions");
-            string tempFolderPath = Path.Combine(rootFolder, "temp");
+            string? serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
+            string? serverPath = Path.Combine(serverDirectoryPath);
+            string? serverJarPath = Path.Combine(serverDirectoryPath, version + ".jar");
+            string? serverLogPath = Path.Combine(serverDirectoryPath, "logs\\latest.log");
+            string? serverPropriertiesPath = Path.Combine(serverDirectoryPath, "server.properties");
+            string? serverVersionsPath = Path.Combine(rootFolder, "versions");
+            string? versionsSupprortListXML = Path.Combine(rootFolder, "SupportedVersions.xml");
+            string? tempFolderPath = Path.Combine(rootFolder, "temp");
 
             // ↓ Update Available Versions ↓
             await VersionsUpdater.Update(serverVersionsPath);
@@ -71,7 +69,7 @@ namespace mainApp
 
             // ↓ Start Server Func ↓
             await ServerOperator.Start(worldNumber, serverPath, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port);
-            await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, true);
+            await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, false);
             await ServerOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, RCON_Port, JMX_Port);
             ServerOperator.Kill(RCON_Port, JMX_Port);
 
@@ -97,13 +95,14 @@ namespace mainApp
                 Thread.Sleep(1000);
             }
         }
+
         private static string GetLocalMachineIP()
         {
             try
             {
                 using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
                 {
-                    socket.Connect("8.8.8.8", 80); // Connect to Google's DNS
+                    socket.Connect("8.8.8.8", 80);
                     IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
                     return endPoint?.Address.ToString() ?? "Unable to determine local IP";
                 }
