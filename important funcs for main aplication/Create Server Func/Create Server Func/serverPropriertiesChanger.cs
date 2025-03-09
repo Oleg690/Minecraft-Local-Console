@@ -1,13 +1,4 @@
-﻿using com.sun.crypto.provider;
-using com.sun.org.apache.bcel.@internal.classfile;
-using jdk.nashorn.@internal.ir;
-using Microsoft.Extensions.DependencyModel.Resolution;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
-
-namespace serverPropriertiesChanger
+﻿namespace serverPropriertiesChanger
 {
     class DataChanger
     {

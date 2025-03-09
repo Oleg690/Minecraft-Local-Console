@@ -1,12 +1,9 @@
 ﻿using Open.Nat;
-using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NetworkConfig
 {
@@ -360,7 +357,7 @@ namespace NetworkConfig
             string domain;
             do
             {
-                string randomCombination = DomainName.Combinations[new Random().Next(DomainName.Combinations.Length)];
+                string randomCombination = Combinations[new Random().Next(Combinations.Length)];
                 domain = $"{randomCombination}.olehost.me.host";
             }
             while (IsMinecraftServerDomain(domain).Result);
@@ -388,7 +385,7 @@ namespace NetworkConfig
                 {
                     try
                     {
-                        using (TcpClient client = new TcpClient())
+                        using (TcpClient client = new())
                         {
                             // Use a timeout to prevent indefinite blocking
                             var connectTask = client.ConnectAsync(address, defaultPort);

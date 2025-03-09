@@ -15,9 +15,9 @@ namespace MainApp
         {
             // ↓ Server Settings ↓
             string version = "";  // e.g. 1.21
-            string worldNumber = "";
+            string worldNumber = ""; // e.g./ 123456789012
             string worldName = ""; // e.g. Minecfraft Server
-            string software = "Paper"; // e.g. Vanilla
+            string software = ""; // e.g. Vanilla
             int totalPlayers = 20;
             string Server_LocalComputerIP = GetLocalMachineIP();
             string Server_PublicComputerIP = await GetPublicIP();
@@ -69,12 +69,12 @@ namespace MainApp
 
             // ↓ Start Server Func ↓
             await ServerOperator.Start(worldNumber, serverPath, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port);
-            await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, false);
-            await ServerOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, RCON_Port, JMX_Port);
+            await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, "00:00");
+            await ServerOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, RCON_Port, JMX_Port, "10:00");
             ServerOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
-            _ = ServerOperator.InputForServer("", worldNumber, RCON_Port, Server_LocalComputerIP);
+            _ = ServerOperator.InputForServer("op Oleg6900", worldNumber, RCON_Port, Server_LocalComputerIP);
 
             // ↓ Change Version Func ↓
             await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, serverVersionsPath, rootFolder, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
@@ -91,8 +91,7 @@ namespace MainApp
             // ↓ Server Stats Loop ↓
             while (true)
             {
-                ServerStats.GetServerInfo(serverDirectoryPath, serverLogPath, worldNumber, Server_LocalComputerIP, JMX_Port, RCON_Port);
-                Thread.Sleep(1000);
+                ServerStats.GetServerInfo(serverDirectoryPath, worldNumber, Server_PublicComputerIP, JMX_Port, RCON_Port, Server_Port);
             }
         }
 

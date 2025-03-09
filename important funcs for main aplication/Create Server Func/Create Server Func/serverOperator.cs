@@ -7,17 +7,41 @@ using System.Net;
 using System.Net.Sockets;
 using NetworkConfig;
 using Updater;
+using System.Xml;
 
 namespace Create_Server_Func
 {
     class ServerCreator
     {
-        private const string TimestampFile = "lastQuiltorFabricCheck.txt";
+        private const string UpdaterLastCheck = "lastQuiltorFabricCheckUpdater.txt";
         private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
+
+        private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
+        private static readonly string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) ?? string.Empty;
+        private static readonly string? versionsSupprortListXML = Path.Combine(rootFolder, "SupportedVersions.xml");
 
         public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
         {
-            await CheckVersions(rootFolder, software, version);
+            if (software == "")
+            {
+                Console.WriteLine("Software not selected!");
+                return "Software not selected!";
+            }
+
+            if (worldName == "")
+            {
+                worldName = software + " Server";
+            }
+
+            if (VersionsUpdater.CheckVersionExists(software, version) == true)
+            {
+                await CheckVersions(rootFolder, software, version);
+            }
+            else
+            {
+                Console.WriteLine($"{software} {version} is not supported!");
+                return "";
+            }
 
             if (!ServerOperator.CheckFirewallRuleExists("MinecraftServer_TCP_25565") && !ServerOperator.CheckFirewallRuleExists("MinecraftServer_UDP_25565"))
             {
@@ -41,15 +65,7 @@ namespace Create_Server_Func
             string versionName = version + ".jar";
             string jarFilePath = "";
 
-            if (software == "")
-            {
-                Console.WriteLine("Software not selected!");
-                return "Software not selected!";
-            }
-
-            object[,] softwareTypes = {
-                { "Vanilla", "Forge", "NeoForge", "Fabric", "Quilt", "Purpur", "Paper" },
-            };
+            object[,] softwareTypes = GetAvailableSoftwares();
 
             foreach (string softwareType in softwareTypes)
             {
@@ -81,7 +97,7 @@ namespace Create_Server_Func
 
             Console.WriteLine("Server .jar file copied to the custom directory.");
 
-            string rconPassword = generatePassword(20);
+            string rconPassword = GeneratePassword(20);
 
             if (worldNumber != null)
             {
@@ -117,6 +133,12 @@ namespace Create_Server_Func
             if (software == "Quilt")
             {
                 processInfo.WorkingDirectory = tempFolderPath;
+            }
+
+            while (ServerOperator.IsPortInUse(RCON_Port) || ServerOperator.IsPortInUse(JMX_Port))
+            {
+                Console.WriteLine("Port not closed!");
+                Thread.Sleep(1000);
             }
 
             if (software == "Vanilla")
@@ -848,7 +870,7 @@ namespace Create_Server_Func
             }
         }
 
-        public static string[] FindJarFile(string rootPath, string targetVersion)
+        private static string[] FindJarFile(string rootPath, string targetVersion)
         {
             string? jarPath = null;
 
@@ -924,7 +946,7 @@ namespace Create_Server_Func
             return new string(number);
         }
 
-        public static string GenerateUniqueRandomNumber(int numOfDigits, string rootFolder)
+        private static string GenerateUniqueRandomNumber(int numOfDigits, string rootFolder)
         {
             string randomNumber;
             do
@@ -937,7 +959,7 @@ namespace Create_Server_Func
             return randomNumber;
         }
 
-        public static bool CheckForMatchingFolder(string rootFolder, string folderName)
+        private static bool CheckForMatchingFolder(string rootFolder, string folderName)
         {
             try
             {
@@ -972,7 +994,7 @@ namespace Create_Server_Func
             return false;
         }
 
-        public static string generatePassword(int passLength)
+        private static string GeneratePassword(int passLength)
         {
             const string upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             const string lowerChars = "abcdefghijklmnopqrstuvwxyz";
@@ -1096,12 +1118,12 @@ namespace Create_Server_Func
 
         private static bool ShouldRunNow()
         {
-            if (!File.Exists(TimestampFile))
+            if (!File.Exists(UpdaterLastCheck))
             {
                 return true; // First run
             }
 
-            string lastRunTimeStr = File.ReadAllText(TimestampFile);
+            string lastRunTimeStr = File.ReadAllText(UpdaterLastCheck);
             if (DateTime.TryParse(lastRunTimeStr, out DateTime lastRunTime))
             {
                 return DateTime.UtcNow - lastRunTime >= DelayTime;
@@ -1127,7 +1149,7 @@ namespace Create_Server_Func
                 {
                     Console.WriteLine("Checking for updates...");
                     await VersionsUpdater.Update(serverVersionsPath, software);
-                    File.WriteAllText(TimestampFile, DateTime.UtcNow.ToString("o"));
+                    File.WriteAllText(UpdaterLastCheck, DateTime.UtcNow.ToString("o"));
                     localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
                     if (localFiles.Length == 0)
                     {
@@ -1169,28 +1191,59 @@ namespace Create_Server_Func
             }
         }
 
+        private static object[,] GetAvailableSoftwares()
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(versionsSupprortListXML);
+
+            XmlNodeList softwareNodes = doc.SelectNodes("/minecraft_softwares/software");
+            List<object> softwareList = new List<object>();
+
+            foreach (XmlNode softwareNode in softwareNodes)
+            {
+                string softwareName = softwareNode.Attributes["name"]?.Value;
+                if (!string.IsNullOrEmpty(softwareName) && !softwareList.Contains(softwareName))
+                {
+                    softwareList.Add(softwareName);
+                }
+            }
+
+            // Convert List<object> to object[,]
+            object[,] result = new object[softwareList.Count, 1];
+            for (int i = 0; i < softwareList.Count; i++)
+            {
+                result[i, 0] = softwareList[i];
+            }
+
+            return result;
+        }
+
         // --------------------------------------------------------------------------------
     }
 
     class ServerOperator
     {
+        private const string StartupTimePath = "serverStartupTime.txt";
+        
         // ------------------------- Main Server Operator Commands -------------------------
         public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Auto_Stop = false)
         {
             while (IsPortInUse(RCON_Port) || IsPortInUse(JMX_Port))
             {
-                Console.WriteLine("Port not closed! Closing Port");
+                Console.WriteLine("Port not closed!");
                 Thread.Sleep(1000);
             }
 
-            if (!CheckFirewallRuleExists("MinecraftServer_TCP_25565") && !CheckFirewallRuleExists("MinecraftServer_UDP_25565"))
+            if (!CheckFirewallRuleExists("MinecraftServer_TCP_25565") && !CheckFirewallRuleExists("MinecraftServer_UDP_25565") && !CheckFirewallRuleExists("MinecraftServer_TCP_25562") && !CheckFirewallRuleExists("MinecraftServer_UDP_25562"))
             {
                 await NetworkConfigSetup.Setup(25565);
+                await NetworkConfigSetup.Setup(25562);
                 return;
             }
 
             string JMX_Server_Settings = $"-Dcom.sun.management.jmxremote " +
                                          $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
+                                         $"-Dcom.sun.management.jmxremote.rmi.port={JMX_Port} " +
                                          $"-Dcom.sun.management.jmxremote.authenticate=false " +
                                          $"-Dcom.sun.management.jmxremote.ssl=false " +
                                          $"-Djava.rmi.server.hostname={ipAddress} ";
@@ -1337,6 +1390,8 @@ namespace Create_Server_Func
 
                 Console.WriteLine("Minecraft server started!");
 
+                RecordServerStart();
+
                 //          ↓ For output traking ↓
                 process.OutputDataReceived += async (sender, e) =>
                 {
@@ -1350,7 +1405,7 @@ namespace Create_Server_Func
                         }
                         else if (Auto_Stop == true && e.Data.Contains("RCON running on"))
                         {
-                            await Stop("stop", worldNumber, "0.0.0.0", RCON_Port, JMX_Port, true);
+                            await Stop("stop", worldNumber, "0.0.0.0", RCON_Port, JMX_Port);
                         }
                     }
                 };
@@ -1368,7 +1423,7 @@ namespace Create_Server_Func
                         }
                         else if (Auto_Stop == true && e.Data.Contains("RCON running on"))
                         {
-                            await Stop("stop", worldNumber, "0.0.0.0", RCON_Port, JMX_Port, true);
+                            await Stop("stop", worldNumber, "0.0.0.0", RCON_Port, JMX_Port);
                         }
                     }
                 };
@@ -1381,12 +1436,9 @@ namespace Create_Server_Func
             }
         }
 
-        public static async Task Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, int JMX_Port, bool instantStop = false)
+        public static async Task Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, int JMX_Port, string time = "00:00")
         {
-            if (!instantStop)
-            {
-                Countdown(5, operation, worldNumber, RCON_Port, ipAddress);
-            }
+            await Countdown(time, operation, worldNumber, RCON_Port, ipAddress);
 
             await InputForServer("stop", worldNumber, RCON_Port, ipAddress);
 
@@ -1394,9 +1446,9 @@ namespace Create_Server_Func
             ClosePort(JMX_Port.ToString());
         }
 
-        public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string StopIPAddress, string StartIPAddress, int RCON_Port, int JMX_Port)
+        public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string StopIPAddress, string StartIPAddress, int RCON_Port, int JMX_Port, string time = "00:00")
         {
-            await Stop("restart", worldNumber, StopIPAddress, RCON_Port, JMX_Port);
+            await Stop("restart", worldNumber, StopIPAddress, RCON_Port, JMX_Port, time);
 
             await Start(worldNumber, serverPath, processMemoryAlocation, StartIPAddress, JMX_Port, RCON_Port);
         }
@@ -1528,6 +1580,49 @@ namespace Create_Server_Func
 
         // -------------------------------- Help Functions --------------------------------
 
+        private static async Task Countdown(string time, string action, string worldNumber, int RCON_Port, string serverIp)
+        {
+            int totalSeconds = ConvertToSeconds(time);
+
+            if (totalSeconds <= 0 || totalSeconds >= 5400)
+                return;
+
+            int minutes = totalSeconds / 60;
+            int seconds = totalSeconds % 60;
+
+            string message = $"say Server will {action} in {(minutes > 0 ? $"{minutes}m" : "")} {(seconds > 0 ? $"{seconds}s" : "")}!";
+            await InputForServer(message.Trim(), worldNumber, RCON_Port, serverIp);
+
+            Stopwatch stopwatch = new();
+
+            await Task.Delay(1000);
+
+            for (int i = totalSeconds - 1; i > 0; i--)
+            {
+                stopwatch.Restart();
+                
+                if (i % 600 == 0 && i > 600) // Every 10 minutes until 10 min left
+                    await InputForServer($"say {i / 60} minutes remaining!", worldNumber, RCON_Port, serverIp);
+                else if (i == 600)
+                    await InputForServer("say 10 minutes remaining!", worldNumber, RCON_Port, serverIp);
+                else if (i == 300)
+                    await InputForServer("say 5 minutes remaining!", worldNumber, RCON_Port, serverIp);
+                else if (i == 60)
+                    await InputForServer("say 1 minute remaining!", worldNumber, RCON_Port, serverIp);
+                else if (i == 30)
+                    await InputForServer("say 30 seconds remaining!", worldNumber, RCON_Port, serverIp);
+                else if (i <= 10)
+                    await InputForServer($"say {i}", worldNumber, RCON_Port, serverIp);
+
+                // Ensure accurate timing
+                int waitTime = 1000 - (int)stopwatch.ElapsedMilliseconds;
+                if (waitTime > 0)
+                    await Task.Delay(waitTime);
+            }
+
+            await InputForServer($"say Server is now {action}!", worldNumber, RCON_Port, serverIp);
+        }
+
         private static string DeleteFolderAndReturnPath(string folderPath)
         {
             if (Directory.Exists(folderPath))
@@ -1608,16 +1703,15 @@ namespace Create_Server_Func
             }
         }
 
-        private static void Countdown(int time, string action, string worldNumber, int RCON_Port, string serverIp)
+        private static int ConvertToSeconds(string time)
         {
-            _ = InputForServer($"say Server will {action} in...", worldNumber, RCON_Port, serverIp);
-            Thread.Sleep(1000);
+            string[] parts = time.Split(':');
+            if (parts.Length != 2) throw new ArgumentException("Invalid time format. Use MM:SS.");
 
-            for (int i = time; i > 0; i--)
-            {
-                _ = InputForServer($"say {i}", worldNumber, RCON_Port, serverIp);
-                Thread.Sleep(1000);
-            }
+            int minutes = int.Parse(parts[0]);
+            int seconds = int.Parse(parts[1]);
+
+            return (minutes * 60) + seconds;
         }
 
         public static bool IsPortInUse(int port)
@@ -1638,7 +1732,7 @@ namespace Create_Server_Func
             return !isAvailable;
         }
 
-        public static string FindClosestJarFile(string folderPath, string targetPattern)
+        private static string FindClosestJarFile(string folderPath, string targetPattern)
         {
             try
             {
@@ -1884,6 +1978,18 @@ namespace Create_Server_Func
             }
 
             return false;
+        }
+
+        private static void RecordServerStart()
+        {
+            // Record the server start in the database
+            DateTime startupTime = DateTime.Now;
+
+            // Write the timestamp to the file
+            File.WriteAllText(StartupTimePath, startupTime.ToString("o")); // "o" for ISO 8601 format
+
+            Console.WriteLine($"Server start time recorded: {startupTime}");
+
         }
 
         // --------------------------------------------------------------------------------

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
@@ -46,8 +45,6 @@ namespace Updater
 
                 if (!localVersions.Contains(version))
                 {
-                    Console.WriteLine($"Vanilla Server {version} is missing. Downloading...");
-
                     var response = await HttpClient.GetStringAsync(availableVersions[version]);
                     using var jsonDoc = JsonDocument.Parse(response);
 
@@ -59,6 +56,8 @@ namespace Updater
                                                     .GetString();
 
                         string savePath = Path.Combine(downloadDirectory, $"vanilla-{version}.jar");
+
+                        Console.WriteLine($"Vanilla Server {version} is missing. Downloading...");
 
                         await DownloadServerJarAsync(jarUrl, savePath);
                     }
@@ -414,12 +413,6 @@ namespace Updater
         private static async Task CheckAndUpdatePurpurAsync(string downloadDirectory, string? selectedVersion = null)
         {
             var localFiles = Directory.GetFiles(downloadDirectory, "purpur-*.jar");
-
-            if (localFiles.Length == 0)
-            {
-                Console.WriteLine("No local files found.");
-            }
-
             var localVersions = new Dictionary<string, int>();
 
             foreach (var file in localFiles)
@@ -823,7 +816,7 @@ namespace Updater
             }
         }
 
-        static object[,] GetAvailableSoftwares()
+        private static object[,] GetAvailableSoftwares()
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(versionsSupprortListXML);
@@ -850,7 +843,7 @@ namespace Updater
             return result;
         }
 
-        private static bool CheckVersionExists(string softwareName, string version)
+        public static bool CheckVersionExists(string softwareName, string version)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(versionsSupprortListXML);
