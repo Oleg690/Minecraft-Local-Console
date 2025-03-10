@@ -2,7 +2,7 @@
 using javax.management;
 using javax.management.remote;
 using javax.management.openmbean;
-using Create_Server_Func;
+using CreateServerFunc;
 using Newtonsoft.Json.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -16,55 +16,55 @@ namespace MinecraftServerStats
 
         public static void GetServerInfo(string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port)
         {
-            if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
+            while (true)
             {
-                Stopwatch stopwatch = new();
-                Console.WriteLine($"--------------------------------------------------");
-
-                // Get memory usage
-                stopwatch.Start();
-                var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port);
-                Console.WriteLine($"Memory Usage: {memoryUsage}; {stopwatch.ElapsedMilliseconds}m");
-                long getUsedHeapMemory = stopwatch.ElapsedMilliseconds;
-                stopwatch.Restart();
-
-                // Get world folder size
-                long worldSize = GetFolderSize(worldFolderPath);
-                Console.WriteLine($"World Folder Size: {worldSize / 1024.0 / 1024.0:F2} MB; {stopwatch.ElapsedMilliseconds}m");
-                long getFolderSize = stopwatch.ElapsedMilliseconds;
-                stopwatch.Restart();
-
-
-                // Get online players
-                var result = dbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = '{worldNumber}';")[0];
-                string version = (string)result[0];
-                string maxPlayers = (string)result[1];
-
-                string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
-                Console.WriteLine($"Players Online: {playersResult} / {maxPlayers}; {stopwatch.ElapsedMilliseconds}m");
-                long getOnlinePlayersCount = stopwatch.ElapsedMilliseconds;
-                stopwatch.Restart();
-
-                // Get server uptime
-                string upTime = GetServerUptime(StartupTimePath);
-                Console.WriteLine($"UpTime: {upTime}; {stopwatch.ElapsedMilliseconds}m");
-                long getServerUptime = stopwatch.ElapsedMilliseconds;
-                stopwatch.Restart();
-                Console.WriteLine($"--------------------------------------------------");
-
-                long totalElapsedTime = getUsedHeapMemory + getFolderSize + getOnlinePlayersCount + getServerUptime;
-
-                if (1000 - totalElapsedTime >= 0)
+                if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
                 {
-                    Thread.Sleep((int)(1000 - totalElapsedTime));
+                    Console.WriteLine($"--------------------------------------------------");
+                    Stopwatch stopwatch = new();
+
+                    // Get memory usage
+                    stopwatch.Start();
+                    var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port);
+                    long getUsedHeapMemory = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine($"Memory Usage: {memoryUsage}; {getUsedHeapMemory}m");
+                    stopwatch.Restart();
+
+                    // Get world folder size
+                    long worldSize = GetFolderSize(worldFolderPath);
+                    long getFolderSize = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine($"World Folder Size: {worldSize / 1024.0 / 1024.0:F2} MB; {getFolderSize}m");
+                    stopwatch.Restart();
+
+                    // Get online players
+                    var result = dbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = '{worldNumber}';")[0];
+                    string version = (string)result[0];
+                    string maxPlayers = (string)result[1];
+
+                    string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
+                    long getOnlinePlayersCount = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine($"Players Online: {playersResult} / {maxPlayers}; {getOnlinePlayersCount}m");
+                    stopwatch.Restart();
+
+                    // Get server uptime
+                    string upTime = GetServerUptime(StartupTimePath);
+                    long getServerUptime = stopwatch.ElapsedMilliseconds;
+                    Console.WriteLine($"UpTime: {upTime}; {getServerUptime}m");
+                    Console.WriteLine($"--------------------------------------------------");
+
+                    long totalElapsedTime = getUsedHeapMemory + getFolderSize + getOnlinePlayersCount + getServerUptime;
+                    if (1000 - totalElapsedTime >= 0)
+                    {
+                        Thread.Sleep((int)(1000 - totalElapsedTime));
+                    }
                 }
-            }
-            else
-            {
-                Console.WriteLine($"--------------------------------------------------");
-                Console.WriteLine("There is no server running!");
-                Console.WriteLine($"--------------------------------------------------");
-                Thread.Sleep(1000);
+                else
+                {
+                    Console.WriteLine($"--------------------------------------------------");
+                    Console.WriteLine("There is no server running!");
+                    Console.WriteLine($"--------------------------------------------------");
+                    Thread.Sleep(1000);
+                }
             }
         }
 
@@ -252,7 +252,9 @@ namespace MinecraftServerStats
                             // Optionally, log the JSON response for debugging:
                             // Console.WriteLine("DEBUG - JSON Response: " + jsonString);
                             JObject jsonObj = JObject.Parse(jsonString);
-                            int online = (int)jsonObj["players"]["online"];
+
+                            JToken? onlineToken = jsonObj["players"]?["online"];
+                            int online = onlineToken != null ? (int)onlineToken : 0;
                             return online.ToString();
                         }
                     }

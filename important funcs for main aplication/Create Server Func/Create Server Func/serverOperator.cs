@@ -7,119 +7,64 @@ using System.Net;
 using System.Net.Sockets;
 using NetworkConfig;
 using Updater;
-using System.Xml;
 
-namespace Create_Server_Func
+namespace CreateServerFunc
 {
     class ServerCreator
     {
-        private const string UpdaterLastCheck = "lastQuiltorFabricCheckUpdater.txt";
+        public static readonly string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))) ?? string.Empty;
+        private static readonly string? UpdaterLastCheck = Path.Combine(rootFolder, "lastQuiltorFabricCheckUpdater.txt");
+
         private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
 
-        private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
-        private static readonly string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) ?? string.Empty;
-        private static readonly string? versionsSupprortListXML = Path.Combine(rootFolder, "SupportedVersions.xml");
-
-        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
+        // ------------------------ Main Create Server Function ------------------------
+        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
         {
-            if (software == "")
-            {
-                Console.WriteLine("Software not selected!");
-                return "Software not selected!";
-            }
+            if (string.IsNullOrEmpty(software)) return LogError("Software not selected!");
+            if (string.IsNullOrEmpty(worldName)) worldName = software + " Server";
 
-            if (worldName == "")
-            {
-                worldName = software + " Server";
-            }
+            if (!VersionsUpdater.CheckVersionExists(software, version)) return LogError($"{software} {version} is not supported!");
+            await CheckVersions(rootFolder, software, version);
 
-            if (VersionsUpdater.CheckVersionExists(software, version) == true)
+            if (!ServerOperator.CheckFirewallRuleExists($"MinecraftServer_TCP_{Server_Port}") &&
+                !ServerOperator.CheckFirewallRuleExists($"MinecraftServer_UDP_{Server_Port}") &&
+                !ServerOperator.CheckFirewallRuleExists($"MinecraftServer_TCP_{JMX_Port}") &&
+                !ServerOperator.CheckFirewallRuleExists($"MinecraftServer_UDP_{JMX_Port}"))
             {
-                await CheckVersions(rootFolder, software, version);
-            }
-            else
-            {
-                Console.WriteLine($"{software} {version} is not supported!");
+                await NetworkConfigSetup.Setup(Server_Port);
                 return "";
             }
 
-            if (!ServerOperator.CheckFirewallRuleExists("MinecraftServer_TCP_25565") && !ServerOperator.CheckFirewallRuleExists("MinecraftServer_UDP_25565"))
-            {
-                await NetworkConfigSetup.Setup(25565);
-                return "";
-            }
-
-            string uniqueNumber = GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
-
-            if (worldNumber != null)
-            {
-                uniqueNumber = worldNumber;
-            }
-
+            // Making the custom folder for the new world
+            string uniqueNumber = worldNumber ?? GenerateUniqueRandomNumber(numberOfDigitsForWorldNumber, rootWorldsFolder);
             string customDirectory = Path.Combine(rootWorldsFolder, uniqueNumber);
-
             Directory.CreateDirectory(customDirectory);
             Console.WriteLine($"Created server directory: {customDirectory}");
 
-            string jarFoldersPath = rootFolder + $"\\versions\\{software}\\";
-            string versionName = version + ".jar";
-            string jarFilePath = "";
+            // Founding the verison in the versions folder
+            string jarFileName = GetJarFilePath(rootFolder, software, version);
+            string jarFilePath = Path.Combine(rootFolder, $"versions\\{software}\\" + jarFileName);
+            if (string.IsNullOrEmpty(jarFilePath) || !File.Exists(jarFilePath)) return LogError("Server .jar file not found! Check the path.");
 
-            object[,] softwareTypes = GetAvailableSoftwares();
-
-            foreach (string softwareType in softwareTypes)
-            {
-                if (softwareType != "Fabric" && softwareType != "Quilt" && softwareType == software)
-                {
-                    versionName = FindJarFile(jarFoldersPath, version)[1];
-                    jarFilePath = Path.Combine(jarFoldersPath, versionName);
-                    break;
-                }
-                else if ((softwareType == "Fabric" || softwareType == "Quilt") && softwareType == software)
-                {
-                    jarFilePath = FindClosestJarFile(jarFoldersPath, "installer");
-                    break;
-                }
-            }
-
-            if (!File.Exists(jarFilePath))
-            {
-                Console.WriteLine("Server .jar file not found! Check the path.");
-                return "";
-            }
-
-            string destinationJarPath = Path.Combine(customDirectory, versionName);
-
+            // Copying the version to the new world folder for it to be used
+            string destinationJarPath = Path.Combine(customDirectory, Path.GetFileName(jarFilePath));
             File.Copy(jarFilePath, destinationJarPath);
-            string jarPath = Path.Combine(Path.GetDirectoryName(destinationJarPath), version + ".jar");
-
+            string jarPath = Path.Combine(Path.GetDirectoryName(destinationJarPath) ?? throw new Exception("Failed to get the destinationJarPath file name."), version + ".jar");
             RenameFile(destinationJarPath, jarPath);
-
             Console.WriteLine("Server .jar file copied to the custom directory.");
 
-            string rconPassword = GeneratePassword(20);
-
-            if (worldNumber != null)
-            {
-                List<object[]> data = dbChanger.GetFunc(worldNumber, true);
-
-                foreach (var row in data)
-                {
-                    rconPassword = (string)row[6];
-                }
-            }
+            string rconPassword = worldNumber != null ? GetRconPassword(worldNumber) : GeneratePassword(20);
 
             object[,] rconSettings = {
                 { "enable-rcon", "true" },
                 { "rcon.password", $"{rconPassword}" },
                 { "rcon.port", $"{RCON_Port}" },
                 { "enable-query", "true" },
-                { "online-mode", "false" } // For testing
             };
 
             Console.WriteLine($"Creating {software} Server!");
 
-            ProcessStartInfo processInfo = new ProcessStartInfo
+            ProcessStartInfo processInfo = new()
             {
                 FileName = "java",
                 RedirectStandardInput = true,
@@ -127,19 +72,10 @@ namespace Create_Server_Func
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
-                WorkingDirectory = customDirectory
+                WorkingDirectory = software == "Quilt" ? tempFolderPath : customDirectory
             };
 
-            if (software == "Quilt")
-            {
-                processInfo.WorkingDirectory = tempFolderPath;
-            }
-
-            while (ServerOperator.IsPortInUse(RCON_Port) || ServerOperator.IsPortInUse(JMX_Port))
-            {
-                Console.WriteLine("Port not closed!");
-                Thread.Sleep(1000);
-            }
+            await WaitForPortClosure(RCON_Port, JMX_Port);
 
             if (software == "Vanilla")
             {
@@ -186,11 +122,12 @@ namespace Create_Server_Func
 
             try
             {
-                using (Process process = Process.Start(processInfo))
+                using (Process? process = Process.Start(processInfo))
                 {
                     if (process == null)
                     {
                         Console.WriteLine("Failed to start the Minecraft server.");
+                        return;
                     }
 
                     Console.WriteLine("Minecraft server is starting...");
@@ -202,18 +139,13 @@ namespace Create_Server_Func
                         Console.WriteLine("Created missing server.properties file.");
                     }
 
+                    DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
                     DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-
-                    // Read server output
-                    if (process == null)
-                    {
-                        Console.WriteLine("Failed to start the Minecraft server!");
-                    }
 
                     Console.WriteLine("Minecraft server started!");
 
                     //          ↓ For output traking ↓
-                    process.OutputDataReceived += async (sender, e) =>
+                    process.OutputDataReceived += (sender, e) =>
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
@@ -232,7 +164,7 @@ namespace Create_Server_Func
                     };
 
                     //     ↓ For error output traking ↓
-                    process.ErrorDataReceived += async (sender, e) =>
+                    process.ErrorDataReceived += (sender, e) =>
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
@@ -256,7 +188,6 @@ namespace Create_Server_Func
                         dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Vanilla", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                     }
 
-                    DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
 
                     Console.WriteLine("Starting minecraft server.");
 
@@ -372,8 +303,8 @@ namespace Create_Server_Func
                     Console.WriteLine("Created missing server.properties file.");
                 }
 
-                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
 
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
 
@@ -588,8 +519,8 @@ namespace Create_Server_Func
 
                 AcceptEULA(fabricJarPath);
 
-                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
 
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
@@ -612,11 +543,12 @@ namespace Create_Server_Func
 
             try
             {
-                using (Process process = Process.Start(processInfo))
+                using (Process? process = Process.Start(processInfo))
                 {
                     if (process == null)
                     {
                         Console.WriteLine("Failed to start the Minecraft server.");
+                        return;
                     }
 
                     Console.WriteLine("Creating files...");
@@ -639,23 +571,24 @@ namespace Create_Server_Func
                         {
                             if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
                             {
-                                ServerOperator.ClosePort(JMX_Port.ToString());
-                                ServerOperator.ClosePort(RCON_Port.ToString());
+                                ServerOperator.ClosePort(JMX_Port);
+                                ServerOperator.ClosePort(RCON_Port);
                             }
 
                             AcceptEULA(purpurJarPath);
-                            DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-                            if (Insert_Into_DB)
-                            {
-                                dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Purpur", $"{version}", $"{totalPlayers}", $"{rconPassword}");
-                            }
+
                         }
                     }
-
                     process.WaitForExit();
                     Console.WriteLine("Starting minecraft server.");
 
+                    if (Insert_Into_DB)
+                    {
+                        dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Purpur", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                    }
+
                     DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+                    DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
 
                     await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
@@ -679,11 +612,12 @@ namespace Create_Server_Func
 
             try
             {
-                using (Process process = Process.Start(processInfo))
+                using (Process? process = Process.Start(processInfo))
                 {
                     if (process == null)
                     {
                         Console.WriteLine("Failed to start the Minecraft server.");
+                        return;
                     }
 
                     Console.WriteLine("Minecraft server is starting...");
@@ -706,23 +640,24 @@ namespace Create_Server_Func
                         {
                             if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
                             {
-                                ServerOperator.ClosePort(JMX_Port.ToString());
-                                ServerOperator.ClosePort(RCON_Port.ToString());
+                                ServerOperator.ClosePort(JMX_Port);
+                                ServerOperator.ClosePort(RCON_Port);
                             }
 
                             AcceptEULA(paperJarPath);
-                            DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-                            if (Insert_Into_DB)
-                            {
-                                dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Paper", $"{version}", $"{totalPlayers}", $"{rconPassword}");
-                            }
                         }
                     }
 
                     process.WaitForExit();
                     Console.WriteLine("Starting minecraft server.");
 
+                    if (Insert_Into_DB)
+                    {
+                        dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Paper", $"{version}", $"{totalPlayers}", $"{rconPassword}");
+                    }
+
                     DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+                    DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
 
                     await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
@@ -842,8 +777,8 @@ namespace Create_Server_Func
 
                 AcceptEULA(quiltJarPath);
 
-                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
                 DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
+                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
 
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
@@ -904,7 +839,7 @@ namespace Create_Server_Func
 
         private static void AcceptEULA(string jarFilePath)
         {
-            string serverDir = Path.GetDirectoryName(jarFilePath);
+            string? serverDir = Path.GetDirectoryName(jarFilePath) ?? throw new Exception("Failed to get the jar file.");
             string eulaFile = Path.Combine(serverDir, "eula.txt");
 
             try
@@ -1029,7 +964,7 @@ namespace Create_Server_Func
             return new string(passwordArray);
         }
 
-        private static string FindClosestJarFile(string folderPath, string targetPattern)
+        private static string? FindClosestJarFile(string folderPath, string targetPattern)
         {
             try
             {
@@ -1044,7 +979,7 @@ namespace Create_Server_Func
                 string[] jarFiles = Directory.GetFiles(folderPath, "*.jar");
 
                 // Search for the closest match
-                string bestMatch = null;
+                string? bestMatch = null;
                 int bestScore = int.MinValue;
 
                 foreach (string file in jarFiles)
@@ -1065,7 +1000,7 @@ namespace Create_Server_Func
                     }
                 }
 
-                return $"{folderPath}\\{bestMatch}";
+                return $"{bestMatch}";
             }
             catch (Exception ex)
             {
@@ -1149,7 +1084,7 @@ namespace Create_Server_Func
                 {
                     Console.WriteLine("Checking for updates...");
                     await VersionsUpdater.Update(serverVersionsPath, software);
-                    File.WriteAllText(UpdaterLastCheck, DateTime.UtcNow.ToString("o"));
+                    File.WriteAllText(UpdaterLastCheck ?? throw new Exception("Failed to write in the UpdaterLastCheck.txt file."), DateTime.UtcNow.ToString("o"));
                     localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
                     if (localFiles.Length == 0)
                     {
@@ -1191,31 +1126,35 @@ namespace Create_Server_Func
             }
         }
 
-        private static object[,] GetAvailableSoftwares()
+        private static string LogError(string message)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(versionsSupprortListXML);
+            Console.WriteLine(message);
+            return message;
+        }
 
-            XmlNodeList softwareNodes = doc.SelectNodes("/minecraft_softwares/software");
-            List<object> softwareList = new List<object>();
-
-            foreach (XmlNode softwareNode in softwareNodes)
+        private static async Task WaitForPortClosure(int rconPort, int jmxPort)
+        {
+            while (ServerOperator.IsPortInUse(rconPort) || ServerOperator.IsPortInUse(jmxPort))
             {
-                string softwareName = softwareNode.Attributes["name"]?.Value;
-                if (!string.IsNullOrEmpty(softwareName) && !softwareList.Contains(softwareName))
-                {
-                    softwareList.Add(softwareName);
-                }
+                Console.WriteLine("Port not closed!");
+                await Task.Delay(1000);
             }
+        }
 
-            // Convert List<object> to object[,]
-            object[,] result = new object[softwareList.Count, 1];
-            for (int i = 0; i < softwareList.Count; i++)
+        private static string GetRconPassword(string worldNumber)
+        {
+            List<object[]> data = dbChanger.GetFunc(worldNumber, true);
+            return data.Count > 0 ? (string)data[0][6] : GeneratePassword(20);
+        }
+
+        private static string GetJarFilePath(string rootFolder, string software, string version)
+        {
+            string jarFoldersPath = Path.Combine(rootFolder, "versions", software);
+            return software switch
             {
-                result[i, 0] = softwareList[i];
-            }
-
-            return result;
+                "Fabric" or "Quilt" => FindClosestJarFile(jarFoldersPath, "installer") ?? string.Empty,
+                _ => FindJarFile(jarFoldersPath, version)?[1] ?? string.Empty
+            };
         }
 
         // --------------------------------------------------------------------------------
@@ -1223,8 +1162,8 @@ namespace Create_Server_Func
 
     class ServerOperator
     {
-        private const string StartupTimePath = "serverStartupTime.txt";
-        
+        private static readonly string? StartupTimePath = ServerCreator.rootFolder != null ? Path.Combine(ServerCreator.rootFolder, "serverStartupTime.txt") : null;
+
         // ------------------------- Main Server Operator Commands -------------------------
         public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Auto_Stop = false)
         {
@@ -1277,7 +1216,7 @@ namespace Create_Server_Func
 
             Console.WriteLine($"Starting {software} Server!");
 
-            string toRunJarFile = "";
+            string? toRunJarFile = "";
 
             if (software == "Vanilla")
             {
@@ -1381,11 +1320,12 @@ namespace Create_Server_Func
                 }
             }
 
-            using (Process process = Process.Start(serverProcessInfo))
+            using (Process? process = Process.Start(serverProcessInfo))
             {
                 if (process == null)
                 {
                     Console.WriteLine("Failed to start the Minecraft server!");
+                    return;
                 }
 
                 Console.WriteLine("Minecraft server started!");
@@ -1442,8 +1382,14 @@ namespace Create_Server_Func
 
             await InputForServer("stop", worldNumber, RCON_Port, ipAddress);
 
-            ClosePort(RCON_Port.ToString());
-            ClosePort(JMX_Port.ToString());
+            if (IsPortInUse(JMX_Port))
+            {
+                ClosePort(JMX_Port);
+            }
+            else if (IsPortInUse(RCON_Port))
+            {
+                ClosePort(RCON_Port);
+            }
         }
 
         public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string StopIPAddress, string StartIPAddress, int RCON_Port, int JMX_Port, string time = "00:00")
@@ -1455,8 +1401,8 @@ namespace Create_Server_Func
 
         public static void Kill(int RCON_Port, int JMX_Port)
         {
-            bool RCON_Port_Closed = ClosePort(RCON_Port.ToString());
-            bool JMX_Port_Closed = ClosePort(JMX_Port.ToString());
+            bool RCON_Port_Closed = ClosePort(RCON_Port);
+            bool JMX_Port_Closed = ClosePort(JMX_Port);
 
             Console.WriteLine("JMX_Port_Closed: " + JMX_Port_Closed);
             Console.WriteLine("RCON_Port_Closed: " + RCON_Port_Closed);
@@ -1498,7 +1444,7 @@ namespace Create_Server_Func
             }
         }
 
-        public static async Task ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Keep_World_On_Version_Change = false)
+        public static async Task ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, bool Keep_World_On_Version_Change = false)
         {
             if (Keep_World_On_Version_Change)
             {
@@ -1518,7 +1464,7 @@ namespace Create_Server_Func
                     dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                     Console.WriteLine("Creating New Server...");
-                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, worldNumber, true, false, true);
 
                     object[,] filesToDelete = {
                         { "world" }
@@ -1549,7 +1495,7 @@ namespace Create_Server_Func
                     dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                     Console.WriteLine("Creating New Server...");
-                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, worldNumber, true, false, true);
                 }
 
                 DeleteFiles(tempFolderPath, false);
@@ -1563,7 +1509,7 @@ namespace Create_Server_Func
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                 Console.WriteLine("Creating New Server...");
-                await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, worldNumber, true, false, true);
             }
         }
 
@@ -1571,7 +1517,7 @@ namespace Create_Server_Func
         {
             if (deleteFromDB)
             {
-                dbChanger.deleteWorldFromDB(worldNumber);
+                dbChanger.DeleteWorldFromDB(worldNumber);
             }
 
             DeleteFiles(serverDirectoryPath, deleteWholeDirectory);
@@ -1590,7 +1536,7 @@ namespace Create_Server_Func
             int minutes = totalSeconds / 60;
             int seconds = totalSeconds % 60;
 
-            string message = $"say Server will {action} in {(minutes > 0 ? $"{minutes}m" : "")} {(seconds > 0 ? $"{seconds}s" : "")}!";
+            string message = $"say Server will {action} in {(minutes > 0 ? $"{minutes}m" : "")}{(seconds > 0 ? $" {seconds}s" : "")}!";
             await InputForServer(message.Trim(), worldNumber, RCON_Port, serverIp);
 
             Stopwatch stopwatch = new();
@@ -1600,7 +1546,7 @@ namespace Create_Server_Func
             for (int i = totalSeconds - 1; i > 0; i--)
             {
                 stopwatch.Restart();
-                
+
                 if (i % 600 == 0 && i > 600) // Every 10 minutes until 10 min left
                     await InputForServer($"say {i / 60} minutes remaining!", worldNumber, RCON_Port, serverIp);
                 else if (i == 600)
@@ -1732,7 +1678,7 @@ namespace Create_Server_Func
             return !isAvailable;
         }
 
-        private static string FindClosestJarFile(string folderPath, string targetPattern)
+        private static string? FindClosestJarFile(string folderPath, string targetPattern)
         {
             try
             {
@@ -1747,7 +1693,7 @@ namespace Create_Server_Func
                 string[] jarFiles = Directory.GetFiles(folderPath, "*.jar");
 
                 // Search for the closest match
-                string bestMatch = null;
+                string? bestMatch = null;
                 int bestScore = int.MinValue;
 
                 foreach (string file in jarFiles)
@@ -1797,8 +1743,9 @@ namespace Create_Server_Func
             return matchLength;
         }
 
-        public static bool ClosePort(string port)
+        public static bool ClosePort(int portInt)
         {
+            string port = portInt.ToString();
             try
             {
                 string findPidCommand = $"netstat -ano | findstr :{port}";
@@ -1849,7 +1796,7 @@ namespace Create_Server_Func
         {
             try
             {
-                ProcessStartInfo processInfo = new ProcessStartInfo("cmd.exe", "/C " + command)
+                ProcessStartInfo processInfo = new("cmd.exe", "/C " + command)
                 {
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
@@ -1857,8 +1804,7 @@ namespace Create_Server_Func
                     CreateNoWindow = true
                 };
 
-                Process process = Process.Start(processInfo);
-
+                Process? process = Process.Start(processInfo) ?? throw new Exception("Failed to start the process.");
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
 
@@ -1920,7 +1866,7 @@ namespace Create_Server_Func
                     {
                         string relativePath = file.Substring(sourcePath.Length + 1); // Get relative path
                         string destFile = Path.Combine(destinationPath, relativePath);
-                        Directory.CreateDirectory(Path.GetDirectoryName(destFile)); // Ensure subdirectory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(destFile) ?? throw new Exception("Failed to get the destination file.")); // Ensure subdirectory exists
                         File.Copy(file, destFile, true); // Copy file
                     }
                     catch (FileNotFoundException ex)
@@ -1985,11 +1931,16 @@ namespace Create_Server_Func
             // Record the server start in the database
             DateTime startupTime = DateTime.Now;
 
-            // Write the timestamp to the file
-            File.WriteAllText(StartupTimePath, startupTime.ToString("o")); // "o" for ISO 8601 format
-
-            Console.WriteLine($"Server start time recorded: {startupTime}");
-
+            if (StartupTimePath != null)
+            {
+                // Write the timestamp to the file
+                File.WriteAllText(StartupTimePath, startupTime.ToString("o")); // "o" for ISO 8601 format
+                Console.WriteLine($"Server start time recorded: {startupTime}");
+            }
+            else
+            {
+                Console.WriteLine("StartupTimePath is null. Cannot record server start time.");
+            }
         }
 
         // --------------------------------------------------------------------------------

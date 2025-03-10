@@ -55,9 +55,13 @@
               "target": "Package",
               "version": "[5.4.2, )"
             },
+            "EntityFramework": {
+              "target": "Package",
+              "version": "[6.5.1, )"
+            },
             "IKVM": {
               "target": "Package",
-              "version": "[8.11.0, )"
+              "version": "[8.11.1, )"
             },
             "MCQuery": {
               "target": "Package",
@@ -70,6 +74,14 @@
             "System.Data.SQLite": {
               "target": "Package",
               "version": "[1.0.119, )"
+            },
+            "System.Data.SqlClient": {
+              "target": "Package",
+              "version": "[4.9.0, )"
+            },
+            "System.Drawing.Common": {
+              "target": "Package",
+              "version": "[9.0.2, )"
             },
             "System.Management": {
               "target": "Package",

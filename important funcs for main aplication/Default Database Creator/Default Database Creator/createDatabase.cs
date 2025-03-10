@@ -63,18 +63,6 @@ namespace Default_Database_Creator
                             Console.WriteLine("Data inserted successfully.");
                         }
                     }
-
-                    //      Retrieve data
-                    //      ↓ ↓ ↓ ↓ ↓ ↓ ↓ 
-                    //string selectQuery = $"SELECT * FROM {dbName}";
-                    //using (SQLiteCommand selectCommand = new SQLiteCommand(selectQuery, connection))
-                    //using (SQLiteDataReader reader = selectCommand.ExecuteReader())
-                    //{
-                    //    while (reader.Read())
-                    //    {
-                    //        Console.WriteLine($"Id: {reader["id"]}, World Number: {reader["worldNumber"]}, Name: {reader["name"]}, Version: {reader["version"]}, Total Players: {reader["totalPlayers"]}");
-                    //    }
-                    //}
                 }
                 catch (Exception ex)
                 {

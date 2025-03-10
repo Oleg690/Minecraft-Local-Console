@@ -18,7 +18,7 @@
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 using (StreamReader reader = new StreamReader(filePath))
                 {
-                    string line;
+                    string? line;
                     while ((line = reader.ReadLine()) != null)
                     {
                         data += line + "\n";
@@ -52,14 +52,15 @@
                 {
                     try
                     {
-                        int lineNumber = FindLineNumber(settings[i, 0].ToString(), lines);
+                        string settingKey = settings[i, 0]?.ToString() ?? throw new ArgumentNullException(nameof(settings), "Setting key cannot be null");
+                        int lineNumber = FindLineNumber(settingKey, lines);
 
                         if (hardWrite && lineNumber == -1)
                         {
-                            File.AppendAllText(filePath, $"{settings[i, 0].ToString()}={settings[i, 1].ToString()}" + Environment.NewLine);
+                            File.AppendAllText(filePath, $"{settingKey}={settings[i, 1].ToString()}" + Environment.NewLine);
                             lines = new(File.ReadAllLines(filePath));
-                            lineNumber = FindLineNumber(settings[i, 0].ToString(), lines);
-                            Console.WriteLine($"Created line with number {lineNumber} with the content {settings[i, 0].ToString()}={settings[i, 1].ToString()};");
+                            lineNumber = FindLineNumber(settingKey, lines);
+                            Console.WriteLine($"Created line with number {lineNumber} with the content {settingKey}={settings[i, 1].ToString()};");
                         }
                         else
                         {

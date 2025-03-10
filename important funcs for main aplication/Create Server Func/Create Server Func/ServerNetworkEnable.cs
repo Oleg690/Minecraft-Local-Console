@@ -21,7 +21,7 @@ namespace NetworkConfig
             Console.WriteLine("Starting Network Configuration...");
 
             // Step 1: Port Forwarding using UPnP
-            // NetworkTunnel -> TODO
+            await UPnP_Port_Mapping.UPnP_Configuration_Async(port); // -> TODO
 
             // Step 2: Set Static IP
             StaticIPConfig.SetStaticIP("192.168.1.100", "255.255.255.0", "192.168.1.1", "8.8.8.8", "8.8.4.4");
@@ -31,7 +31,6 @@ namespace NetworkConfig
 
             if (IsAdministrator())
             {
-
                 return;
             }
 
@@ -40,6 +39,11 @@ namespace NetworkConfig
 
         private static bool IsAdministrator()
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                throw new PlatformNotSupportedException("This method is only supported on Windows.");
+            }
+
             using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
             {
                 WindowsPrincipal principal = new WindowsPrincipal(identity);
@@ -48,9 +52,9 @@ namespace NetworkConfig
         }
         private static void RestartAsAdmin()
         {
-            ProcessStartInfo psi = new ProcessStartInfo
+            ProcessStartInfo psi = new()
             {
-                FileName = Process.GetCurrentProcess().MainModule.FileName,
+                FileName = Environment.ProcessPath,
                 Verb = "runas",
                 UseShellExecute = true
             };

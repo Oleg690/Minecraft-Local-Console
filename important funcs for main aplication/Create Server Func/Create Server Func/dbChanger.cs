@@ -4,13 +4,66 @@ namespace databaseChanger
 {
     class dbChanger
     {
+        public static readonly string? currentDirectory = Directory.GetCurrentDirectory();
+        public static readonly string? dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
+        public static readonly string? connectionString = $"Data Source={dbPath};Version=3;";
+        public static void CreateDB(string dbName, bool insertOneDefaultSQLVerificator = false)
+        {
+            // Ensure the directory exists
+            string? directory = Path.GetDirectoryName(dbPath);
+            if (directory != null && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+                Console.WriteLine($"Directory created: {directory}");
+            }
+
+            // Establish connection
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            {
+                try
+                {
+                    // Open the connection
+                    connection.Open();
+                    Console.WriteLine("Connected to the database.");
+
+                    // Create a command
+                    string query = $"CREATE TABLE IF NOT EXISTS {dbName} (" +
+                        $"id integer primary key autoincrement," +
+                        $"worldNumber text," +
+                        $"name text," +
+                        $"version text," +
+                        $"software text," +
+                        $"totalPlayers text," +
+                        $"rconPassword text" +
+                        $")";
+                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    {
+                        command.ExecuteNonQuery();
+                        Console.WriteLine("Table created successfully.");
+                    }
+
+                    // Insert data
+                    string insertDefaultSQL = $"insert into {dbName} (worldNumber, name, version, totalPlayers, rconPassword) values('123456789', 'Minecraft SMP', '1.21', '20', '123456789123456789');";
+                    if (insertOneDefaultSQLVerificator != false)
+                    {
+                        using (SQLiteCommand insertCommand = new SQLiteCommand(insertDefaultSQL, connection))
+                        {
+                            insertCommand.ExecuteNonQuery();
+                            Console.WriteLine("Data inserted successfully.");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error: {ex.Message}");
+                }
+            }
+            Console.WriteLine("Done!");
+        }
+
         public static List<object[]> SpecificDataFunc(string sqlQuery)
         {
-            List<object[]> data = [];
-
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
-            string connectionString = $"Data Source={dbPath};Version=3;";
+            List<object[]> data = new List<object[]>();
 
             using (SQLiteConnection connection = new(connectionString))
             {
@@ -40,11 +93,7 @@ namespace databaseChanger
 
         public static List<object[]> GetFunc(string worldNumber, bool verificator = false)
         {
-            List<object[]> data = [];
-
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
-            string connectionString = $"Data Source={dbPath};Version=3;";
+            List<object[]> data = new List<object[]>();
 
             using (SQLiteConnection connection = new(connectionString))
             {
@@ -74,26 +123,13 @@ namespace databaseChanger
                 {
                     Console.WriteLine(ex);
                 }
-                
+
             }
             return data;
         }
+
         public static void SetFunc(string worldNumber, string worldName, string Software, string version, string totalPlayers, string rconPassword)
         {
-            // Specify the full path for the database file
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
-
-            // Ensure the directory exists
-            string directory = Path.GetDirectoryName(dbPath);
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            // Specify the database file
-            string connectionString = $"Data Source={dbPath};Version=3;";
-
             // Establish connection
             using (SQLiteConnection connection = new(connectionString))
             {
@@ -122,22 +158,8 @@ namespace databaseChanger
             Console.WriteLine("Data set succeasfully to database!");
         }
 
-        public static void deleteWorldFromDB(string worldNumber)
+        public static void DeleteWorldFromDB(string worldNumber)
         {
-            // Specify the full path for the database file
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
-
-            // Ensure the directory exists
-            string directory = Path.GetDirectoryName(dbPath);
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            // Specify the database file
-            string connectionString = $"Data Source={dbPath};Version=3;";
-
             // Establish connection
             using (SQLiteConnection connection = new(connectionString))
             {

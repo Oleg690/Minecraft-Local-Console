@@ -2,7 +2,7 @@
 {
     class ServerFileExplorer
     {
-        public static List<string> FileExplorer(string rootPath, string worldNumber)
+        public static List<string> FileExplorer(string? rootPath, string worldNumber)
         {
             while (true)
             {
@@ -14,7 +14,7 @@
                 List<string> items = GetFoldersAndFiles(rootPath);
 
                 Console.Write("\nInsert the folder to go or exit using 'exit': ");
-                string consoleInput = Console.ReadLine();
+                string? consoleInput = Console.ReadLine();
 
                 // Handle empty input
                 if (string.IsNullOrWhiteSpace(consoleInput))
@@ -34,7 +34,7 @@
                 if (consoleInput.Equals("back", StringComparison.OrdinalIgnoreCase))
                 {
                     // Get the parent directory and check if it's the world number (root)
-                    string parentDirectory = GetLastPartOfPath(rootPath);
+                    string? parentDirectory = GetLastPartOfPath(rootPath);
 
                     if (parentDirectory != null && parentDirectory != worldNumber)
                     {
@@ -48,33 +48,41 @@
                 }
 
                 // Check if the input is a file name (should not be processed as a folder)
-                string combinedPath = Path.Combine(rootPath, consoleInput);
-                if (consoleInput.Contains('.') && File.Exists(combinedPath))
+                if (rootPath != null)
                 {
-                    Console.WriteLine("You need to insert a folder name, not a file!");
-                    continue;
-                }
+                    string combinedPath = Path.Combine(rootPath, consoleInput);
+                    if (consoleInput.Contains('.') && File.Exists(combinedPath))
+                    {
+                        Console.WriteLine("You need to insert a folder name, not a file!");
+                        continue;
+                    }
 
-                // Check if the input is a valid folder
-                if (Directory.Exists(combinedPath))
-                {
-                    rootPath = combinedPath; // Navigate to the new folder
+                    // Check if the input is a valid folder
+                    if (Directory.Exists(combinedPath))
+                    {
+                        rootPath = combinedPath; // Navigate to the new folder
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid folder name! Please try again.");
+                    }
                 }
                 else
                 {
-                    Console.WriteLine("Invalid folder name! Please try again.");
+                    Console.WriteLine("Root path is null. Please provide a valid root path.");
+                    break;
                 }
             }
 
-            return []; // Return an empty list if the loop ends
+            return new List<string>(); // Return an empty list if the loop ends
         }
 
         // -------------------------------- Help Functions --------------------------------
-        private static List<string> GetFoldersAndFiles(string folderPath)
+        private static List<string> GetFoldersAndFiles(string? folderPath)
         {
             List<string> allItems = new List<string>();
 
-            if (!Directory.Exists(folderPath))
+            if (folderPath == null || !Directory.Exists(folderPath))
             {
                 Console.WriteLine($"The folder '{folderPath}' does not exist.");
                 return allItems; // Return an empty list
@@ -107,10 +115,9 @@
 
             return allItems;
         }
-        private static string GetLastPartOfPath(string path)
+        private static string? GetLastPartOfPath(string? path)
         {
-            // Use Path.GetFileName to get the last part of the path (folder name or file name)
-            return Path.GetFileName(path);
+            return path != null ? Path.GetFileName(path) : null;
         }
     }
 }

@@ -16,14 +16,14 @@
           "lib/netstandard2.0/CoreRCON.dll": {}
         }
       },
-      "EntityFramework/6.4.4": {
+      "EntityFramework/6.5.1": {
         "type": "package",
         "dependencies": {
           "Microsoft.CSharp": "4.7.0",
-          "System.CodeDom": "4.7.0",
-          "System.ComponentModel.Annotations": "4.7.0",
-          "System.Configuration.ConfigurationManager": "4.7.0",
-          "System.Data.SqlClient": "4.8.1"
+          "System.CodeDom": "6.0.0",
+          "System.ComponentModel.Annotations": "5.0.0",
+          "System.Configuration.ConfigurationManager": "6.0.1",
+          "System.Data.SqlClient": "4.8.6"
         },
         "compile": {
           "lib/netstandard2.1/EntityFramework.SqlServer.dll": {
@@ -42,16 +42,16 @@
           }
         },
         "build": {
-          "buildTransitive/netcoreapp3.0/EntityFramework.props": {},
-          "buildTransitive/netcoreapp3.0/EntityFramework.targets": {}
+          "buildTransitive/net6.0/EntityFramework.props": {},
+          "buildTransitive/net6.0/EntityFramework.targets": {}
         }
       },
-      "IKVM/8.11.0": {
+      "IKVM/8.11.1": {
         "type": "package",
         "dependencies": {
           "IKVM.ByteCode": "9.3.0",
-          "IKVM.Image": "8.11.0",
-          "IKVM.MSBuild": "8.11.0",
+          "IKVM.Image": "8.11.1",
+          "IKVM.MSBuild": "8.11.1",
           "Microsoft.Extensions.DependencyModel": "8.0.0",
           "System.Collections.Immutable": "8.0.0",
           "System.Data.Odbc": "8.0.0",
@@ -185,22 +185,22 @@
           "lib/net8.0/IKVM.ByteCode.dll": {}
         }
       },
-      "IKVM.Image/8.11.0": {
+      "IKVM.Image/8.11.1": {
         "type": "package",
         "dependencies": {
-          "IKVM.Image.runtime.android-arm64": "8.11.0",
-          "IKVM.Image.runtime.android-x64": "8.11.0",
-          "IKVM.Image.runtime.linux-arm": "8.11.0",
-          "IKVM.Image.runtime.linux-arm64": "8.11.0",
-          "IKVM.Image.runtime.linux-musl-arm": "8.11.0",
-          "IKVM.Image.runtime.linux-musl-arm64": "8.11.0",
-          "IKVM.Image.runtime.linux-musl-x64": "8.11.0",
-          "IKVM.Image.runtime.linux-x64": "8.11.0",
-          "IKVM.Image.runtime.osx-arm64": "8.11.0",
-          "IKVM.Image.runtime.osx-x64": "8.11.0",
-          "IKVM.Image.runtime.win-arm64": "8.11.0",
-          "IKVM.Image.runtime.win-x64": "8.11.0",
-          "IKVM.Image.runtime.win-x86": "8.11.0"
+          "IKVM.Image.runtime.android-arm64": "8.11.1",
+          "IKVM.Image.runtime.android-x64": "8.11.1",
+          "IKVM.Image.runtime.linux-arm": "8.11.1",
+          "IKVM.Image.runtime.linux-arm64": "8.11.1",
+          "IKVM.Image.runtime.linux-musl-arm": "8.11.1",
+          "IKVM.Image.runtime.linux-musl-arm64": "8.11.1",
+          "IKVM.Image.runtime.linux-musl-x64": "8.11.1",
+          "IKVM.Image.runtime.linux-x64": "8.11.1",
+          "IKVM.Image.runtime.osx-arm64": "8.11.1",
+          "IKVM.Image.runtime.osx-x64": "8.11.1",
+          "IKVM.Image.runtime.win-arm64": "8.11.1",
+          "IKVM.Image.runtime.win-x64": "8.11.1",
+          "IKVM.Image.runtime.win-x86": "8.11.1"
         },
         "compile": {
           "lib/net8.0/_._": {}
@@ -213,7 +213,7 @@
           "buildTransitive/IKVM.Image.targets": {}
         }
       },
-      "IKVM.Image.runtime.android-arm64/8.11.0": {
+      "IKVM.Image.runtime.android-arm64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -225,7 +225,7 @@
           "buildTransitive/IKVM.Image.runtime.android-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.android-x64/8.11.0": {
+      "IKVM.Image.runtime.android-x64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -237,7 +237,7 @@
           "buildTransitive/IKVM.Image.runtime.android-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-arm/8.11.0": {
+      "IKVM.Image.runtime.linux-arm/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -249,7 +249,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-arm.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-arm64/8.11.0": {
+      "IKVM.Image.runtime.linux-arm64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -261,7 +261,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-musl-arm/8.11.0": {
+      "IKVM.Image.runtime.linux-musl-arm/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -273,7 +273,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-musl-arm.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-musl-arm64/8.11.0": {
+      "IKVM.Image.runtime.linux-musl-arm64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -285,7 +285,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-musl-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-musl-x64/8.11.0": {
+      "IKVM.Image.runtime.linux-musl-x64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -297,7 +297,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-musl-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-x64/8.11.0": {
+      "IKVM.Image.runtime.linux-x64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -309,7 +309,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.osx-arm64/8.11.0": {
+      "IKVM.Image.runtime.osx-arm64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -321,7 +321,7 @@
           "buildTransitive/IKVM.Image.runtime.osx-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.osx-x64/8.11.0": {
+      "IKVM.Image.runtime.osx-x64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -333,7 +333,7 @@
           "buildTransitive/IKVM.Image.runtime.osx-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.win-arm64/8.11.0": {
+      "IKVM.Image.runtime.win-arm64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -345,7 +345,7 @@
           "buildTransitive/IKVM.Image.runtime.win-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.win-x64/8.11.0": {
+      "IKVM.Image.runtime.win-x64/8.11.1": {
         "type": "package",
         "compile": {
           "lib/netstandard2.0/_._": {}
@@ -357,7 +357,7 @@
           "buildTransitive/IKVM.Image.runtime.win-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.win-x86/8.11.0": {
+      "IKVM.Image.runtime.win-x86/8.11.1": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -369,10 +369,10 @@
           "buildTransitive/IKVM.Image.runtime.win-x86.props": {}
         }
       },
-      "IKVM.MSBuild/8.11.0": {
+      "IKVM.MSBuild/8.11.1": {
         "type": "package",
         "dependencies": {
-          "IKVM.MSBuild.Tools": "8.11.0"
+          "IKVM.MSBuild.Tools": "8.11.1"
         },
         "compile": {
           "lib/net8.0/_._": {}
@@ -385,16 +385,16 @@
           "buildTransitive/IKVM.MSBuild.targets": {}
         }
       },
-      "IKVM.MSBuild.Tools/8.11.0": {
+      "IKVM.MSBuild.Tools/8.11.1": {
         "type": "package",
         "dependencies": {
-          "IKVM.MSBuild.Tools.runtime.linux-arm": "8.11.0",
-          "IKVM.MSBuild.Tools.runtime.linux-arm64": "8.11.0",
-          "IKVM.MSBuild.Tools.runtime.linux-x64": "8.11.0",
-          "IKVM.MSBuild.Tools.runtime.osx-arm64": "8.11.0",
-          "IKVM.MSBuild.Tools.runtime.osx-x64": "8.11.0",
-          "IKVM.MSBuild.Tools.runtime.win-arm64": "8.11.0",
-          "IKVM.MSBuild.Tools.runtime.win-x64": "8.11.0"
+          "IKVM.MSBuild.Tools.runtime.linux-arm": "8.11.1",
+          "IKVM.MSBuild.Tools.runtime.linux-arm64": "8.11.1",
+          "IKVM.MSBuild.Tools.runtime.linux-x64": "8.11.1",
+          "IKVM.MSBuild.Tools.runtime.osx-arm64": "8.11.1",
+          "IKVM.MSBuild.Tools.runtime.osx-x64": "8.11.1",
+          "IKVM.MSBuild.Tools.runtime.win-arm64": "8.11.1",
+          "IKVM.MSBuild.Tools.runtime.win-x64": "8.11.1"
         },
         "compile": {
           "lib/netstandard2.0/_._": {}
@@ -406,43 +406,43 @@
           "buildTransitive/IKVM.MSBuild.Tools.targets": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.linux-arm/8.11.0": {
+      "IKVM.MSBuild.Tools.runtime.linux-arm/8.11.1": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-arm.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.linux-arm64/8.11.0": {
+      "IKVM.MSBuild.Tools.runtime.linux-arm64/8.11.1": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-arm64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.linux-x64/8.11.0": {
+      "IKVM.MSBuild.Tools.runtime.linux-x64/8.11.1": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-x64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.osx-arm64/8.11.0": {
+      "IKVM.MSBuild.Tools.runtime.osx-arm64/8.11.1": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.osx-arm64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.osx-x64/8.11.0": {
+      "IKVM.MSBuild.Tools.runtime.osx-x64/8.11.1": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.osx-x64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.win-arm64/8.11.0": {
+      "IKVM.MSBuild.Tools.runtime.win-arm64/8.11.1": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.win-arm64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.win-x64/8.11.0": {
+      "IKVM.MSBuild.Tools.runtime.win-x64/8.11.1": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.win-x64.props": {}
@@ -600,59 +600,23 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.NETCore.Platforms/3.1.0": {
+      "Microsoft.Win32.SystemEvents/9.0.2": {
         "type": "package",
         "compile": {
-          "lib/netstandard1.0/_._": {}
-        },
-        "runtime": {
-          "lib/netstandard1.0/_._": {}
-        }
-      },
-      "Microsoft.Win32.Registry/4.7.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Security.AccessControl": "4.7.0",
-          "System.Security.Principal.Windows": "4.7.0"
-        },
-        "compile": {
-          "ref/netstandard2.0/_._": {
+          "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/netstandard2.0/Microsoft.Win32.Registry.dll": {
+          "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
             "related": ".xml"
           }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
         },
         "runtimeTargets": {
-          "runtimes/unix/lib/netstandard2.0/Microsoft.Win32.Registry.dll": {
-            "assetType": "runtime",
-            "rid": "unix"
-          },
-          "runtimes/win/lib/netstandard2.0/Microsoft.Win32.Registry.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
-        }
-      },
-      "Microsoft.Win32.SystemEvents/4.7.0": {
-        "type": "package",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.1.0"
-        },
-        "compile": {
-          "ref/netstandard2.0/_._": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/win/lib/netcoreapp3.0/Microsoft.Win32.SystemEvents.dll": {
+          "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
             "assetType": "runtime",
             "rid": "win"
           }
@@ -684,7 +648,7 @@
           }
         }
       },
-      "runtime.native.System.Data.SqlClient.sni/4.7.0": {
+      "runtime.native.System.Data.SqlClient.sni/4.4.0": {
         "type": "package",
         "dependencies": {
           "runtime.win-arm64.runtime.native.System.Data.SqlClient.sni": "4.4.0",
@@ -782,7 +746,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.ComponentModel.Annotations/4.7.0": {
+      "System.ComponentModel.Annotations/5.0.0": {
         "type": "package",
         "compile": {
           "ref/netstandard2.1/System.ComponentModel.Annotations.dll": {
@@ -795,21 +759,24 @@
           }
         }
       },
-      "System.Configuration.ConfigurationManager/4.7.0": {
+      "System.Configuration.ConfigurationManager/6.0.1": {
         "type": "package",
         "dependencies": {
-          "System.Security.Cryptography.ProtectedData": "4.7.0",
-          "System.Security.Permissions": "4.7.0"
+          "System.Security.Cryptography.ProtectedData": "6.0.0",
+          "System.Security.Permissions": "6.0.0"
         },
         "compile": {
-          "ref/netstandard2.0/System.Configuration.ConfigurationManager.dll": {
+          "lib/net6.0/System.Configuration.ConfigurationManager.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/netstandard2.0/System.Configuration.ConfigurationManager.dll": {
+          "lib/net6.0/System.Configuration.ConfigurationManager.dll": {
             "related": ".xml"
           }
+        },
+        "build": {
+          "buildTransitive/netcoreapp3.1/_._": {}
         }
       },
       "System.Data.Odbc/8.0.0": {
@@ -865,29 +832,30 @@
           }
         }
       },
-      "System.Data.SqlClient/4.8.1": {
+      "System.Data.SqlClient/4.9.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Win32.Registry": "4.7.0",
-          "System.Security.Principal.Windows": "4.7.0",
-          "runtime.native.System.Data.SqlClient.sni": "4.7.0"
+          "runtime.native.System.Data.SqlClient.sni": "4.4.0"
         },
         "compile": {
-          "ref/netcoreapp2.1/System.Data.SqlClient.dll": {
+          "lib/net8.0/System.Data.SqlClient.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/netcoreapp2.1/System.Data.SqlClient.dll": {
+          "lib/net8.0/System.Data.SqlClient.dll": {
             "related": ".xml"
           }
         },
+        "build": {
+          "buildTransitive/net6.0/_._": {}
+        },
         "runtimeTargets": {
-          "runtimes/unix/lib/netcoreapp2.1/System.Data.SqlClient.dll": {
+          "runtimes/unix/lib/net8.0/System.Data.SqlClient.dll": {
             "assetType": "runtime",
             "rid": "unix"
           },
-          "runtimes/win/lib/netcoreapp2.1/System.Data.SqlClient.dll": {
+          "runtimes/win/lib/net8.0/System.Data.SqlClient.dll": {
             "assetType": "runtime",
             "rid": "win"
           }
@@ -934,29 +902,29 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Drawing.Common/4.7.0": {
+      "System.Drawing.Common/9.0.2": {
         "type": "package",
         "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.1.0",
-          "Microsoft.Win32.SystemEvents": "4.7.0"
+          "Microsoft.Win32.SystemEvents": "9.0.2"
         },
         "compile": {
-          "ref/netcoreapp3.0/_._": {
+          "lib/net8.0/System.Drawing.Common.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net8.0/System.Private.Windows.Core.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/netstandard2.0/System.Drawing.Common.dll": {}
-        },
-        "runtimeTargets": {
-          "runtimes/unix/lib/netcoreapp3.0/System.Drawing.Common.dll": {
-            "assetType": "runtime",
-            "rid": "unix"
+          "lib/net8.0/System.Drawing.Common.dll": {
+            "related": ".pdb;.xml"
           },
-          "runtimes/win/lib/netcoreapp3.0/System.Drawing.Common.dll": {
-            "assetType": "runtime",
-            "rid": "win"
+          "lib/net8.0/System.Private.Windows.Core.dll": {
+            "related": ".xml"
           }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
         }
       },
       "System.IO.Pipelines/8.0.0": {
@@ -1025,86 +993,68 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Security.AccessControl/4.7.0": {
+      "System.Security.AccessControl/6.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/System.Security.AccessControl.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/System.Security.AccessControl.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/netcoreapp3.1/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net6.0/System.Security.AccessControl.dll": {
+            "assetType": "runtime",
+            "rid": "win"
+          }
+        }
+      },
+      "System.Security.Cryptography.ProtectedData/6.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/System.Security.Cryptography.ProtectedData.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/System.Security.Cryptography.ProtectedData.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/netcoreapp3.1/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net6.0/System.Security.Cryptography.ProtectedData.dll": {
+            "assetType": "runtime",
+            "rid": "win"
+          }
+        }
+      },
+      "System.Security.Permissions/6.0.0": {
         "type": "package",
         "dependencies": {
-          "Microsoft.NETCore.Platforms": "3.1.0",
-          "System.Security.Principal.Windows": "4.7.0"
+          "System.Security.AccessControl": "6.0.0",
+          "System.Windows.Extensions": "6.0.0"
         },
         "compile": {
-          "ref/netstandard2.0/System.Security.AccessControl.dll": {
+          "lib/net6.0/System.Security.Permissions.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/netstandard2.0/System.Security.AccessControl.dll": {
+          "lib/net6.0/System.Security.Permissions.dll": {
             "related": ".xml"
           }
         },
-        "runtimeTargets": {
-          "runtimes/win/lib/netcoreapp2.0/System.Security.AccessControl.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
-        }
-      },
-      "System.Security.Cryptography.ProtectedData/4.7.0": {
-        "type": "package",
-        "compile": {
-          "ref/netstandard2.0/_._": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/System.Security.Cryptography.ProtectedData.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/win/lib/netstandard2.0/System.Security.Cryptography.ProtectedData.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
-        }
-      },
-      "System.Security.Permissions/4.7.0": {
-        "type": "package",
-        "dependencies": {
-          "System.Security.AccessControl": "4.7.0",
-          "System.Windows.Extensions": "4.7.0"
-        },
-        "compile": {
-          "ref/netcoreapp3.0/System.Security.Permissions.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netcoreapp3.0/System.Security.Permissions.dll": {
-            "related": ".xml"
-          }
-        }
-      },
-      "System.Security.Principal.Windows/4.7.0": {
-        "type": "package",
-        "compile": {
-          "ref/netcoreapp3.0/System.Security.Principal.Windows.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/netstandard2.0/System.Security.Principal.Windows.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtimeTargets": {
-          "runtimes/unix/lib/netcoreapp2.1/System.Security.Principal.Windows.dll": {
-            "assetType": "runtime",
-            "rid": "unix"
-          },
-          "runtimes/win/lib/netcoreapp2.1/System.Security.Principal.Windows.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
+        "build": {
+          "buildTransitive/netcoreapp3.1/_._": {}
         }
       },
       "System.Text.Encoding.CodePages/8.0.0": {
@@ -1176,23 +1126,23 @@
           "lib/netcoreapp2.1/_._": {}
         }
       },
-      "System.Windows.Extensions/4.7.0": {
+      "System.Windows.Extensions/6.0.0": {
         "type": "package",
         "dependencies": {
-          "System.Drawing.Common": "4.7.0"
+          "System.Drawing.Common": "6.0.0"
         },
         "compile": {
-          "ref/netcoreapp3.0/System.Windows.Extensions.dll": {
+          "lib/net6.0/System.Windows.Extensions.dll": {
             "related": ".xml"
           }
         },
         "runtime": {
-          "lib/netcoreapp3.0/System.Windows.Extensions.dll": {
+          "lib/net6.0/System.Windows.Extensions.dll": {
             "related": ".xml"
           }
         },
         "runtimeTargets": {
-          "runtimes/win/lib/netcoreapp3.0/System.Windows.Extensions.dll": {
+          "runtimes/win/lib/net6.0/System.Windows.Extensions.dll": {
             "assetType": "runtime",
             "rid": "win"
           }
@@ -1215,30 +1165,31 @@
         "logo.png"
       ]
     },
-    "EntityFramework/6.4.4": {
-      "sha512": "yj1+/4tci7Panu3jKDHYizxwVm0Jvm7b7m057b5h4u8NUHGCR8WIWirBTw+8EptRffwftIWPBeIRGNKD1ewEMQ==",
+    "EntityFramework/6.5.1": {
+      "sha512": "sQRP2lWg1i3aAGWqdliAM8zrGx7LHMUk+9/MoxUjwfTZYGMXvZ2JYZTlyTm1PqDxvn3c9E3U76TWDON7Y5+CVA==",
       "type": "package",
-      "path": "entityframework/6.4.4",
+      "path": "entityframework/6.5.1",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
+        "README.md",
         "build/EntityFramework.DefaultItems.props",
         "build/EntityFramework.props",
         "build/EntityFramework.targets",
         "build/Microsoft.Data.Entity.Build.Tasks.dll",
-        "build/netcoreapp3.0/EntityFramework.props",
-        "build/netcoreapp3.0/EntityFramework.targets",
+        "build/net6.0/EntityFramework.props",
+        "build/net6.0/EntityFramework.targets",
         "buildTransitive/EntityFramework.props",
         "buildTransitive/EntityFramework.targets",
-        "buildTransitive/netcoreapp3.0/EntityFramework.props",
-        "buildTransitive/netcoreapp3.0/EntityFramework.targets",
+        "buildTransitive/net6.0/EntityFramework.props",
+        "buildTransitive/net6.0/EntityFramework.targets",
         "content/net40/App.config.install.xdt",
         "content/net40/App.config.transform",
         "content/net40/Web.config.install.xdt",
         "content/net40/Web.config.transform",
-        "entityframework.6.4.4.nupkg.sha512",
+        "entityframework.6.5.1.nupkg.sha512",
         "entityframework.nuspec",
         "lib/net40/EntityFramework.SqlServer.dll",
         "lib/net40/EntityFramework.SqlServer.xml",
@@ -1261,21 +1212,25 @@
         "tools/install.ps1",
         "tools/net40/any/ef6.exe",
         "tools/net40/any/ef6.pdb",
+        "tools/net40/win-arm64/ef6.exe",
+        "tools/net40/win-arm64/ef6.pdb",
         "tools/net40/win-x86/ef6.exe",
         "tools/net40/win-x86/ef6.pdb",
         "tools/net45/any/ef6.exe",
         "tools/net45/any/ef6.pdb",
+        "tools/net45/win-arm64/ef6.exe",
+        "tools/net45/win-arm64/ef6.pdb",
         "tools/net45/win-x86/ef6.exe",
         "tools/net45/win-x86/ef6.pdb",
-        "tools/netcoreapp3.0/any/ef6.dll",
-        "tools/netcoreapp3.0/any/ef6.pdb",
-        "tools/netcoreapp3.0/any/ef6.runtimeconfig.json"
+        "tools/net6.0/any/ef6.dll",
+        "tools/net6.0/any/ef6.pdb",
+        "tools/net6.0/any/ef6.runtimeconfig.json"
       ]
     },
-    "IKVM/8.11.0": {
-      "sha512": "UXgQiMWdnSK6lPfaBmiCcbFWDuDzRHOJ1adne96p9oCNJ6Xwkq4UQptbeGZJsIA0d+p1sJZsPD9UV7I5Z+TFmg==",
+    "IKVM/8.11.1": {
+      "sha512": "YWfTovcW/5+NP2NdTW0rmdsUPL8h08gMDw7W63uwgIjach/xN3mbjH/XukO8Q/gO89SxaS1fOSHv84ds/7uOYw==",
       "type": "package",
-      "path": "ikvm/8.11.0",
+      "path": "ikvm/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1287,7 +1242,7 @@
         "buildTransitive/IKVM.IkvmReference.targets",
         "buildTransitive/IKVM.props",
         "buildTransitive/IKVM.targets",
-        "ikvm.8.11.0.nupkg.sha512",
+        "ikvm.8.11.1.nupkg.sha512",
         "ikvm.nuspec",
         "ikvm.snk",
         "lib/net472/IKVM.CoreLib.dll",
@@ -1392,10 +1347,10 @@
         "lib/netstandard2.0/IKVM.ByteCode.dll"
       ]
     },
-    "IKVM.Image/8.11.0": {
-      "sha512": "2lSOczGAHfDr2irAyPg08X3bSp6BqsP4JNSEX00snDRy/Nj6jiRjbzLTu+r28tHz8qbLnq2xSutN1jhBRQW/Nw==",
+    "IKVM.Image/8.11.1": {
+      "sha512": "Hmh5Qmx23X5tvHv8N4Ih7uLapZ7RUIqhHFrKIzp7W0DGItjmHGhcnLEizpXkOvzMGE4MrT0HnsNgjG/2pr1Rew==",
       "type": "package",
-      "path": "ikvm.image/8.11.0",
+      "path": "ikvm.image/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1404,7 +1359,7 @@
         "buildTransitive/IKVM.Image.props",
         "buildTransitive/IKVM.Image.targets",
         "buildTransitive/ikvm.properties",
-        "ikvm.image.8.11.0.nupkg.sha512",
+        "ikvm.image.8.11.1.nupkg.sha512",
         "ikvm.image.nuspec",
         "ikvm/any/any/LICENSE.md",
         "ikvm/any/any/README.md",
@@ -1442,17 +1397,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.android-arm64/8.11.0": {
-      "sha512": "czV7H0I6iDT8qcVVAGijhMV2NA007n8ZpI+lW4i+Ngq+t038C+4AmOBOr2UPP/reZ+rmroEX9N1SjIvKAccCeQ==",
+    "IKVM.Image.runtime.android-arm64/8.11.1": {
+      "sha512": "W0ZDL2V0LoGlMDOtnxoLUUb1skj/OGZOs5rrPzmXrqhcgDPfN/2iq35sjXMG1DtHTmWUbE00USpDXYkoOCJ+Zg==",
       "type": "package",
-      "path": "ikvm.image.runtime.android-arm64/8.11.0",
+      "path": "ikvm.image.runtime.android-arm64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.android-arm64.props",
-        "ikvm.image.runtime.android-arm64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.android-arm64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.android-arm64.nuspec",
         "ikvm/any/android-arm64/bin/libiava.so",
         "ikvm/any/android-arm64/bin/libj2gss.so",
@@ -1487,17 +1442,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.android-x64/8.11.0": {
-      "sha512": "F0SQPkVmmHCV7DMjGMMiVlszhEavqijZOVQAVMHoDzywq6iADwWdEircCOi25vr0Leb2iUituDmBIqgWout8iQ==",
+    "IKVM.Image.runtime.android-x64/8.11.1": {
+      "sha512": "t91G0XKiIJ6pBjnq3mYhmgH497kcRnzD2NnkkvQxG7/R+ddxRq/SzMl8eUSbUldT7upMo+CKYjsIeYuSu28ZEw==",
       "type": "package",
-      "path": "ikvm.image.runtime.android-x64/8.11.0",
+      "path": "ikvm.image.runtime.android-x64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.android-x64.props",
-        "ikvm.image.runtime.android-x64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.android-x64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.android-x64.nuspec",
         "ikvm/any/android-x64/bin/libiava.so",
         "ikvm/any/android-x64/bin/libj2gss.so",
@@ -1531,17 +1486,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-arm/8.11.0": {
-      "sha512": "E8hKR+GXjYlfaoa3ASC37qxq2T4NlPMy9Yc9sy4UM/jUgbbs3aPlHc49uPBX+0EI1Uqh1XTybPyGp0cclWyPqw==",
+    "IKVM.Image.runtime.linux-arm/8.11.1": {
+      "sha512": "0Zb3fzlMJ13+sA6pgS4B5Oy8haRxr5T6uyt7snOO1a/ajRewmp5kVU7MynNEVUZxoo3caS9OUkbl0x+8+Q3N6A==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-arm/8.11.0",
+      "path": "ikvm.image.runtime.linux-arm/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-arm.props",
-        "ikvm.image.runtime.linux-arm.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.linux-arm.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.linux-arm.nuspec",
         "ikvm/any/linux-arm/bin/libawt.so",
         "ikvm/any/linux-arm/bin/libawt_headless.so",
@@ -1583,17 +1538,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-arm64/8.11.0": {
-      "sha512": "GEMbSTpqVcAq6hH2igpi7ZEjNdMc5PGYgvSol8VWvieqIGuZfuLAKNvaC/R5KkpmwAtBZK8A4QYImLFDfw766w==",
+    "IKVM.Image.runtime.linux-arm64/8.11.1": {
+      "sha512": "k3n9TB1toU1RNTU016uI3KPc/j8DOPmQXuJB1a9/SCZbt14e7kVYNwqfkg368D2qSSqGrzrjmNDNN1rZY6fkBw==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-arm64/8.11.0",
+      "path": "ikvm.image.runtime.linux-arm64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-arm64.props",
-        "ikvm.image.runtime.linux-arm64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.linux-arm64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.linux-arm64.nuspec",
         "ikvm/any/linux-arm64/bin/libawt.so",
         "ikvm/any/linux-arm64/bin/libawt_headless.so",
@@ -1635,17 +1590,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-musl-arm/8.11.0": {
-      "sha512": "SrdmyJz9do4wHUInPlkYr9E8fBzar74WfZf2g+4GS6Kvc4rBZ5Xxh3IMnMbRLfLuWCSPBZEyaC28liPp8McjvQ==",
+    "IKVM.Image.runtime.linux-musl-arm/8.11.1": {
+      "sha512": "3aWPeoE/oLHEFti2sibfQDSxB8YiI4xlcBOBdej35H5013+z5syGKkpdQF0f9DqtCoibuonYs3C1UVUg2gESGQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-musl-arm/8.11.0",
+      "path": "ikvm.image.runtime.linux-musl-arm/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-musl-arm.props",
-        "ikvm.image.runtime.linux-musl-arm.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.linux-musl-arm.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.linux-musl-arm.nuspec",
         "ikvm/any/linux-musl-arm/bin/libawt.so",
         "ikvm/any/linux-musl-arm/bin/libawt_headless.so",
@@ -1687,17 +1642,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-musl-arm64/8.11.0": {
-      "sha512": "XaKjEGImraXu8pSzthCWoX5dZL6l0+J+tlmzB0wpEwHr+TgfUJBf8+PoCkEH/Qsp9ZApo/krMFvIR8hYUDF1qw==",
+    "IKVM.Image.runtime.linux-musl-arm64/8.11.1": {
+      "sha512": "yhXsWMvOFtgxBdHRjcaRvpt9yGKnQSa9BA1MSoUunKxw2OIhEOuwGiIDRRaSMekh9bT/gzL4cpZaLw4Zrf+0xg==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-musl-arm64/8.11.0",
+      "path": "ikvm.image.runtime.linux-musl-arm64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-musl-arm64.props",
-        "ikvm.image.runtime.linux-musl-arm64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.linux-musl-arm64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.linux-musl-arm64.nuspec",
         "ikvm/any/linux-musl-arm64/bin/libawt.so",
         "ikvm/any/linux-musl-arm64/bin/libawt_headless.so",
@@ -1739,17 +1694,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-musl-x64/8.11.0": {
-      "sha512": "KbR9YZd1gt36msElSkHW+XjSGONiPkvwjSaLcyM2gsXrO0xxbBJK2HVJ0Azcfv2Ts684LfjaeZ5i69PCEMTYmg==",
+    "IKVM.Image.runtime.linux-musl-x64/8.11.1": {
+      "sha512": "xP+CNRfFMCQOE2mVbAz/vcBXuWg+2prTcwBKPawJzU/cWBHnaPBjfMUz5onytv4hj5Vx0O55Wi7eM1DuejlZKQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-musl-x64/8.11.0",
+      "path": "ikvm.image.runtime.linux-musl-x64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-musl-x64.props",
-        "ikvm.image.runtime.linux-musl-x64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.linux-musl-x64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.linux-musl-x64.nuspec",
         "ikvm/any/linux-musl-x64/bin/libawt.so",
         "ikvm/any/linux-musl-x64/bin/libawt_headless.so",
@@ -1791,17 +1746,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-x64/8.11.0": {
-      "sha512": "F/zjUC94BtjFLIEG5KsiLnQhPxBuOM+/GkT2VN+5OO17UW6kU72Ad0kmUP4dYs5GKec7HIXjtfSoqJZE7Dh/dQ==",
+    "IKVM.Image.runtime.linux-x64/8.11.1": {
+      "sha512": "TG7HQTVcihvE0om6UGO46gKkVGVvPQYomEPSGUUnXDFLqSUDnmg7/f6I3t3mmq5EpfdqzcP3nceoXGkV4ZNB3w==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-x64/8.11.0",
+      "path": "ikvm.image.runtime.linux-x64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-x64.props",
-        "ikvm.image.runtime.linux-x64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.linux-x64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.linux-x64.nuspec",
         "ikvm/any/linux-x64/bin/libawt.so",
         "ikvm/any/linux-x64/bin/libawt_headless.so",
@@ -1843,17 +1798,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.osx-arm64/8.11.0": {
-      "sha512": "XyDc9GRXeYbmDqCFn7vW4KafbqmC4wIhuWhQvaOD0vYWLA6xw2ghOpKwMkn386msuKmOhjo4lMDdgB8pyj0S7A==",
+    "IKVM.Image.runtime.osx-arm64/8.11.1": {
+      "sha512": "SU19MUZMc10Bm6OXK04Us//cMbG54dH0x0wb92/pd1x3sH0X0jx7UjjMMu4v094WqU4kyqi4Uk0EApQmB6Jfog==",
       "type": "package",
-      "path": "ikvm.image.runtime.osx-arm64/8.11.0",
+      "path": "ikvm.image.runtime.osx-arm64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.osx-arm64.props",
-        "ikvm.image.runtime.osx-arm64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.osx-arm64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.osx-arm64.nuspec",
         "ikvm/any/osx-arm64/bin/libawt.dylib",
         "ikvm/any/osx-arm64/bin/libawt_lwawt.dylib",
@@ -1899,17 +1854,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.osx-x64/8.11.0": {
-      "sha512": "NBmWazssKQpY0BeAJcFXYd6igYl//sFBht7EOVeTxYEZCFj0qoeMB3lMCE45zRz/aEd4rk5kPhf6YGyRS0FogA==",
+    "IKVM.Image.runtime.osx-x64/8.11.1": {
+      "sha512": "XAUm5Gf7fRsUNyVLKrng4iAbsLBZI4eE859bfB/EU6/QjqbOgHseJOXx/4B8DOyA2cwzKh7HwaZ8ECkTJswRCQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.osx-x64/8.11.0",
+      "path": "ikvm.image.runtime.osx-x64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.osx-x64.props",
-        "ikvm.image.runtime.osx-x64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.osx-x64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.osx-x64.nuspec",
         "ikvm/any/osx-x64/bin/libawt.dylib",
         "ikvm/any/osx-x64/bin/libawt_lwawt.dylib",
@@ -1956,17 +1911,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.win-arm64/8.11.0": {
-      "sha512": "ZeXQqmHSqJBVjSXHo/aC+Ixxeg24+Ugz3g07nwmcbD4pyFvFPFJswyMysZqoNojR2O67UXBPbpGqBi2YBSfHdw==",
+    "IKVM.Image.runtime.win-arm64/8.11.1": {
+      "sha512": "2GkbOjXwJmLqW4y65jJPbxCdR+HrxZpx1nKwP9CGb0V4Zzp4hag0h2tDwn6cfZjTkbXjkhnBOrMfYbBTf4zhTQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.win-arm64/8.11.0",
+      "path": "ikvm.image.runtime.win-arm64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.win-arm64.props",
-        "ikvm.image.runtime.win-arm64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.win-arm64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.win-arm64.nuspec",
         "ikvm/any/win-arm64/bin/awt.dll",
         "ikvm/any/win-arm64/bin/fontmanager.dll",
@@ -2013,17 +1968,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.win-x64/8.11.0": {
-      "sha512": "xCNSIyxU5rNcvgBDraVH8FK0I3tJ6grAeU/0EQHrM8bRwcBA7otR67+K2RYeL5J76RCEMB3S+hVFdaIVh+TYkg==",
+    "IKVM.Image.runtime.win-x64/8.11.1": {
+      "sha512": "H1ykxyE/3AxxL5NlCS0m1jWWAVRqoeBrQ+9UB8O/r2vjmDvnh38+imVYG3d5rQO00oqBX9DDZ8v6zaQ99Hk7LQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.win-x64/8.11.0",
+      "path": "ikvm.image.runtime.win-x64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.win-x64.props",
-        "ikvm.image.runtime.win-x64.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.win-x64.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.win-x64.nuspec",
         "ikvm/any/win-x64/bin/awt.dll",
         "ikvm/any/win-x64/bin/fontmanager.dll",
@@ -2068,17 +2023,17 @@
         "lib/netstandard2.0/_._"
       ]
     },
-    "IKVM.Image.runtime.win-x86/8.11.0": {
-      "sha512": "idXz9Qc+mKR3+viCAWvFC2NDvNlrg9nUUdUQqUqce3qjnwWous6pkRnMm6YCJDqmotPx2FbyfUlav6WJDELg3g==",
+    "IKVM.Image.runtime.win-x86/8.11.1": {
+      "sha512": "Yy6AwkdfQqXgfY5Df3dgZBAW9Cm0Ocq6b1rmi5CQBlRx0v4M6BGHbIdhY2tXeNare4G8AsZYdcS6Sl1ge7UjYw==",
       "type": "package",
-      "path": "ikvm.image.runtime.win-x86/8.11.0",
+      "path": "ikvm.image.runtime.win-x86/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.win-x86.props",
-        "ikvm.image.runtime.win-x86.8.11.0.nupkg.sha512",
+        "ikvm.image.runtime.win-x86.8.11.1.nupkg.sha512",
         "ikvm.image.runtime.win-x86.nuspec",
         "ikvm/any/win-x86/bin/awt.dll",
         "ikvm/any/win-x86/bin/fontmanager.dll",
@@ -2125,10 +2080,10 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.MSBuild/8.11.0": {
-      "sha512": "i8s32ewBdM/fiTms5afntGQGGQ96lWWmbvkDyaEGowsX5GpXenu8sgPs7Z1XjocbZuMscpMkmSysfu+LWnBoNw==",
+    "IKVM.MSBuild/8.11.1": {
+      "sha512": "128BxYb8Jx4dzxd43cScEyLyKsQfPXCIi4bKDuaide832SDI17/JuayTSxqtNbrMZulIR0l7xp7R/5Qc82rC/A==",
       "type": "package",
-      "path": "ikvm.msbuild/8.11.0",
+      "path": "ikvm.msbuild/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -2139,7 +2094,7 @@
         "buildTransitive/IKVM.MSBuild.Tasks.targets",
         "buildTransitive/IKVM.MSBuild.props",
         "buildTransitive/IKVM.MSBuild.targets",
-        "ikvm.msbuild.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.8.11.1.nupkg.sha512",
         "ikvm.msbuild.nuspec",
         "lib/net6.0/_._",
         "lib/net8.0/_._",
@@ -4002,32 +3957,32 @@
         "tasks/net6.0/runtimes/win/lib/net6.0/System.Security.Cryptography.Pkcs.dll"
       ]
     },
-    "IKVM.MSBuild.Tools/8.11.0": {
-      "sha512": "FOu1o6Muy9Hec2klAeZymnGC2zqZGXKbrg1DxJ0uXaQd3HVjpIe1iJHkcC5GdNXSjwSAT9pNpjPmYI0TDJGrdw==",
+    "IKVM.MSBuild.Tools/8.11.1": {
+      "sha512": "Cnf9BU1gsfjHlKrjnBt/F4S4M81DiIt+91sBYzeBtwxOt6C4T+oy7YSIi979hjEB0EE1iG1NbNYz5oxQCcrkIg==",
       "type": "package",
-      "path": "ikvm.msbuild.tools/8.11.0",
+      "path": "ikvm.msbuild.tools/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.targets",
-        "ikvm.msbuild.tools.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.tools.8.11.1.nupkg.sha512",
         "ikvm.msbuild.tools.nuspec",
         "lib/netstandard2.0/_._"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.linux-arm/8.11.0": {
-      "sha512": "C0qgrRVl5ytr9kwRiP5i7atDyPdj04iQZYWjkycFbmlCebMPZiI2ZH6GLE6O3uhP/0nUz1Pz2+Rd1FpFnlYEag==",
+    "IKVM.MSBuild.Tools.runtime.linux-arm/8.11.1": {
+      "sha512": "qEosbUrH47bjg/ph/A4vkFWd4VTyrid7GsmU1IiFKYpdcvuGewkYA5IcZHK7j/mjBW3Rz4gUHjrzYhztXXKZEA==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.linux-arm/8.11.0",
+      "path": "ikvm.msbuild.tools.runtime.linux-arm/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-arm.props",
-        "ikvm.msbuild.tools.runtime.linux-arm.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.linux-arm.8.11.1.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.linux-arm.nuspec",
         "ikvmc/net8.0/linux-arm/IKVM.ByteCode.dll",
         "ikvmc/net8.0/linux-arm/IKVM.CoreLib.dll",
@@ -4469,17 +4424,17 @@
         "ikvmstub/net8.0/linux-arm/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.linux-arm64/8.11.0": {
-      "sha512": "tvMCgJhxipLFhzGw+bXFfOseKTAgm0OAmRpMpw9fKQNonBY99gctWtNOrr/qqmvsZ6V/GZgc3YqBql+f66A2bg==",
+    "IKVM.MSBuild.Tools.runtime.linux-arm64/8.11.1": {
+      "sha512": "/YFFUuPBmrI/HXVjYL064UeAJm04vpDDYOk4Rse51Gzuh/JHv96aOXdWoy5hIlEM8t07v2KLzlpKw3sjcmfqhQ==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.linux-arm64/8.11.0",
+      "path": "ikvm.msbuild.tools.runtime.linux-arm64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-arm64.props",
-        "ikvm.msbuild.tools.runtime.linux-arm64.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.linux-arm64.8.11.1.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.linux-arm64.nuspec",
         "ikvmc/net8.0/linux-arm64/IKVM.ByteCode.dll",
         "ikvmc/net8.0/linux-arm64/IKVM.CoreLib.dll",
@@ -4921,17 +4876,17 @@
         "ikvmstub/net8.0/linux-arm64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.linux-x64/8.11.0": {
-      "sha512": "ZHD0LGWf8e62sN9IZOpLzNsA1RPMoIxFepDOO9g8UXPA1YHB8AFT6lhfvS39cHrWhF10cCi3olOdbISPZiaZLg==",
+    "IKVM.MSBuild.Tools.runtime.linux-x64/8.11.1": {
+      "sha512": "G2Ki0iRtD634YDLecrs6JiiBOFW1Nj4glU7gKJqkFs4FhO5pGjyVr9yAtrrasL0YUi8aFRyo1fN+gXaF6bliuA==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.linux-x64/8.11.0",
+      "path": "ikvm.msbuild.tools.runtime.linux-x64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-x64.props",
-        "ikvm.msbuild.tools.runtime.linux-x64.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.linux-x64.8.11.1.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.linux-x64.nuspec",
         "ikvmc/net472/linux-x64/IKVM.ByteCode.dll",
         "ikvmc/net472/linux-x64/IKVM.CoreLib.dll",
@@ -5469,17 +5424,17 @@
         "ikvmstub/net8.0/linux-x64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.osx-arm64/8.11.0": {
-      "sha512": "mHcmGFq0NbzWU6Pg6vTv43CQJG2OCXH7ov47+O+QCaTWkaU0lmNNWW1F5m5LQI6tS/J7m/O6huzDFDmbifxdVg==",
+    "IKVM.MSBuild.Tools.runtime.osx-arm64/8.11.1": {
+      "sha512": "i8uM8c0+OgfSsbXgkfknFfbJqK4X9456hN4GjmxyzvLBfOhhuTfuuxEC/G9j2Q6JvQBQ94HBf0C3IyLowFdCQQ==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.osx-arm64/8.11.0",
+      "path": "ikvm.msbuild.tools.runtime.osx-arm64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.osx-arm64.props",
-        "ikvm.msbuild.tools.runtime.osx-arm64.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.osx-arm64.8.11.1.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.osx-arm64.nuspec",
         "ikvmc/net472/osx-arm64/IKVM.ByteCode.dll",
         "ikvmc/net472/osx-arm64/IKVM.CoreLib.dll",
@@ -6017,17 +5972,17 @@
         "ikvmstub/net8.0/osx-arm64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.osx-x64/8.11.0": {
-      "sha512": "Z1G/jAmJK21/FSLSCLx4W+uwZZMBDc1ihLuqnNEM9O7ZSGO1tGD1ySH08RbULy7wV7j6wi7SsjegwEqbdnVOiQ==",
+    "IKVM.MSBuild.Tools.runtime.osx-x64/8.11.1": {
+      "sha512": "/kUiSeVkWUH/xkZX7IiR8ym1UpffdGmb6TV7H50inw6pQMDO6zrR1uHZg6qJtF1DAoME1L52IkbwWb5qcW8Gnw==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.osx-x64/8.11.0",
+      "path": "ikvm.msbuild.tools.runtime.osx-x64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.osx-x64.props",
-        "ikvm.msbuild.tools.runtime.osx-x64.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.osx-x64.8.11.1.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.osx-x64.nuspec",
         "ikvmc/net472/osx-x64/IKVM.ByteCode.dll",
         "ikvmc/net472/osx-x64/IKVM.CoreLib.dll",
@@ -6565,17 +6520,17 @@
         "ikvmstub/net8.0/osx-x64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.win-arm64/8.11.0": {
-      "sha512": "pED0koyo/rikKjkjAXkDg8le0BKNn++9m4WQEyqIhBlH189uTwnZaup88WhJ59wGUIPYXxDrfWwLJjstXagtMQ==",
+    "IKVM.MSBuild.Tools.runtime.win-arm64/8.11.1": {
+      "sha512": "aU+8NUflVs+X6CezRAFBknYIPSXiH9SimfEW02VVw8LlkvpvXCRsqjYSnolYLV7MixqX6oW6pv9uU2DfHK7h5A==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.win-arm64/8.11.0",
+      "path": "ikvm.msbuild.tools.runtime.win-arm64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.win-arm64.props",
-        "ikvm.msbuild.tools.runtime.win-arm64.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.win-arm64.8.11.1.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.win-arm64.nuspec",
         "ikvmc/net472/win-arm64/IKVM.ByteCode.dll",
         "ikvmc/net472/win-arm64/IKVM.CoreLib.dll",
@@ -6832,7 +6787,7 @@
         "ikvmc/net8.0/win-arm64/ja/System.CommandLine.resources.dll",
         "ikvmc/net8.0/win-arm64/ko/System.CommandLine.resources.dll",
         "ikvmc/net8.0/win-arm64/mscordaccore.dll",
-        "ikvmc/net8.0/win-arm64/mscordaccore_arm64_arm64_8.0.1224.60305.dll",
+        "ikvmc/net8.0/win-arm64/mscordaccore_arm64_arm64_8.0.1325.6609.dll",
         "ikvmc/net8.0/win-arm64/mscordbi.dll",
         "ikvmc/net8.0/win-arm64/mscorlib.dll",
         "ikvmc/net8.0/win-arm64/mscorrc.dll",
@@ -7099,7 +7054,7 @@
         "ikvmstub/net8.0/win-arm64/ja/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/win-arm64/ko/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/win-arm64/mscordaccore.dll",
-        "ikvmstub/net8.0/win-arm64/mscordaccore_arm64_arm64_8.0.1224.60305.dll",
+        "ikvmstub/net8.0/win-arm64/mscordaccore_arm64_arm64_8.0.1325.6609.dll",
         "ikvmstub/net8.0/win-arm64/mscordbi.dll",
         "ikvmstub/net8.0/win-arm64/mscorlib.dll",
         "ikvmstub/net8.0/win-arm64/mscorrc.dll",
@@ -7113,17 +7068,17 @@
         "ikvmstub/net8.0/win-arm64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.win-x64/8.11.0": {
-      "sha512": "IhMUkCs1bf/LqZDrjEcIJvlzOT9lsV6bpApwWUIZOVWZZtb/DNYiKF9e/PIzjKn+lW7NDitDHN3zoiFyYDbLzQ==",
+    "IKVM.MSBuild.Tools.runtime.win-x64/8.11.1": {
+      "sha512": "drz6pYvRyBRCs+GKdNppDKEeFga3Wu1UVA0qcHWNamlYdlzt7ZBt0iAv1Vho5svWXdtKwJrM/ZZ+k6U9GBJ/+g==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.win-x64/8.11.0",
+      "path": "ikvm.msbuild.tools.runtime.win-x64/8.11.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.win-x64.props",
-        "ikvm.msbuild.tools.runtime.win-x64.8.11.0.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.win-x64.8.11.1.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.win-x64.nuspec",
         "ikvmc/net472/win-x64/IKVM.ByteCode.dll",
         "ikvmc/net472/win-x64/IKVM.CoreLib.dll",
@@ -7380,7 +7335,7 @@
         "ikvmc/net8.0/win-x64/ja/System.CommandLine.resources.dll",
         "ikvmc/net8.0/win-x64/ko/System.CommandLine.resources.dll",
         "ikvmc/net8.0/win-x64/mscordaccore.dll",
-        "ikvmc/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.1224.60305.dll",
+        "ikvmc/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.1325.6609.dll",
         "ikvmc/net8.0/win-x64/mscordbi.dll",
         "ikvmc/net8.0/win-x64/mscorlib.dll",
         "ikvmc/net8.0/win-x64/mscorrc.dll",
@@ -7647,7 +7602,7 @@
         "ikvmstub/net8.0/win-x64/ja/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/win-x64/ko/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/win-x64/mscordaccore.dll",
-        "ikvmstub/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.1224.60305.dll",
+        "ikvmstub/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.1325.6609.dll",
         "ikvmstub/net8.0/win-x64/mscordbi.dll",
         "ikvmstub/net8.0/win-x64/mscorlib.dll",
         "ikvmstub/net8.0/win-x64/mscorrc.dll",
@@ -8019,97 +7974,36 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.NETCore.Platforms/3.1.0": {
-      "sha512": "z7aeg8oHln2CuNulfhiLYxCVMPEwBl3rzicjvIX+4sUuCwvXw5oXQEtbiU2c0z4qYL5L3Kmx0mMA/+t/SbY67w==",
+    "Microsoft.Win32.SystemEvents/9.0.2": {
+      "sha512": "5BkGZ6mHp2dHydR29sb0fDfAuqkv30AHtTih8wMzvPZysOmBFvHfnkR2w3tsc0pSiIg8ZoKyefJXWy9r3pBh0w==",
       "type": "package",
-      "path": "microsoft.netcore.platforms/3.1.0",
+      "path": "microsoft.win32.systemevents/9.0.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
+        "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
-        "lib/netstandard1.0/_._",
-        "microsoft.netcore.platforms.3.1.0.nupkg.sha512",
-        "microsoft.netcore.platforms.nuspec",
-        "runtime.json",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "Microsoft.Win32.Registry/4.7.0": {
-      "sha512": "KSrRMb5vNi0CWSGG1++id2ZOs/1QhRqROt+qgbEAdQuGjGrFcl4AOl4/exGPUYz2wUnU42nvJqon1T3U0kPXLA==",
-      "type": "package",
-      "path": "microsoft.win32.registry/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net46/Microsoft.Win32.Registry.dll",
-        "lib/net461/Microsoft.Win32.Registry.dll",
-        "lib/net461/Microsoft.Win32.Registry.xml",
-        "lib/netstandard1.3/Microsoft.Win32.Registry.dll",
-        "lib/netstandard2.0/Microsoft.Win32.Registry.dll",
-        "lib/netstandard2.0/Microsoft.Win32.Registry.xml",
-        "microsoft.win32.registry.4.7.0.nupkg.sha512",
-        "microsoft.win32.registry.nuspec",
-        "ref/net46/Microsoft.Win32.Registry.dll",
-        "ref/net461/Microsoft.Win32.Registry.dll",
-        "ref/net461/Microsoft.Win32.Registry.xml",
-        "ref/net472/Microsoft.Win32.Registry.dll",
-        "ref/net472/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/Microsoft.Win32.Registry.dll",
-        "ref/netstandard1.3/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/de/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/es/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/fr/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/it/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/ja/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/ko/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/ru/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/zh-hans/Microsoft.Win32.Registry.xml",
-        "ref/netstandard1.3/zh-hant/Microsoft.Win32.Registry.xml",
-        "ref/netstandard2.0/Microsoft.Win32.Registry.dll",
-        "ref/netstandard2.0/Microsoft.Win32.Registry.xml",
-        "runtimes/unix/lib/netstandard2.0/Microsoft.Win32.Registry.dll",
-        "runtimes/unix/lib/netstandard2.0/Microsoft.Win32.Registry.xml",
-        "runtimes/win/lib/net46/Microsoft.Win32.Registry.dll",
-        "runtimes/win/lib/net461/Microsoft.Win32.Registry.dll",
-        "runtimes/win/lib/net461/Microsoft.Win32.Registry.xml",
-        "runtimes/win/lib/netstandard1.3/Microsoft.Win32.Registry.dll",
-        "runtimes/win/lib/netstandard2.0/Microsoft.Win32.Registry.dll",
-        "runtimes/win/lib/netstandard2.0/Microsoft.Win32.Registry.xml",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "Microsoft.Win32.SystemEvents/4.7.0": {
-      "sha512": "mtVirZr++rq+XCDITMUdnETD59XoeMxSpLRIII7JRI6Yj0LEDiO1pPn0ktlnIj12Ix8bfvQqQDMMIF9wC98oCA==",
-      "type": "package",
-      "path": "microsoft.win32.systemevents/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net461/Microsoft.Win32.SystemEvents.dll",
-        "lib/net461/Microsoft.Win32.SystemEvents.xml",
+        "buildTransitive/net461/Microsoft.Win32.SystemEvents.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Win32.SystemEvents.targets",
+        "lib/net462/Microsoft.Win32.SystemEvents.dll",
+        "lib/net462/Microsoft.Win32.SystemEvents.xml",
+        "lib/net8.0/Microsoft.Win32.SystemEvents.dll",
+        "lib/net8.0/Microsoft.Win32.SystemEvents.xml",
+        "lib/net9.0/Microsoft.Win32.SystemEvents.dll",
+        "lib/net9.0/Microsoft.Win32.SystemEvents.xml",
         "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll",
         "lib/netstandard2.0/Microsoft.Win32.SystemEvents.xml",
-        "microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+        "microsoft.win32.systemevents.9.0.2.nupkg.sha512",
         "microsoft.win32.systemevents.nuspec",
-        "ref/net461/Microsoft.Win32.SystemEvents.dll",
-        "ref/net461/Microsoft.Win32.SystemEvents.xml",
-        "ref/net472/Microsoft.Win32.SystemEvents.dll",
-        "ref/net472/Microsoft.Win32.SystemEvents.xml",
-        "ref/netstandard2.0/Microsoft.Win32.SystemEvents.dll",
-        "ref/netstandard2.0/Microsoft.Win32.SystemEvents.xml",
-        "runtimes/win/lib/netcoreapp2.0/Microsoft.Win32.SystemEvents.dll",
-        "runtimes/win/lib/netcoreapp2.0/Microsoft.Win32.SystemEvents.xml",
-        "runtimes/win/lib/netcoreapp3.0/Microsoft.Win32.SystemEvents.dll",
-        "runtimes/win/lib/netcoreapp3.0/Microsoft.Win32.SystemEvents.xml",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.dll",
+        "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.xml",
+        "runtimes/win/lib/net9.0/Microsoft.Win32.SystemEvents.dll",
+        "runtimes/win/lib/net9.0/Microsoft.Win32.SystemEvents.xml",
+        "useSharedDesignerContext.txt"
       ]
     },
     "Newtonsoft.Json/13.0.1": {
@@ -8156,16 +8050,16 @@
         "open.nat.nuspec"
       ]
     },
-    "runtime.native.System.Data.SqlClient.sni/4.7.0": {
-      "sha512": "9kyFSIdN3T0qjDQ2R0HRXYIhS3l5psBzQi6qqhdLz+SzFyEy4sVxNOke+yyYv8Cu8rPER12c3RDjLT8wF3WBYQ==",
+    "runtime.native.System.Data.SqlClient.sni/4.4.0": {
+      "sha512": "A8v6PGmk+UGbfWo5Ixup0lPM4swuSwOiayJExZwKIOjTlFFQIsu3QnDXECosBEyrWSPryxBVrdqtJyhK3BaupQ==",
       "type": "package",
-      "path": "runtime.native.system.data.sqlclient.sni/4.7.0",
+      "path": "runtime.native.system.data.sqlclient.sni/4.4.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
-        "runtime.native.system.data.sqlclient.sni.4.7.0.nupkg.sha512",
+        "runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
         "runtime.native.system.data.sqlclient.sni.nuspec",
         "useSharedDesignerContext.txt",
         "version.txt"
@@ -8298,13 +8192,14 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.ComponentModel.Annotations/4.7.0": {
-      "sha512": "0YFqjhp/mYkDGpU0Ye1GjE53HMp9UVfGN7seGpAMttAC0C40v5gw598jCgpbBLMmCo0E5YRLBv5Z2doypO49ZQ==",
+    "System.ComponentModel.Annotations/5.0.0": {
+      "sha512": "dMkqfy2el8A8/I76n2Hi1oBFEbG1SfxD2l5nhwXV3XjlnOmwxJlQbYpJH4W51odnU9sARCSAgv7S3CyAFMkpYg==",
       "type": "package",
-      "path": "system.componentmodel.annotations/4.7.0",
+      "path": "system.componentmodel.annotations/5.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
         "lib/MonoAndroid10/_._",
@@ -8381,33 +8276,35 @@
         "ref/xamarinmac20/_._",
         "ref/xamarintvos10/_._",
         "ref/xamarinwatchos10/_._",
-        "system.componentmodel.annotations.4.7.0.nupkg.sha512",
+        "system.componentmodel.annotations.5.0.0.nupkg.sha512",
         "system.componentmodel.annotations.nuspec",
         "useSharedDesignerContext.txt",
         "version.txt"
       ]
     },
-    "System.Configuration.ConfigurationManager/4.7.0": {
-      "sha512": "/anOTeSZCNNI2zDilogWrZ8pNqCmYbzGNexUnNhjW8k0sHqEZ2nHJBp147jBV3hGYswu5lINpNg1vxR7bnqvVA==",
+    "System.Configuration.ConfigurationManager/6.0.1": {
+      "sha512": "jXw9MlUu/kRfEU0WyTptAVueupqIeE3/rl0EZDMlf8pcvJnitQ8HeVEp69rZdaStXwTV72boi/Bhw8lOeO+U2w==",
       "type": "package",
-      "path": "system.configuration.configurationmanager/4.7.0",
+      "path": "system.configuration.configurationmanager/6.0.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/netcoreapp2.0/System.Configuration.ConfigurationManager.targets",
+        "buildTransitive/netcoreapp3.1/_._",
         "lib/net461/System.Configuration.ConfigurationManager.dll",
         "lib/net461/System.Configuration.ConfigurationManager.xml",
+        "lib/net6.0/System.Configuration.ConfigurationManager.dll",
+        "lib/net6.0/System.Configuration.ConfigurationManager.xml",
         "lib/netstandard2.0/System.Configuration.ConfigurationManager.dll",
         "lib/netstandard2.0/System.Configuration.ConfigurationManager.xml",
-        "ref/net461/System.Configuration.ConfigurationManager.dll",
-        "ref/net461/System.Configuration.ConfigurationManager.xml",
-        "ref/netstandard2.0/System.Configuration.ConfigurationManager.dll",
-        "ref/netstandard2.0/System.Configuration.ConfigurationManager.xml",
-        "system.configuration.configurationmanager.4.7.0.nupkg.sha512",
+        "runtimes/win/lib/net461/System.Configuration.ConfigurationManager.dll",
+        "runtimes/win/lib/net461/System.Configuration.ConfigurationManager.xml",
+        "system.configuration.configurationmanager.6.0.1.nupkg.sha512",
         "system.configuration.configurationmanager.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "useSharedDesignerContext.txt"
       ]
     },
     "System.Data.Odbc/8.0.0": {
@@ -8480,90 +8377,37 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Data.SqlClient/4.8.1": {
-      "sha512": "HKLykcv6eZLbLnSMnlQ6Os4+UAmFE+AgYm92CTvJYeTOBtOYusX3qu8OoGhFrnKZax91UcLcDo5vPrqvJUTSNQ==",
+    "System.Data.SqlClient/4.9.0": {
+      "sha512": "j4KJO+vC62NyUtNHz854njEqXbT8OmAa5jb1nrGfYWBOcggyYUQE0w/snXeaCjdvkSKWuUD+hfvlbN8pTrJTXg==",
       "type": "package",
-      "path": "system.data.sqlclient/4.8.1",
+      "path": "system.data.sqlclient/4.9.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "Icon.png",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net451/System.Data.SqlClient.dll",
-        "lib/net46/System.Data.SqlClient.dll",
-        "lib/net461/System.Data.SqlClient.dll",
-        "lib/net461/System.Data.SqlClient.xml",
-        "lib/netcoreapp2.1/System.Data.SqlClient.dll",
-        "lib/netcoreapp2.1/System.Data.SqlClient.xml",
-        "lib/netstandard1.2/System.Data.SqlClient.dll",
-        "lib/netstandard1.2/System.Data.SqlClient.xml",
-        "lib/netstandard1.3/System.Data.SqlClient.dll",
-        "lib/netstandard1.3/System.Data.SqlClient.xml",
+        "PACKAGE.md",
+        "buildTransitive/net461/System.Data.SqlClient.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net6.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Data.SqlClient.targets",
+        "lib/net462/System.Data.SqlClient.dll",
+        "lib/net462/System.Data.SqlClient.xml",
+        "lib/net6.0/System.Data.SqlClient.dll",
+        "lib/net6.0/System.Data.SqlClient.xml",
+        "lib/net8.0/System.Data.SqlClient.dll",
+        "lib/net8.0/System.Data.SqlClient.xml",
         "lib/netstandard2.0/System.Data.SqlClient.dll",
         "lib/netstandard2.0/System.Data.SqlClient.xml",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "lib/xamarintvos10/_._",
-        "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net451/System.Data.SqlClient.dll",
-        "ref/net46/System.Data.SqlClient.dll",
-        "ref/net461/System.Data.SqlClient.dll",
-        "ref/net461/System.Data.SqlClient.xml",
-        "ref/netcoreapp2.1/System.Data.SqlClient.dll",
-        "ref/netcoreapp2.1/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/System.Data.SqlClient.dll",
-        "ref/netstandard1.2/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/de/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/es/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/fr/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/it/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/ja/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/ko/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/ru/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/zh-hans/System.Data.SqlClient.xml",
-        "ref/netstandard1.2/zh-hant/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/System.Data.SqlClient.dll",
-        "ref/netstandard1.3/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/de/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/es/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/fr/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/it/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/ja/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/ko/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/ru/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/zh-hans/System.Data.SqlClient.xml",
-        "ref/netstandard1.3/zh-hant/System.Data.SqlClient.xml",
-        "ref/netstandard2.0/System.Data.SqlClient.dll",
-        "ref/netstandard2.0/System.Data.SqlClient.xml",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._",
-        "runtimes/unix/lib/netcoreapp2.1/System.Data.SqlClient.dll",
-        "runtimes/unix/lib/netcoreapp2.1/System.Data.SqlClient.xml",
-        "runtimes/unix/lib/netstandard1.3/System.Data.SqlClient.dll",
-        "runtimes/unix/lib/netstandard2.0/System.Data.SqlClient.dll",
-        "runtimes/unix/lib/netstandard2.0/System.Data.SqlClient.xml",
-        "runtimes/win/lib/net451/System.Data.SqlClient.dll",
-        "runtimes/win/lib/net46/System.Data.SqlClient.dll",
-        "runtimes/win/lib/net461/System.Data.SqlClient.dll",
-        "runtimes/win/lib/net461/System.Data.SqlClient.xml",
-        "runtimes/win/lib/netcoreapp2.1/System.Data.SqlClient.dll",
-        "runtimes/win/lib/netcoreapp2.1/System.Data.SqlClient.xml",
-        "runtimes/win/lib/netstandard1.3/System.Data.SqlClient.dll",
-        "runtimes/win/lib/netstandard2.0/System.Data.SqlClient.dll",
-        "runtimes/win/lib/netstandard2.0/System.Data.SqlClient.xml",
-        "runtimes/win/lib/uap10.0.16299/System.Data.SqlClient.dll",
-        "runtimes/win/lib/uap10.0.16299/System.Data.SqlClient.xml",
-        "system.data.sqlclient.4.8.1.nupkg.sha512",
-        "system.data.sqlclient.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "runtimes/unix/lib/net6.0/System.Data.SqlClient.dll",
+        "runtimes/unix/lib/net6.0/System.Data.SqlClient.xml",
+        "runtimes/unix/lib/net8.0/System.Data.SqlClient.dll",
+        "runtimes/unix/lib/net8.0/System.Data.SqlClient.xml",
+        "runtimes/win/lib/net6.0/System.Data.SqlClient.dll",
+        "runtimes/win/lib/net6.0/System.Data.SqlClient.xml",
+        "runtimes/win/lib/net8.0/System.Data.SqlClient.dll",
+        "runtimes/win/lib/net8.0/System.Data.SqlClient.xml",
+        "system.data.sqlclient.4.9.0.nupkg.sha512",
+        "system.data.sqlclient.nuspec"
       ]
     },
     "System.Data.SQLite/1.0.119": {
@@ -8654,43 +8498,46 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Drawing.Common/4.7.0": {
-      "sha512": "v+XbyYHaZjDfn0ENmJEV1VYLgGgCTx1gnfOBcppowbpOAriglYgGCvFCPr2EEZyBvXlpxbEsTwkOlInl107ahA==",
+    "System.Drawing.Common/9.0.2": {
+      "sha512": "JU947wzf8JbBS16Y5EIZzAlyQU+k68D7LRx6y03s2wlhlvLqkt/8uPBrjv2hJnnaJKbdb0GhQ3JZsfYXhrRjyg==",
       "type": "package",
-      "path": "system.drawing.common/4.7.0",
+      "path": "system.drawing.common/9.0.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
+        "PACKAGE.md",
         "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.Drawing.Common.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Drawing.Common.targets",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
-        "lib/net461/System.Drawing.Common.dll",
+        "lib/net462/System.Drawing.Common.dll",
+        "lib/net462/System.Drawing.Common.pdb",
+        "lib/net462/System.Drawing.Common.xml",
+        "lib/net8.0/System.Drawing.Common.dll",
+        "lib/net8.0/System.Drawing.Common.pdb",
+        "lib/net8.0/System.Drawing.Common.xml",
+        "lib/net8.0/System.Private.Windows.Core.dll",
+        "lib/net8.0/System.Private.Windows.Core.xml",
+        "lib/net9.0/System.Drawing.Common.dll",
+        "lib/net9.0/System.Drawing.Common.pdb",
+        "lib/net9.0/System.Drawing.Common.xml",
+        "lib/net9.0/System.Private.Windows.Core.dll",
+        "lib/net9.0/System.Private.Windows.Core.xml",
         "lib/netstandard2.0/System.Drawing.Common.dll",
+        "lib/netstandard2.0/System.Drawing.Common.pdb",
+        "lib/netstandard2.0/System.Drawing.Common.xml",
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
         "lib/xamarintvos10/_._",
         "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net461/System.Drawing.Common.dll",
-        "ref/netcoreapp3.0/System.Drawing.Common.dll",
-        "ref/netcoreapp3.0/System.Drawing.Common.xml",
-        "ref/netstandard2.0/System.Drawing.Common.dll",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._",
-        "runtimes/unix/lib/netcoreapp2.0/System.Drawing.Common.dll",
-        "runtimes/unix/lib/netcoreapp3.0/System.Drawing.Common.dll",
-        "runtimes/unix/lib/netcoreapp3.0/System.Drawing.Common.xml",
-        "runtimes/win/lib/netcoreapp2.0/System.Drawing.Common.dll",
-        "runtimes/win/lib/netcoreapp3.0/System.Drawing.Common.dll",
-        "runtimes/win/lib/netcoreapp3.0/System.Drawing.Common.xml",
-        "system.drawing.common.4.7.0.nupkg.sha512",
+        "system.drawing.common.9.0.2.nupkg.sha512",
         "system.drawing.common.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "useSharedDesignerContext.txt"
       ]
     },
     "System.IO.Pipelines/8.0.0": {
@@ -8804,176 +8651,97 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Security.AccessControl/4.7.0": {
-      "sha512": "JECvTt5aFF3WT3gHpfofL2MNNP6v84sxtXxpqhLBCcDRzqsPBmHhQ6shv4DwwN2tRlzsUxtb3G9M3763rbXKDg==",
+    "System.Security.AccessControl/6.0.0": {
+      "sha512": "AUADIc0LIEQe7MzC+I0cl0rAT8RrTAKFHl53yHjEUzNVIaUlhFY11vc2ebiVJzVBuOzun6F7FBA+8KAbGTTedQ==",
       "type": "package",
-      "path": "system.security.accesscontrol/4.7.0",
+      "path": "system.security.accesscontrol/6.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
-        "lib/net46/System.Security.AccessControl.dll",
+        "buildTransitive/netcoreapp2.0/System.Security.AccessControl.targets",
+        "buildTransitive/netcoreapp3.1/_._",
         "lib/net461/System.Security.AccessControl.dll",
         "lib/net461/System.Security.AccessControl.xml",
-        "lib/netstandard1.3/System.Security.AccessControl.dll",
+        "lib/net6.0/System.Security.AccessControl.dll",
+        "lib/net6.0/System.Security.AccessControl.xml",
         "lib/netstandard2.0/System.Security.AccessControl.dll",
         "lib/netstandard2.0/System.Security.AccessControl.xml",
-        "lib/uap10.0.16299/_._",
-        "ref/net46/System.Security.AccessControl.dll",
-        "ref/net461/System.Security.AccessControl.dll",
-        "ref/net461/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/System.Security.AccessControl.dll",
-        "ref/netstandard1.3/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/de/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/es/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/fr/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/it/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/ja/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/ko/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/ru/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/zh-hans/System.Security.AccessControl.xml",
-        "ref/netstandard1.3/zh-hant/System.Security.AccessControl.xml",
-        "ref/netstandard2.0/System.Security.AccessControl.dll",
-        "ref/netstandard2.0/System.Security.AccessControl.xml",
-        "ref/uap10.0.16299/_._",
-        "runtimes/win/lib/net46/System.Security.AccessControl.dll",
         "runtimes/win/lib/net461/System.Security.AccessControl.dll",
         "runtimes/win/lib/net461/System.Security.AccessControl.xml",
-        "runtimes/win/lib/netcoreapp2.0/System.Security.AccessControl.dll",
-        "runtimes/win/lib/netcoreapp2.0/System.Security.AccessControl.xml",
-        "runtimes/win/lib/netstandard1.3/System.Security.AccessControl.dll",
-        "runtimes/win/lib/uap10.0.16299/_._",
-        "system.security.accesscontrol.4.7.0.nupkg.sha512",
+        "runtimes/win/lib/net6.0/System.Security.AccessControl.dll",
+        "runtimes/win/lib/net6.0/System.Security.AccessControl.xml",
+        "runtimes/win/lib/netstandard2.0/System.Security.AccessControl.dll",
+        "runtimes/win/lib/netstandard2.0/System.Security.AccessControl.xml",
+        "system.security.accesscontrol.6.0.0.nupkg.sha512",
         "system.security.accesscontrol.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "useSharedDesignerContext.txt"
       ]
     },
-    "System.Security.Cryptography.ProtectedData/4.7.0": {
-      "sha512": "ehYW0m9ptxpGWvE4zgqongBVWpSDU/JCFD4K7krxkQwSz/sFQjEXCUqpvencjy6DYDbn7Ig09R8GFffu8TtneQ==",
+    "System.Security.Cryptography.ProtectedData/6.0.0": {
+      "sha512": "rp1gMNEZpvx9vP0JW0oHLxlf8oSiQgtno77Y4PLUBjSiDYoD77Y8uXHr1Ea5XG4/pIKhqAdxZ8v8OTUtqo9PeQ==",
       "type": "package",
-      "path": "system.security.cryptography.protecteddata/4.7.0",
+      "path": "system.security.cryptography.protecteddata/6.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/netcoreapp2.0/System.Security.Cryptography.ProtectedData.targets",
+        "buildTransitive/netcoreapp3.1/_._",
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
-        "lib/net46/System.Security.Cryptography.ProtectedData.dll",
         "lib/net461/System.Security.Cryptography.ProtectedData.dll",
         "lib/net461/System.Security.Cryptography.ProtectedData.xml",
-        "lib/netstandard1.3/System.Security.Cryptography.ProtectedData.dll",
+        "lib/net6.0/System.Security.Cryptography.ProtectedData.dll",
+        "lib/net6.0/System.Security.Cryptography.ProtectedData.xml",
         "lib/netstandard2.0/System.Security.Cryptography.ProtectedData.dll",
         "lib/netstandard2.0/System.Security.Cryptography.ProtectedData.xml",
         "lib/xamarinios10/_._",
         "lib/xamarinmac20/_._",
         "lib/xamarintvos10/_._",
         "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net46/System.Security.Cryptography.ProtectedData.dll",
-        "ref/net461/System.Security.Cryptography.ProtectedData.dll",
-        "ref/net461/System.Security.Cryptography.ProtectedData.xml",
-        "ref/netstandard1.3/System.Security.Cryptography.ProtectedData.dll",
-        "ref/netstandard2.0/System.Security.Cryptography.ProtectedData.dll",
-        "ref/netstandard2.0/System.Security.Cryptography.ProtectedData.xml",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._",
-        "runtimes/win/lib/net46/System.Security.Cryptography.ProtectedData.dll",
         "runtimes/win/lib/net461/System.Security.Cryptography.ProtectedData.dll",
         "runtimes/win/lib/net461/System.Security.Cryptography.ProtectedData.xml",
-        "runtimes/win/lib/netstandard1.3/System.Security.Cryptography.ProtectedData.dll",
+        "runtimes/win/lib/net6.0/System.Security.Cryptography.ProtectedData.dll",
+        "runtimes/win/lib/net6.0/System.Security.Cryptography.ProtectedData.xml",
         "runtimes/win/lib/netstandard2.0/System.Security.Cryptography.ProtectedData.dll",
         "runtimes/win/lib/netstandard2.0/System.Security.Cryptography.ProtectedData.xml",
-        "system.security.cryptography.protecteddata.4.7.0.nupkg.sha512",
+        "system.security.cryptography.protecteddata.6.0.0.nupkg.sha512",
         "system.security.cryptography.protecteddata.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "useSharedDesignerContext.txt"
       ]
     },
-    "System.Security.Permissions/4.7.0": {
-      "sha512": "dkOV6YYVBnYRa15/yv004eCGRBVADXw8qRbbNiCn/XpdJSUXkkUeIvdvFHkvnko4CdKMqG8yRHC4ox83LSlMsQ==",
+    "System.Security.Permissions/6.0.0": {
+      "sha512": "T/uuc7AklkDoxmcJ7LGkyX1CcSviZuLCa4jg3PekfJ7SU0niF0IVTXwUiNVP9DSpzou2PpxJ+eNY2IfDM90ZCg==",
       "type": "package",
-      "path": "system.security.permissions/4.7.0",
+      "path": "system.security.permissions/6.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/netcoreapp2.0/System.Security.Permissions.targets",
+        "buildTransitive/netcoreapp3.1/_._",
         "lib/net461/System.Security.Permissions.dll",
         "lib/net461/System.Security.Permissions.xml",
-        "lib/netcoreapp3.0/System.Security.Permissions.dll",
-        "lib/netcoreapp3.0/System.Security.Permissions.xml",
+        "lib/net5.0/System.Security.Permissions.dll",
+        "lib/net5.0/System.Security.Permissions.xml",
+        "lib/net6.0/System.Security.Permissions.dll",
+        "lib/net6.0/System.Security.Permissions.xml",
+        "lib/netcoreapp3.1/System.Security.Permissions.dll",
+        "lib/netcoreapp3.1/System.Security.Permissions.xml",
         "lib/netstandard2.0/System.Security.Permissions.dll",
         "lib/netstandard2.0/System.Security.Permissions.xml",
-        "ref/net461/System.Security.Permissions.dll",
-        "ref/net461/System.Security.Permissions.xml",
-        "ref/netcoreapp3.0/System.Security.Permissions.dll",
-        "ref/netcoreapp3.0/System.Security.Permissions.xml",
-        "ref/netstandard2.0/System.Security.Permissions.dll",
-        "ref/netstandard2.0/System.Security.Permissions.xml",
-        "system.security.permissions.4.7.0.nupkg.sha512",
+        "runtimes/win/lib/net461/System.Security.Permissions.dll",
+        "runtimes/win/lib/net461/System.Security.Permissions.xml",
+        "system.security.permissions.6.0.0.nupkg.sha512",
         "system.security.permissions.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
-      ]
-    },
-    "System.Security.Principal.Windows/4.7.0": {
-      "sha512": "ojD0PX0XhneCsUbAZVKdb7h/70vyYMDYs85lwEI+LngEONe/17A0cFaRFqZU+sOEidcVswYWikYOQ9PPfjlbtQ==",
-      "type": "package",
-      "path": "system.security.principal.windows/4.7.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "lib/net46/System.Security.Principal.Windows.dll",
-        "lib/net461/System.Security.Principal.Windows.dll",
-        "lib/net461/System.Security.Principal.Windows.xml",
-        "lib/netstandard1.3/System.Security.Principal.Windows.dll",
-        "lib/netstandard2.0/System.Security.Principal.Windows.dll",
-        "lib/netstandard2.0/System.Security.Principal.Windows.xml",
-        "lib/uap10.0.16299/_._",
-        "ref/net46/System.Security.Principal.Windows.dll",
-        "ref/net461/System.Security.Principal.Windows.dll",
-        "ref/net461/System.Security.Principal.Windows.xml",
-        "ref/netcoreapp3.0/System.Security.Principal.Windows.dll",
-        "ref/netcoreapp3.0/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/System.Security.Principal.Windows.dll",
-        "ref/netstandard1.3/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/de/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/es/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/fr/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/it/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/ja/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/ko/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/ru/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/zh-hans/System.Security.Principal.Windows.xml",
-        "ref/netstandard1.3/zh-hant/System.Security.Principal.Windows.xml",
-        "ref/netstandard2.0/System.Security.Principal.Windows.dll",
-        "ref/netstandard2.0/System.Security.Principal.Windows.xml",
-        "ref/uap10.0.16299/_._",
-        "runtimes/unix/lib/netcoreapp2.0/System.Security.Principal.Windows.dll",
-        "runtimes/unix/lib/netcoreapp2.0/System.Security.Principal.Windows.xml",
-        "runtimes/unix/lib/netcoreapp2.1/System.Security.Principal.Windows.dll",
-        "runtimes/unix/lib/netcoreapp2.1/System.Security.Principal.Windows.xml",
-        "runtimes/win/lib/net46/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/net461/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/net461/System.Security.Principal.Windows.xml",
-        "runtimes/win/lib/netcoreapp2.0/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/netcoreapp2.0/System.Security.Principal.Windows.xml",
-        "runtimes/win/lib/netcoreapp2.1/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/netcoreapp2.1/System.Security.Principal.Windows.xml",
-        "runtimes/win/lib/netstandard1.3/System.Security.Principal.Windows.dll",
-        "runtimes/win/lib/uap10.0.16299/_._",
-        "system.security.principal.windows.4.7.0.nupkg.sha512",
-        "system.security.principal.windows.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "useSharedDesignerContext.txt"
       ]
     },
     "System.Text.Encoding.CodePages/8.0.0": {
@@ -9163,35 +8931,40 @@
         "version.txt"
       ]
     },
-    "System.Windows.Extensions/4.7.0": {
-      "sha512": "CeWTdRNfRaSh0pm2gDTJFwVaXfTq6Xwv/sA887iwPTneW7oMtMlpvDIO+U60+3GWTB7Aom6oQwv5VZVUhQRdPQ==",
+    "System.Windows.Extensions/6.0.0": {
+      "sha512": "IXoJOXIqc39AIe+CIR7koBtRGMiCt/LPM3lI+PELtDIy9XdyeSrwXFdWV9dzJ2Awl0paLWUaknLxFQ5HpHZUog==",
       "type": "package",
-      "path": "system.windows.extensions/4.7.0",
+      "path": "system.windows.extensions/6.0.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "Icon.png",
         "LICENSE.TXT",
         "THIRD-PARTY-NOTICES.TXT",
-        "lib/netcoreapp3.0/System.Windows.Extensions.dll",
-        "lib/netcoreapp3.0/System.Windows.Extensions.xml",
-        "ref/netcoreapp3.0/System.Windows.Extensions.dll",
-        "ref/netcoreapp3.0/System.Windows.Extensions.xml",
-        "runtimes/win/lib/netcoreapp3.0/System.Windows.Extensions.dll",
-        "runtimes/win/lib/netcoreapp3.0/System.Windows.Extensions.xml",
-        "system.windows.extensions.4.7.0.nupkg.sha512",
+        "lib/net6.0/System.Windows.Extensions.dll",
+        "lib/net6.0/System.Windows.Extensions.xml",
+        "lib/netcoreapp3.1/System.Windows.Extensions.dll",
+        "lib/netcoreapp3.1/System.Windows.Extensions.xml",
+        "runtimes/win/lib/net6.0/System.Windows.Extensions.dll",
+        "runtimes/win/lib/net6.0/System.Windows.Extensions.xml",
+        "runtimes/win/lib/netcoreapp3.1/System.Windows.Extensions.dll",
+        "runtimes/win/lib/netcoreapp3.1/System.Windows.Extensions.xml",
+        "system.windows.extensions.6.0.0.nupkg.sha512",
         "system.windows.extensions.nuspec",
-        "useSharedDesignerContext.txt",
-        "version.txt"
+        "useSharedDesignerContext.txt"
       ]
     }
   },
   "projectFileDependencyGroups": {
     "net8.0": [
       "CoreRCON >= 5.4.2",
-      "IKVM >= 8.11.0",
+      "EntityFramework >= 6.5.1",
+      "IKVM >= 8.11.1",
       "MCQuery >= 2022.7.13.192844",
       "Open.Nat >= 2.1.0",
       "System.Data.SQLite >= 1.0.119",
+      "System.Data.SqlClient >= 4.9.0",
+      "System.Drawing.Common >= 9.0.2",
       "System.Management >= 9.0.2"
     ]
   },
@@ -9250,9 +9023,13 @@
             "target": "Package",
             "version": "[5.4.2, )"
           },
+          "EntityFramework": {
+            "target": "Package",
+            "version": "[6.5.1, )"
+          },
           "IKVM": {
             "target": "Package",
-            "version": "[8.11.0, )"
+            "version": "[8.11.1, )"
           },
           "MCQuery": {
             "target": "Package",
@@ -9265,6 +9042,14 @@
           "System.Data.SQLite": {
             "target": "Package",
             "version": "[1.0.119, )"
+          },
+          "System.Data.SqlClient": {
+            "target": "Package",
+            "version": "[4.9.0, )"
+          },
+          "System.Drawing.Common": {
+            "target": "Package",
+            "version": "[9.0.2, )"
           },
           "System.Management": {
             "target": "Package",

@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
+using jdk.nashorn.@internal.ir;
 using Newtonsoft.Json.Linq;
 
 namespace Updater
@@ -73,7 +74,7 @@ namespace Updater
             }
         }
 
-        private static async Task<Dictionary<string, string>> GetAvailableVanillaServerVersionsAsync(string? selectedVersion = null)
+        private static async Task<Dictionary<string, string>?> GetAvailableVanillaServerVersionsAsync(string? selectedVersion = null)
         {
             try
             {
@@ -83,8 +84,8 @@ namespace Updater
                 var availableVersions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray()
                     .Where(v => v.GetProperty("type").GetString() == "release")
                     .ToDictionary(
-                        v => v.GetProperty("id").GetString(),
-                        v => v.GetProperty("url").GetString()
+                        v => v.GetProperty("id").GetString() ?? string.Empty,
+                        v => v.GetProperty("url").GetString() ?? string.Empty
                     );
 
                 if (!string.IsNullOrEmpty(selectedVersion))
@@ -116,8 +117,8 @@ namespace Updater
                 var latestLoader = loaderJson.RootElement.EnumerateArray()
                     .Where(v => v.GetProperty("stable").GetBoolean() == true)
                     .ToDictionary(
-                        v => v.GetProperty("version").GetString(),
-                        v => v.GetProperty("url").GetString()
+                        v => v.GetProperty("version").GetString() ?? string.Empty,
+                        v => v.GetProperty("url").GetString() ?? string.Empty
                     );
 
                 if (latestLoader.TryGetValue == null)
@@ -159,8 +160,13 @@ namespace Updater
                 JObject promotions = JObject.Parse(json);
 
                 // Get the list of stable versions
-                JObject promos = (JObject)promotions["promos"];
-                List<string> stableVersions = new List<string>();
+                List<string> stableVersions = [];
+
+                if (promotions["promos"] is not JObject promos)
+                {
+                    Console.WriteLine("Promotions data is null.");
+                    return;
+                }
 
                 foreach (var promo in promos)
                 {
@@ -203,7 +209,12 @@ namespace Updater
 
         private static async Task ProcessVersion(string downloadDirectory, JObject promos, string version)
         {
-            string build = promos[$"{version}-latest"].ToString();
+            string? build = promos[$"{version}-latest"]?.ToString();
+            if (build == null)
+            {
+                Console.WriteLine($"Build information for version {version} is missing.");
+                return;
+            }
             string actualDownloadUrl = $"{ForgeApiBaseUrl}{version}-{build}/forge-{version}-{build}-installer.jar";
 
             string fileName = $"forge-{version}-{build}.jar";
@@ -314,7 +325,7 @@ namespace Updater
                         {
                             continue;
                         }
-                        
+
                         await ProcessNeoForgeVersion(downloadDirectory, version);
                     }
                 }
@@ -328,7 +339,7 @@ namespace Updater
         private static bool IsStableVersion(string version)
         {
             // Filter out versions with "-pre", "-rc", or snapshot-like versions (e.g., "25w09b")
-            return !version.Contains("-pre") && !version.Contains("-rc") && !version.Contains("w");
+            return !version.Contains("-pre") && !version.Contains("-rc") && !version.Contains('w');
         }
 
         private static async Task ProcessNeoForgeVersion(string downloadDirectory, string version)
@@ -340,7 +351,7 @@ namespace Updater
                 JObject versionInfo = JObject.Parse(versionInfoJson);
 
                 // Get the server download URL
-                string serverUrl = versionInfo["downloads"]?["server"]?["url"]?.ToString();
+                string? serverUrl = versionInfo["downloads"]?["server"]?["url"]?.ToString();
 
                 if (!string.IsNullOrEmpty(serverUrl))
                 {
@@ -498,7 +509,7 @@ namespace Updater
             }
         }
 
-        private static async Task<string[]> GetAvailablePurpurVersionsAsync(string? selectedVersion = null)
+        private static async Task<string[]?> GetAvailablePurpurVersionsAsync(string? selectedVersion = null)
         {
             try
             {
@@ -512,7 +523,7 @@ namespace Updater
                     versions = jsonDoc.RootElement.GetProperty("versions").EnumerateArray().Where(v => v.GetString() == $"{selectedVersion}").Select(e => e.GetString()).ToArray();
                 }
 
-                return versions;
+                return versions!;
             }
             catch (Exception ex)
             {
@@ -533,7 +544,7 @@ namespace Updater
                 var buildNumbers = buildsArray
                     .Select(e => int.TryParse(e.GetString(), out int num) ? num : (int?)null)
                     .Where(num => num.HasValue)
-                    .Select(num => num.Value);
+                    .Select(num => num!.Value);
 
                 return buildNumbers.Any() ? buildNumbers.Max() : null;
             }
@@ -593,7 +604,7 @@ namespace Updater
 
                     foreach (string? versionAvaliable in versions)
                     {
-                        if (CheckVersionExists("Paper", versionAvaliable) == false)
+                        if (CheckVersionExists("Paper", versionAvaliable!) == false)
                         {
                             continue;
                         }
@@ -653,8 +664,8 @@ namespace Updater
             {
                 string json = await response.Content.ReadAsStringAsync();
                 JObject data = JObject.Parse(json);
-                JArray builds = (JArray)data["builds"];
-                return builds.Last?["build"]?.ToString() ?? "";
+                JArray? builds = data["builds"] as JArray;
+                return builds!.Last?["build"]?.ToString() ?? "";
             }
             return "";
         }
@@ -682,7 +693,7 @@ namespace Updater
                 await RunUpdaterForSoftware(versionDirectory, software);
 
                 Console.WriteLine("----------------------------------------------");
-                Console.WriteLine($"All {software} Server versions are updated!"); 
+                Console.WriteLine($"All {software} Server versions are updated!");
                 Console.WriteLine("----------------------------------------------");
 
             }
@@ -818,15 +829,25 @@ namespace Updater
 
         private static object[,] GetAvailableSoftwares()
         {
+            if (string.IsNullOrEmpty(versionsSupprortListXML))
+            {
+                throw new InvalidOperationException("The path to the supported versions XML file is not set.");
+            }
+
             XmlDocument doc = new XmlDocument();
             doc.Load(versionsSupprortListXML);
 
-            XmlNodeList softwareNodes = doc.SelectNodes("/minecraft_softwares/software");
+            XmlNodeList? softwareNodes = doc.SelectNodes("/minecraft_softwares/software");
             List<object> softwareList = new List<object>();
+
+            if (softwareNodes == null)
+            {
+                return new object[0, 0];
+            }
 
             foreach (XmlNode softwareNode in softwareNodes)
             {
-                string softwareName = softwareNode.Attributes["name"]?.Value;
+                string? softwareName = softwareNode.Attributes?["name"]?.Value;
                 if (!string.IsNullOrEmpty(softwareName) && !softwareList.Contains(softwareName))
                 {
                     softwareList.Add(softwareName);
@@ -845,16 +866,21 @@ namespace Updater
 
         public static bool CheckVersionExists(string softwareName, string version)
         {
-            XmlDocument doc = new XmlDocument();
+            if (string.IsNullOrEmpty(versionsSupprortListXML))
+            {
+                throw new InvalidOperationException("The path to the supported versions XML file is not set.");
+            }
+
+            XmlDocument doc = new();
             doc.Load(versionsSupprortListXML);
 
-            XmlNode softwareNode = doc.SelectSingleNode($"/minecraft_softwares/software[@name='{softwareName}']");
+            XmlNode? softwareNode = doc.SelectSingleNode($"/minecraft_softwares/software[@name='{softwareName}']");
             if (softwareNode == null)
             {
                 return false; // Software not found
             }
 
-            foreach (XmlNode versionNode in softwareNode.SelectNodes("version"))
+            foreach (XmlNode versionNode in softwareNode.SelectNodes("version")!)
             {
                 if (versionNode.InnerText == version)
                 {
