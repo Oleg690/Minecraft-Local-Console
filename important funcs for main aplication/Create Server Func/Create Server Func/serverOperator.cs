@@ -1,11 +1,11 @@
-﻿using System.Text;
-using System.Diagnostics;
-using serverPropriertiesChanger;
+﻿using CoreRCON;
 using databaseChanger;
-using CoreRCON;
+using NetworkConfig;
+using serverPropriertiesChanger;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using NetworkConfig;
+using System.Text;
 using Updater;
 
 namespace CreateServerFunc
@@ -14,11 +14,12 @@ namespace CreateServerFunc
     {
         public static readonly string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))) ?? string.Empty;
         private static readonly string? UpdaterLastCheck = Path.Combine(rootFolder, "lastQuiltorFabricCheckUpdater.txt");
+        private static readonly string? serverPropertiesDefaultPath = Path.Combine(rootFolder + "\\Preset Files\\server.properties");
 
         private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
 
         // ------------------------ Main Create Server Function ------------------------
-        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true, bool Auto_Stop_After_Start = false)
+        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true)
         {
             if (string.IsNullOrEmpty(software)) return LogError("Software not selected!");
             if (string.IsNullOrEmpty(worldName)) worldName = software + " Server";
@@ -31,7 +32,7 @@ namespace CreateServerFunc
                 !ServerOperator.CheckFirewallRuleExists($"MinecraftServer_TCP_{JMX_Port}") &&
                 !ServerOperator.CheckFirewallRuleExists($"MinecraftServer_UDP_{JMX_Port}"))
             {
-                await NetworkConfigSetup.Setup(Server_Port);
+                await NetworkConfigSetup.Setup(Server_Port, JMX_Port);
                 return "";
             }
 
@@ -62,7 +63,7 @@ namespace CreateServerFunc
                 { "enable-query", "true" },
             };
 
-            Console.WriteLine($"Creating {software} Server!");
+            Console.WriteLine($"Seting world settings...");
 
             ProcessStartInfo processInfo = new()
             {
@@ -75,7 +76,20 @@ namespace CreateServerFunc
                 WorkingDirectory = software == "Quilt" ? tempFolderPath : customDirectory
             };
 
+            string serverPropertiesNewPath = Path.Combine(customDirectory, "server.properties");
+
+            if (!File.Exists(serverPropertiesNewPath) && File.Exists(serverPropertiesDefaultPath))
+            {
+                File.Copy(serverPropertiesDefaultPath, serverPropertiesNewPath);
+                Console.WriteLine("Created missing server.properties file.");
+            }
+
+            DataChanger.SetInfo(worldSettings, serverPropertiesNewPath, true);
+            DataChanger.SetInfo(rconSettings, serverPropertiesNewPath, true);
+
             await WaitForPortClosure(RCON_Port, JMX_Port);
+
+            Console.WriteLine($"Creating {software} Server!");
 
             if (software == "Vanilla")
             {
@@ -130,18 +144,6 @@ namespace CreateServerFunc
                         return;
                     }
 
-                    Console.WriteLine("Minecraft server is starting...");
-
-                    string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
-                    if (!File.Exists(serverPropertiesPath))
-                    {
-                        File.Create(serverPropertiesPath).Close();
-                        Console.WriteLine("Created missing server.properties file.");
-                    }
-
-                    DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
-                    DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-
                     Console.WriteLine("Minecraft server started!");
 
                     //          ↓ For output traking ↓
@@ -188,11 +190,12 @@ namespace CreateServerFunc
                         dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Vanilla", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                     }
 
-
-                    Console.WriteLine("Starting minecraft server.");
+                    Console.WriteLine("Minecraft server installation is starting...");
 
                     await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
+
+                Console.WriteLine("Installation completed!");
             }
             catch (Exception ex)
             {
@@ -293,19 +296,6 @@ namespace CreateServerFunc
                     Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
-                string currentDirectory = Directory.GetCurrentDirectory();
-                string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
-
-                if (!File.Exists(serverPropertiesPath))
-                {
-                    File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
-                    Console.WriteLine("Created missing server.properties file.");
-                }
-
-                DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
-                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
 
                 AcceptEULA(forgeJarPath);
@@ -330,19 +320,6 @@ namespace CreateServerFunc
 
             try
             {
-                string currentDirectory = Directory.GetCurrentDirectory();
-                string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
-
-                if (!File.Exists(serverPropertiesPath))
-                {
-                    File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
-                    Console.WriteLine("Created missing server.properties file.");
-                }
-
-                DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
-                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-
                 using (Process process = new Process { StartInfo = processInfo })
                 {
                     process.OutputDataReceived += (sender, e) =>
@@ -507,20 +484,7 @@ namespace CreateServerFunc
 
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
-                string currentDirectory = Directory.GetCurrentDirectory();
-
-                string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
-                if (!File.Exists(serverPropertiesPath))
-                {
-                    File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
-                    Console.WriteLine("Created missing server.properties file.");
-                }
-
                 AcceptEULA(fabricJarPath);
-
-                DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
-                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
 
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
@@ -551,14 +515,7 @@ namespace CreateServerFunc
                         return;
                     }
 
-                    Console.WriteLine("Creating files...");
-
-                    string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
-                    if (!File.Exists(serverPropertiesPath))
-                    {
-                        File.Create(serverPropertiesPath).Close();
-                        Console.WriteLine("Created missing server.properties file.");
-                    }
+                    Console.WriteLine("Minecraft server installation is starting...");
 
                     // Read server output
                     while (process.StandardOutput.EndOfStream == false)
@@ -576,22 +533,20 @@ namespace CreateServerFunc
                             }
 
                             AcceptEULA(purpurJarPath);
-
                         }
                     }
+
                     process.WaitForExit();
-                    Console.WriteLine("Starting minecraft server.");
 
                     if (Insert_Into_DB)
                     {
                         dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Purpur", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                     }
 
-                    DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
-                    DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
-
                     await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
+
+                Console.WriteLine("Installation completed!");
             }
             catch (Exception ex)
             {
@@ -620,14 +575,7 @@ namespace CreateServerFunc
                         return;
                     }
 
-                    Console.WriteLine("Minecraft server is starting...");
-
-                    string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
-                    if (!File.Exists(serverPropertiesPath))
-                    {
-                        File.Create(serverPropertiesPath).Close();
-                        Console.WriteLine("Created missing server.properties file.");
-                    }
+                    Console.WriteLine("Minecraft server installation is starting...");
 
                     // Read server output
                     while (process.StandardOutput.EndOfStream == false)
@@ -649,15 +597,12 @@ namespace CreateServerFunc
                     }
 
                     process.WaitForExit();
-                    Console.WriteLine("Starting minecraft server.");
+                    Console.WriteLine("Installation completed!");
 
                     if (Insert_Into_DB)
                     {
                         dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Paper", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                     }
-
-                    DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
-                    DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
 
                     await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
@@ -740,6 +685,7 @@ namespace CreateServerFunc
                 {
                     dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Quilt", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                 }
+
                 Console.WriteLine("Installation completed!");
 
                 CopyFiles(Path.Combine(tempFolderPath, "server"), customDirectory);
@@ -765,20 +711,7 @@ namespace CreateServerFunc
 
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port);
 
-                string currentDirectory = Directory.GetCurrentDirectory();
-
-                string serverPropertiesPath = Path.Combine(customDirectory, "server.properties");
-                string serverPropertiesPresetPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\Preset Files\\server.properties";
-                if (!File.Exists(serverPropertiesPath))
-                {
-                    File.Copy(serverPropertiesPresetPath, serverPropertiesPath);
-                    Console.WriteLine("Created missing server.properties file.");
-                }
-
                 AcceptEULA(quiltJarPath);
-
-                DataChanger.SetInfo(worldSettings, serverPropertiesPath, true);
-                DataChanger.SetInfo(rconSettings, serverPropertiesPath, true);
 
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
@@ -1165,7 +1098,7 @@ namespace CreateServerFunc
         private static readonly string? StartupTimePath = ServerCreator.rootFolder != null ? Path.Combine(ServerCreator.rootFolder, "serverStartupTime.txt") : null;
 
         // ------------------------- Main Server Operator Commands -------------------------
-        public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Auto_Stop = false)
+        public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int JMX_Port, int RCON_Port, bool Auto_Stop = false, bool noGUI = true)
         {
             while (IsPortInUse(RCON_Port) || IsPortInUse(JMX_Port))
             {
@@ -1173,10 +1106,12 @@ namespace CreateServerFunc
                 Thread.Sleep(1000);
             }
 
-            if (!CheckFirewallRuleExists("MinecraftServer_TCP_25565") && !CheckFirewallRuleExists("MinecraftServer_UDP_25565") && !CheckFirewallRuleExists("MinecraftServer_TCP_25562") && !CheckFirewallRuleExists("MinecraftServer_UDP_25562"))
+            if (!CheckFirewallRuleExists($"MinecraftServer_TCP_{25565}") &&
+                !CheckFirewallRuleExists($"MinecraftServer_UDP_{25565}") &&
+                !CheckFirewallRuleExists($"MinecraftServer_TCP_{JMX_Port}") &&
+                !CheckFirewallRuleExists($"MinecraftServer_UDP_{JMX_Port}"))
             {
-                await NetworkConfigSetup.Setup(25565);
-                await NetworkConfigSetup.Setup(25562);
+                await NetworkConfigSetup.Setup(25565, JMX_Port);
                 return;
             }
 
@@ -1193,14 +1128,14 @@ namespace CreateServerFunc
 
             //           ↓ For debugging! ↓
             Console.WriteLine($"World Number: '{worldNumber}'");
-            //Console.WriteLine($"Software: '{software}'");
-            //Console.WriteLine(software == "Vanilla");
-            //Console.WriteLine(software == "Forge");
-            //Console.WriteLine(software == "NeoForge");
-            //Console.WriteLine(software == "Fabric");
-            //Console.WriteLine(software == "Quilt");
-            //Console.WriteLine(software == "Purpur");
-            //Console.WriteLine(software == "Paper");
+            Console.WriteLine($"Software: '{software}'");
+            //Console.WriteLine("software == \"Vanilla\": " + software == "Vanilla");
+            //Console.WriteLine("software == \"Forge\": " + software == "Forge");
+            //Console.WriteLine("software == \"NeoForge\": " + software == "NeoForge");
+            //Console.WriteLine("software == \"Fabric\": " + software == "Fabric");
+            //Console.WriteLine("software == \"Quilt\": " + software == "Quilt");
+            //Console.WriteLine("software == \"Purpur\": " + software == "Purpur");
+            //Console.WriteLine("software == \"Paper\": " + software == "Paper");
 
 
             ProcessStartInfo serverProcessInfo = new()
@@ -1223,9 +1158,10 @@ namespace CreateServerFunc
                 string version = dbChanger.SpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar";
                 toRunJarFile = Path.Combine(serverPath, version);
 
-                serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " + // nogui
-                                              JMX_Server_Settings +
-                                              $"-jar \"{toRunJarFile}\"";
+                serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M" +
+                                                              JMX_Server_Settings +
+                                                              $"-jar \"{toRunJarFile}\" {(noGUI ? " nogui" : "")} ";
+
             }
             else if (software == "Forge")
             {
@@ -1251,7 +1187,7 @@ namespace CreateServerFunc
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
                                               $"{winArgsPath} " +
-                                              $"{toRunJarFile} %*"; // nogui
+                                              $"{toRunJarFile} {(noGUI ? " nogui" : "")} %*"; // nogui
             }
             else if (software == "NeoForge")
             {
@@ -1260,7 +1196,7 @@ namespace CreateServerFunc
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"-jar \"{toRunJarFile}\" %*"; // nogui
+                                              $"-jar \"{toRunJarFile}\" {(noGUI ? " nogui" : "")} %*"; // nogui
             }
             else if (software == "Fabric")
             {
@@ -1273,7 +1209,7 @@ namespace CreateServerFunc
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"{toRunJarFile} "; // nogui
+                                              $"{toRunJarFile} {(noGUI ? " nogui" : "")} "; // nogui
             }
             else if (software == "Quilt")
             {
@@ -1286,7 +1222,7 @@ namespace CreateServerFunc
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"{toRunJarFile} "; // nogui
+                                              $"{toRunJarFile} {(noGUI ? " nogui" : "")} "; // nogui
             }
             else if (software == "Purpur")
             {
@@ -1295,7 +1231,7 @@ namespace CreateServerFunc
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " + // nogui
                                               JMX_Server_Settings +
-                                              $"-jar \"{toRunJarFile}\" "; // nogui
+                                              $"-jar \"{toRunJarFile}\" {(noGUI ? " nogui" : "")} "; // nogui
             }
             else if (software == "Paper")
             {
@@ -1304,13 +1240,13 @@ namespace CreateServerFunc
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"-jar \"{toRunJarFile}\" "; // nogui
+                                              $"-jar \"{toRunJarFile}\" {(noGUI ? " nogui" : "")} "; // nogui
             }
             else
             {
                 if (worldNumber == "" || worldNumber == null)
                 {
-                    Console.WriteLine("No world number was supplied!");
+                    Console.WriteLine("No worldNumber was supplied!");
                     return;
                 }
                 else if (software == "" || software == null)
@@ -1380,15 +1316,12 @@ namespace CreateServerFunc
         {
             await Countdown(time, operation, worldNumber, RCON_Port, ipAddress);
 
+            await InputForServer("save-all flush", worldNumber, RCON_Port, ipAddress);
             await InputForServer("stop", worldNumber, RCON_Port, ipAddress);
 
-            if (IsPortInUse(JMX_Port))
+            if (IsPortInUse(JMX_Port) || IsPortInUse(RCON_Port))
             {
-                ClosePort(JMX_Port);
-            }
-            else if (IsPortInUse(RCON_Port))
-            {
-                ClosePort(RCON_Port);
+                Kill(RCON_Port, JMX_Port);
             }
         }
 
@@ -1401,11 +1334,8 @@ namespace CreateServerFunc
 
         public static void Kill(int RCON_Port, int JMX_Port)
         {
-            bool RCON_Port_Closed = ClosePort(RCON_Port);
-            bool JMX_Port_Closed = ClosePort(JMX_Port);
-
-            Console.WriteLine("JMX_Port_Closed: " + JMX_Port_Closed);
-            Console.WriteLine("RCON_Port_Closed: " + RCON_Port_Closed);
+            ClosePort(RCON_Port);
+            ClosePort(JMX_Port);
         }
 
         public static async Task InputForServer(string input, string worldNumber, int RCON_Port, string serverIp)
@@ -1444,60 +1374,97 @@ namespace CreateServerFunc
             }
         }
 
-        public static async Task ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, bool Keep_World_On_Version_Change = false)
+        public static async Task ChangeVersion(string worldNumber, string worldPath, string tempFolderPath, string serverVersionsPath, string rootFolder, int numberOfDigitsForWorldNumber, string version, string worldName, string toSoftware, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, bool Keep_World_On_Version_Change = false)
         {
+            if (string.IsNullOrEmpty(worldNumber))
+            {
+                Console.WriteLine("No world number was supplied!");
+                return;
+            }
+
             if (Keep_World_On_Version_Change)
             {
                 string rootWorldsFolder = Path.Combine(rootFolder, "worlds");
+                string rootWorldFilesFolder = Path.Combine(rootWorldsFolder, $"{worldNumber}");
 
-                string? curentSoftware = dbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';").ToString();
+                string? curentSoftware = dbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString();
 
-                if (software == "Vanilla" || software == "Fabric" || software == "Forge" || software == "NeoForge" || software == "Quilt" && curentSoftware != "Purpur")
+                Console.WriteLine("Storing world...");
+
+                if (curentSoftware == "Purpur" || curentSoftware == "Paper")
                 {
-                    string rootWorldFilesFolder = Path.Combine(rootFolder, $"worlds\\{worldNumber}");
-
-                    Console.WriteLine("Copying world...");
-                    CopyFiles("world", tempFolderPath, rootWorldFilesFolder);
-
-                    DeleteFiles(worldPath, false);
-
-                    dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
-
-                    Console.WriteLine("Creating New Server...");
-                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, worldNumber, true, false, true);
-
-                    object[,] filesToDelete = {
-                        { "world" }
-                    };
-
-                    foreach (string file in filesToDelete)
+                    if (toSoftware == "Purpur" || toSoftware == "Paper")
                     {
-                        try
-                        {
-                            string deletedFolderPath = DeleteFolderAndReturnPath(Path.Combine(rootWorldFilesFolder, file));
+                        // Case 1 if the software is from Purpur or Paper to Purpur or Paper
+                        Console.WriteLine("Case 1");
 
-                            if (!string.IsNullOrEmpty(deletedFolderPath))
+                        object[,] worldFiles = {
+                            { "world\\region", "world_nether\\DIM-1", "world_the_end\\DIM1" }
+                        };
+
+                        foreach (string file in worldFiles)
+                        {
+                            try
                             {
-                                Directory.CreateDirectory(deletedFolderPath);
-                                CopyFolderToDirectory(Path.Combine(tempFolderPath, file), deletedFolderPath);
+                                CopyFiles(file, tempFolderPath, rootWorldFilesFolder);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error: {ex.Message}");
                             }
                         }
-                        catch (Exception ex)
+
+                        DeleteFiles(worldPath, false);
+
+                        Console.WriteLine("Database updated.");
+                        dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{toSoftware}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
+
+                        Console.WriteLine("Creating New Server...");
+                        await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, toSoftware, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, worldNumber, Insert_Into_DB: false);
+
+                        Console.WriteLine("Restoring old world.");
+                        foreach (string file in worldFiles)
                         {
-                            Console.WriteLine($"Error: {ex.Message}");
+                            try
+                            {
+                                string fileToChange = Path.Combine(rootWorldFilesFolder, file);
+
+                                DeleteFiles(fileToChange, true);
+
+                                if (!Directory.Exists(fileToChange))
+                                {
+                                    Directory.CreateDirectory(fileToChange);
+                                }
+
+                                CopyFolderToDirectory(Path.Combine(tempFolderPath, file), fileToChange);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error: {ex.Message}");
+                            }
                         }
                     }
+                    else
+                    {
+                        // Case 2 if the software is from Purpur or Paper to other ones
+                        Console.WriteLine("Case 2");
+                    }
                 }
-                else if (software == "Purpur")
+                else
                 {
-                    DeleteFiles(worldPath, false);
-
-                    dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
-
-                    Console.WriteLine("Creating New Server...");
-                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                    if (toSoftware == "Purpur" || toSoftware == "Paper")
+                    {
+                        // Case 3 if the software is not from Purpur or Paper to Purpur or Paper
+                        Console.WriteLine("Case 3");
+                    }
+                    else
+                    {
+                        // Case 3 if the software is not from Purpur or Paper to also not Purpur or Paper
+                        Console.WriteLine("Case 4");
+                    }
                 }
 
+                Console.WriteLine("Deleting temporary wolrd files...");
                 DeleteFiles(tempFolderPath, false);
             }
             else
@@ -1506,11 +1473,13 @@ namespace CreateServerFunc
 
                 DeleteFiles(worldPath, false);
 
-                dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{software}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
+                dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{toSoftware}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
                 Console.WriteLine("Creating New Server...");
-                await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, worldNumber, true, false, true);
+                await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, toSoftware, totalPlayers, worldSettings, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, worldNumber, true, false);
             }
+
+            Console.WriteLine("Version changed succeasfully!");
         }
 
         public static void DeleteServer(string worldNumber, string serverDirectoryPath, bool deleteFromDB = true, bool deleteWholeDirectory = true)
@@ -1567,21 +1536,6 @@ namespace CreateServerFunc
             }
 
             await InputForServer($"say Server is now {action}!", worldNumber, RCON_Port, serverIp);
-        }
-
-        private static string DeleteFolderAndReturnPath(string folderPath)
-        {
-            if (Directory.Exists(folderPath))
-            {
-                Directory.Delete(folderPath, true); // Delete folder and all contents
-                Console.WriteLine($"Folder '{folderPath}' deleted successfully.");
-                return folderPath; // Return the deleted folder path
-            }
-            else
-            {
-                Console.WriteLine($"Folder '{folderPath}' not found.");
-                return string.Empty; // Return empty string if not found
-            }
         }
 
         private static void CopyFolderToDirectory(string sourceFolder, string destinationFolder)

@@ -9,7 +9,7 @@ namespace NetworkConfig
 {
     class NetworkConfigSetup
     {
-        public static async Task Setup(int port)
+        public static async Task Setup(int port1, int port2)
         {
             if (!IsAdministrator())
             {
@@ -21,13 +21,15 @@ namespace NetworkConfig
             Console.WriteLine("Starting Network Configuration...");
 
             // Step 1: Port Forwarding using UPnP
-            await UPnP_Port_Mapping.UPnP_Configuration_Async(port); // -> TODO
+            await UPnP_Port_Mapping.UPnP_Configuration_Async(port1); // -> TODO
+            await UPnP_Port_Mapping.UPnP_Configuration_Async(port2); // -> TODO
 
             // Step 2: Set Static IP
             StaticIPConfig.SetStaticIP("192.168.1.100", "255.255.255.0", "192.168.1.1", "8.8.8.8", "8.8.4.4");
 
             // Step 3: Open Firewall Port
-            FirewallRules.OpenFirewallPort(port);
+            FirewallRules.OpenFirewallPort(port1);
+            FirewallRules.OpenFirewallPort(port2);
 
             if (IsAdministrator())
             {
@@ -61,6 +63,7 @@ namespace NetworkConfig
             try
             {
                 Process.Start(psi);
+                Console.ReadKey();
                 Environment.Exit(0);
             }
             catch (Exception)
@@ -77,28 +80,33 @@ namespace NetworkConfig
         {
             try
             {
-                // Discover a UPnP-enabled router
-                var nat = new NatDiscoverer();
-                var device = await nat.DiscoverDeviceAsync();
+                NatDiscoverer discoverer = new();
+                CancellationTokenSource cts = new(TimeSpan.FromSeconds(10));
 
-                // Get the local IP address of the machine
+                // Discover UPnP-enabled router
+                NatDevice device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
+                if (device == null)
+                {
+                    Console.WriteLine("No UPnP device found on the network.");
+                    return;
+                }
+
+                // Get local IP
                 string localIp = GetLocalIpAddress();
-                Console.WriteLine(localIp);
+                Console.WriteLine($"Local IP: {localIp}");
 
-                // Define the port mapping
-                int externalPort = port;
-                int internalPort = port;
-                string description = "Minecraft Server Port Forwarding";
+                // Define port mapping
+                string description = "Minecraft Server";
 
-                // Add the port mapping for TCP and UDP
-                await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, internalPort, externalPort, description + " TCP"));
-                await device.CreatePortMapAsync(new Mapping(Protocol.Udp, internalPort, externalPort, description + " UDP"));
+                // Add port forwarding rule for TCP
+                await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, port, port, description));
+                await device.CreatePortMapAsync(new Mapping(Protocol.Udp, port, port, description));
 
-                Console.WriteLine($"Port mapping successful! External port {externalPort} is now forwarded to {localIp}:{internalPort}.");
+                Console.WriteLine($"Port mapping successful! External port {port} is now forwarded to {localIp}:{port}.");
             }
             catch (NatDeviceNotFoundException)
             {
-                Console.WriteLine("Device not found. You probably don't have UPnP enabled in the router settings or the router doesn't support it! You need to set port mapping manually!");
+                Console.WriteLine("No UPnP device found on the network.");
             }
             catch (Exception ex)
             {
@@ -106,17 +114,19 @@ namespace NetworkConfig
             }
         }
 
-        static string GetLocalIpAddress()
+        private static string GetLocalIpAddress()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+            try
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
+                using Socket socket = new(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+                socket.Connect("8.8.8.8", 80);
+                IPEndPoint? endPoint = socket.LocalEndPoint as IPEndPoint;
+                return endPoint?.Address.ToString() ?? "Unable to determine local IP";
             }
-            throw new Exception("No network adapters with an IPv4 address found.");
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
         }
     }
 

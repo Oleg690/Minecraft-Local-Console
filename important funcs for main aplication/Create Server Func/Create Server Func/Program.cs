@@ -1,9 +1,9 @@
-﻿using System.Net.Sockets;
-using System.Net;
-using MinecraftServerStats;
+﻿using CreateServerFunc;
 using FileExplorer;
+using MinecraftServerStats;
+using System.Net;
+using System.Net.Sockets;
 using Updater;
-using CreateServerFunc;
 
 namespace MainAppFuncs
 {
@@ -16,7 +16,7 @@ namespace MainAppFuncs
             string version = "";      // e.g. 1.21.4
             string worldNumber = ""; // e.g. 123456789012
             string worldName = "";  // e.g. Minecfraft Server
-            int totalPlayers = 20;
+            int totalPlayers = 10;
             string Server_LocalComputerIP = GetLocalMachineIP();
             string Server_PublicComputerIP = await GetPublicIP();
             int Server_Port = 25565;
@@ -46,15 +46,10 @@ namespace MainAppFuncs
 
             // ↓ All needed directories ↓
             string? currentDirectory = Directory.GetCurrentDirectory();
-            string? rootWorldsFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\worlds";
-            string? rootFolder = Path.GetDirectoryName(rootWorldsFolder) + "\\";
+            string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) ?? throw new InvalidOperationException("Root folder path is null");
+            string? rootWorldsFolder = Path.Combine(rootFolder, "worlds");
             string? serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
-            string? serverPath = Path.Combine(serverDirectoryPath);
-            string? serverJarPath = Path.Combine(serverDirectoryPath, version + ".jar");
-            string? serverLogPath = Path.Combine(serverDirectoryPath, "logs\\latest.log");
-            string? serverPropriertiesPath = Path.Combine(serverDirectoryPath, "server.properties");
             string? serverVersionsPath = Path.Combine(rootFolder, "versions");
-            string? versionsSupprortListXML = Path.Combine(rootFolder, "SupportedVersions.xml");
             string? tempFolderPath = Path.Combine(rootFolder, "temp");
 
             // ↓ Update Available Versions ↓
@@ -66,9 +61,9 @@ namespace MainAppFuncs
             worldNumber = await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, 12, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port);
 
             // ↓ Start Server Func ↓
-            await ServerOperator.Start(worldNumber, serverPath, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port);
+            await ServerOperator.Start(worldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port, noGUI: false);
             await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, "00:00");
-            await ServerOperator.Restart(serverPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, RCON_Port, JMX_Port, "00:00");
+            await ServerOperator.Restart(serverDirectoryPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, RCON_Port, JMX_Port, "00:00");
             ServerOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓

@@ -827,7 +827,7 @@ namespace Updater
             }
         }
 
-        private static object[,] GetAvailableSoftwares()
+        public static object[,] GetAvailableSoftwares()
         {
             if (string.IsNullOrEmpty(versionsSupprortListXML))
             {

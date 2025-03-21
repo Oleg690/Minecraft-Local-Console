@@ -1,0 +1,160 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {
+      "Open.NAT/2.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Open.Nat.dll": {
+            "related": ".XML"
+          }
+        },
+        "runtime": {
+          "lib/net45/Open.Nat.dll": {
+            "related": ".XML"
+          }
+        }
+      },
+      "UPnP/1.1.6": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/UPnP.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/UPnP.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Open.NAT/2.1.0": {
+      "sha512": "cFa5GY3a1LYpgyCkCfi4kY3XyArNNGjx36tQVfY9bQEXQBo8zx9rFKkDrDjOEupy31FPPH/mqLClddLNUl41hQ==",
+      "type": "package",
+      "path": "open.nat/2.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net35/Open.Nat.XML",
+        "lib/net35/Open.Nat.dll",
+        "lib/net35/System.Threading.dll",
+        "lib/net35/System.Threading.xml",
+        "lib/net45/Open.Nat.XML",
+        "lib/net45/Open.Nat.dll",
+        "open.nat.2.1.0.nupkg.sha512",
+        "open.nat.nuspec"
+      ]
+    },
+    "UPnP/1.1.6": {
+      "sha512": "mocatmPRaR0wgnzIHyQBKvTft2MuzTH5JcOiWHnKp0xyljf6ZgRJsanex3iqLp3/Yblba49+v06IRhjUbNsxiA==",
+      "type": "package",
+      "path": "upnp/1.1.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net472/UPnP.dll",
+        "lib/net6.0/UPnP.dll",
+        "lib/netstandard2.0/UPnP.dll",
+        "upnp.1.1.6.nupkg.sha512",
+        "upnp.nuspec"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "Open.NAT >= 2.1.0",
+      "UPnP >= 1.1.6"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\crist\\.nuget\\packages\\": {},
+    "D:\\Visual Studio Code for C\\Shares\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\OpenNatTest\\OpenNatTest.csproj",
+      "projectName": "OpenNatTest",
+      "projectPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\OpenNatTest\\OpenNatTest.csproj",
+      "packagesPath": "C:\\Users\\crist\\.nuget\\packages\\",
+      "outputPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\OpenNatTest\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "D:\\Visual Studio Code for C\\Shares\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\crist\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.200"
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "dependencies": {
+          "Open.NAT": {
+            "target": "Package",
+            "version": "[2.1.0, )"
+          },
+          "UPnP": {
+            "target": "Package",
+            "version": "[1.1.6, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Open.NAT 2.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Open.NAT",
+      "targetGraphs": [
+        "net8.0"
+      ]
+    }
+  ]
+}
