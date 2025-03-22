@@ -1,4 +1,6 @@
-﻿namespace serverPropriertiesChanger
+﻿using com.sun.org.apache.bcel.@internal.classfile;
+
+namespace serverPropriertiesChanger
 {
     class DataChanger
     {
@@ -112,7 +114,8 @@
         {
             for (int i = 0; i < lines.Count; i++)
             {
-                if (lines[i].Contains(textToFind))
+                string[] line = lines[i].Split('=');
+                if (line[0] == textToFind)
                 {
                     return i;
                 }
