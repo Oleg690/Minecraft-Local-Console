@@ -4,21 +4,22 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Principal;
+using Logger;
 
 namespace NetworkConfig
 {
-    class NetworkConfigSetup
+    class NetworkSetup
     {
         public static async Task Setup(int port1, int port2)
         {
             if (!IsAdministrator())
             {
-                Console.WriteLine("Restarting as Administrator...");
+                CodeLogger.ConsoleLog("Restarting as Administrator...");
                 RestartAsAdmin();
                 return;
             }
 
-            Console.WriteLine("Starting Network Configuration...");
+            CodeLogger.ConsoleLog("Starting Network Configuration...");
 
             // Step 1: Port Forwarding using UPnP
             await UPnP_Port_Mapping.UPnP_Configuration_Async(port1); // -> TODO
@@ -36,7 +37,36 @@ namespace NetworkConfig
                 return;
             }
 
-            Console.WriteLine("Network setup completed!");
+            CodeLogger.ConsoleLog("Network setup completed!");
+        }
+        public static string GetLocalIP()
+        {
+            try
+            {
+                using Socket socket = new(AddressFamily.InterNetwork, SocketType.Dgram, 0);
+                socket.Connect("8.8.8.8", 80);
+                IPEndPoint? endPoint = socket.LocalEndPoint as IPEndPoint;
+                return endPoint?.Address.ToString() ?? "Unable to determine local IP";
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+        }
+
+        public static async Task<string> GetPublicIP()
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    return await client.GetStringAsync("https://api64.ipify.org");
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
         }
 
         private static bool IsAdministrator()
@@ -52,6 +82,7 @@ namespace NetworkConfig
                 return principal.IsInRole(WindowsBuiltInRole.Administrator);
             }
         }
+
         private static void RestartAsAdmin()
         {
             ProcessStartInfo psi = new()
@@ -68,7 +99,7 @@ namespace NetworkConfig
             }
             catch (Exception)
             {
-                Console.WriteLine("Failed to start as Administrator. Please run manually as Admin.");
+                CodeLogger.ConsoleLog("Failed to start as Administrator. Please run manually as Admin.");
                 Environment.Exit(1);
             }
         }
@@ -87,13 +118,13 @@ namespace NetworkConfig
                 NatDevice device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
                 if (device == null)
                 {
-                    Console.WriteLine("No UPnP device found on the network.");
+                    CodeLogger.ConsoleLog("No UPnP device found on the network.");
                     return;
                 }
 
                 // Get local IP
-                string localIp = GetLocalIpAddress();
-                Console.WriteLine($"Local IP: {localIp}");
+                string localIp = NetworkSetup.GetLocalIP();
+                CodeLogger.ConsoleLog($"Local IP: {localIp}");
 
                 // Define port mapping
                 string description = "Minecraft Server";
@@ -102,32 +133,19 @@ namespace NetworkConfig
                 await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, port, port, description));
                 await device.CreatePortMapAsync(new Mapping(Protocol.Udp, port, port, description));
 
-                Console.WriteLine($"Port mapping successful! External port {port} is now forwarded to {localIp}:{port}.");
+                CodeLogger.ConsoleLog($"Port mapping successful! External port {port} is now forwarded to {localIp}:{port}.");
             }
             catch (NatDeviceNotFoundException)
             {
-                Console.WriteLine("No UPnP device found on the network.");
+                CodeLogger.ConsoleLog("No UPnP device found on the network.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
 
-        private static string GetLocalIpAddress()
-        {
-            try
-            {
-                using Socket socket = new(AddressFamily.InterNetwork, SocketType.Dgram, 0);
-                socket.Connect("8.8.8.8", 80);
-                IPEndPoint? endPoint = socket.LocalEndPoint as IPEndPoint;
-                return endPoint?.Address.ToString() ?? "Unable to determine local IP";
-            }
-            catch (Exception ex)
-            {
-                return "Error: " + ex.Message;
-            }
-        }
+
     }
 
     public class StaticIPConfig
@@ -161,7 +179,7 @@ namespace NetworkConfig
                 Execute_Command.Execute(dnsAltCommand);
             }
 
-            Console.WriteLine("Static IP configuration verified and updated if necessary.");
+            CodeLogger.ConsoleLog("Static IP configuration verified and updated if necessary.");
         }
 
         private static string GetActiveAdapterName()
@@ -234,7 +252,7 @@ namespace NetworkConfig
                 AddFirewallRule($"MinecraftServer_UDP_{port}", port, "UDP");
             }
 
-            Console.WriteLine($"Firewall rules verified and updated if necessary for port {port}.");
+            CodeLogger.ConsoleLog($"Firewall rules verified and updated if necessary for port {port}.");
         }
 
         private static void AddFirewallRule(string ruleName, int port, string protocol)
@@ -268,7 +286,7 @@ namespace NetworkConfig
             };
             process.Start();
             string result = process.StandardOutput.ReadToEnd();
-            Console.WriteLine(result);
+            CodeLogger.ConsoleLog(result);
             process.WaitForExit();
         }
 
@@ -383,14 +401,14 @@ namespace NetworkConfig
         {
             try
             {
-                Console.WriteLine($"Checking {domain} domain name.");
+                CodeLogger.ConsoleLog($"Checking {domain} domain name.");
 
                 // 1. Resolve the domain name to an IP address
                 IPAddress[] addresses = await Dns.GetHostAddressesAsync(domain);
 
                 if (addresses.Length == 0)
                 {
-                    Console.WriteLine($"Domain {domain} could not be resolved.");
+                    CodeLogger.ConsoleLog($"Domain {domain} could not be resolved.");
                     return false; // Domain doesn't exist
                 }
 
@@ -409,19 +427,19 @@ namespace NetworkConfig
 
                             if (completedTask == timeoutTask)
                             {
-                                Console.WriteLine($"Connection to {domain} timed out.");
+                                CodeLogger.ConsoleLog($"Connection to {domain} timed out.");
                                 continue; // Try the next IP address
                             }
 
                             await connectTask; // Wait for the connection to complete (if it didn't time out)
-                            Console.WriteLine($"Successfully connected to {domain} ({address}) on port {defaultPort}.");
+                            CodeLogger.ConsoleLog($"Successfully connected to {domain} ({address}) on port {defaultPort}.");
                             return true; // Minecraft server is likely running
                         }
                     }
                     catch (Exception ex)
                     {
                         // Catch exceptions like connection refused, etc.
-                        Console.WriteLine($"Error connecting to {domain} ({address}): {ex.Message}");
+                        CodeLogger.ConsoleLog($"Error connecting to {domain} ({address}): {ex.Message}");
                         // Don't immediately return false; try other IP addresses first
                     }
                 }
@@ -430,7 +448,7 @@ namespace NetworkConfig
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error resolving or checking domain {domain}: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error resolving or checking domain {domain}: {ex.Message}");
                 return false;
             }
         }

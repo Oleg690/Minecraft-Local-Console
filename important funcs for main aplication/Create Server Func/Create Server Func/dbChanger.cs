@@ -1,4 +1,5 @@
 ﻿using System.Data.SQLite;
+using Logger;
 
 namespace databaseChanger
 {
@@ -14,7 +15,7 @@ namespace databaseChanger
             if (directory != null && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
-                Console.WriteLine($"Directory created: {directory}");
+                CodeLogger.ConsoleLog($"Directory created: {directory}");
             }
 
             // Establish connection
@@ -24,7 +25,7 @@ namespace databaseChanger
                 {
                     // Open the connection
                     connection.Open();
-                    Console.WriteLine("Connected to the database.");
+                    CodeLogger.ConsoleLog("Connected to the database.");
 
                     // Create a command
                     string query = $"CREATE TABLE IF NOT EXISTS {dbName} (" +
@@ -39,7 +40,7 @@ namespace databaseChanger
                     using (SQLiteCommand command = new SQLiteCommand(query, connection))
                     {
                         command.ExecuteNonQuery();
-                        Console.WriteLine("Table created successfully.");
+                        CodeLogger.ConsoleLog("Table created successfully.");
                     }
 
                     // Insert data
@@ -49,16 +50,16 @@ namespace databaseChanger
                         using (SQLiteCommand insertCommand = new SQLiteCommand(insertDefaultSQL, connection))
                         {
                             insertCommand.ExecuteNonQuery();
-                            Console.WriteLine("Data inserted successfully.");
+                            CodeLogger.ConsoleLog("Data inserted successfully.");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    CodeLogger.ConsoleLog($"Error: {ex.Message}");
                 }
             }
-            Console.WriteLine("Done!");
+            CodeLogger.ConsoleLog("Done!");
         }
 
         public static List<object[]> SpecificDataFunc(string sqlQuery)
@@ -84,7 +85,7 @@ namespace databaseChanger
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    CodeLogger.ConsoleLog(ex.ToString());
                 }
 
             }
@@ -121,7 +122,7 @@ namespace databaseChanger
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex);
+                    CodeLogger.ConsoleLog(ex.ToString());
                 }
 
             }
@@ -148,14 +149,14 @@ namespace databaseChanger
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    CodeLogger.ConsoleLog($"Error: {ex.Message}");
                 }
                 finally
                 {
                     connection.Close();
                 }
             }
-            Console.WriteLine("Data set succeasfully to database!");
+            CodeLogger.ConsoleLog("Data set succeasfully to database!");
         }
 
         public static void DeleteWorldFromDB(string worldNumber)
@@ -174,12 +175,12 @@ namespace databaseChanger
                     using (SQLiteCommand command = new(query, connection))
                     {
                         command.ExecuteNonQuery();
-                        Console.WriteLine("World deleted from DB!");
+                        CodeLogger.ConsoleLog("World deleted from DB!");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    CodeLogger.ConsoleLog($"Error: {ex.Message}");
                 }
                 finally
                 {

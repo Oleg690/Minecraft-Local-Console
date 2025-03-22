@@ -1,4 +1,4 @@
-﻿using com.sun.org.apache.bcel.@internal.classfile;
+﻿using Logger;
 
 namespace serverPropriertiesChanger
 {
@@ -29,7 +29,7 @@ namespace serverPropriertiesChanger
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error reading the file: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error reading the file: {ex.Message}");
                 return string.Empty;
             }
 
@@ -44,7 +44,7 @@ namespace serverPropriertiesChanger
                 // Validate if the file exists
                 if (!File.Exists(filePath))
                 {
-                    Console.WriteLine("filePath: " + filePath);
+                    CodeLogger.ConsoleLog("filePath: " + filePath);
                     throw new FileNotFoundException("The specified file does not exist.");
                 }
 
@@ -62,7 +62,7 @@ namespace serverPropriertiesChanger
                             File.AppendAllText(filePath, $"{settingKey}={settings[i, 1].ToString()}" + Environment.NewLine);
                             lines = new(File.ReadAllLines(filePath));
                             lineNumber = FindLineNumber(settingKey, lines);
-                            Console.WriteLine($"Created line with number {lineNumber} with the content {settingKey}={settings[i, 1].ToString()};");
+                            CodeLogger.ConsoleLog($"Created line with number {lineNumber} with the content {settingKey}={settings[i, 1].ToString()};");
                         }
                         else
                         {
@@ -88,23 +88,23 @@ namespace serverPropriertiesChanger
                             string newContent = lineContents[0] + "=" + settings[i, 1].ToString();
                             lines[lineNumber] = newContent;
 
-                            Console.WriteLine($"Line {lineNumber + 1} was changed from: {oldContent}; to: {newContent};");
+                            CodeLogger.ConsoleLog($"Line {lineNumber + 1} was changed from: {oldContent}; to: {newContent};");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error at line {i}: {ex.Message}");
+                        CodeLogger.ConsoleLog($"Error at line {i}: {ex.Message}");
                     }
                 }
 
                 File.WriteAllLines(filePath, lines);
 
-                Console.WriteLine($"Lines updated succeasfully!");
+                CodeLogger.ConsoleLog($"Lines updated succeasfully!");
             }
             catch (Exception ex)
             {
                 // Handle general errors (file not found, reading/writing errors)
-                Console.WriteLine($"Error writing to the file: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error writing to the file: {ex.Message}");
             }
         }
 

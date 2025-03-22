@@ -1,9 +1,9 @@
 ﻿using CreateServerFunc;
 using FileExplorer;
 using MinecraftServerStats;
-using System.Net;
-using System.Net.Sockets;
 using Updater;
+using NetworkConfig;
+using Logger;
 
 namespace MainAppFuncs
 {
@@ -17,8 +17,8 @@ namespace MainAppFuncs
             string worldNumber = ""; // e.g. 123456789012
             string worldName = "";  // e.g. Minecfraft Server
             int totalPlayers = 20;
-            string Server_LocalComputerIP = GetLocalMachineIP();
-            string Server_PublicComputerIP = await GetPublicIP();
+            string Server_LocalComputerIP = NetworkSetup.GetLocalIP();
+            string Server_PublicComputerIP = await NetworkSetup.GetPublicIP();
             int Server_Port = 25565;
             int JMX_Port = 25562;
             int RCON_Port = 25575;
@@ -52,6 +52,8 @@ namespace MainAppFuncs
             string? tempFolderPath = Path.Combine(rootFolder, "temp");
             string? defaultServerPropertiesPath = Path.Combine(rootFolder + "\\Preset Files\\server.properties");
             string? serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
+            // Create a log file
+            CodeLogger.CreateLogFile();
 
             // ↓ Update Available Versions ↓
             await VersionsUpdater.Update(serverVersionsPath);
@@ -81,38 +83,6 @@ namespace MainAppFuncs
 
             // ↓ Server Stats Loop ↓
             ServerStats.GetServerInfo(serverDirectoryPath, worldNumber, Server_PublicComputerIP, JMX_Port, RCON_Port, Server_Port);
-        }
-
-        private static string GetLocalMachineIP()
-        {
-            try
-            {
-                using (Socket socket = new(AddressFamily.InterNetwork, SocketType.Dgram, 0))
-                {
-                    socket.Connect("8.8.8.8", 80);
-                    IPEndPoint? endPoint = socket.LocalEndPoint as IPEndPoint;
-                    return endPoint?.Address.ToString() ?? "Unable to determine local IP";
-                }
-            }
-            catch (Exception ex)
-            {
-                return "Error: " + ex.Message;
-            }
-        }
-
-        private static async Task<string> GetPublicIP()
-        {
-            try
-            {
-                using (HttpClient client = new HttpClient())
-                {
-                    return await client.GetStringAsync("https://api64.ipify.org");
-                }
-            }
-            catch (Exception ex)
-            {
-                return "Error: " + ex.Message;
-            }
         }
     }
 }

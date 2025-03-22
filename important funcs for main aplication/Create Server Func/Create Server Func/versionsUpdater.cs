@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
-using jdk.nashorn.@internal.ir;
 using Newtonsoft.Json.Linq;
+using Logger;
 
 namespace Updater
 {
@@ -30,7 +30,7 @@ namespace Updater
             var availableVersions = await GetAvailableVanillaServerVersionsAsync(selectedVersion);
             if (availableVersions == null || availableVersions.Count == 0)
             {
-                Console.WriteLine("No available server versions found.");
+                CodeLogger.ConsoleLog("No available server versions found.");
                 return;
             }
 
@@ -58,18 +58,18 @@ namespace Updater
 
                         string savePath = Path.Combine(downloadDirectory, $"vanilla-{version}.jar");
 
-                        Console.WriteLine($"Vanilla Server {version} is missing. Downloading...");
+                        CodeLogger.ConsoleLog($"Vanilla Server {version} is missing. Downloading...");
 
                         await DownloadServerJarAsync(jarUrl, savePath);
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Version not found. Error: {ex.Message}");
+                        CodeLogger.ConsoleLog($"Version not found. Error: {ex.Message}");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"Skipping download for version {version}. Existing build is up to date.");
+                    CodeLogger.ConsoleLog($"Skipping download for version {version}. Existing build is up to date.");
                 }
             }
         }
@@ -98,7 +98,7 @@ namespace Updater
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching versions: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error fetching versions: {ex.Message}");
                 return null;
             }
         }
@@ -123,7 +123,7 @@ namespace Updater
 
                 if (latestLoader.TryGetValue == null)
                 {
-                    Console.WriteLine("Failed to retrieve the latest Fabric Loader version.");
+                    CodeLogger.ConsoleLog("Failed to retrieve the latest Fabric Loader version.");
                     return;
                 }
 
@@ -132,20 +132,20 @@ namespace Updater
                     string localFilePath = Path.Combine(downloadDirectory, $"fabric-installer-{loader.Key}.jar");
                     if (File.Exists(localFilePath))
                     {
-                        Console.WriteLine($"Latest Fabric Universal Server Installer {loader.Key} is already downloaded.");
+                        CodeLogger.ConsoleLog($"Latest Fabric Universal Server Installer {loader.Key} is already downloaded.");
                         return;
                     }
                     else
                     {
                         DeleteFiles(downloadDirectory, false);
-                        Console.WriteLine($"Downloading Fabric Universal Server Installer {loader.Key}...");
+                        CodeLogger.ConsoleLog($"Downloading Fabric Universal Server Installer {loader.Key}...");
                         await DownloadServerJarAsync(loader.Value, localFilePath);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching the latest Fabric version: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error fetching the latest Fabric version: {ex.Message}");
             }
         }
 
@@ -164,7 +164,7 @@ namespace Updater
 
                 if (promotions["promos"] is not JObject promos)
                 {
-                    Console.WriteLine("Promotions data is null.");
+                    CodeLogger.ConsoleLog("Promotions data is null.");
                     return;
                 }
 
@@ -185,7 +185,7 @@ namespace Updater
                     }
                     else
                     {
-                        Console.WriteLine($"Version {selectedVersion} not found in the list of stable versions.");
+                        CodeLogger.ConsoleLog($"Version {selectedVersion} not found in the list of stable versions.");
                     }
                 }
                 else
@@ -203,7 +203,7 @@ namespace Updater
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
             }
         }
 
@@ -212,7 +212,7 @@ namespace Updater
             string? build = promos[$"{version}-latest"]?.ToString();
             if (build == null)
             {
-                Console.WriteLine($"Build information for version {version} is missing.");
+                CodeLogger.ConsoleLog($"Build information for version {version} is missing.");
                 return;
             }
             string actualDownloadUrl = $"{ForgeApiBaseUrl}{version}-{build}/forge-{version}-{build}-installer.jar";
@@ -234,29 +234,29 @@ namespace Updater
                     // Compare build numbers as strings
                     if (CompareForgeBuildNumbers(build, existingBuild)) // Check if the new build is greater
                     {
-                        Console.WriteLine($"Newer build found for version {version}. Existing build: {existingBuild}, New build: {build}");
+                        CodeLogger.ConsoleLog($"Newer build found for version {version}. Existing build: {existingBuild}, New build: {build}");
 
                         // Delete the old file
                         File.Delete(existingFiles[0]);
-                        Console.WriteLine($"Deleted old file: {existingFileName}.jar");
+                        CodeLogger.ConsoleLog($"Deleted old file: {existingFileName}.jar");
 
                         // Download the new file
                         await DownloadServerJarAsync(actualDownloadUrl, destinationPath);
                     }
                     else
                     {
-                        Console.WriteLine($"Skipping download for version {version}. Existing build ({existingBuild}) is up to date.");
+                        CodeLogger.ConsoleLog($"Skipping download for version {version}. Existing build ({existingBuild}) is up to date.");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"Unable to parse build number from existing file: {existingFileName}");
+                    CodeLogger.ConsoleLog($"Unable to parse build number from existing file: {existingFileName}");
                 }
             }
             else
             {
                 // If no local file exists, download the new file
-                Console.WriteLine($"No local file found for version {version}. Downloading new build: {build}");
+                CodeLogger.ConsoleLog($"No local file found for version {version}. Downloading new build: {build}");
 
                 await DownloadServerJarAsync(actualDownloadUrl, destinationPath);
             }
@@ -313,7 +313,7 @@ namespace Updater
                     }
                     else
                     {
-                        Console.WriteLine($"Version {selectedVersion} not found in the list of available versions.");
+                        CodeLogger.ConsoleLog($"Version {selectedVersion} not found in the list of available versions.");
                     }
                 }
                 else
@@ -332,7 +332,7 @@ namespace Updater
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
             }
         }
 
@@ -361,23 +361,23 @@ namespace Updater
                     // Check if a file for this version already exists locally
                     if (File.Exists(destinationPath))
                     {
-                        Console.WriteLine($"Skipping download for version {version}. Existing build is up to date.");
+                        CodeLogger.ConsoleLog($"Skipping download for version {version}. Existing build is up to date.");
                     }
                     else
                     {
                         // Download the server file
-                        Console.WriteLine($"No local file found for version {version}. Downloading...");
+                        CodeLogger.ConsoleLog($"No local file found for version {version}. Downloading...");
                         await DownloadServerJarAsync(serverUrl, destinationPath);
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"Could not find server download URL for version {version}.");
+                    CodeLogger.ConsoleLog($"Could not find server download URL for version {version}.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to process version {version}: {ex.Message}");
+                CodeLogger.ConsoleLog($"Failed to process version {version}: {ex.Message}");
             }
         }
 
@@ -396,27 +396,27 @@ namespace Updater
 
                 if (doc == null)
                 {
-                    Console.WriteLine("Failed to retrieve the latest Quilt Loader version.");
+                    CodeLogger.ConsoleLog("Failed to retrieve the latest Quilt Loader version.");
                     return;
                 }
 
                 string localFilePath = Path.Combine(downloadDirectory, $"quilt-installer-{latestVersion}.jar");
                 if (File.Exists(localFilePath))
                 {
-                    Console.WriteLine($"Latest Quilt Universal Server Installer {latestVersion} is already downloaded.");
+                    CodeLogger.ConsoleLog($"Latest Quilt Universal Server Installer {latestVersion} is already downloaded.");
                     return;
                 }
                 else
                 {
                     DeleteFiles(downloadDirectory, false);
-                    Console.WriteLine($"Downloading Quilt Universal Server Installer {latestVersion}...");
+                    CodeLogger.ConsoleLog($"Downloading Quilt Universal Server Installer {latestVersion}...");
                     string jarUrl = $"{QuiltApiBaseUrl}{latestVersion}/quilt-installer-{latestVersion}.jar";
                     await DownloadServerJarAsync(jarUrl, localFilePath);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching the latest Quilt version: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error fetching the latest Quilt version: {ex.Message}");
             }
         }
 
@@ -442,14 +442,14 @@ namespace Updater
                 }
                 else
                 {
-                    Console.WriteLine($"Skipping {fileName} - Unrecognized format");
+                    CodeLogger.ConsoleLog($"Skipping {fileName} - Unrecognized format");
                 }
             }
 
             var availableVersions = await GetAvailablePurpurVersionsAsync(selectedVersion);
             if (availableVersions == null || availableVersions.Length == 0)
             {
-                Console.WriteLine("No available versions found.");
+                CodeLogger.ConsoleLog("No available versions found.");
                 return;
             }
 
@@ -464,7 +464,7 @@ namespace Updater
 
                 if (latestBuild == null)
                 {
-                    Console.WriteLine($"Skipping {version} because no latest build was found.");
+                    CodeLogger.ConsoleLog($"Skipping {version} because no latest build was found.");
                     continue;
                 }
 
@@ -478,12 +478,12 @@ namespace Updater
                     string oldFileWithoutBuild = Path.Combine(downloadDirectory, $"purpur-{version}.jar");
                     if (File.Exists(oldFileWithoutBuild))
                     {
-                        Console.WriteLine($"Deleting old version without build number: {oldFileWithoutBuild}");
+                        CodeLogger.ConsoleLog($"Deleting old version without build number: {oldFileWithoutBuild}");
                         File.Delete(oldFileWithoutBuild);
                     }
 
                     // Download the latest version and rename it to include the build number
-                    Console.WriteLine($"Purpur {version} is missing. Downloading...");
+                    CodeLogger.ConsoleLog($"Purpur {version} is missing. Downloading...");
                     await DownloadServerJarAsync(url, finalFilePath);
                 }
                 else
@@ -492,18 +492,18 @@ namespace Updater
 
                     if (currentBuild < latestBuild)
                     {
-                        Console.WriteLine($"Purpur {version} is outdated. Updating...");
+                        CodeLogger.ConsoleLog($"Purpur {version} is outdated. Updating...");
                         string oldFile = Path.Combine(downloadDirectory, $"purpur-{version}-{currentBuild}.jar");
                         if (File.Exists(oldFile))
                         {
-                            Console.WriteLine($"Deleting old version: {oldFile}");
+                            CodeLogger.ConsoleLog($"Deleting old version: {oldFile}");
                             File.Delete(oldFile);
                         }
                         await DownloadServerJarAsync(url, finalFilePath);
                     }
                     else
                     {
-                        Console.WriteLine($"Skipping download for version {version}. Existing is up to date.");
+                        CodeLogger.ConsoleLog($"Skipping download for version {version}. Existing is up to date.");
                     }
                 }
             }
@@ -527,7 +527,7 @@ namespace Updater
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching versions: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error fetching versions: {ex.Message}");
                 return null;
             }
         }
@@ -550,7 +550,7 @@ namespace Updater
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error fetching latest build for {version}: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error fetching latest build for {version}: {ex.Message}");
                 return null;
             }
         }
@@ -567,7 +567,7 @@ namespace Updater
 
                     if (string.IsNullOrEmpty(latestBuild))
                     {
-                        Console.WriteLine("Failed to retrieve latest build number.");
+                        CodeLogger.ConsoleLog("Failed to retrieve latest build number.");
                         return;
                     }
 
@@ -581,7 +581,7 @@ namespace Updater
                         string fileName = $"paper-{version}-{latestBuild}.jar";
                         string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/{fileName}";
                         string destinationPath = Path.Combine(downloadDirectory, fileName);
-                        Console.WriteLine($"Paper Server {version} is missing. Downloading...");
+                        CodeLogger.ConsoleLog($"Paper Server {version} is missing. Downloading...");
                         await DownloadServerJarAsync(jarUrl, destinationPath);
                     }
                 }
@@ -598,7 +598,7 @@ namespace Updater
 
                     if (versions.Length == 0)
                     {
-                        Console.WriteLine("No versions found.");
+                        CodeLogger.ConsoleLog("No versions found.");
                         return;
                     }
 
@@ -621,7 +621,7 @@ namespace Updater
                             string fileName = $"paper-{versionAvaliable}-{latestBuild}.jar";
                             string jarUrl = $"{PaperApiBaseUrl}/versions/{versionAvaliable}/builds/{latestBuild}/downloads/{fileName}";
                             string destinationPath = Path.Combine(downloadDirectory, fileName);
-                            Console.WriteLine($"Paper Server {versionAvaliable} is missing. Downloading...");
+                            CodeLogger.ConsoleLog($"Paper Server {versionAvaliable} is missing. Downloading...");
                             await DownloadServerJarAsync(jarUrl, destinationPath);
                         }
                     }
@@ -629,7 +629,7 @@ namespace Updater
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
             }
         }
 
@@ -641,9 +641,9 @@ namespace Updater
                 string existingBuild = parts[2];
                 if (latestBuild != existingBuild)
                 {
-                    Console.WriteLine($"Newer build found for version {version}. Existing build: {existingBuild}, New build: {latestBuild}");
+                    CodeLogger.ConsoleLog($"Newer build found for version {version}. Existing build: {existingBuild}, New build: {latestBuild}");
                     File.Delete(file);
-                    Console.WriteLine($"Deleted old file: {file}");
+                    CodeLogger.ConsoleLog($"Deleted old file: {file}");
                     string fileName = $"paper-{version}-{latestBuild}.jar";
                     string jarUrl = $"{PaperApiBaseUrl}/versions/{version}/builds/{latestBuild}/downloads/{fileName}";
                     string destinationPath = Path.Combine(downloadDirectory, fileName);
@@ -651,7 +651,7 @@ namespace Updater
                 }
                 else
                 {
-                    Console.WriteLine($"Skipping download for version {version}. Existing build ({existingBuild}) is up to date.");
+                    CodeLogger.ConsoleLog($"Skipping download for version {version}. Existing build ({existingBuild}) is up to date.");
                 }
             }
         }
@@ -674,16 +674,16 @@ namespace Updater
 
         public static async Task Update(string serverVersionsPath)
         {
-            Console.WriteLine("--------------------------------------------");
-            Console.WriteLine("Starting versions updater for all softwares.");
-            Console.WriteLine("--------------------------------------------");
+            CodeLogger.ConsoleLog("--------------------------------------------");
+            CodeLogger.ConsoleLog("Starting versions updater for all softwares.");
+            CodeLogger.ConsoleLog("--------------------------------------------");
 
             object[,] softwareTypes = GetAvailableSoftwares();
 
             foreach (string software in softwareTypes)
             {
                 string versionDirectory = Path.Combine(serverVersionsPath, software);
-                Console.WriteLine($"Checking {software} versions in: {versionDirectory} \n");
+                CodeLogger.ConsoleLog($"Checking {software} versions in: {versionDirectory} \n");
 
                 if (!Directory.Exists(versionDirectory))
                 {
@@ -692,22 +692,22 @@ namespace Updater
 
                 await RunUpdaterForSoftware(versionDirectory, software);
 
-                Console.WriteLine("----------------------------------------------");
-                Console.WriteLine($"All {software} Server versions are updated!");
-                Console.WriteLine("----------------------------------------------");
+                CodeLogger.ConsoleLog("----------------------------------------------");
+                CodeLogger.ConsoleLog($"All {software} Server versions are updated!");
+                CodeLogger.ConsoleLog("----------------------------------------------");
 
             }
 
-            Console.WriteLine("--------------------------");
-            Console.WriteLine("All softwares are updated!");
-            Console.WriteLine("--------------------------");
+            CodeLogger.ConsoleLog("--------------------------");
+            CodeLogger.ConsoleLog("All softwares are updated!");
+            CodeLogger.ConsoleLog("--------------------------");
         }
 
         public static async Task Update(string serverVersionsPath, string software)
         {
-            Console.WriteLine("--------------------------------------------");
-            Console.WriteLine($"Starting versions updater for {software}.");
-            Console.WriteLine("--------------------------------------------");
+            CodeLogger.ConsoleLog("--------------------------------------------");
+            CodeLogger.ConsoleLog($"Starting versions updater for {software}.");
+            CodeLogger.ConsoleLog("--------------------------------------------");
 
             string versionDirectory = Path.Combine(serverVersionsPath, software);
 
@@ -719,16 +719,16 @@ namespace Updater
 
             await RunUpdaterForSoftware(versionDirectory, software);
 
-            Console.WriteLine("-------------------------");
-            Console.WriteLine("All versions are updated!");
-            Console.WriteLine("-------------------------");
+            CodeLogger.ConsoleLog("-------------------------");
+            CodeLogger.ConsoleLog("All versions are updated!");
+            CodeLogger.ConsoleLog("-------------------------");
         }
 
         public static async Task Update(string serverVersionsPath, string software, string version)
         {
-            Console.WriteLine("--------------------------------------------");
-            Console.WriteLine($"Starting versions updater for {software}.");
-            Console.WriteLine("--------------------------------------------");
+            CodeLogger.ConsoleLog("--------------------------------------------");
+            CodeLogger.ConsoleLog($"Starting versions updater for {software}.");
+            CodeLogger.ConsoleLog("--------------------------------------------");
 
             string versionDirectory = Path.Combine(serverVersionsPath, software);
 
@@ -740,9 +740,9 @@ namespace Updater
 
             await RunUpdaterForSoftware(versionDirectory, software, version, true);
 
-            Console.WriteLine("-------------------------");
-            Console.WriteLine("All versions are updated!");
-            Console.WriteLine("-------------------------");
+            CodeLogger.ConsoleLog("-------------------------");
+            CodeLogger.ConsoleLog("All versions are updated!");
+            CodeLogger.ConsoleLog("-------------------------");
         }
 
         // ------------------------ ↓ Helpers for Updater Funcs ↓ ------------------------
@@ -753,13 +753,13 @@ namespace Updater
             {
                 if (CheckVersionExists(software, version) == false)
                 {
-                    Console.WriteLine($"Version {version} not found in the list of supported versions.");
+                    CodeLogger.ConsoleLog($"Version {version} not found in the list of supported versions.");
                     return;
                 }
             }
             if (skipCheckForInstallers && (software == "Fabric" || software == "Quilt"))
             {
-                Console.WriteLine("This is an universal Installer, there aren't versions, checking the installer...");
+                CodeLogger.ConsoleLog("This is an universal Installer, there aren't versions, checking the installer...");
             }
             if (software == "Vanilla")
             {
@@ -791,7 +791,7 @@ namespace Updater
             }
             else
             {
-                Console.WriteLine($"Unknown version type: {software}");
+                CodeLogger.ConsoleLog($"Unknown version type: {software}");
             }
         }
 
@@ -802,7 +802,7 @@ namespace Updater
                 if (deleteWholeDirectory)
                 {
                     Directory.Delete(path, true); // Deletes the entire directory and its contents
-                    Console.WriteLine($"Deleted entire directory: {path}");
+                    CodeLogger.ConsoleLog($"Deleted entire directory: {path}");
                 }
                 else
                 {
@@ -810,20 +810,20 @@ namespace Updater
                     foreach (string file in Directory.GetFiles(path))
                     {
                         File.Delete(file);
-                        Console.WriteLine($"Deleted file: {file}");
+                        CodeLogger.ConsoleLog($"Deleted file: {file}");
                     }
 
                     // Delete all subdirectories and their contents
                     foreach (string directory in Directory.GetDirectories(path))
                     {
                         Directory.Delete(directory, true);
-                        Console.WriteLine($"Deleted directory: {directory}");
+                        CodeLogger.ConsoleLog($"Deleted directory: {directory}");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
             }
         }
 
@@ -900,11 +900,11 @@ namespace Updater
                 using var fileStream = File.Create(savePath);
                 await jarResponse.CopyToAsync(fileStream);
 
-                Console.WriteLine($"Downloaded successfully: {Path.GetFileName(savePath)}");
+                CodeLogger.ConsoleLog($"Downloaded successfully: {Path.GetFileName(savePath)}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to download {jarUrl}: {ex.Message}");
+                CodeLogger.ConsoleLog($"Failed to download {jarUrl}: {ex.Message}");
                 if (File.Exists(savePath))
                 {
                     File.Delete(savePath);

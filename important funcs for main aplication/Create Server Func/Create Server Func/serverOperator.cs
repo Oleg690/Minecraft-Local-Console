@@ -1,6 +1,5 @@
 ﻿using CoreRCON;
 using databaseChanger;
-using java.util;
 using NetworkConfig;
 using serverPropriertiesChanger;
 using System.Diagnostics;
@@ -8,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Updater;
+using Logger;
 
 namespace CreateServerFunc
 {
@@ -32,7 +32,7 @@ namespace CreateServerFunc
                 !ServerOperator.CheckFirewallRuleExists($"MinecraftServer_TCP_{JMX_Port}") &&
                 !ServerOperator.CheckFirewallRuleExists($"MinecraftServer_UDP_{JMX_Port}"))
             {
-                await NetworkConfigSetup.Setup(Server_Port, JMX_Port);
+                await NetworkSetup.Setup(Server_Port, JMX_Port);
                 return "";
             }
 
@@ -40,7 +40,7 @@ namespace CreateServerFunc
             string uniqueNumber = worldNumber ?? GenerateUniqueRandomNumber(12, rootWorldsFolder);
             string customDirectory = Path.Combine(rootWorldsFolder, uniqueNumber);
             Directory.CreateDirectory(customDirectory);
-            Console.WriteLine($"Created server directory: {customDirectory}");
+            CodeLogger.ConsoleLog($"Created server directory: {customDirectory}");
 
             // Founding the verison in the versions folder
             string jarFileName = GetJarFilePath(rootFolder, software, version);
@@ -52,7 +52,7 @@ namespace CreateServerFunc
             File.Copy(jarFilePath, destinationJarPath);
             string jarPath = Path.Combine(Path.GetDirectoryName(destinationJarPath) ?? throw new Exception("Failed to get the destinationJarPath file name."), version + ".jar");
             RenameFile(destinationJarPath, jarPath);
-            Console.WriteLine("Server .jar file copied to the custom directory.");
+            CodeLogger.ConsoleLog("Server .jar file copied to the custom directory.");
 
             string rconPassword = worldNumber != null ? GetRconPassword(worldNumber) : GeneratePassword(20);
 
@@ -63,7 +63,7 @@ namespace CreateServerFunc
                 { "enable-query", "true" },
             };
 
-            Console.WriteLine($"Seting world settings...");
+            CodeLogger.ConsoleLog($"Seting world settings...");
 
             ProcessStartInfo processInfo = new()
             {
@@ -81,7 +81,7 @@ namespace CreateServerFunc
             if (!File.Exists(serverPropertiesNewPath) && File.Exists(defaultServerPropertiesPath))
             {
                 File.Copy(defaultServerPropertiesPath, serverPropertiesNewPath);
-                Console.WriteLine("Created missing server.properties file.");
+                CodeLogger.ConsoleLog("Created missing server.properties file.");
             }
 
             DataChanger.SetInfo(worldSettings, serverPropertiesNewPath, true);
@@ -89,7 +89,7 @@ namespace CreateServerFunc
 
             await WaitForPortClosure(RCON_Port, JMX_Port);
 
-            Console.WriteLine($"Creating {software} Server!");
+            CodeLogger.ConsoleLog($"Creating {software} Server!");
 
             if (software == "Vanilla")
             {
@@ -120,6 +120,7 @@ namespace CreateServerFunc
                 await QuiltServerInitialisation(processInfo, customDirectory, jarPath, tempFolderPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, JMX_Port, RCON_Port, Server_Auto_Start, Insert_Into_DB);
             }
 
+            CodeLogger.ConsoleLog("World Created Succeasfully");
             return uniqueNumber;
         }
 
@@ -140,11 +141,11 @@ namespace CreateServerFunc
                 {
                     if (process == null)
                     {
-                        Console.WriteLine("Failed to start the Minecraft server.");
+                        CodeLogger.ConsoleLog("Failed to start the Minecraft server.");
                         return;
                     }
 
-                    Console.WriteLine("Minecraft server started!");
+                    CodeLogger.ConsoleLog("Minecraft server started!");
 
                     //          ↓ For output traking ↓
                     process.OutputDataReceived += (sender, e) =>
@@ -183,23 +184,23 @@ namespace CreateServerFunc
                     process.BeginErrorReadLine();
 
                     process.WaitForExit();
-                    Console.WriteLine($"Process for the server has stopped with exit code: {process.ExitCode}");
+                    CodeLogger.ConsoleLog($"Process for the server has stopped with exit code: {process.ExitCode}");
                 }
 
-                Console.WriteLine("Installation completed!");
+                CodeLogger.ConsoleLog("Installation completed!");
 
                 if (Insert_Into_DB)
                 {
                     dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Vanilla", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                 }
 
-                Console.WriteLine("Minecraft server installation is starting...");
+                CodeLogger.ConsoleLog("Minecraft server installation is starting...");
 
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
 
@@ -221,32 +222,32 @@ namespace CreateServerFunc
                             if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
                             {
                                 currentProgress = 10;
-                                Console.WriteLine($"Progress: {currentProgress}% - Extracting main jar...");
+                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Extracting main jar...");
                             }
                             else if (e.Data.Contains("Downloading library from") && currentProgress < 30)
                             {
                                 currentProgress = 30;
-                                Console.WriteLine($"Progress: {currentProgress}% - Downloading libraries...");
+                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Downloading libraries...");
                             }
                             else if (e.Data.Contains("Checksum validated") && currentProgress < 50)
                             {
                                 currentProgress = 50;
-                                Console.WriteLine($"Progress: {currentProgress}% - Libraries validated...");
+                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Libraries validated...");
                             }
                             else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
                             {
                                 currentProgress = 70;
-                                Console.WriteLine($"Progress: {currentProgress}% - Extracting server files...");
+                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Extracting server files...");
                             }
                             else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
                             {
                                 currentProgress = 85;
-                                Console.WriteLine($"Progress: {currentProgress}% - Processing bundled files...");
+                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Processing bundled files...");
                             }
                             else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
                             {
                                 currentProgress = 100;
-                                Console.WriteLine($"Progress: {currentProgress}% - Files installation complete!");
+                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Files installation complete!");
                             }
                         }
                     };
@@ -255,7 +256,7 @@ namespace CreateServerFunc
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
-                            Console.WriteLine($"Error: {e.Data}");
+                            CodeLogger.ConsoleLog($"Error: {e.Data}");
                         }
                     };
 
@@ -266,7 +267,7 @@ namespace CreateServerFunc
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    Console.WriteLine("Minecraft server installation is starting...");
+                    CodeLogger.ConsoleLog("Minecraft server installation is starting...");
 
                     process.WaitForExit();
                 }
@@ -275,7 +276,7 @@ namespace CreateServerFunc
                 {
                     dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Forge", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                 }
-                Console.WriteLine("Installation completed!");
+                CodeLogger.ConsoleLog("Installation completed!");
 
                 File.Delete(forgeJarPath);
 
@@ -296,15 +297,15 @@ namespace CreateServerFunc
                     Directory.CreateDirectory(customDirectory + $"\\mods");
                 }
 
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, Auto_Stop:true);
 
                 AcceptEULA(forgeJarPath);
 
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, Auto_Stop:true);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
 
@@ -326,6 +327,8 @@ namespace CreateServerFunc
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
+                            Console.WriteLine($"{e.Data}");
+
                             if (e.Data.Contains("You need to agree to the EULA") || e.Data.Contains("RCON running on") || e.Data.Contains("Done"))
                             {
                                 ServerOperator.Kill(RCON_Port, JMX_Port);
@@ -355,7 +358,7 @@ namespace CreateServerFunc
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    Console.WriteLine("Minecraft server installation is starting...");
+                    CodeLogger.ConsoleLog("Minecraft server installation is starting...");
 
                     process.WaitForExit();
                 }
@@ -364,7 +367,7 @@ namespace CreateServerFunc
                 {
                     dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "NeoForge", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                 }
-                Console.WriteLine("Installation completed!");
+                CodeLogger.ConsoleLog("Installation completed!");
 
                 object[,] filesToDelete = {
                 { "run.bat", "run.sh", "user_jvm_args.txt", "installer.log" }
@@ -387,7 +390,7 @@ namespace CreateServerFunc
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
 
@@ -399,46 +402,6 @@ namespace CreateServerFunc
             {
                 using (Process process = new Process { StartInfo = processInfo })
                 {
-                    int currentProgress = 0;
-
-                    process.OutputDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                        {
-                            // Determine progress based on output logs and update state
-                            if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
-                            {
-                                currentProgress = 10;
-                                Console.WriteLine($"Progress: {currentProgress}% - Extracting main jar...");
-                            }
-                            else if (e.Data.Contains("Downloading library from") && currentProgress < 30)
-                            {
-                                currentProgress = 30;
-                                Console.WriteLine($"Progress: {currentProgress}% - Downloading libraries...");
-                            }
-                            else if (e.Data.Contains("Checksum validated") && currentProgress < 50)
-                            {
-                                currentProgress = 50;
-                                Console.WriteLine($"Progress: {currentProgress}% - Libraries validated...");
-                            }
-                            else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
-                            {
-                                currentProgress = 70;
-                                Console.WriteLine($"Progress: {currentProgress}% - Extracting server files...");
-                            }
-                            else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
-                            {
-                                currentProgress = 85;
-                                Console.WriteLine($"Progress: {currentProgress}% - Processing bundled files...");
-                            }
-                            else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
-                            {
-                                currentProgress = 100;
-                                Console.WriteLine($"Progress: {currentProgress}% - Files installation complete!");
-                            }
-                        }
-                    };
-
                     process.ErrorDataReceived += (sender, e) =>
                     {
                         if (!string.IsNullOrEmpty(e.Data))
@@ -454,7 +417,7 @@ namespace CreateServerFunc
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    Console.WriteLine("Minecraft server installation is starting...");
+                    CodeLogger.ConsoleLog("Minecraft server installation is starting...");
 
                     process.WaitForExit();
                 }
@@ -463,7 +426,7 @@ namespace CreateServerFunc
                 {
                     dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Fabric", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                 }
-                Console.WriteLine("Installation completed!");
+                CodeLogger.ConsoleLog("Installation completed!");
 
                 object[,] filesToDelete = {
                 { "fabric-server-launch.jar", "fabric-server-launcher.properties", $"{version}.jar" }
@@ -490,7 +453,7 @@ namespace CreateServerFunc
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
 
@@ -510,11 +473,11 @@ namespace CreateServerFunc
                 {
                     if (process == null)
                     {
-                        Console.WriteLine("Failed to start the Minecraft server.");
+                        CodeLogger.ConsoleLog("Failed to start the Minecraft server.");
                         return;
                     }
 
-                    Console.WriteLine("Minecraft server installation is starting...");
+                    CodeLogger.ConsoleLog("Minecraft server installation is starting...");
 
                     // Read server output
                     while (process.StandardOutput.EndOfStream == false)
@@ -545,11 +508,11 @@ namespace CreateServerFunc
                     await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
 
-                Console.WriteLine("Installation completed!");
+                CodeLogger.ConsoleLog("Installation completed!");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
 
@@ -569,11 +532,11 @@ namespace CreateServerFunc
                 {
                     if (process == null)
                     {
-                        Console.WriteLine("Failed to start the Minecraft server.");
+                        CodeLogger.ConsoleLog("Failed to start the Minecraft server.");
                         return;
                     }
 
-                    Console.WriteLine("Minecraft server installation is starting...");
+                    CodeLogger.ConsoleLog("Minecraft server installation is starting...");
 
                     // Read server output
                     while (process.StandardOutput.EndOfStream == false)
@@ -604,11 +567,11 @@ namespace CreateServerFunc
                     await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, JMX_Port, RCON_Port, true);
                 }
 
-                Console.WriteLine("Installation completed!");
+                CodeLogger.ConsoleLog("Installation completed!");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
 
@@ -620,51 +583,11 @@ namespace CreateServerFunc
             {
                 using (Process process = new Process { StartInfo = processInfo })
                 {
-                    int currentProgress = 0;
-
-                    process.OutputDataReceived += (sender, e) =>
-                    {
-                        if (!string.IsNullOrEmpty(e.Data))
-                        {
-                            // Determine progress based on output logs and update state
-                            if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
-                            {
-                                currentProgress = 10;
-                                Console.WriteLine($"Progress: {currentProgress}% - Extracting main jar...");
-                            }
-                            else if (e.Data.Contains("Downloading library from") && currentProgress < 30)
-                            {
-                                currentProgress = 30;
-                                Console.WriteLine($"Progress: {currentProgress}% - Downloading libraries...");
-                            }
-                            else if (e.Data.Contains("Checksum validated") && currentProgress < 50)
-                            {
-                                currentProgress = 50;
-                                Console.WriteLine($"Progress: {currentProgress}% - Libraries validated...");
-                            }
-                            else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
-                            {
-                                currentProgress = 70;
-                                Console.WriteLine($"Progress: {currentProgress}% - Extracting server files...");
-                            }
-                            else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
-                            {
-                                currentProgress = 85;
-                                Console.WriteLine($"Progress: {currentProgress}% - Processing bundled files...");
-                            }
-                            else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
-                            {
-                                currentProgress = 100;
-                                Console.WriteLine($"Progress: {currentProgress}% - Files installation complete!");
-                            }
-                        }
-                    };
-
                     process.ErrorDataReceived += (sender, e) =>
                     {
                         if (!string.IsNullOrEmpty(e.Data))
                         {
-                            Console.WriteLine($"Error: {e.Data}");
+                            CodeLogger.ConsoleLog($"Error: {e.Data}");
                         }
                     };
 
@@ -675,7 +598,7 @@ namespace CreateServerFunc
                     process.BeginOutputReadLine();
                     process.BeginErrorReadLine();
 
-                    Console.WriteLine("Minecraft server installation is starting...");
+                    CodeLogger.ConsoleLog("Minecraft server installation is starting...");
 
                     process.WaitForExit();
                 }
@@ -685,7 +608,7 @@ namespace CreateServerFunc
                     dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", "Quilt", $"{version}", $"{totalPlayers}", $"{rconPassword}");
                 }
 
-                Console.WriteLine("Installation completed!");
+                CodeLogger.ConsoleLog("Installation completed!");
 
                 CopyFiles(Path.Combine(tempFolderPath, "server"), customDirectory);
 
@@ -716,7 +639,7 @@ namespace CreateServerFunc
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
 
@@ -729,7 +652,7 @@ namespace CreateServerFunc
                 FileInfo fileInfo = new FileInfo(fileName);
                 File.Move(fileName, newName);
 
-                Console.WriteLine($"File has been renamed successfully.");
+                CodeLogger.ConsoleLog($"File has been renamed successfully.");
             }
             catch (Exception ex)
             {
@@ -764,7 +687,7 @@ namespace CreateServerFunc
             // Handle exceptions, such as no matching jar found
             if (jarPath == null)
             {
-                Console.WriteLine("No jar file found with the specified version.");
+                CodeLogger.ConsoleLog("No jar file found with the specified version.");
             }
             return ["0", "No jar file found with the specified version."];
         }
@@ -777,11 +700,11 @@ namespace CreateServerFunc
             try
             {
                 File.WriteAllText(eulaFile, "eula=true");
-                Console.WriteLine("EULA accepted. Restart the server.");
+                CodeLogger.ConsoleLog("EULA accepted. Restart the server.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to write EULA file: {ex.Message}");
+                CodeLogger.ConsoleLog($"Failed to write EULA file: {ex.Message}");
             }
         }
 
@@ -855,7 +778,7 @@ namespace CreateServerFunc
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
             }
 
             return false;
@@ -903,7 +826,7 @@ namespace CreateServerFunc
                 // Ensure the folder exists
                 if (!Directory.Exists(folderPath))
                 {
-                    Console.WriteLine("The specified folder does not exist.");
+                    CodeLogger.ConsoleLog("The specified folder does not exist.");
                     return null;
                 }
 
@@ -936,7 +859,7 @@ namespace CreateServerFunc
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
                 return null;
             }
         }
@@ -1014,13 +937,13 @@ namespace CreateServerFunc
             {
                 if (ShouldRunNow() || localFiles.Length == 0)
                 {
-                    Console.WriteLine("Checking for updates...");
+                    CodeLogger.ConsoleLog("Checking for updates...");
                     await VersionsUpdater.Update(serverVersionsPath, software);
                     File.WriteAllText(UpdaterLastCheck ?? throw new Exception("Failed to write in the UpdaterLastCheck.txt file."), DateTime.UtcNow.ToString("o"));
                     localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
                     if (localFiles.Length == 0)
                     {
-                        Console.WriteLine("Error downloading the server file.");
+                        CodeLogger.ConsoleLog("Error downloading the server file.");
                         return;
                     }
                 }
@@ -1037,7 +960,7 @@ namespace CreateServerFunc
                 }
                 if (!_contiune)
                 {
-                    Console.WriteLine("Version not found in local files! Downloading it...");
+                    CodeLogger.ConsoleLog("Version not found in local files! Downloading it...");
                     await VersionsUpdater.Update(serverVersionsPath, software, version);
 
                     localFiles = Directory.GetFiles(Path.Combine(serverVersionsPath, software), "*.jar");
@@ -1051,7 +974,7 @@ namespace CreateServerFunc
                     }
                     if (!_contiune)
                     {
-                        Console.WriteLine($"Error downloading the server file with the version {version}.");
+                        CodeLogger.ConsoleLog($"Error downloading the server file with the version {version}.");
                         return;
                     }
                 }
@@ -1060,7 +983,7 @@ namespace CreateServerFunc
 
         private static string LogError(string message)
         {
-            Console.WriteLine(message);
+            CodeLogger.ConsoleLog(message);
             return message;
         }
 
@@ -1068,7 +991,7 @@ namespace CreateServerFunc
         {
             while (ServerOperator.IsPortInUse(rconPort) || ServerOperator.IsPortInUse(jmxPort))
             {
-                Console.WriteLine("Port not closed!");
+                CodeLogger.ConsoleLog("Port not closed!");
                 await Task.Delay(1000);
             }
         }
@@ -1101,7 +1024,7 @@ namespace CreateServerFunc
         {
             while (IsPortInUse(RCON_Port) || IsPortInUse(JMX_Port))
             {
-                Console.WriteLine("Port not closed!");
+                CodeLogger.ConsoleLog("Port not closed!");
                 Thread.Sleep(1000);
             }
 
@@ -1110,7 +1033,7 @@ namespace CreateServerFunc
                 !CheckFirewallRuleExists($"MinecraftServer_TCP_{JMX_Port}") &&
                 !CheckFirewallRuleExists($"MinecraftServer_UDP_{JMX_Port}"))
             {
-                await NetworkConfigSetup.Setup(25565, JMX_Port);
+                await NetworkSetup.Setup(25565, JMX_Port);
                 return;
             }
 
@@ -1126,16 +1049,15 @@ namespace CreateServerFunc
             string software = string.Join("\n", softwareList.Select(arr => string.Join(", ", arr)));
 
             //           ↓ For debugging! ↓
-            Console.WriteLine($"World Number: '{worldNumber}'");
-            Console.WriteLine($"Software: '{software}'");
-            //Console.WriteLine("software == \"Vanilla\": " + software == "Vanilla");
-            //Console.WriteLine("software == \"Forge\": " + software == "Forge");
-            //Console.WriteLine("software == \"NeoForge\": " + software == "NeoForge");
-            //Console.WriteLine("software == \"Fabric\": " + software == "Fabric");
-            //Console.WriteLine("software == \"Quilt\": " + software == "Quilt");
-            //Console.WriteLine("software == \"Purpur\": " + software == "Purpur");
-            //Console.WriteLine("software == \"Paper\": " + software == "Paper");
-
+            CodeLogger.ConsoleLog($"World Number: '{worldNumber}'");
+            CodeLogger.ConsoleLog($"Software: '{software}'");
+            //CodeLogger.ConsoleLog("software == \"Vanilla\": " + software == "Vanilla");
+            //CodeLogger.ConsoleLog("software == \"Forge\": " + software == "Forge");
+            //CodeLogger.ConsoleLog("software == \"NeoForge\": " + software == "NeoForge");
+            //CodeLogger.ConsoleLog("software == \"Fabric\": " + software == "Fabric");
+            //CodeLogger.ConsoleLog("software == \"Quilt\": " + software == "Quilt");
+            //CodeLogger.ConsoleLog("software == \"Purpur\": " + software == "Purpur");
+            //CodeLogger.ConsoleLog("software == \"Paper\": " + software == "Paper");
 
             ProcessStartInfo serverProcessInfo = new()
             {
@@ -1148,7 +1070,7 @@ namespace CreateServerFunc
                 WorkingDirectory = serverPath
             };
 
-            Console.WriteLine($"Starting {software} Server!");
+            CodeLogger.ConsoleLog($"Starting {software} Server!");
 
             string? toRunJarFile = "";
 
@@ -1168,7 +1090,7 @@ namespace CreateServerFunc
 
                 if (winArgsPath != "")
                 {
-                    winArgsPath = $"@\"{winArgsPath}\" ";
+                    winArgsPath = $"@\"{winArgsPath}\"";
                 }
 
                 toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
@@ -1179,14 +1101,16 @@ namespace CreateServerFunc
 
                     if (toRunJarFile == null)
                     {
-                        Console.WriteLine("No server file found");
+                        CodeLogger.ConsoleLog("No server file found");
                     }
                 }
-
+                Console.WriteLine($"toRunJarFile: {toRunJarFile}");
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
                                               $"{winArgsPath} " +
-                                              $"{toRunJarFile} {(noGUI ? "nogui" : "")} %*";
+                                              $"{toRunJarFile} {(noGUI ? "nogui" : "")}";
+
+                Console.WriteLine($"serverProcessInfo.Arguments: {serverProcessInfo.Arguments}");
             }
             else if (software == "NeoForge")
             {
@@ -1195,7 +1119,7 @@ namespace CreateServerFunc
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"-jar \"{toRunJarFile}\" {(noGUI ? "nogui" : "")} %*";
+                                              $"-jar \"{toRunJarFile}\" {(noGUI ? "nogui" : "")}";
             }
             else if (software == "Fabric")
             {
@@ -1203,12 +1127,12 @@ namespace CreateServerFunc
 
                 if (toRunJarFile == null)
                 {
-                    Console.WriteLine("No server file found");
+                    CodeLogger.ConsoleLog("No server file found");
                 }
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"{toRunJarFile} {(noGUI ? "nogui" : "")} ";
+                                              $"{toRunJarFile} {(noGUI ? "nogui" : "")}";
             }
             else if (software == "Quilt")
             {
@@ -1216,12 +1140,12 @@ namespace CreateServerFunc
 
                 if (toRunJarFile == null)
                 {
-                    Console.WriteLine("No server file found");
+                    CodeLogger.ConsoleLog("No server file found");
                 }
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"{toRunJarFile} {(noGUI ? "nogui" : "")} ";
+                                              $"{toRunJarFile} {(noGUI ? "nogui" : "")}";
             }
             else if (software == "Purpur")
             {
@@ -1230,7 +1154,7 @@ namespace CreateServerFunc
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"-jar \"{toRunJarFile}\" {(noGUI ? "nogui" : "")} ";
+                                              $"-jar \"{toRunJarFile}\" {(noGUI ? "nogui" : "")}";
             }
             else if (software == "Paper")
             {
@@ -1239,18 +1163,18 @@ namespace CreateServerFunc
 
                 serverProcessInfo.Arguments = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
                                               JMX_Server_Settings +
-                                              $"-jar \"{toRunJarFile}\" {(noGUI ? "nogui" : "")} ";
+                                              $"-jar \"{toRunJarFile}\" {(noGUI ? "nogui" : "")}";
             }
             else
             {
                 if (worldNumber == "" || worldNumber == null)
                 {
-                    Console.WriteLine("No worldNumber was supplied!");
+                    CodeLogger.ConsoleLog("No worldNumber was supplied!");
                     return;
                 }
                 else if (software == "" || software == null)
                 {
-                    Console.WriteLine("No software was supplied!");
+                    CodeLogger.ConsoleLog("No software was supplied!");
                     return;
                 }
             }
@@ -1259,11 +1183,11 @@ namespace CreateServerFunc
             {
                 if (process == null)
                 {
-                    Console.WriteLine("Failed to start the Minecraft server!");
+                    CodeLogger.ConsoleLog("Failed to start the Minecraft server!");
                     return;
                 }
 
-                Console.WriteLine("Minecraft server started!");
+                CodeLogger.ConsoleLog("Minecraft server started!");
 
                 RecordServerStart();
 
@@ -1307,7 +1231,7 @@ namespace CreateServerFunc
                 process.BeginErrorReadLine();
 
                 process.WaitForExit();
-                Console.WriteLine($"Process for the server has stopped with exit code: {process.ExitCode}");
+                CodeLogger.ConsoleLog($"Process for the server has stopped with exit code: {process.ExitCode}");
             }
         }
 
@@ -1359,19 +1283,19 @@ namespace CreateServerFunc
                 // Create an RCON client
                 using (var rcon = new RCON(serverAddress, port, password))
                 {
-                    Console.WriteLine("Connecting to the server...");
+                    CodeLogger.ConsoleLog("Connecting to the server...");
                     await rcon.ConnectAsync();
 
-                    Console.WriteLine("Connected. Sending command...");
+                    CodeLogger.ConsoleLog("Connected. Sending command...");
                     // Send a command
                     string response = await rcon.SendCommandAsync(input);
                     // Output the server response
-                    Console.WriteLine($"Server response: {response}");
+                    CodeLogger.ConsoleLog($"Server response: {response}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
             }
         }
 
@@ -1379,7 +1303,7 @@ namespace CreateServerFunc
         {
             if (string.IsNullOrEmpty(worldNumber))
             {
-                Console.WriteLine("No world number was supplied!");
+                CodeLogger.ConsoleLog("No world number was supplied!");
                 return;
             }
 
@@ -1402,23 +1326,23 @@ namespace CreateServerFunc
             bool isCurrentPaperOrPurpur = currentSoftware == "Purpur" || currentSoftware == "Paper";
             bool isNewPaperOrPurpur = toSoftware == "Purpur" || toSoftware == "Paper";
 
-            Console.WriteLine("Storing world...");
+            CodeLogger.ConsoleLog("Storing world...");
             BackupWorldFiles(worldFilesPaths, tempFolderPath, rootWorldFilesFolder, isCurrentPaperOrPurpur);
-            Console.WriteLine("World saved...");
+            CodeLogger.ConsoleLog("World saved...");
 
             DeleteFiles(worldPath, false);
-            Console.WriteLine("Database updated.");
+            CodeLogger.ConsoleLog("Database updated.");
             dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{toSoftware}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
-            Console.WriteLine("Creating New Server...");
+            CodeLogger.ConsoleLog("Creating New Server...");
             await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, toSoftware, totalPlayers, worldSettings, processMemoryAllocation, ipAddress, serverPort, jmxPort, rconPort, worldNumber, Insert_Into_DB: false);
 
-            Console.WriteLine("Restoring old world...");
+            CodeLogger.ConsoleLog("Restoring old world...");
             RestoreWorldFiles(worldFilesPaths, tempFolderPath, rootWorldFilesFolder, isNewPaperOrPurpur);
 
-            Console.WriteLine("Deleting old stored world files...");
+            CodeLogger.ConsoleLog("Deleting old stored world files...");
             DeleteFiles(tempFolderPath, false);
-            Console.WriteLine("Version changed successfully!");
+            CodeLogger.ConsoleLog("Version changed successfully!");
         }
 
         public static void DeleteServer(string worldNumber, string serverDirectoryPath, bool deleteFromDB = true, bool deleteWholeDirectory = true)
@@ -1429,7 +1353,7 @@ namespace CreateServerFunc
             }
 
             DeleteFiles(serverDirectoryPath, deleteWholeDirectory);
-            Console.WriteLine("Done!");
+            CodeLogger.ConsoleLog("Done!");
         }
 
         // -------------------------------- Help Functions --------------------------------
@@ -1441,11 +1365,11 @@ namespace CreateServerFunc
                 try
                 {
                     CopyFiles(worldFilesPaths[i, useSecondColumn ? 1 : 0], tempFolderPath, rootWorldFilesFolder);
-                    Console.WriteLine($"Backup of '{worldFilesPaths[i, useSecondColumn ? 1 : 0]}' completed.");
+                    CodeLogger.ConsoleLog($"Backup of '{worldFilesPaths[i, useSecondColumn ? 1 : 0]}' completed.");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    CodeLogger.ConsoleLog($"Error: {ex.Message}");
                 }
             }
         }
@@ -1468,7 +1392,7 @@ namespace CreateServerFunc
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    CodeLogger.ConsoleLog($"Error: {ex.Message}");
                 }
             }
         }
@@ -1478,7 +1402,7 @@ namespace CreateServerFunc
             DeleteFiles(worldPath, false);
             dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{toSoftware}\", totalPlayers = \"{totalPlayers}\" WHERE worldNumber = \"{worldNumber}\";");
 
-            Console.WriteLine("Creating New Server...");
+            CodeLogger.ConsoleLog("Creating New Server...");
             await ServerCreator.CreateServerFunc(rootWorldsFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, toSoftware, totalPlayers, worldSettings, processMemoryAllocation, ipAddress, serverPort, jmxPort, rconPort, worldNumber, insertIntoDB, false);
         }
 
@@ -1529,12 +1453,12 @@ namespace CreateServerFunc
         {
             if (!Directory.Exists(sourceFolder))
             {
-                Console.WriteLine($"Folder '{sourceFolder}' not found.");
+                CodeLogger.ConsoleLog($"Folder '{sourceFolder}' not found.");
                 return;
             }
 
             CopyAll(new DirectoryInfo(sourceFolder), new DirectoryInfo(destinationFolder));
-            Console.WriteLine($"Folder '{sourceFolder}' copied to '{destinationFolder}'.");
+            CodeLogger.ConsoleLog($"Folder '{sourceFolder}' copied to '{destinationFolder}'.");
         }
 
         private static void CopyAll(DirectoryInfo source, DirectoryInfo target)
@@ -1563,7 +1487,7 @@ namespace CreateServerFunc
                 if (deleteWholeDirectory)
                 {
                     Directory.Delete(path, true); // Deletes the entire directory and its contents
-                    Console.WriteLine($"Deleted entire directory: {path}");
+                    CodeLogger.ConsoleLog($"Deleted entire directory: {path}");
                 }
                 else
                 {
@@ -1571,22 +1495,22 @@ namespace CreateServerFunc
                     foreach (string file in Directory.GetFiles(path))
                     {
                         File.Delete(file);
-                        Console.WriteLine($"Deleted file: {file}");
+                        CodeLogger.ConsoleLog($"Deleted file: {file}");
                     }
 
                     // Delete all subdirectories and their contents
                     foreach (string directory in Directory.GetDirectories(path))
                     {
                         Directory.Delete(directory, true);
-                        Console.WriteLine($"Deleted directory: {directory}");
+                        CodeLogger.ConsoleLog($"Deleted directory: {directory}");
                     }
 
-                    Console.WriteLine("All contents deleted successfully, but the directory itself remains.");
+                    CodeLogger.ConsoleLog("All contents deleted successfully, but the directory itself remains.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
             }
         }
 
@@ -1626,7 +1550,7 @@ namespace CreateServerFunc
                 // Ensure the folder exists
                 if (!Directory.Exists(folderPath))
                 {
-                    Console.WriteLine("The specified folder does not exist.");
+                    CodeLogger.ConsoleLog("The specified folder does not exist.");
                     return null;
                 }
 
@@ -1654,12 +1578,17 @@ namespace CreateServerFunc
                         }
                     }
                 }
-
+                if (!string.IsNullOrEmpty(bestMatch))
+                {
+                    return "";
+                }
+                
                 return $"-jar \"{folderPath}\\{bestMatch}\"";
+                
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
                 return null;
             }
         }
@@ -1702,33 +1631,33 @@ namespace CreateServerFunc
                         {
                             string pid = parts[parts.Length - 1];
 
-                            Console.WriteLine($"Found PID: {pid}");
+                            CodeLogger.ConsoleLog($"Found PID: {pid}");
 
                             string killCommand = $"taskkill /PID {pid} /F";
                             string killOutput = ExecuteCommand(killCommand);
 
                             if (!string.IsNullOrWhiteSpace(killOutput) && !killOutput.Contains("Error"))
                             {
-                                Console.WriteLine($"Successfully terminated process with PID {pid}.");
+                                CodeLogger.ConsoleLog($"Successfully terminated process with PID {pid}.");
                                 return true;
                             }
                             else
                             {
-                                Console.WriteLine($"Failed to terminate process with PID {pid}.");
+                                CodeLogger.ConsoleLog($"Failed to terminate process with PID {pid}.");
                             }
                         }
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"No process found on port {port}.");
+                    CodeLogger.ConsoleLog($"No process found on port {port}.");
                 }
 
                 return false;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception: {ex.Message}");
+                CodeLogger.ConsoleLog($"Exception: {ex.Message}");
                 return false;
             }
         }
@@ -1774,12 +1703,12 @@ namespace CreateServerFunc
             }
             catch (UnauthorizedAccessException ex)
             {
-                Console.WriteLine($"Access denied to folder: {folderPath}. Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Access denied to folder: {folderPath}. Error: {ex.Message}");
                 return "";
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
                 return "";
             }
         }
@@ -1792,7 +1721,7 @@ namespace CreateServerFunc
 
                 if (directories.Length == 0)
                 {
-                    Console.WriteLine($"Folder '{folderName}' was NOT found inside '{rootDir}'.");
+                    CodeLogger.ConsoleLog($"Folder '{folderName}' was NOT found inside '{rootDir}'.");
                     return;
                 }
 
@@ -1812,25 +1741,25 @@ namespace CreateServerFunc
                     }
                     catch (FileNotFoundException ex)
                     {
-                        Console.WriteLine($"File not found: {ex.FileName}");
+                        CodeLogger.ConsoleLog($"File not found: {ex.FileName}");
                     }
                     catch (DirectoryNotFoundException ex)
                     {
-                        Console.WriteLine($"Directory not found: {ex.Message}");
+                        CodeLogger.ConsoleLog($"Directory not found: {ex.Message}");
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"An error occurred: {ex.Message}");
+                        CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
                     }
                 }
             }
             catch (DirectoryNotFoundException ex)
             {
-                Console.WriteLine($"Directory not found: {ex.Message}");
+                CodeLogger.ConsoleLog($"Directory not found: {ex.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
             }
         }
 
@@ -1861,7 +1790,7 @@ namespace CreateServerFunc
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error: " + ex.Message);
+                CodeLogger.ConsoleLog("Error: " + ex.Message);
             }
 
             return false;
@@ -1876,11 +1805,11 @@ namespace CreateServerFunc
             {
                 // Write the timestamp to the file
                 File.WriteAllText(StartupTimePath, startupTime.ToString("o")); // "o" for ISO 8601 format
-                Console.WriteLine($"Server start time recorded: {startupTime}");
+                CodeLogger.ConsoleLog($"Server start time recorded: {startupTime}");
             }
             else
             {
-                Console.WriteLine("StartupTimePath is null. Cannot record server start time.");
+                CodeLogger.ConsoleLog("StartupTimePath is null. Cannot record server start time.");
             }
         }
 
