@@ -1,4 +1,5 @@
-﻿using CreateServerFunc;
+﻿using System.Runtime.Versioning;
+using CreateServerFunc;
 using FileExplorer;
 using MinecraftServerStats;
 using Updater;
@@ -7,6 +8,7 @@ using Logger;
 
 namespace MainAppFuncs
 {
+    [SupportedOSPlatform("windows")]
     internal class Program
     {
         static async Task Main()
@@ -21,6 +23,7 @@ namespace MainAppFuncs
             string Server_PublicComputerIP = await NetworkSetup.GetPublicIP();
             int Server_Port = 25565;
             int JMX_Port = 25562;
+            int RMI_Port = 25563;
             int RCON_Port = 25575;
 
             bool Keep_World_On_Version_Change = true;
@@ -50,7 +53,7 @@ namespace MainAppFuncs
             string? rootWorldsFolder = Path.Combine(rootFolder, "worlds");
             string? serverVersionsPath = Path.Combine(rootFolder, "versions");
             string? tempFolderPath = Path.Combine(rootFolder, "temp");
-            string? defaultServerPropertiesPath = Path.Combine(rootFolder + "\\Preset Files\\server.properties");
+            string? defaultServerPropertiesPath = Path.Combine(rootFolder, "Preset Files\\server.properties");
             string? serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
             // Create a log file
             CodeLogger.CreateLogFile();
@@ -61,19 +64,19 @@ namespace MainAppFuncs
             await VersionsUpdater.Update(serverVersionsPath, software, version);
 
             // ↓ Create World Func ↓
-            worldNumber = await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port);
+            worldNumber = await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
 
             // ↓ Start Server Func ↓
-            await ServerOperator.Start(worldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, JMX_Port, RCON_Port, noGUI: false);
+            await ServerOperator.Start(worldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
             await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, "00:00");
-            await ServerOperator.Restart(serverDirectoryPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, RCON_Port, JMX_Port, "00:00");
+            await ServerOperator.Restart(serverDirectoryPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, "00:00");
             ServerOperator.Kill(RCON_Port, JMX_Port);
 
             // ↓ Send Server Command Func ↓
             await ServerOperator.InputForServer("say Oleg690's Minecraft Console Project", worldNumber, RCON_Port, Server_LocalComputerIP);
 
             // ↓ Change Version Func ↓
-            await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, defaultServerPropertiesPath, serverVersionsPath, rootFolder, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, Keep_World_On_Version_Change);
+            await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, defaultServerPropertiesPath, serverVersionsPath, rootFolder, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, Keep_World_On_Version_Change);
 
             // ↓ Server Files Loop ↓
             List<string> files = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
@@ -83,6 +86,9 @@ namespace MainAppFuncs
 
             // ↓ Server Stats Loop ↓
             ServerStats.GetServerInfo(serverDirectoryPath, worldNumber, Server_PublicComputerIP, JMX_Port, RCON_Port, Server_Port);
+
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
     }
 }

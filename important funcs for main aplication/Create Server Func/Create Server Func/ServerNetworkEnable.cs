@@ -4,13 +4,18 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Security.Principal;
+using System.Security.AccessControl;
 using Logger;
+using CreateServerFunc;
+using System.Runtime.Versioning;
 
 namespace NetworkConfig
 {
+    [SupportedOSPlatform("windows")]
     class NetworkSetup
     {
-        public static async Task Setup(int port1, int port2)
+        
+        public static async Task Setup(int port1, int port2, int port3)
         {
             if (!IsAdministrator())
             {
@@ -24,13 +29,19 @@ namespace NetworkConfig
             // Step 1: Port Forwarding using UPnP
             await UPnP_Port_Mapping.UPnP_Configuration_Async(port1); // -> TODO
             await UPnP_Port_Mapping.UPnP_Configuration_Async(port2); // -> TODO
+            await UPnP_Port_Mapping.UPnP_Configuration_Async(port3); // -> TODO
 
             // Step 2: Set Static IP
-            StaticIPConfig.SetStaticIP("192.168.1.100", "255.255.255.0", "192.168.1.1", "8.8.8.8", "8.8.4.4");
+            //StaticIPConfig.SetStaticIP("192.168.1.100", "255.255.255.0", "192.168.1.1", "8.8.8.8", "8.8.4.4");
+
+            JMX_Setter.CreateJMXPasswordFile();
 
             // Step 3: Open Firewall Port
             FirewallRules.OpenFirewallPort(port1);
             FirewallRules.OpenFirewallPort(port2);
+            FirewallRules.OpenFirewallPort(port3);
+
+            Console.WriteLine(IsAdministrator());
 
             if (IsAdministrator())
             {
@@ -105,14 +116,15 @@ namespace NetworkConfig
         }
     }
 
-    public class UPnP_Port_Mapping
+    [SupportedOSPlatform("windows")]
+    public class UPnP_Port_Mapping // -> TODO
     {
         public static async Task UPnP_Configuration_Async(int port)
         {
             try
             {
                 NatDiscoverer discoverer = new();
-                CancellationTokenSource cts = new(TimeSpan.FromSeconds(10));
+                CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
 
                 // Discover UPnP-enabled router
                 NatDevice device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
@@ -148,6 +160,7 @@ namespace NetworkConfig
 
     }
 
+    [SupportedOSPlatform("windows")]
     public class StaticIPConfig
     {
         public static void SetStaticIP(string localIP, string subnetMask, string gateway, string dns1, string dns2)
@@ -238,6 +251,7 @@ namespace NetworkConfig
         }
     }
 
+    [SupportedOSPlatform("windows")]
     public class FirewallRules
     {
         public static void OpenFirewallPort(int port)
@@ -269,6 +283,139 @@ namespace NetworkConfig
         }
     }
 
+    [SupportedOSPlatform("windows")]
+    class JMX_Setter
+    {
+        public static readonly string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))) ?? string.Empty;
+        private static readonly string? JMX_Access_File_Path = rootFolder + "\\jmx\\jmxremote.access";
+        private static readonly string? JMX_Password_File_Path = rootFolder + "\\jmx\\jmxremote.password";
+
+        public static void CreateJMXPasswordFile()
+        {
+            try
+            {
+                if (JMX_Access_File_Path != null)
+                {
+                    File.Delete(JMX_Access_File_Path);
+                }
+
+                if (JMX_Password_File_Path != null)
+                {
+                    File.Delete(JMX_Password_File_Path);
+                }
+
+                // Get current username
+                string currentUser = Environment.UserName;
+                string contentFile1 = $"admin readwrite";
+                string contentFile2 = $"admin {ServerCreator.GenerateRandomNumber(5)}";
+
+                // Ensure directory exists
+                string? directoryPath = Path.GetDirectoryName(JMX_Password_File_Path);
+                if (directoryPath != null && !Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                // Create and write to the file both files
+                if (JMX_Access_File_Path != null)
+                {
+                    File.WriteAllText(JMX_Access_File_Path, contentFile1);
+                    CodeLogger.ConsoleLog("Password file created successfully.");
+                }
+
+                if (JMX_Password_File_Path != null)
+                {
+                    File.WriteAllText(JMX_Password_File_Path, contentFile2);
+                    CodeLogger.ConsoleLog("Password file created successfully.");
+                }
+
+                // Set file 2 permissions
+                if (JMX_Password_File_Path != null)
+                {
+                    FileSecurity security = new();
+                    security.SetOwner(new NTAccount(currentUser));
+                    security.SetAccessRuleProtection(true, false); // Remove inherited permissions
+
+                    FileSystemAccessRule rule = new FileSystemAccessRule(
+                        new NTAccount(currentUser),
+                        FileSystemRights.Read | FileSystemRights.Write,
+                        AccessControlType.Allow
+                    );
+
+                    security.AddAccessRule(rule);
+
+                    FileInfo fileInfo = new(JMX_Password_File_Path);
+                    fileInfo.SetAccessControl(security);
+
+                    CodeLogger.ConsoleLog("Permissions set successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
+            }
+        }
+
+        public static bool EnsureJMXPasswordFile()
+        {
+            if (File.Exists(JMX_Access_File_Path) && File.Exists(JMX_Password_File_Path))
+            {
+                if (!HasCorrectPermissions(JMX_Password_File_Path))
+                {
+                    CodeLogger.ConsoleLog("Incorrect permissions detected. Recreating file...");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                CodeLogger.ConsoleLog("File does not exist. Creating new file...");
+                return false;
+            }
+        }
+
+        private static bool HasCorrectPermissions(string path)
+        {
+            try
+            {
+                FileInfo fileInfo = new(path);
+                FileSecurity security = fileInfo.GetAccessControl();
+                AuthorizationRuleCollection rules = security.GetAccessRules(true, true, typeof(NTAccount));
+
+                string currentUser = Environment.UserName;
+                bool hasReadWrite = false;
+                bool hasExtraPermissions = false;
+
+                foreach (FileSystemAccessRule rule in rules)
+                {
+                    if (rule.IdentityReference.Value.Contains(currentUser))
+                    {
+                        if ((rule.FileSystemRights & FileSystemRights.Read) != 0 &&
+                            (rule.FileSystemRights & FileSystemRights.Write) != 0)
+                        {
+                            hasReadWrite = true;
+                        }
+                    }
+                    else
+                    {
+                        hasExtraPermissions = true;
+                    }
+                }
+
+                return hasReadWrite && !hasExtraPermissions;
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error checking permissions: {ex.Message}");
+                return false;
+            }
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
     class Execute_Command
     {
         public static void Execute(string command)
@@ -310,6 +457,7 @@ namespace NetworkConfig
         }
     }
 
+    [SupportedOSPlatform("windows")]
     class DomainName
     {
         private static readonly string[] Combinations = {

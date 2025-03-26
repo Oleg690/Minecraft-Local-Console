@@ -7,14 +7,17 @@ using Newtonsoft.Json.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Diagnostics;
+using java.util;
+using System.Runtime.Versioning;
 
 namespace MinecraftServerStats
 {
+    [SupportedOSPlatform("windows")]
     class ServerStats
     {
         private const string StartupTimePath = "serverStartupTime.txt";
 
-        public static void GetServerInfo(string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port)
+        public static void GetServerInfo(string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
         {
             while (true)
             {
@@ -25,7 +28,7 @@ namespace MinecraftServerStats
 
                     // Get memory usage
                     stopwatch.Start();
-                    var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port);
+                    var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw);
                     long getUsedHeapMemory = stopwatch.ElapsedMilliseconds;
                     Console.WriteLine($"Memory Usage: {memoryUsage}; {getUsedHeapMemory}m");
                     stopwatch.Restart();
@@ -69,7 +72,7 @@ namespace MinecraftServerStats
         }
 
         // ------------------------ Method to get memory usage of Minecraft server ------------------------
-        private static string GetUsedHeapMemory(string ip, int port)
+        private static string GetUsedHeapMemory(string ip, int port, string user, string psw)
         {
             try
             {
@@ -77,8 +80,11 @@ namespace MinecraftServerStats
                 string url = $"service:jmx:rmi:///jndi/rmi://{ip}:{port}/jmxrmi";
                 JMXServiceURL serviceURL = new(url);
 
+                var environment = new HashMap();
+                environment.put(JMXConnector.CREDENTIALS, new string[] { user, psw });
+
                 // Connect to the JMX server
-                using JMXConnector connector = JMXConnectorFactory.connect(serviceURL);
+                using JMXConnector connector = JMXConnectorFactory.connect(serviceURL, environment);
                 MBeanServerConnection mBeanConnection = connector.getMBeanServerConnection();
 
                 ObjectName memoryMXBean = new("java.lang:type=Memory");
@@ -340,27 +346,27 @@ namespace MinecraftServerStats
         {
             // Mapping based on commonly known Minecraft protocol versions.
             var mapping = new Dictionary<string, int>
-            {
-                {"1.2.5", 5},
-                {"1.3.1", 5}, {"1.3.2", 5},
-                {"1.4", 5}, {"1.4.2", 5}, {"1.4.4", 5},
-                {"1.5", 5}, {"1.5.1", 5}, {"1.5.2", 5},
-                {"1.6", 5}, {"1.6.1", 5}, {"1.6.2", 5}, {"1.6.4", 5},
-                {"1.7", 5}, {"1.7.2", 5}, {"1.7.10", 5},
-                {"1.8", 47}, {"1.8.1", 47}, {"1.8.9", 47},
-                {"1.9", 107}, {"1.9.2", 107}, {"1.9.4", 107},
-                {"1.10", 210},
-                {"1.11", 315}, {"1.11.2", 315},
-                {"1.12", 335}, {"1.12.2", 335},
-                {"1.13", 393}, {"1.13.1", 393}, {"1.13.2", 393},
-                {"1.14", 498},
-                {"1.15", 573},
-                {"1.16", 735}, {"1.16.1", 736}, {"1.16.2", 736}, {"1.16.4", 754},
-                {"1.17", 755}, {"1.17.1", 756},
-                {"1.18", 757}, {"1.18.1", 757}, {"1.18.2", 757},
-                {"1.19", 759}, {"1.19.1", 760}, {"1.19.2", 761},
-                {"1.20", 763}, {"1.20.1", 764},
-            };
+                {
+                    {"1.2.5", 5},
+                    {"1.3.1", 5}, {"1.3.2", 5},
+                    {"1.4", 5}, {"1.4.2", 5}, {"1.4.4", 5},
+                    {"1.5", 5}, {"1.5.1", 5}, {"1.5.2", 5},
+                    {"1.6", 5}, {"1.6.1", 5}, {"1.6.2", 5}, {"1.6.4", 5},
+                    {"1.7", 5}, {"1.7.2", 5}, {"1.7.10", 5},
+                    {"1.8", 47}, {"1.8.1", 47}, {"1.8.9", 47},
+                    {"1.9", 107}, {"1.9.2", 107}, {"1.9.4", 107},
+                    {"1.10", 210},
+                    {"1.11", 315}, {"1.11.2", 315},
+                    {"1.12", 335}, {"1.12.2", 335},
+                    {"1.13", 393}, {"1.13.1", 393}, {"1.13.2", 393},
+                    {"1.14", 498},
+                    {"1.15", 573},
+                    {"1.16", 735}, {"1.16.1", 736}, {"1.16.2", 736}, {"1.16.4", 754},
+                    {"1.17", 755}, {"1.17.1", 756},
+                    {"1.18", 757}, {"1.18.1", 757}, {"1.18.2", 757},
+                    {"1.19", 759}, {"1.19.1", 760}, {"1.19.2", 761},
+                    {"1.20", 763}, {"1.20.1", 764},
+                };
 
             if (mapping.TryGetValue(version, out int proto))
             {
