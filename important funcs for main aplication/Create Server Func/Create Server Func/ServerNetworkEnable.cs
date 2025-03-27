@@ -27,9 +27,9 @@ namespace NetworkConfig
             CodeLogger.ConsoleLog("Starting Network Configuration...");
 
             // Step 1: Port Forwarding using UPnP
-            await UPnP_Port_Mapping.UPnP_Configuration_Async(port1); // -> TODO
-            await UPnP_Port_Mapping.UPnP_Configuration_Async(port2); // -> TODO
-            await UPnP_Port_Mapping.UPnP_Configuration_Async(port3); // -> TODO
+            //await UPnP_Port_Mapping.UPnP_Configuration_Async(port1); // -> TODO
+            //await UPnP_Port_Mapping.UPnP_Configuration_Async(port2); // -> TODO
+            //await UPnP_Port_Mapping.UPnP_Configuration_Async(port3); // -> TODO
 
             // Step 2: Set Static IP
             //StaticIPConfig.SetStaticIP("192.168.1.100", "255.255.255.0", "192.168.1.1", "8.8.8.8", "8.8.4.4");
