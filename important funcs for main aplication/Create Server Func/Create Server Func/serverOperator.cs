@@ -43,7 +43,6 @@ namespace CreateServerFunc
 
             // Founding the verison in the versions folder
             string jarFileName = GetJarFilePath(rootFolder, software, version);
-            Console.WriteLine("jarFileName: " + jarFileName);
             string jarFilePath = Path.Combine(rootFolder, $"versions\\{software}\\" + jarFileName);
             if (string.IsNullOrEmpty(jarFilePath) || !File.Exists(jarFilePath)) return ServerOperator.LogError("Server .jar file not found! Check the path.");
 
@@ -205,11 +204,11 @@ namespace CreateServerFunc
             {
                 if (Insert_Into_DB) dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{software}", $"{version}", $"{totalPlayers}", $"{rconPassword}");
 
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop:true);
 
                 AcceptEULA(JarPath);
 
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop:true);
             }
             catch (Exception ex)
             {
@@ -692,7 +691,7 @@ namespace CreateServerFunc
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
-                        Console.WriteLine($"{e.Data}"); // For debugging
+                        Console.WriteLine($"e: {e.Data}"); // For debugging
 
                         if (Auto_Stop && (e.Data.Contains("You need to agree to the EULA") || e.Data.Contains("Done")))
                         {
@@ -843,19 +842,6 @@ namespace CreateServerFunc
         }
 
         // -------------------------------- Help Functions --------------------------------
-
-        private static bool IsFolderInRoot(string rootDirectory, string folderName)
-        {
-            if (!Directory.Exists(rootDirectory))
-            {
-                Console.WriteLine("Root directory does not exist.");
-                return false;
-            }
-
-            string targetPath = Path.Combine(rootDirectory, folderName);
-            return Directory.Exists(targetPath);
-        }
-
 
         public static bool CheckFilesAndNetworkSettings(int Server_Port = 25565, int JMX_Port = 25562, int RMI_Port = 25563)
         {

@@ -8,7 +8,7 @@ namespace databaseChanger
         public static readonly string? currentDirectory = Directory.GetCurrentDirectory();
         public static readonly string? dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
         public static readonly string? connectionString = $"Data Source={dbPath};Version=3;";
-        public static void CreateDB(string dbName, bool insertOneDefaultSQLVerificator = false)
+        public static void CreateDB(string dbName)
         {
             // Ensure the directory exists
             string? directory = Path.GetDirectoryName(dbPath);
@@ -35,23 +35,16 @@ namespace databaseChanger
                         $"version text," +
                         $"software text," +
                         $"totalPlayers text," +
+                        $"Server_Port text," +
+                        $"JMX_Port text," +
+                        $"RCON_Port text," +
+                        $"RMI_Port text," +
                         $"rconPassword text" +
                         $")";
                     using (SQLiteCommand command = new SQLiteCommand(query, connection))
                     {
                         command.ExecuteNonQuery();
                         CodeLogger.ConsoleLog("Table created successfully.");
-                    }
-
-                    // Insert data
-                    string insertDefaultSQL = $"insert into {dbName} (worldNumber, name, version, totalPlayers, rconPassword) values('123456789', 'Minecraft SMP', '1.21', '20', '123456789123456789');";
-                    if (insertOneDefaultSQLVerificator != false)
-                    {
-                        using (SQLiteCommand insertCommand = new SQLiteCommand(insertDefaultSQL, connection))
-                        {
-                            insertCommand.ExecuteNonQuery();
-                            CodeLogger.ConsoleLog("Data inserted successfully.");
-                        }
                     }
                 }
                 catch (Exception ex)

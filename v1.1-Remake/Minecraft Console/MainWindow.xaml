@@ -1,0 +1,147 @@
+﻿<Window
+    x:Class="Minecraft_Console.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Minecraft_Console"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Minecraft Console"
+    Width="800"
+    Height="500"
+    mc:Ignorable="d">
+
+    <Grid>
+        <!--  Sidebar  -->
+        <Grid
+            Width="200"
+            HorizontalAlignment="Left"
+            Background="#333333">
+            <StackPanel Margin="10" VerticalAlignment="Top">
+                <Button
+                    Margin="5"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    Click="NavigateToServers"
+                    Content="Servers"
+                    Foreground="White" />
+                <Button
+                    Margin="5"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    Click="NavigateToSettings"
+                    Content="Settings"
+                    Foreground="White" />
+                <Button
+                    Margin="5"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    Click="NavigateToAccount"
+                    Content="Account"
+                    Foreground="White" />
+                <Button
+                    Margin="5"
+                    Background="Transparent"
+                    BorderBrush="Transparent"
+                    Click="NavigateToSupport"
+                    Content="Support"
+                    Foreground="White" />
+            </StackPanel>
+        </Grid>
+
+        <!--  Main Content Area  -->
+        <Grid x:Name="MainContent" Margin="200,0,0,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid x:Name="ServerGrid" Margin="10" />
+            </ScrollViewer>
+        </Grid>
+
+        <!--  Control Panel (Initially Hidden)  -->
+        <Grid
+            x:Name="ControlPanel"
+            Height="200"
+            Margin="200,0,0,0"
+            Background="LightGray"
+            Visibility="Collapsed">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock
+                    x:Name="SelectedServerLabel"
+                    Margin="0,10,0,10"
+                    FontSize="16"
+                    FontWeight="Bold" />
+                <StackPanel Orientation="Horizontal">
+                    <Button
+                        Margin="5"
+                        Click="StartServer"
+                        Content="Start" />
+                    <Button
+                        Margin="5"
+                        Click="StopServer"
+                        Content="Stop" />
+                    <Button
+                        Margin="5"
+                        Click="RestartServer"
+                        Content="Restart" />
+                </StackPanel>
+                <Button
+                    Margin="10"
+                    Click="NavigateToServers"
+                    Content="Back" />
+            </StackPanel>
+        </Grid>
+
+        <!--  Create Server Page (Initially Hidden)  -->
+        <Grid
+            x:Name="CreateServerPage"
+            Margin="200,0,0,0"
+            Visibility="Collapsed">
+            <StackPanel
+                Margin="10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+                <TextBlock
+                    Margin="0,10,0,10"
+                    FontSize="20"
+                    Text="Create Minecraft Server" />
+
+                <TextBlock Margin="5" Text="Software:" />
+                <ComboBox x:Name="SoftwareComboBox" Margin="5">
+                    <ComboBoxItem Content="Vanilla" />
+                    <ComboBoxItem Content="Forge" />
+                    <ComboBoxItem Content="NeoForge" />
+                    <ComboBoxItem Content="Fabric" />
+                    <ComboBoxItem Content="Quilt" />
+                    <ComboBoxItem Content="Purpur" />
+                    <ComboBoxItem Content="Paper" />
+                    <!--  Add other software options if needed  -->
+                </ComboBox>
+
+                <TextBlock Margin="5" Text="Version (e.g. 1.21.4):" />
+                <TextBox
+                    x:Name="ServerVersionTextBox"
+                    Margin="5"
+                    Text="1.21.4" />
+
+                <TextBlock Margin="5" Text="World Name (e.g. My World):" />
+                <TextBox
+                    x:Name="WorldNameTextBox"
+                    Margin="5"
+                    Text="My World" />
+
+                <TextBlock Margin="5" Text="Total Players:" />
+                <TextBox
+                    x:Name="TotalPlayersTextBox"
+                    Margin="5"
+                    Text="20" />
+
+                <Button
+                    Margin="10"
+                    Click="CreateServer_Click"
+                    Content="Create Server" />
+                <Button
+                    Margin="5"
+                    Click="BackToServersPage"
+                    Content="Back" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
