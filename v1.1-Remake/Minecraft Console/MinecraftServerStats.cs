@@ -10,70 +10,78 @@ using System.Diagnostics;
 using java.util;
 using System.Runtime.Versioning;
 using System.IO;
+using Logger;
 
 namespace MinecraftServerStats
 {
     [SupportedOSPlatform("windows")]
     class ServerStats
     {
-        private const string StartupTimePath = "serverStartupTime.txt";
-
-        public static void GetServerInfo(string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
+        public static void GetServerInfo(ServerInfoViewModel viewModel, string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
         {
-            while (true)
+            if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
             {
-                if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
+                Console.WriteLine($"--------------------------------------------------");
+                Stopwatch stopwatch = new();
+
+                // Get memory usage
+                stopwatch.Start();
+                string memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw)[0];
+                long getUsedHeapMemoryTime = stopwatch.ElapsedMilliseconds;
+                string[] memoryData = [memoryUsage, getUsedHeapMemoryTime.ToString()];
+                viewModel.MemoryUsage = memoryData[0];
+                stopwatch.Restart();
+
+                // Get world folder size
+                string worldSize = GetFolderSize(worldFolderPath);
+                long getFolderSizeTime = stopwatch.ElapsedMilliseconds;
+                string[] worldData = [worldSize, getFolderSizeTime.ToString()];
+                viewModel.WorldSize = worldData[0];
+                stopwatch.Restart();
+
+                // Get online players
+                var data = dbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = '{worldNumber}';")[0];
+                string version = (string)data[0];
+                string maxPlayers = (string)data[1];
+
+                string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
+                long getOnlinePlayersCountTime = stopwatch.ElapsedMilliseconds;
+                string[] playersData = [playersResult, getOnlinePlayersCountTime.ToString()];
+                viewModel.PlayersOnline = $"{playersData[0]} / {maxPlayers}";
+                stopwatch.Restart();
+
+                // Get server uptime
+                string upTime = GetServerUptime(worldFolderPath);
+                long getServerUpTime = stopwatch.ElapsedMilliseconds;
+                string[] uptimeData = [upTime, getServerUpTime.ToString()];
+                viewModel.UpTime = uptimeData[0];
+                stopwatch.Restart();
+
+                // Get console output
+                string consoleOutput = GetConsoleOutput(worldFolderPath);
+                long consoleOutputTime = stopwatch.ElapsedMilliseconds;
+                string[] consoleOutputData = [consoleOutput, consoleOutputTime.ToString()];
+                viewModel.Console = consoleOutputData[0];
+                stopwatch.Restart();
+
+                long totalElapsedTime = getUsedHeapMemoryTime + getFolderSizeTime + getOnlinePlayersCountTime + getServerUpTime + consoleOutputTime;
+                if (1000 - totalElapsedTime >= 0)
                 {
-                    Console.WriteLine($"--------------------------------------------------");
-                    Stopwatch stopwatch = new();
-
-                    // Get memory usage
-                    stopwatch.Start();
-                    var memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw);
-                    long getUsedHeapMemory = stopwatch.ElapsedMilliseconds;
-                    Console.WriteLine($"Memory Usage: {memoryUsage}; {getUsedHeapMemory}m");
-                    stopwatch.Restart();
-
-                    // Get world folder size
-                    long worldSize = GetFolderSize(worldFolderPath);
-                    long getFolderSize = stopwatch.ElapsedMilliseconds;
-                    Console.WriteLine($"World Folder Size: {worldSize / 1024.0 / 1024.0:F2} MB; {getFolderSize}m");
-                    stopwatch.Restart();
-
-                    // Get online players
-                    var data = dbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = '{worldNumber}';")[0];
-                    string version = (string)data[0];
-                    string maxPlayers = (string)data[1];
-
-                    string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
-                    long getOnlinePlayersCount = stopwatch.ElapsedMilliseconds;
-                    Console.WriteLine($"Players Online: {playersResult} / {maxPlayers}; {getOnlinePlayersCount}m");
-                    stopwatch.Restart();
-
-                    // Get server uptime
-                    string upTime = GetServerUptime(StartupTimePath);
-                    long getServerUptime = stopwatch.ElapsedMilliseconds;
-                    Console.WriteLine($"UpTime: {upTime}; {getServerUptime}m");
-                    Console.WriteLine($"--------------------------------------------------");
-
-                    long totalElapsedTime = getUsedHeapMemory + getFolderSize + getOnlinePlayersCount + getServerUptime;
-                    if (1000 - totalElapsedTime >= 0)
-                    {
-                        Thread.Sleep((int)(1000 - totalElapsedTime));
-                    }
+                    Thread.Sleep((int)(1000 - totalElapsedTime));
                 }
-                else
-                {
-                    Console.WriteLine($"--------------------------------------------------");
-                    Console.WriteLine("There is no server running!");
-                    Console.WriteLine($"--------------------------------------------------");
-                    Thread.Sleep(1000);
-                }
+            }
+            else
+            {
+                Console.WriteLine($"--------------------------------------------------");
+                Console.WriteLine("There is no server running!");
+                Console.WriteLine($"--------------------------------------------------");
+                Thread.Sleep(1000);
             }
         }
 
+
         // ------------------------ Method to get memory usage of Minecraft server ------------------------
-        private static string GetUsedHeapMemory(string ip, int port, string user, string psw)
+        private static string[] GetUsedHeapMemory(string ip, int port, string user, string psw)
         {
             try
             {
@@ -99,43 +107,63 @@ namespace MinecraftServerStats
 
                 long freeHeap = maxHeap - usedHeap;
 
-                double freeHeapPercentage = ((double)freeHeap / maxHeap) * 100;
+                string freeHeapPercentage = (((double)freeHeap / maxHeap) * 100).ToString("0.00");
 
-                return $"{usedHeap / (1024.0 * 1024.0):0} MB ({freeHeapPercentage:0}% free)";
+                string usedHeapPercentage = (((double)usedHeap / maxHeap) * 100).ToString("0.00");
+
+                return [$"{usedHeapPercentage}%", $"{freeHeapPercentage}%"];
             }
             catch (Exception ex)
             {
-                return $"GetUsedHeapMemory Error: {ex.Message}";
+                return [$"GetUsedHeapMemory Error: {ex.Message}", "Error"];
             }
         }
 
         // ------------------------ Method to get folder size of the Minecraft world ------------------------
 
-        public static long GetFolderSize(string folderPath)
+        public static string GetFolderSize(string folderPath)
         {
             if (!Directory.Exists(folderPath))
-                return 0;
+                return $"Cannot find {folderPath}";
             try
             {
-                return new DirectoryInfo(folderPath)
+                long sizeInBytes = new DirectoryInfo(folderPath)
                     .EnumerateFiles("*", SearchOption.AllDirectories)
                     .Sum(file => file.Length);
+
+                double sizeInMB = sizeInBytes / (1024.0 * 1024.0);
+                double sizeInGB = sizeInMB / 1024.0;
+
+                return sizeInGB >= 1 ? $"{sizeInGB:F2} GB" : $"{sizeInMB:F2} MB";
             }
             catch
             {
-                return 0;
+                return "Error calculating size";
             }
         }
 
         // ------------------------ Method to get server uptime via StartupTime file last write time ------------------------
 
-        private static string GetServerUptime(string? filePath)
+        private static string GetServerUptime(string? worldFolderPath)
         {
-            if (File.Exists(filePath))
+            if (worldFolderPath == null)
+            {
+                return "-1";
+            }
+
+            string? parentDirectory = Path.GetDirectoryName(worldFolderPath);
+            if (parentDirectory == null)
+            {
+                return "-1";
+            }
+
+            string? startupTimePath = Path.Combine(parentDirectory, "serverStartupTime.txt");
+
+            if (File.Exists(startupTimePath))
             {
                 try
                 {
-                    DateTime startupTime = DateTime.Parse(File.ReadAllText(filePath));
+                    DateTime startupTime = DateTime.Parse(File.ReadAllText(startupTimePath));
                     return (DateTime.Now - startupTime).ToString(@"hh\:mm\:ss");
                 }
                 catch (Exception ex)
@@ -275,7 +303,53 @@ namespace MinecraftServerStats
                     return "Error: " + ex.Message;
                 }
             }
+        }
 
+        public static string GetConsoleOutput(string rootPath)
+        {
+            try
+            {
+                // 1. Check logs/latest.log
+                string latestLogPath = Path.Combine(rootPath, "logs", "latest.log");
+                if (File.Exists(latestLogPath))
+                {
+                    return ReadFile(latestLogPath);
+                }
+
+                // 2. Check root directory for server.log
+                string serverLogPath = Path.Combine(rootPath, "server.log");
+                if (File.Exists(serverLogPath))
+                {
+                    return ReadFile(serverLogPath);
+                }
+
+                // 3. Search the entire directory for any .log file
+                string[] logFiles = Directory.GetFiles(rootPath, "*.log", SearchOption.AllDirectories);
+                if (logFiles.Length > 0)
+                {
+                    return ReadFile(logFiles[0]); // Return the first found log file
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Error reading log file: {ex.Message}";
+            }
+
+            return "Log file not found.";
+        }
+
+        private static string ReadFile(string filePath)
+        {
+            try
+            {
+                using FileStream fs = new(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using StreamReader reader = new(fs);
+                return reader.ReadToEnd();
+            }
+            catch (Exception ex)
+            {
+                return $"Error accessing file {filePath}: {ex.Message}";
+            }
         }
 
         // ------------------------ Help Funcs for GetOnlinePlayersCount() ------------------------

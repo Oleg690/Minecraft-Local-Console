@@ -10,6 +10,8 @@ using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
 using Updater;
+using Minecraft_Console;
+using MinecraftServerStats;
 
 namespace CreateServerFunc
 {
@@ -205,11 +207,11 @@ namespace CreateServerFunc
             {
                 if (Insert_Into_DB) dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{software}", $"{version}", $"{totalPlayers}", $"{Server_Port}", $"{JMX_Port}", $"{RCON_Port}", $"{RMI_Port}", $"{rconPassword}");
 
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop:true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
 
                 AcceptEULA(JarPath);
 
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop:true);
+                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
             }
             catch (Exception ex)
             {
@@ -524,7 +526,7 @@ namespace CreateServerFunc
         private static readonly string? JMX_Password_File_Path = ServerCreator.rootFolder != null ? Path.Combine(ServerCreator.rootFolder, "jmx\\jmxremote.password") : null;
 
         // ------------------------- Main Server Operator Commands -------------------------
-        public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true)
+        public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ServerInfoViewModel? viewModel = null)
         {
             bool verificator = true;
 
@@ -679,11 +681,14 @@ namespace CreateServerFunc
                         {
                             Kill(RCON_Port, JMX_Port);
                         }
-                        //else if (e.Data.Contains("RCON running on"))
-                        //{
-                        //    Thread GetServerInfoThread = new(() => ServerStats.GetServerInfo(serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw));
-                        //    GetServerInfoThread.Start();
-                        //}
+                        else if (e.Data.Contains("RCON running on"))
+                        {
+                            MainWindow.serverRunning = true;
+                            while (MainWindow.serverRunning && viewModel != null)
+                            {
+                                ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
+                            }
+                        }
                     }
                 };
 
@@ -702,11 +707,14 @@ namespace CreateServerFunc
                         {
                             Kill(RCON_Port, JMX_Port);
                         }
-                        //else if (e.Data.Contains("RCON running on"))
-                        //{
-                        //    Thread GetServerInfoThread = new(() => ServerStats.GetServerInfo(serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw));
-                        //    GetServerInfoThread.Start();
-                        //}
+                        else if (e.Data.Contains("RCON running on"))
+                        {
+                            MainWindow.serverRunning = true;
+                            while (MainWindow.serverRunning == true && viewModel != null)
+                            {
+                                ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
+                            }
+                        }
                     }
                 };
 

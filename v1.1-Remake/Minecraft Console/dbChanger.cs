@@ -20,7 +20,7 @@ namespace databaseChanger
             }
 
             // Establish connection
-            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            using (SQLiteConnection connection = new(connectionString))
             {
                 try
                 {

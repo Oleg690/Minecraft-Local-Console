@@ -274,7 +274,39 @@ namespace MinecraftServerStats
                     return "Error: " + ex.Message;
                 }
             }
+        }
 
+        public static string GetConsoleOutput(string rootPath)
+        {
+            try
+            {
+                // 1. Check logs/latest.log
+                string latestLogPath = Path.Combine(rootPath, "logs", "latest.log");
+                if (File.Exists(latestLogPath))
+                {
+                    return File.ReadAllText(latestLogPath);
+                }
+
+                // 2. Check root directory for server.log
+                string serverLogPath = Path.Combine(rootPath, "server.log");
+                if (File.Exists(serverLogPath))
+                {
+                    return File.ReadAllText(serverLogPath);
+                }
+
+                // 3. Search the entire directory for any .log file
+                string[] logFiles = Directory.GetFiles(rootPath, "*.log", SearchOption.AllDirectories);
+                if (logFiles.Length > 0)
+                {
+                    return File.ReadAllText(logFiles[0]); // Return the first found log file
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Error reading log file: {ex.Message}";
+            }
+
+            return "Log file not found.";
         }
 
         // ------------------------ Help Funcs for GetOnlinePlayersCount() ------------------------
