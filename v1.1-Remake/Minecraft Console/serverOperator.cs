@@ -26,6 +26,8 @@ namespace CreateServerFunc
         // ------------------------ Main Create Server Function ------------------------
         public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, string defaultServerPropertiesPath, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true)
         {
+            MainWindow.SetLoadingBarProgress(5);
+
             if (string.IsNullOrEmpty(software)) return ServerOperator.LogError("Software not selected!");
             if (string.IsNullOrEmpty(worldName)) worldName = $"{software} Server";
 
@@ -86,6 +88,8 @@ namespace CreateServerFunc
                 CodeLogger.ConsoleLog("Created missing server.properties file.");
             }
 
+            MainWindow.SetLoadingBarProgress(10);
+
             DataChanger.SetInfo(worldSettings, serverPropertiesNewPath, true);
             DataChanger.SetInfo(rconSettings, serverPropertiesNewPath, true);
 
@@ -115,6 +119,9 @@ namespace CreateServerFunc
             await BasicServerInitializator(software, customDirectory, jarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Insert_Into_DB);
 
             CodeLogger.ConsoleLog("World Created Succeasfully");
+
+            MainWindow.SetLoadingBarProgress(100);
+
             return uniqueNumber;
         }
 
@@ -138,11 +145,13 @@ namespace CreateServerFunc
                             if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
                             {
                                 currentProgress = 10;
+                                MainWindow.SetLoadingBarProgress(15);
                                 CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Extracting main jar...");
                             }
                             else if (e.Data.Contains("Downloading libraries") && currentProgress < 30)
                             {
                                 currentProgress = 30;
+                                MainWindow.SetLoadingBarProgress(20);
                                 CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Downloading libraries...");
                             }
                             else if (e.Data.Contains("Checksum validated"))
@@ -151,22 +160,26 @@ namespace CreateServerFunc
                                 if (checksumCount >= 3 && currentProgress < 50)
                                 {
                                     currentProgress = 50;
+                                    MainWindow.SetLoadingBarProgress(25);
                                     CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Libraries validated...");
                                 }
                             }
                             else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
                             {
                                 currentProgress = 70;
+                                MainWindow.SetLoadingBarProgress(30);
                                 CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Extracting server files...");
                             }
                             else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
                             {
                                 currentProgress = 85;
+                                MainWindow.SetLoadingBarProgress(35);
                                 CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Processing bundled files...");
                             }
                             else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
                             {
                                 currentProgress = 100;
+                                MainWindow.SetLoadingBarProgress(40);
                                 CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Installation complete!");
                             }
                         }
@@ -194,6 +207,7 @@ namespace CreateServerFunc
                 }
 
                 CodeLogger.ConsoleLog("Installation completed!");
+                MainWindow.loadingScreenProcentage = 45;
             }
             catch (Exception ex)
             {
@@ -206,12 +220,13 @@ namespace CreateServerFunc
             try
             {
                 if (Insert_Into_DB) dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{software}", $"{version}", $"{totalPlayers}", $"{Server_Port}", $"{JMX_Port}", $"{RCON_Port}", $"{RMI_Port}", $"{rconPassword}");
-
+                MainWindow.SetLoadingBarProgress(50);
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
-
+                MainWindow.SetLoadingBarProgress(70);
                 AcceptEULA(JarPath);
-
+                MainWindow.SetLoadingBarProgress(75);
                 await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
+                MainWindow.SetLoadingBarProgress(99);
             }
             catch (Exception ex)
             {
@@ -525,9 +540,12 @@ namespace CreateServerFunc
         private static readonly string? JMX_Access_File_Path = ServerCreator.rootFolder != null ? Path.Combine(ServerCreator.rootFolder, "jmx\\jmxremote.access") : null;
         private static readonly string? JMX_Password_File_Path = ServerCreator.rootFolder != null ? Path.Combine(ServerCreator.rootFolder, "jmx\\jmxremote.password") : null;
 
+        private static ProcessStartInfo? serverProcessInfo = new();
+
         // ------------------------- Main Server Operator Commands -------------------------
         public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ServerInfoViewModel? viewModel = null)
         {
+            MainWindow.serverRunning = true;
             bool verificator = true;
 
             void ValidateInput(string input, string errorMessage)
@@ -604,7 +622,7 @@ namespace CreateServerFunc
                                      $"-Dcom.sun.management.jmxremote.password.file=\"{JMX_Password_File_Path}\" " +
                                      $"-Djava.rmi.server.hostname={ipAddress} ";
 
-            ProcessStartInfo serverProcessInfo = new()
+            serverProcessInfo = new()
             {
                 FileName = "java",
                 RedirectStandardInput = true,
@@ -620,7 +638,11 @@ namespace CreateServerFunc
             string? toRunJarFile = "";
             string GetVersionedJarFile() => Path.Combine(serverPath, dbChanger.SpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar");
 
-            void SetServerArguments(string arguments) => serverProcessInfo.Arguments = arguments;
+            void SetServerArguments(string arguments)
+            {
+                if (serverProcessInfo == null) return;
+                serverProcessInfo.Arguments = arguments;
+            }
 
             switch (software)
             {
@@ -654,6 +676,7 @@ namespace CreateServerFunc
 
             serverProcessInfo.Arguments += noGUI ? " nogui" : "";
 
+            
             using (Process? process = Process.Start(serverProcessInfo))
             {
                 if (process == null)
@@ -662,12 +685,16 @@ namespace CreateServerFunc
                     return;
                 }
 
+                dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\" WHERE worldNumber = \"{worldNumber}\";");
+                dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = \"{user}\" WHERE worldNumber = \"{worldNumber}\";");
+                dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = \"{psw}\" WHERE worldNumber = \"{worldNumber}\";");
+
                 CodeLogger.ConsoleLog("Minecraft server started!");
 
                 RecordServerStart();
 
                 //          ↓ For output traking ↓
-                process.OutputDataReceived += (sender, e) =>
+                process.OutputDataReceived += async (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
@@ -683,17 +710,16 @@ namespace CreateServerFunc
                         }
                         else if (e.Data.Contains("RCON running on"))
                         {
-                            MainWindow.serverRunning = true;
                             while (MainWindow.serverRunning && viewModel != null)
                             {
-                                ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
+                                await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
                             }
                         }
                     }
                 };
 
                 //     ↓ For error output traking ↓
-                process.ErrorDataReceived += (sender, e) =>
+                process.ErrorDataReceived += async (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
@@ -709,10 +735,9 @@ namespace CreateServerFunc
                         }
                         else if (e.Data.Contains("RCON running on"))
                         {
-                            MainWindow.serverRunning = true;
                             while (MainWindow.serverRunning == true && viewModel != null)
                             {
-                                ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
+                                await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
                             }
                         }
                     }
@@ -745,6 +770,10 @@ namespace CreateServerFunc
             {
                 Kill(RCON_Port, JMX_Port);
             }
+
+            dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{worldNumber}\";");
+            dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL WHERE worldNumber = \"{worldNumber}\";");
+            dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = NULL WHERE worldNumber = \"{worldNumber}\";");
         }
 
         public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string StopIPAddress, string StartIPAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, string time = "00:00", bool noGUI = true)

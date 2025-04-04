@@ -841,6 +841,7 @@ D:\Minecraft-Server\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\Syste
 D:\Minecraft-Server\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\System.IO.Pipelines.dll
 D:\Minecraft-Server\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\System.Management.dll
 D:\Minecraft-Server\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\UPnP.dll
+D:\Minecraft-Server\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\WpfAnimatedGif.dll
 D:\Minecraft-Server\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\runtimes\linux-arm\native\libikvm.so
 D:\Minecraft-Server\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\runtimes\linux-arm64\native\libikvm.so
 D:\Minecraft-Server\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\runtimes\linux-musl-arm\native\libikvm.so

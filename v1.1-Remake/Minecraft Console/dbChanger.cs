@@ -1,6 +1,6 @@
-﻿using System.Data.SQLite;
+﻿using Logger;
+using System.Data.SQLite;
 using System.IO;
-using Logger;
 
 namespace databaseChanger
 {
@@ -40,23 +40,24 @@ namespace databaseChanger
                         $"JMX_Port text," +
                         $"RCON_Port text," +
                         $"RMI_Port text," +
-                        $"rconPassword text" +
+                        $"rconPassword text," +
+                        $"serverUser text," +
+                        $"serverTempPsw text," +
+                        $"Process_ID text" +
                         $")";
-                    using (SQLiteCommand command = new SQLiteCommand(query, connection))
+                    using (SQLiteCommand command = new(query, connection))
                     {
                         command.ExecuteNonQuery();
                         CodeLogger.ConsoleLog("Table created successfully.");
                     }
 
                     // Insert data
-                    string insertDefaultSQL = $"insert into {dbName} (worldNumber, name, version, totalPlayers, rconPassword) values('123456789', 'Minecraft SMP', '1.21', '20', '123456789123456789');";
+                    string insertDefaultSQL = $"insert into {dbName} (worldNumber, name, version, software, totalPlayers, rconPassword, Process_ID) values('123456789', 'Minecraft SMP', '1.21', 'Vanilla', '20', '123456789123456789', NULL);";
                     if (insertOneDefaultSQLVerificator != false)
                     {
-                        using (SQLiteCommand insertCommand = new SQLiteCommand(insertDefaultSQL, connection))
-                        {
-                            insertCommand.ExecuteNonQuery();
-                            CodeLogger.ConsoleLog("Data inserted successfully.");
-                        }
+                        using SQLiteCommand insertCommand = new(insertDefaultSQL, connection);
+                        insertCommand.ExecuteNonQuery();
+                        CodeLogger.ConsoleLog("Data inserted successfully.");
                     }
                 }
                 catch (Exception ex)
@@ -69,7 +70,13 @@ namespace databaseChanger
 
         public static List<object[]> SpecificDataFunc(string sqlQuery)
         {
-            List<object[]> data = new List<object[]>();
+            List<object[]> data = [];
+
+            if (File.Exists(dbPath) == false)
+            {
+                CodeLogger.ConsoleLog("Database file does not exist.");
+                CreateDB("worlds");
+            }
 
             using (SQLiteConnection connection = new(connectionString))
             {

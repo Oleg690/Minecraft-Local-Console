@@ -11,31 +11,37 @@ using java.util;
 using System.Runtime.Versioning;
 using System.IO;
 using Logger;
+using Minecraft_Console;
 
 namespace MinecraftServerStats
 {
     [SupportedOSPlatform("windows")]
     class ServerStats
     {
-        public static void GetServerInfo(ServerInfoViewModel viewModel, string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
+        public static async Task GetServerInfo(ServerInfoViewModel viewModel, string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
         {
-            if (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port))
+            if (MainWindow.serverRunning = true && (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port)))
             {
                 Console.WriteLine($"--------------------------------------------------");
                 Stopwatch stopwatch = new();
 
                 // Get memory usage
                 stopwatch.Start();
+
+                var serverData = dbChanger.SpecificDataFunc($"SELECT serverUser, serverTempPsw FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
+                user = serverData[0].ToString() ?? string.Empty;
+                psw = serverData[1].ToString() ?? string.Empty;
+
                 string memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw)[0];
                 long getUsedHeapMemoryTime = stopwatch.ElapsedMilliseconds;
-                string[] memoryData = [memoryUsage, getUsedHeapMemoryTime.ToString()];
+                string[] memoryData = { memoryUsage, getUsedHeapMemoryTime.ToString() };
                 viewModel.MemoryUsage = memoryData[0];
                 stopwatch.Restart();
 
                 // Get world folder size
                 string worldSize = GetFolderSize(worldFolderPath);
                 long getFolderSizeTime = stopwatch.ElapsedMilliseconds;
-                string[] worldData = [worldSize, getFolderSizeTime.ToString()];
+                string[] worldData = { worldSize, getFolderSizeTime.ToString() };
                 viewModel.WorldSize = worldData[0];
                 stopwatch.Restart();
 
@@ -46,39 +52,35 @@ namespace MinecraftServerStats
 
                 string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
                 long getOnlinePlayersCountTime = stopwatch.ElapsedMilliseconds;
-                string[] playersData = [playersResult, getOnlinePlayersCountTime.ToString()];
+                string[] playersData = { playersResult, getOnlinePlayersCountTime.ToString() };
                 viewModel.PlayersOnline = $"{playersData[0]} / {maxPlayers}";
                 stopwatch.Restart();
 
                 // Get server uptime
                 string upTime = GetServerUptime(worldFolderPath);
                 long getServerUpTime = stopwatch.ElapsedMilliseconds;
-                string[] uptimeData = [upTime, getServerUpTime.ToString()];
+                string[] uptimeData = { upTime, getServerUpTime.ToString() };
                 viewModel.UpTime = uptimeData[0];
                 stopwatch.Restart();
 
                 // Get console output
                 string consoleOutput = GetConsoleOutput(worldFolderPath);
                 long consoleOutputTime = stopwatch.ElapsedMilliseconds;
-                string[] consoleOutputData = [consoleOutput, consoleOutputTime.ToString()];
+                string[] consoleOutputData = { consoleOutput, consoleOutputTime.ToString() };
                 viewModel.Console = consoleOutputData[0];
                 stopwatch.Restart();
 
                 long totalElapsedTime = getUsedHeapMemoryTime + getFolderSizeTime + getOnlinePlayersCountTime + getServerUpTime + consoleOutputTime;
-                if (1000 - totalElapsedTime >= 0)
-                {
-                    Thread.Sleep((int)(1000 - totalElapsedTime));
-                }
+                int delayTime = Math.Max(0, 500 - (int)totalElapsedTime);
+                if (delayTime < 0) delayTime = 0;
+                await Task.Delay(delayTime);
             }
             else
             {
-                Console.WriteLine($"--------------------------------------------------");
-                Console.WriteLine("There is no server running!");
-                Console.WriteLine($"--------------------------------------------------");
-                Thread.Sleep(1000);
+                await Task.Delay(1000);
+                return;
             }
         }
-
 
         // ------------------------ Method to get memory usage of Minecraft server ------------------------
         private static string[] GetUsedHeapMemory(string ip, int port, string user, string psw)
@@ -151,7 +153,7 @@ namespace MinecraftServerStats
                 return "-1";
             }
 
-            string? parentDirectory = Path.GetDirectoryName(worldFolderPath);
+            string? parentDirectory = Path.GetDirectoryName(Path.GetDirectoryName(worldFolderPath));
             if (parentDirectory == null)
             {
                 return "-1";
@@ -168,9 +170,15 @@ namespace MinecraftServerStats
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error reading startup time: " + ex.Message);
+                    CodeLogger.ConsoleLog("Error reading startup time: " + ex.Message);
                 }
             }
+            else
+            {
+                CodeLogger.ConsoleLog("Startup time file not found.");
+                return "-1";
+            }
+
             return "-1";
         }
 

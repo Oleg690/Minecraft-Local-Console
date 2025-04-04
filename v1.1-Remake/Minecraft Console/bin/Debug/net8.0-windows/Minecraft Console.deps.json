@@ -17,7 +17,8 @@
           "System.Data.SqlClient": "4.9.0",
           "System.Drawing.Common": "9.0.3",
           "System.Management": "9.0.3",
-          "UPnP": "1.1.6"
+          "UPnP": "1.1.6",
+          "WpfAnimatedGif": "2.0.2"
         },
         "runtime": {
           "Minecraft Console.dll": {}
@@ -634,6 +635,14 @@
             "fileVersion": "1.1.6.0"
           }
         }
+      },
+      "WpfAnimatedGif/2.0.2": {
+        "runtime": {
+          "lib/netcoreapp3.0/WpfAnimatedGif.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.2.0"
+          }
+        }
       }
     }
   },
@@ -1104,6 +1113,13 @@
       "sha512": "sha512-mocatmPRaR0wgnzIHyQBKvTft2MuzTH5JcOiWHnKp0xyljf6ZgRJsanex3iqLp3/Yblba49+v06IRhjUbNsxiA==",
       "path": "upnp/1.1.6",
       "hashPath": "upnp.1.1.6.nupkg.sha512"
+    },
+    "WpfAnimatedGif/2.0.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-B0j9SqtThyHVTiOPvu6yR+39Te0g3o+7Jjb+qEm7+Iz1HRqbE5/4QV+ntHWOYYBPOUFr9x1mdzGl/EzWP+nKiA==",
+      "path": "wpfanimatedgif/2.0.2",
+      "hashPath": "wpfanimatedgif.2.0.2.nupkg.sha512"
     }
   }
 }

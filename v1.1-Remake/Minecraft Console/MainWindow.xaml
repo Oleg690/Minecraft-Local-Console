@@ -5,17 +5,59 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:Minecraft_Console"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Window"
     Title="Minecraft Console"
     Width="800"
     Height="500"
     mc:Ignorable="d">
 
     <Grid>
+
+        <!--  Loading Animation  -->
+        <Grid
+            x:Name="LoadingScreen"
+            Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}}"
+            Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Window}}"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Panel.ZIndex="100"
+            Background="#B3B8B8B8"
+            Visibility="Collapsed">
+            <Image
+                Name="gifImage"
+                Width="200"
+                Margin="0,-100,-20,0" />
+            <Label
+                Name="LoadingLabel"
+                Margin="0,50,0,0"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Content="Loading..."
+                FontSize="20"
+                FontWeight="Bold"
+                Foreground="White" />
+            <Border
+                x:Name="loadingBarOutPadding"
+                Width="410"
+                Height="40"
+                Margin="0,150,0,0"
+                Background="#A2A2A2"
+                CornerRadius="15">
+                <Border
+                    x:Name="progresBar"
+                    Width="400"
+                    Margin="5"
+                    HorizontalAlignment="Left"
+                    Background="#85FF4C"
+                    CornerRadius="10" />
+            </Border>
+        </Grid>
+
         <!--  Sidebar  -->
         <Grid
             Width="200"
             HorizontalAlignment="Left"
-            Background="#333333">
+            Background="#262A32">
             <StackPanel Margin="10" VerticalAlignment="Top">
                 <Button
                     Margin="5"
@@ -55,18 +97,22 @@
             </ScrollViewer>
         </Grid>
 
-        <!--  Control Panel (Initially Hidden)  -->
-        <Grid>
+        <!--  Server Control Panel (Initially Hidden)  -->
+        <Grid
+            Margin="200,0,0,0"
+            Panel.ZIndex="-1"
+            Background="#1C2127">
             <Grid x:Name="ServerControlPanelDropBox">
                 <ComboBox
                     x:Name="ServerDropBox"
                     Width="100"
                     Height="25"
-                    Margin="210,10,10,10"
+                    Margin="10,10,10,10"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Top"
                     SelectedIndex="0"
-                    SelectionChanged="ServerControlPanelDropBoxChanged">
+                    SelectionChanged="ServerControlPanelDropBoxChanged"
+                    Visibility="Collapsed">
                     <ComboBoxItem Name="ManageCheckBox" Content="Manage" />
                     <ComboBoxItem Name="ConsoleCheckBox" Content="Console" />
                     <ComboBoxItem Name="FilesCheckBox" Content="Files" />
@@ -77,15 +123,15 @@
             <Grid
                 x:Name="Manage"
                 Height="200"
-                Margin="200,0,0,0"
-                Background="LightGray"
+                Background="#262A32"
                 Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock
                         x:Name="SelectedServerLabel"
                         Margin="0,10,0,10"
                         FontSize="16"
-                        FontWeight="Bold" />
+                        FontWeight="Bold"
+                        Foreground="White" />
                     <StackPanel Orientation="Horizontal">
                         <Button
                             Margin="5"
@@ -106,10 +152,7 @@
                         Content="Back" />
                 </StackPanel>
             </Grid>
-            <Grid
-                x:Name="Console"
-                Margin="200,0,0,0"
-                Visibility="Visible">
+            <Grid x:Name="Console" Visibility="Collapsed">
                 <Grid Margin="0,35,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="300*" />
@@ -321,28 +364,39 @@
                     </StackPanel>
                 </Grid>
             </Grid>
-            <Grid
-                x:Name="Files"
-                Height="200"
-                Margin="200,0,0,0"
-                Background="Green"
-                Visibility="Collapsed">
+            <Grid x:Name="Files" Visibility="Collapsed">
+                <Grid Margin="0,35,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Margin="10" Orientation="Horizontal">
+                        <Button
+                            Margin="0,0,10,0"
+                            Padding="5"
+                            Content="&lt;-" />
+                        <TextBlock
+                            x:Name="directoryPathBlock"
+                            VerticalAlignment="Center"
+                            FontSize="14"
+                            Text="/ path" />
+                    </StackPanel>
+
+                    <ListView
+                        x:Name="Files_Folders_ListView"
+                        Grid.Row="1"
+                        Margin="10"
+                        VerticalAlignment="Top"
+                        HorizontalContentAlignment="Stretch"
+                        Background="Transparent"
+                        BorderBrush="Transparent" />
+                </Grid>
+            </Grid>
+            <Grid x:Name="Stats" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Grid>
-            <Grid
-                x:Name="Stats"
-                Height="200"
-                Margin="200,0,0,0"
-                Background="Blue"
-                Visibility="Collapsed">
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" />
-            </Grid>
-            <Grid
-                x:Name="Settings"
-                Height="200"
-                Margin="200,0,0,0"
-                Background="Purple"
-                Visibility="Collapsed">
+            <Grid x:Name="Settings" Visibility="Collapsed">
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Grid>
         </Grid>
@@ -352,56 +406,398 @@
             x:Name="CreateServerPage"
             Margin="200,0,0,0"
             Visibility="Collapsed">
-            <StackPanel
-                Margin="10"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center">
-                <TextBlock
-                    Margin="0,10,0,10"
-                    FontSize="20"
-                    Text="Create Minecraft Server" />
+            <Grid Background="#1C2127">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
 
-                <TextBlock Margin="5" Text="Software:" />
-                <ComboBox
-                    x:Name="SoftwareComboBox"
-                    Margin="5"
-                    SelectedIndex="0">
-                    <ComboBoxItem Content="Vanilla" />
-                    <ComboBoxItem Content="Forge" />
-                    <ComboBoxItem Content="NeoForge" />
-                    <ComboBoxItem Content="Fabric" />
-                    <ComboBoxItem Content="Quilt" />
-                    <ComboBoxItem Content="Purpur" />
-                    <ComboBoxItem Content="Paper" />
-                </ComboBox>
 
-                <TextBlock Margin="5" Text="Version (e.g. 1.21.4):" />
-                <TextBox
-                    x:Name="ServerVersionTextBox"
-                    Margin="5"
-                    Text="1.21.4" />
+                <Border
+                    x:Name="BackgroundOverlay"
+                    Grid.ColumnSpan="2"
+                    Background="#80000000"
+                    Visibility="Collapsed">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock x:Name="DescriptionParagraph" Margin="0,0,0,10" />
+                        <StackPanel>
+                            <ProgressBar
+                                x:Name="ProgressBar"
+                                Width="300"
+                                Height="20" />
+                            <TextBlock x:Name="ProgressParagraph" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
 
-                <TextBlock Margin="5" Text="World Name (e.g. My World):" />
-                <TextBox
-                    x:Name="WorldNameTextBox"
-                    Margin="5"
-                    Text="My World" />
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
 
-                <TextBlock Margin="5" Text="Total Players:" />
-                <TextBox
-                    x:Name="TotalPlayersTextBox"
-                    Margin="5"
-                    Text="20" />
+                        <Grid>
+                            <Grid.Resources>
+                                <Style x:Key="DefaultTextStyle" TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="White" />
+                                </Style>
 
-                <Button
-                    Margin="10"
-                    Click="CreateServer_Click"
-                    Content="Create Server" />
-                <Button
-                    Margin="5"
-                    Click="BackToServersPage"
-                    Content="Back" />
-            </StackPanel>
+                                <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+                                    <Setter Property="Background" Value="#3C3C3C" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Padding" Value="5" />
+                                    <Setter Property="Margin" Value="0,2,0,2" />
+                                </Style>
+
+                                <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
+                                    <Setter Property="Background" Value="#3C3C3C" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Padding" Value="5" />
+                                    <Setter Property="Margin" Value="0,2,0,2" />
+                                </Style>
+
+                                <Style x:Key="ToggleCheckBoxStyle" TargetType="CheckBox">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type CheckBox}">
+                                                <Grid>
+                                                    <Rectangle
+                                                        x:Name="Background"
+                                                        Width="30"
+                                                        Height="16"
+                                                        Fill="#4A4A4A"
+                                                        RadiusX="8"
+                                                        RadiusY="8" />
+                                                    <Ellipse
+                                                        x:Name="Thumb"
+                                                        Width="14"
+                                                        Height="14"
+                                                        Margin="1"
+                                                        HorizontalAlignment="Left"
+                                                        Fill="White" />
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsChecked" Value="True">
+                                                        <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
+                                                        <Setter TargetName="Background" Property="Fill" Value="#4CAF50" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Margin" Value="0,2,0,2" />
+                                </Style>
+
+                                <Style x:Key="CreateButtonStyle" TargetType="Button">
+                                    <Setter Property="Background" Value="#4CAF50" />
+                                    <Setter Property="Foreground" Value="White" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Padding" Value="10,5" />
+                                    <Setter Property="Margin" Value="0,5,0,5" />
+                                    <Setter Property="FontSize" Value="16" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </Style>
+                            </Grid.Resources>
+
+                            <StackPanel VerticalAlignment="Top">
+
+                                <StackPanel Margin="0,10,0,10">
+                                    <TextBlock
+                                        Margin="0,0,0,5"
+                                        Style="{StaticResource DefaultTextStyle}"
+                                        Text="Server Name" />
+                                    <TextBox
+                                        x:Name="ServerNameInput"
+                                        Width="200"
+                                        Style="{StaticResource InputTextBoxStyle}" />
+                                </StackPanel>
+
+                                <StackPanel Margin="0,10,0,10">
+                                    <TextBlock
+                                        Margin="0,0,0,5"
+                                        Style="{StaticResource DefaultTextStyle}"
+                                        Text="Version" />
+                                    <WrapPanel>
+                                        <StackPanel Margin="0,5,15,5" Orientation="Horizontal">
+                                            <TextBlock
+                                                Width="100"
+                                                Foreground="White"
+                                                Style="{StaticResource DefaultTextStyle}"
+                                                Text="Software" />
+                                            <ComboBox
+                                                x:Name="SoftwareChangeBox"
+                                                Width="100"
+                                                SelectedIndex="0"
+                                                Style="{StaticResource InputComboBoxStyle}">
+                                                <ComboBoxItem Content="Vanilla" />
+                                                <ComboBoxItem Content="Forge" />
+                                                <ComboBoxItem Content="NeoForge" />
+                                                <ComboBoxItem Content="Fabric" />
+                                                <ComboBoxItem Content="Quilt" />
+                                                <ComboBoxItem Content="Purpur" />
+                                                <ComboBoxItem Content="Paper" />
+                                            </ComboBox>
+                                        </StackPanel>
+                                        <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                            <TextBlock
+                                                Width="100"
+                                                Foreground="White"
+                                                Style="{StaticResource DefaultTextStyle}"
+                                                Text="Version" />
+                                            <ComboBox
+                                                x:Name="VersionsChangeBox"
+                                                Width="100"
+                                                SelectedIndex="0"
+                                                Style="{StaticResource InputComboBoxStyle}">
+                                                <ComboBoxItem Content="1.21.4" />
+                                                <ComboBoxItem Content="1.21.3" />
+                                                <ComboBoxItem Content="1.21.2" />
+                                                <ComboBoxItem Content="1.21.1" />
+                                                <ComboBoxItem Content="1.21" />
+                                            </ComboBox>
+                                        </StackPanel>
+                                    </WrapPanel>
+                                </StackPanel>
+
+                                <StackPanel Margin="0,10,0,10">
+                                    <TextBlock
+                                        Margin="0,0,0,5"
+                                        Style="{StaticResource DefaultTextStyle}"
+                                        Text="Options" />
+                                    <StackPanel Background="#282828">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                Margin="0,0,5,0"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                Foreground="White"
+                                                Text="&#xE116;" />
+                                            <TextBlock
+                                                Margin="0,0,10,0"
+                                                Foreground="White"
+                                                Style="{StaticResource DefaultTextStyle}"
+                                                Text="server.properties" />
+                                        </StackPanel>
+
+                                        <WrapPanel>
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Slots" />
+                                                <TextBox
+                                                    x:Name="SlotsInput"
+                                                    Width="50"
+                                                    Style="{StaticResource InputTextBoxStyle}"
+                                                    Text="20" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Gamemode" />
+                                                <ComboBox
+                                                    x:Name="GamemodeComboBox"
+                                                    Width="100"
+                                                    SelectedIndex="0"
+                                                    Style="{StaticResource InputComboBoxStyle}">
+                                                    <ComboBoxItem Content="Survival" />
+                                                    <ComboBoxItem Content="Creative" />
+                                                    <ComboBoxItem Content="Adventure" />
+                                                    <ComboBoxItem Content="Spectator" />
+                                                </ComboBox>
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Difficulty" />
+                                                <ComboBox
+                                                    x:Name="DifficultyComboBox"
+                                                    Width="100"
+                                                    SelectedIndex="2"
+                                                    Style="{StaticResource InputComboBoxStyle}">
+                                                    <ComboBoxItem Content="Peaceful" />
+                                                    <ComboBoxItem Content="Easy" />
+                                                    <ComboBoxItem Content="Normal" />
+                                                    <ComboBoxItem Content="Hard" />
+                                                </ComboBox>
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Whitelist" />
+                                                <CheckBox
+                                                    x:Name="WhitelistCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Cracked" />
+                                                <CheckBox
+                                                    x:Name="CrackedCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="PVP" />
+                                                <CheckBox
+                                                    x:Name="PVPCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    IsChecked="True"
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Commandblocks" />
+                                                <CheckBox
+                                                    x:Name="CommandblocksCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    IsChecked="True"
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Fly" />
+                                                <CheckBox
+                                                    x:Name="FlyCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    IsChecked="True"
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Animals" />
+                                                <CheckBox
+                                                    x:Name="AnimalsCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    IsChecked="True"
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Monster" />
+                                                <CheckBox
+                                                    x:Name="MonsterCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    IsChecked="True"
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Villagers" />
+                                                <CheckBox
+                                                    x:Name="VillagersCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    IsChecked="True"
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Nether" />
+                                                <CheckBox
+                                                    x:Name="NetherCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    IsChecked="True"
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Force Gamemode" />
+                                                <CheckBox
+                                                    x:Name="ForceGamemodeCheckBox"
+                                                    Margin="5,0,0,0"
+                                                    Content=""
+                                                    Style="{StaticResource ToggleCheckBoxStyle}" />
+                                            </StackPanel>
+
+                                            <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
+                                                <TextBlock
+                                                    Width="100"
+                                                    Foreground="White"
+                                                    Style="{StaticResource DefaultTextStyle}"
+                                                    Text="Spawn Protection" />
+                                                <TextBox
+                                                    x:Name="SpawnProtectionInput"
+                                                    Width="50"
+                                                    Style="{StaticResource InputTextBoxStyle}"
+                                                    Text="0" />
+                                            </StackPanel>
+                                        </WrapPanel>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <Button
+                                    Margin="0,20,0,0"
+                                    HorizontalAlignment="Center"
+                                    Click="CreateServer_Click"
+                                    Content="Create"
+                                    Style="{StaticResource CreateButtonStyle}" />
+
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
