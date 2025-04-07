@@ -5,8 +5,9 @@ namespace Logger
 {
     public static class CodeLogger
     {
-        public static readonly string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))) ?? string.Empty;
-        private static readonly string? LogsPath = Path.Combine(rootFolder, "Logs");
+        public static readonly string rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))) ?? string.Empty;
+        private static readonly string LogsPath = Path.Combine(rootFolder, "Logs");
+        private static readonly Random rng = new(); // at top of class
 
         public static void CreateLogFile(int maxLogFiles = 10)
         {
@@ -27,7 +28,7 @@ namespace Logger
 
                 do
                 {
-                    string randomNumber = new Random().Next(1000, 9999).ToString();
+                    string randomNumber = rng.Next(1000, 9999).ToString();
                     archivedLogName = $"{timestamp}-{randomNumber}.log";
                     archivedLogPath = Path.Combine(LogsPath, archivedLogName);
                     gzipFilePath = archivedLogPath + ".gz";
@@ -103,6 +104,7 @@ namespace Logger
             catch (Exception ex)
             {
                 Console.WriteLine("Error logging: " + ex.Message);
+                ConsoleLog("Error logging: " + ex.Message);
             }
         }
     }

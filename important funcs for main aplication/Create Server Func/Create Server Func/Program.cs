@@ -14,8 +14,8 @@ namespace MainAppFuncs
         static async Task Main()
         {
             // ↓ Server Settings ↓
-            string software = "";      // e.g. Vanilla
-            string version = "";      // e.g. 1.21.4
+            string software = "Vanilla";      // e.g. Vanilla
+            string version = "1.21";      // e.g. 1.21.4
             string worldNumber = ""; // e.g. 123456789012
             string worldName = "";  // e.g. Minecfraft Server
             int totalPlayers = 20;

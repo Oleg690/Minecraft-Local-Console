@@ -14,6 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="assets\Fonts\Istok Web\IstokWeb-Bold.ttf" />
+    <None Remove="assets\Fonts\Istok Web\IstokWeb-BoldItalic.ttf" />
+    <None Remove="assets\Fonts\Istok Web\IstokWeb-Italic.ttf" />
+    <None Remove="assets\Fonts\Istok Web\IstokWeb-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CoreRCON" Version="5.4.2" />
     <PackageReference Include="EntityFramework" Version="6.5.1" />
     <PackageReference Include="IKVM" Version="8.11.2" />
@@ -30,9 +37,17 @@
   <ItemGroup>
     <Folder Include="database\" />
     <Folder Include="Logs\" />
+    <Folder Include="NewFolder\" />
     <Folder Include="versions\" />
     <Folder Include="temp\" />
     <Folder Include="worlds\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="assets\Fonts\Istok Web\IstokWeb-Bold.ttf" />
+    <Resource Include="assets\Fonts\Istok Web\IstokWeb-BoldItalic.ttf" />
+    <Resource Include="assets\Fonts\Istok Web\IstokWeb-Italic.ttf" />
+    <Resource Include="assets\Fonts\Istok Web\IstokWeb-Regular.ttf" />
   </ItemGroup>
 
 </Project>

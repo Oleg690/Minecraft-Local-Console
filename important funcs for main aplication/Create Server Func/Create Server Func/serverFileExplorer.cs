@@ -119,5 +119,76 @@
         {
             return path != null ? Path.GetFileName(path) : null;
         }
+
+        public static string[] GetPathComponents(string fullPath)
+        {
+            var components = new List<string>();
+            var split = fullPath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            bool foundWorlds = false;
+            foreach (var part in split)
+            {
+                if (!foundWorlds)
+                {
+                    if (part.Equals("worlds", StringComparison.OrdinalIgnoreCase))
+                    {
+                        foundWorlds = true;
+                    }
+                    continue;
+                }
+
+                if (!string.IsNullOrWhiteSpace(part))
+                    components.Add(part);
+            }
+
+            return [.. components];
+        }
+
+        public static List<string[][]> GetStructuredPathComponents(string fullPath)
+        {
+            var result = new List<string[][]>();
+            var split = fullPath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            bool foundWorlds = false;
+            string currentPath = "";
+
+            for (int i = 0; i < split.Length; i++)
+            {
+                var part = split[i];
+
+                if (string.IsNullOrWhiteSpace(part))
+                    continue;
+
+                if (!foundWorlds)
+                {
+                    if (part.Equals("worlds", StringComparison.OrdinalIgnoreCase))
+                    {
+                        foundWorlds = true;
+                    }
+                }
+
+                if (foundWorlds)
+                {
+                    currentPath = Path.Combine(currentPath, part);
+
+                    // Skip adding the "worlds" component itself
+                    if (!part.Equals("worlds", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var entry = new string[][]
+                        {
+                    [currentPath + Path.DirectorySeparatorChar],
+                    [part]
+                        };
+                        result.Add(entry);
+                    }
+                }
+                else
+                {
+                    currentPath = Path.Combine(currentPath, part);
+                }
+            }
+
+            return result;
+        }
     }
 }

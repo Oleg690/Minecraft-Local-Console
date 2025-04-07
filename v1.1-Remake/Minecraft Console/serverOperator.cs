@@ -118,8 +118,11 @@ namespace CreateServerFunc
 
             await BasicServerInitializator(software, customDirectory, jarPath, rconSettings, worldSettings, ProcessMemoryAlocation, uniqueNumber, worldName, version, totalPlayers, rconPassword, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Insert_Into_DB);
 
-            CodeLogger.ConsoleLog("World Created Succeasfully");
+            dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{uniqueNumber}\";");
+            dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL WHERE worldNumber = \"{uniqueNumber}\";");
+            dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = NULL WHERE worldNumber = \"{uniqueNumber}\";");
 
+            CodeLogger.ConsoleLog("World Created Succeasfully");
             MainWindow.SetLoadingBarProgress(100);
 
             return uniqueNumber;
@@ -765,11 +768,6 @@ namespace CreateServerFunc
             await InputForServer("stop", worldNumber, RCON_Port, ipAddress);
 
             Thread.Sleep(1000);
-
-            if (IsPortInUse(JMX_Port) || IsPortInUse(RCON_Port))
-            {
-                Kill(RCON_Port, JMX_Port);
-            }
 
             dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{worldNumber}\";");
             dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL WHERE worldNumber = \"{worldNumber}\";");

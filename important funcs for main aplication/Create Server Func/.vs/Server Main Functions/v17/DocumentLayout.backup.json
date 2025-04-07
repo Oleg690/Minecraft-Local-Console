@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\dbchanger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\dbchanger.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\serverfileexplorer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\serverfileexplorer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -18,7 +18,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
@@ -28,24 +28,10 @@
               "RelativeDocumentMoniker": "Create Server Func\\Program.cs",
               "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Program.cs",
               "RelativeToolTip": "Create Server Func\\Program.cs",
-              "ViewState": "AgIAADEAAAAAAAAAAAAgwEUAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAgwD4AAABcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-09T18:43:51.86Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "dbChanger.cs",
-              "DocumentMoniker": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\dbChanger.cs",
-              "RelativeDocumentMoniker": "Create Server Func\\dbChanger.cs",
-              "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\dbChanger.cs",
-              "RelativeToolTip": "Create Server Func\\dbChanger.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-03T16:31:47.112Z",
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
@@ -54,6 +40,19 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "serverFileExplorer.cs",
+              "DocumentMoniker": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\serverFileExplorer.cs",
+              "RelativeDocumentMoniker": "Create Server Func\\serverFileExplorer.cs",
+              "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\serverFileExplorer.cs",
+              "RelativeToolTip": "Create Server Func\\serverFileExplorer.cs",
+              "ViewState": "AgIAAG8AAAAAAAAAAIAwwH4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-04T17:13:32.661Z",
+              "EditorCaption": ""
             }
           ]
         }
