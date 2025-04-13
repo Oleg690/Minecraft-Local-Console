@@ -31,8 +31,7 @@
               "ViewState": "AgIAABMAAAAAAAAAAAAgwDsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-09T18:43:51.86Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Bookmark",
@@ -52,8 +51,7 @@
               "RelativeToolTip": "Create Server Func\\serverFileExplorer.cs",
               "ViewState": "AgIAAG8AAAAAAAAAAIAwwH4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-04T17:13:32.661Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-04-04T17:13:32.661Z"
             }
           ]
         }

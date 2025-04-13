@@ -1,0 +1,2 @@
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\bin\Release\net8.0\win-x64\publish\JMXConsoleTool.pdb
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\bin\Release\net8.0\win-x64\publish\JMXConsoleTool.exe

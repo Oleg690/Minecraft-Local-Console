@@ -747,6 +747,36 @@ namespace Updater
             CodeLogger.ConsoleLog("-------------------------");
         }
 
+        public static List<string> GetSupportedSoftwares()
+        {
+            if (string.IsNullOrEmpty(versionsSupprortListXML))
+            {
+                CodeLogger.ConsoleLog("The path to the supported versions XML file is not set.");
+                throw new InvalidOperationException("The path to the supported versions XML file is not set.");
+            }
+
+            var doc = XDocument.Load(versionsSupprortListXML!); // Use null-forgiving operator to suppress CS8604
+            return [.. doc.Descendants("software")
+                      .Select(s => s.Attribute("name")?.Value)
+                      .Where(name => !string.IsNullOrEmpty(name))
+                      .Distinct()];
+        }
+
+        public static List<string> GetSupportedVersions(string softwareName)
+        {
+            if (string.IsNullOrEmpty(versionsSupprortListXML))
+            {
+                CodeLogger.ConsoleLog("The path to the supported versions XML file is not set.");
+                throw new InvalidOperationException("The path to the supported versions XML file is not set.");
+            }
+
+            var doc = XDocument.Load(versionsSupprortListXML);
+            return [.. doc.Descendants("software")
+                      .Where(s => s.Attribute("name")?.Value == softwareName)
+                      .Descendants("version")
+                      .Select(v => v.Value)];
+        }
+
         // ------------------------ ↓ Helpers for Updater Funcs ↓ ------------------------
 
         private static async Task RunUpdaterForSoftware(string versionDirectory, string software, string? version = null, bool skipCheckForInstallers = false)

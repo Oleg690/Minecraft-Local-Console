@@ -22,7 +22,7 @@
       "EntityFramework/6.5.1": {
         "dependencies": {
           "Microsoft.CSharp": "4.7.0",
-          "System.CodeDom": "9.0.3",
+          "System.CodeDom": "9.0.4",
           "System.ComponentModel.Annotations": "5.0.0",
           "System.Configuration.ConfigurationManager": "6.0.1",
           "System.Data.SqlClient": "4.9.0"
@@ -328,11 +328,11 @@
           }
         }
       },
-      "Microsoft.Win32.SystemEvents/9.0.3": {
+      "Microsoft.Win32.SystemEvents/9.0.4": {
         "runtime": {
           "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11113"
+            "fileVersion": "9.0.425.16305"
           }
         },
         "runtimeTargets": {
@@ -340,7 +340,7 @@
             "rid": "win",
             "assetType": "runtime",
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11113"
+            "fileVersion": "9.0.425.16305"
           }
         }
       },
@@ -424,11 +424,11 @@
           }
         }
       },
-      "System.CodeDom/9.0.3": {
+      "System.CodeDom/9.0.4": {
         "runtime": {
           "lib/net8.0/System.CodeDom.dll": {
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11113"
+            "fileVersion": "9.0.425.16305"
           }
         }
       },
@@ -576,18 +576,18 @@
           }
         }
       },
-      "System.Drawing.Common/9.0.3": {
+      "System.Drawing.Common/9.0.4": {
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "9.0.3"
+          "Microsoft.Win32.SystemEvents": "9.0.4"
         },
         "runtime": {
           "lib/net8.0/System.Drawing.Common.dll": {
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11202"
+            "fileVersion": "9.0.425.16312"
           },
           "lib/net8.0/System.Private.Windows.Core.dll": {
             "assemblyVersion": "9.0.0.0",
-            "fileVersion": "9.0.325.11202"
+            "fileVersion": "9.0.425.16312"
           }
         }
       },
@@ -599,22 +599,22 @@
           }
         }
       },
-      "System.Management/9.0.3": {
+      "System.Management/9.0.4": {
         "dependencies": {
-          "System.CodeDom": "9.0.3"
+          "System.CodeDom": "9.0.4"
         },
         "runtime": {
           "lib/net8.0/System.Management.dll": {
-            "assemblyVersion": "9.0.0.3",
-            "fileVersion": "9.0.325.11113"
+            "assemblyVersion": "9.0.0.4",
+            "fileVersion": "9.0.425.16305"
           }
         },
         "runtimeTargets": {
           "runtimes/win/lib/net8.0/System.Management.dll": {
             "rid": "win",
             "assetType": "runtime",
-            "assemblyVersion": "9.0.0.3",
-            "fileVersion": "9.0.325.11113"
+            "assemblyVersion": "9.0.0.4",
+            "fileVersion": "9.0.425.16305"
           }
         }
       },
@@ -714,7 +714,7 @@
       "System.Threading.Tasks.Extensions/4.5.4": {},
       "System.Windows.Extensions/6.0.0": {
         "dependencies": {
-          "System.Drawing.Common": "9.0.3"
+          "System.Drawing.Common": "9.0.4"
         },
         "runtime": {
           "lib/net6.0/System.Windows.Extensions.dll": {
@@ -988,12 +988,12 @@
       "path": "microsoft.extensions.primitives/8.0.0",
       "hashPath": "microsoft.extensions.primitives.8.0.0.nupkg.sha512"
     },
-    "Microsoft.Win32.SystemEvents/9.0.3": {
+    "Microsoft.Win32.SystemEvents/9.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Z0hIB2oeNqPOO0MYD0wkLpEe0LangoF3BSdMLLF5wft/rndYoXhLQvWni1OxymlWj+1adswAps2ZlrPmD9ZhBg==",
-      "path": "microsoft.win32.systemevents/9.0.3",
-      "hashPath": "microsoft.win32.systemevents.9.0.3.nupkg.sha512"
+      "sha512": "sha512-kHgtAkXhNEP8oGuAVe3Q5admxsdMlSdWE2rXcA9FfeGDZJQawPccmZgnOswgW3ugUPSJt7VH+TMQPz65mnhGSQ==",
+      "path": "microsoft.win32.systemevents/9.0.4",
+      "hashPath": "microsoft.win32.systemevents.9.0.4.nupkg.sha512"
     },
     "Newtonsoft.Json/13.0.1": {
       "type": "package",
@@ -1044,12 +1044,12 @@
       "path": "stub.system.data.sqlite.core.netstandard/1.0.119",
       "hashPath": "stub.system.data.sqlite.core.netstandard.1.0.119.nupkg.sha512"
     },
-    "System.CodeDom/9.0.3": {
+    "System.CodeDom/9.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-KeFk4+is5IB3FCjFmPjtFYaTSYhFA/l6ZOeWBQo6CVVQchpvl6vv+3kPPfNttkEoA/Gq78FsJFMu4Eej/ln44Q==",
-      "path": "system.codedom/9.0.3",
-      "hashPath": "system.codedom.9.0.3.nupkg.sha512"
+      "sha512": "sha512-aJdv7Z87PoPW8ijvGIincocooYRbH3Umtlz7OrJKf6GDInbdu1bvk5X1fFlmbl7WP+9ntoIBd7NjKz+siVFdHA==",
+      "path": "system.codedom/9.0.4",
+      "hashPath": "system.codedom.9.0.4.nupkg.sha512"
     },
     "System.Collections.Immutable/8.0.0": {
       "type": "package",
@@ -1114,12 +1114,12 @@
       "path": "system.diagnostics.diagnosticsource/8.0.1",
       "hashPath": "system.diagnostics.diagnosticsource.8.0.1.nupkg.sha512"
     },
-    "System.Drawing.Common/9.0.3": {
+    "System.Drawing.Common/9.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-yDxzWfZGvOtk8zk5apWXP/tmro1Nghn7/4bWS5np5CtwIfiVCC74qCc1qvIsnywvXKzVqIbKXRk09wts+xGfeg==",
-      "path": "system.drawing.common/9.0.3",
-      "hashPath": "system.drawing.common.9.0.3.nupkg.sha512"
+      "sha512": "sha512-SbtusMUT1bCxZ14904ZPo2GZyelze0rwUni9wXrp8KX9Zlsda8idqpxra1RBvOA85WM0wW+fCI4GLrlCTYiE6A==",
+      "path": "system.drawing.common/9.0.4",
+      "hashPath": "system.drawing.common.9.0.4.nupkg.sha512"
     },
     "System.IO.Pipelines/8.0.0": {
       "type": "package",
@@ -1128,12 +1128,12 @@
       "path": "system.io.pipelines/8.0.0",
       "hashPath": "system.io.pipelines.8.0.0.nupkg.sha512"
     },
-    "System.Management/9.0.3": {
+    "System.Management/9.0.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Wsb47+pRN1xnCxKOXcj+80FZ5OYQK2Dr8nnS8CHS1LVB+MXdzyK90sEmDYs/ux+btrxpE1N56FZo5rDbzpd1HA==",
-      "path": "system.management/9.0.3",
-      "hashPath": "system.management.9.0.3.nupkg.sha512"
+      "sha512": "sha512-MfY9+SrkSvchAoFiChTkhQYCAjBaQQ9u3LwiKmho7oTbujucnxCzORlPgLhId/ChLSptsQ/1UmtPGLZaKYVdsA==",
+      "path": "system.management/9.0.4",
+      "hashPath": "system.management.9.0.4.nupkg.sha512"
     },
     "System.Memory/4.5.5": {
       "type": "package",

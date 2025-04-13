@@ -1,15 +1,14 @@
-﻿using Open.Nat;
+﻿using Logger;
+using Open.Nat;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Security.Principal;
-using System.Security.AccessControl;
-using Logger;
-using CreateServerFunc;
 using System.Runtime.Versioning;
-using System.Net.Http;
-using System.IO;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Windows;
 
 namespace NetworkConfig
@@ -17,54 +16,27 @@ namespace NetworkConfig
     [SupportedOSPlatform("windows")]
     class NetworkSetup
     {
-        
         public static async Task Setup(int port1, int port2, int port3)
         {
             try
             {
-                // Create ProcessStartInfo to run the application as administrator
-                ProcessStartInfo processInfo = new()
+                // Step 1: Port Forwarding using UPnP
+                //await UPnP_Port_Mapping.UPnP_Configuration_Async(port1); // -> TODO
+                //await UPnP_Port_Mapping.UPnP_Configuration_Async(port2); // -> TODO
+                //await UPnP_Port_Mapping.UPnP_Configuration_Async(port3); // -> TODO
+
+                // Step 2: Set Static IP
+                //StaticIPConfig.SetStaticIP("192.168.1.100", "255.255.255.0", "192.168.1.1", "8.8.8.8", "8.8.4.4");
+
+                await Task.Run(() =>
                 {
-                    FileName = Environment.ProcessPath, // The file you want to run with elevated permissions
-                    UseShellExecute = true,
-                    Verb = "runas", // This tells Windows to run as Administrator
-                    CreateNoWindow = false, // Optional: Keep the window visible
-                    WindowStyle = ProcessWindowStyle.Normal // Optional: You can set to Hidden if you don't want a visible window
-                };
-
-                // Start the process
-                using (Process? process = Process.Start(processInfo))
-                {
-                    if (process == null)
-                    {
-                        CodeLogger.ConsoleLog("Failed to start the Minecraft server!");
-                        return;
-                    }
-
-                    // Step 1: Port Forwarding using UPnP
-                    //await UPnP_Port_Mapping.UPnP_Configuration_Async(port1); // -> TODO
-                    //await UPnP_Port_Mapping.UPnP_Configuration_Async(port2); // -> TODO
-                    //await UPnP_Port_Mapping.UPnP_Configuration_Async(port3); // -> TODO
-
-                    // Step 2: Set Static IP
-                    //StaticIPConfig.SetStaticIP("192.168.1.100", "255.255.255.0", "192.168.1.1", "8.8.8.8", "8.8.4.4");
-
                     JMX_Setter.CreateJMXPasswordFile();
+                });
 
-                    // Step 3: Open Firewall Port
-                    FirewallRules.OpenFirewallPort(port1);
-                    FirewallRules.OpenFirewallPort(port2);
-                    FirewallRules.OpenFirewallPort(port3);
-
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
-
-                    process.WaitForExit();
-                    CodeLogger.ConsoleLog($"Process for the server has stopped with exit code: {process.ExitCode}");
-                }
-
-                CodeLogger.ConsoleLog("Network setup completed!");
-                MessageBox.Show("Network setup completed!");
+                // Step 3: Open Firewall Port
+                FirewallRules.OpenFirewallPort(port1);
+                FirewallRules.OpenFirewallPort(port2);
+                FirewallRules.OpenFirewallPort(port3);
             }
             catch (Exception ex)
             {
@@ -92,7 +64,7 @@ namespace NetworkConfig
         {
             try
             {
-                using (HttpClient client = new HttpClient())
+                using (HttpClient client = new())
                 {
                     return await client.GetStringAsync("https://api64.ipify.org");
                 }
@@ -100,41 +72,6 @@ namespace NetworkConfig
             catch (Exception ex)
             {
                 return "Error: " + ex.Message;
-            }
-        }
-
-        private static bool IsAdministrator()
-        {
-            if (!OperatingSystem.IsWindows())
-            {
-                throw new PlatformNotSupportedException("This method is only supported on Windows.");
-            }
-
-            using (WindowsIdentity identity = WindowsIdentity.GetCurrent())
-            {
-                WindowsPrincipal principal = new WindowsPrincipal(identity);
-                return principal.IsInRole(WindowsBuiltInRole.Administrator);
-            }
-        }
-
-        private static void RestartAsAdmin()
-        {
-            ProcessStartInfo psi = new()
-            {
-                FileName = Environment.ProcessPath,
-                Verb = "runas",
-                UseShellExecute = true
-            };
-            try
-            {
-                Process.Start(psi);
-                Console.ReadKey();
-                Environment.Exit(0);
-            }
-            catch (Exception)
-            {
-                CodeLogger.ConsoleLog("Failed to start as Administrator. Please run manually as Admin.");
-                Environment.Exit(1);
             }
         }
     }
@@ -179,8 +116,6 @@ namespace NetworkConfig
                 CodeLogger.ConsoleLog($"Error: {ex.Message}");
             }
         }
-
-
     }
 
     [SupportedOSPlatform("windows")]
@@ -262,12 +197,12 @@ namespace NetworkConfig
 
         private static string ExtractValue(string output, string key)
         {
-            string[] lines = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
             foreach (string line in lines)
             {
                 if (line.Contains(key))
                 {
-                    return line.Split(new[] { ':' }, 2)[1].Trim();
+                    return line.Split([':'], 2)[1].Trim();
                 }
             }
             return string.Empty;
@@ -310,72 +245,34 @@ namespace NetworkConfig
     class JMX_Setter
     {
         public static readonly string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))) ?? string.Empty;
+        private static readonly string? JMX_Exe_File_Path = rootFolder + "\\jmx\\JMXConsoleTool.exe";
         private static readonly string? JMX_Access_File_Path = rootFolder + "\\jmx\\jmxremote.access";
         private static readonly string? JMX_Password_File_Path = rootFolder + "\\jmx\\jmxremote.password";
 
         public static void CreateJMXPasswordFile()
         {
+            ProcessStartInfo startInfo = new()
+            {
+                FileName = JMX_Exe_File_Path,
+                Arguments = $"\"{JMX_Access_File_Path}\" \"{JMX_Password_File_Path}\"",
+                UseShellExecute = true,
+                CreateNoWindow = false,
+                Verb = "runas"
+            };
+
             try
             {
-                if (JMX_Access_File_Path != null)
+                Process? process = Process.Start(startInfo);
+
+                using (process)
                 {
-                    File.Delete(JMX_Access_File_Path);
+                    process?.WaitForExit(); // Correctly call WaitForExit on the Process instance
                 }
-
-                if (JMX_Password_File_Path != null)
-                {
-                    File.Delete(JMX_Password_File_Path);
-                }
-
-                // Get current username
-                string currentUser = Environment.UserName;
-                string contentFile1 = $"admin readwrite";
-                string contentFile2 = $"admin {ServerCreator.GenerateRandomNumber(5)}";
-
-                // Ensure directory exists
-                string? directoryPath = Path.GetDirectoryName(JMX_Password_File_Path);
-                if (directoryPath != null && !Directory.Exists(directoryPath))
-                {
-                    Directory.CreateDirectory(directoryPath);
-                }
-
-                // Create and write to the file both files
-                if (JMX_Access_File_Path != null)
-                {
-                    File.WriteAllText(JMX_Access_File_Path, contentFile1);
-                    CodeLogger.ConsoleLog("Password file created successfully.");
-                }
-
-                if (JMX_Password_File_Path != null)
-                {
-                    File.WriteAllText(JMX_Password_File_Path, contentFile2);
-                    CodeLogger.ConsoleLog("Password file created successfully.");
-                }
-
-                // Set file 2 permissions
-                if (JMX_Password_File_Path != null)
-                {
-                    FileSecurity security = new();
-                    security.SetOwner(new NTAccount(currentUser));
-                    security.SetAccessRuleProtection(true, false); // Remove inherited permissions
-
-                    FileSystemAccessRule rule = new FileSystemAccessRule(
-                        new NTAccount(currentUser),
-                        FileSystemRights.Read | FileSystemRights.Write,
-                        AccessControlType.Allow
-                    );
-
-                    security.AddAccessRule(rule);
-
-                    FileInfo fileInfo = new(JMX_Password_File_Path);
-                    fileInfo.SetAccessControl(security);
-
-                    CodeLogger.ConsoleLog("Permissions set successfully.");
-                }
+                CodeLogger.ConsoleLog("JMXConsoleTool launched with Administrator privileges.");
             }
             catch (Exception ex)
             {
-                CodeLogger.ConsoleLog($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Failed to launch: {ex.Message}");
             }
         }
 
@@ -443,7 +340,7 @@ namespace NetworkConfig
     {
         public static void Execute(string command)
         {
-            Process process = new Process
+            Process process = new()
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -462,7 +359,7 @@ namespace NetworkConfig
 
         public static string ExecuteWithOutput(string command)
         {
-            Process process = new Process
+            Process process = new()
             {
                 StartInfo = new ProcessStartInfo
                 {

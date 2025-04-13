@@ -37,7 +37,6 @@ namespace CreateServerFunc
             if (!ServerOperator.CheckFilesAndNetworkSettings(Server_Port, JMX_Port, RMI_Port))
             {
                 await NetworkSetup.Setup(Server_Port, JMX_Port, RMI_Port);
-                return "";
             }
 
             // Making the custom folder for the new world
@@ -451,6 +450,8 @@ namespace CreateServerFunc
 
         private static async Task CheckVersions(string rootFolder, string software, string version)
         {
+            CodeLogger.ConsoleLog($"Software: '{software}'; Version: '{version}';");
+
             string serverVersionsPath = Path.Combine(rootFolder, "versions");
             if (!Path.Exists(Path.Combine(serverVersionsPath, software)))
             {
@@ -587,7 +588,6 @@ namespace CreateServerFunc
             if (!CheckFilesAndNetworkSettings(Server_Port, JMX_Port, RMI_Port))
             {
                 await NetworkSetup.Setup(Server_Port, JMX_Port, RMI_Port);
-                return;
             }
 
             //           ↓ For debugging! ↓
@@ -679,7 +679,6 @@ namespace CreateServerFunc
 
             serverProcessInfo.Arguments += noGUI ? " nogui" : "";
 
-            
             using (Process? process = Process.Start(serverProcessInfo))
             {
                 if (process == null)
@@ -772,13 +771,6 @@ namespace CreateServerFunc
             dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{worldNumber}\";");
             dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL WHERE worldNumber = \"{worldNumber}\";");
             dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = NULL WHERE worldNumber = \"{worldNumber}\";");
-        }
-
-        public static async Task Restart(string serverPath, string worldNumber, int processMemoryAlocation, string StopIPAddress, string StartIPAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, string time = "00:00", bool noGUI = true)
-        {
-            await Stop("restart", worldNumber, StopIPAddress, RCON_Port, JMX_Port, time);
-
-            await Start(worldNumber, serverPath, processMemoryAlocation, StartIPAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, noGUI: noGUI);
         }
 
         public static void Kill(int RCON_Port, int JMX_Port)

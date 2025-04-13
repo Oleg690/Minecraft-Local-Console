@@ -566,7 +566,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.Win32.SystemEvents/9.0.3": {
+      "Microsoft.Win32.SystemEvents/9.0.4": {
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
@@ -680,7 +680,7 @@
           }
         }
       },
-      "System.CodeDom/9.0.3": {
+      "System.CodeDom/9.0.4": {
         "type": "package",
         "compile": {
           "lib/net8.0/System.CodeDom.dll": {
@@ -868,10 +868,10 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Drawing.Common/9.0.3": {
+      "System.Drawing.Common/9.0.4": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "9.0.3"
+          "Microsoft.Win32.SystemEvents": "9.0.4"
         },
         "compile": {
           "lib/net8.0/System.Drawing.Common.dll": {
@@ -909,10 +909,10 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Management/9.0.3": {
+      "System.Management/9.0.4": {
         "type": "package",
         "dependencies": {
-          "System.CodeDom": "9.0.3"
+          "System.CodeDom": "9.0.4"
         },
         "compile": {
           "lib/net8.0/System.Management.dll": {
@@ -7760,10 +7760,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Win32.SystemEvents/9.0.3": {
-      "sha512": "Z0hIB2oeNqPOO0MYD0wkLpEe0LangoF3BSdMLLF5wft/rndYoXhLQvWni1OxymlWj+1adswAps2ZlrPmD9ZhBg==",
+    "Microsoft.Win32.SystemEvents/9.0.4": {
+      "sha512": "kHgtAkXhNEP8oGuAVe3Q5admxsdMlSdWE2rXcA9FfeGDZJQawPccmZgnOswgW3ugUPSJt7VH+TMQPz65mnhGSQ==",
       "type": "package",
-      "path": "microsoft.win32.systemevents/9.0.3",
+      "path": "microsoft.win32.systemevents/9.0.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -7783,7 +7783,7 @@
         "lib/net9.0/Microsoft.Win32.SystemEvents.xml",
         "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll",
         "lib/netstandard2.0/Microsoft.Win32.SystemEvents.xml",
-        "microsoft.win32.systemevents.9.0.3.nupkg.sha512",
+        "microsoft.win32.systemevents.9.0.4.nupkg.sha512",
         "microsoft.win32.systemevents.nuspec",
         "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.dll",
         "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.xml",
@@ -7920,10 +7920,10 @@
         "stub.system.data.sqlite.core.netstandard.nuspec"
       ]
     },
-    "System.CodeDom/9.0.3": {
-      "sha512": "KeFk4+is5IB3FCjFmPjtFYaTSYhFA/l6ZOeWBQo6CVVQchpvl6vv+3kPPfNttkEoA/Gq78FsJFMu4Eej/ln44Q==",
+    "System.CodeDom/9.0.4": {
+      "sha512": "aJdv7Z87PoPW8ijvGIincocooYRbH3Umtlz7OrJKf6GDInbdu1bvk5X1fFlmbl7WP+9ntoIBd7NjKz+siVFdHA==",
       "type": "package",
-      "path": "system.codedom/9.0.3",
+      "path": "system.codedom/9.0.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -7943,7 +7943,7 @@
         "lib/net9.0/System.CodeDom.xml",
         "lib/netstandard2.0/System.CodeDom.dll",
         "lib/netstandard2.0/System.CodeDom.xml",
-        "system.codedom.9.0.3.nupkg.sha512",
+        "system.codedom.9.0.4.nupkg.sha512",
         "system.codedom.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -8284,10 +8284,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Drawing.Common/9.0.3": {
-      "sha512": "yDxzWfZGvOtk8zk5apWXP/tmro1Nghn7/4bWS5np5CtwIfiVCC74qCc1qvIsnywvXKzVqIbKXRk09wts+xGfeg==",
+    "System.Drawing.Common/9.0.4": {
+      "sha512": "SbtusMUT1bCxZ14904ZPo2GZyelze0rwUni9wXrp8KX9Zlsda8idqpxra1RBvOA85WM0wW+fCI4GLrlCTYiE6A==",
       "type": "package",
-      "path": "system.drawing.common/9.0.3",
+      "path": "system.drawing.common/9.0.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -8321,7 +8321,7 @@
         "lib/xamarinmac20/_._",
         "lib/xamarintvos10/_._",
         "lib/xamarinwatchos10/_._",
-        "system.drawing.common.9.0.3.nupkg.sha512",
+        "system.drawing.common.9.0.4.nupkg.sha512",
         "system.drawing.common.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -8355,10 +8355,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Management/9.0.3": {
-      "sha512": "Wsb47+pRN1xnCxKOXcj+80FZ5OYQK2Dr8nnS8CHS1LVB+MXdzyK90sEmDYs/ux+btrxpE1N56FZo5rDbzpd1HA==",
+    "System.Management/9.0.4": {
+      "sha512": "MfY9+SrkSvchAoFiChTkhQYCAjBaQQ9u3LwiKmho7oTbujucnxCzORlPgLhId/ChLSptsQ/1UmtPGLZaKYVdsA==",
       "type": "package",
-      "path": "system.management/9.0.3",
+      "path": "system.management/9.0.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -8379,7 +8379,7 @@
         "runtimes/win/lib/net8.0/System.Management.xml",
         "runtimes/win/lib/net9.0/System.Management.dll",
         "runtimes/win/lib/net9.0/System.Management.xml",
-        "system.management.9.0.3.nupkg.sha512",
+        "system.management.9.0.4.nupkg.sha512",
         "system.management.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -8784,8 +8784,8 @@
       "Open.Nat >= 2.1.0",
       "System.Data.SQLite >= 1.0.119",
       "System.Data.SqlClient >= 4.9.0",
-      "System.Drawing.Common >= 9.0.3",
-      "System.Management >= 9.0.3",
+      "System.Drawing.Common >= 9.0.4",
+      "System.Management >= 9.0.4",
       "UPnP >= 1.1.6",
       "WpfAnimatedGif >= 2.0.2"
     ]
@@ -8871,11 +8871,11 @@
           },
           "System.Drawing.Common": {
             "target": "Package",
-            "version": "[9.0.3, )"
+            "version": "[9.0.4, )"
           },
           "System.Management": {
             "target": "Package",
-            "version": "[9.0.3, )"
+            "version": "[9.0.4, )"
           },
           "UPnP": {
             "target": "Package",
@@ -8905,7 +8905,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
       }
     }
   },

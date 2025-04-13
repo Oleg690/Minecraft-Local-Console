@@ -1,0 +1,14 @@
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\bin\Debug\net8.0\JMXConsoleTool.exe
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\bin\Debug\net8.0\JMXConsoleTool.deps.json
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\bin\Debug\net8.0\JMXConsoleTool.runtimeconfig.json
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\bin\Debug\net8.0\JMXConsoleTool.dll
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\bin\Debug\net8.0\JMXConsoleTool.pdb
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\JMXConsoleTool.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\JMXConsoleTool.AssemblyInfoInputs.cache
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\JMXConsoleTool.AssemblyInfo.cs
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\JMXConsoleTool.csproj.CoreCompileInputs.cache
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\JMXConsoleTool.dll
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\refint\JMXConsoleTool.dll
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\JMXConsoleTool.pdb
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\JMXConsoleTool.genruntimeconfig.cache
+C:\Users\crist\Desktop\Test\Test\JMXConsoleTool\obj\Debug\net8.0\ref\JMXConsoleTool.dll

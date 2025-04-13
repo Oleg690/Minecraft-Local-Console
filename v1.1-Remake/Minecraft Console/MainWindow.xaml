@@ -7,11 +7,11 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="Window"
     Title="Minecraft Console"
-    Width="800"
-    Height="500"
+    Width="1000"
+    Height="600"
     Icon="D:\Minecraft-Server\v1.1-Remake\Minecraft Console\assets\icons\Logo\logo.ico"
+    Loaded="OnLoaded"
     mc:Ignorable="d">
-
     <Window.Resources>
         <Style TargetType="TextBlock">
             <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
@@ -21,6 +21,51 @@
         </Style>
         <Style TargetType="ListViewItem">
             <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
+        </Style>
+
+        <Style x:Key="SidebarButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="0,5" />
+            <Setter Property="Height" Value="60" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="FontSize" Value="25" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="20,10" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#2F333D" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#1E2127" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=(local:ButtonExtensions.IsSidebarSelected)}" Value="True">
+                    <Setter Property="Background" Value="#22262D" />
+                    <Setter Property="Foreground" Value="#FEC538" />
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
 
@@ -70,54 +115,60 @@
                 <ColumnDefinition Width="80*" />
             </Grid.ColumnDefinitions>
 
-
-
             <!--  Sidebar  -->
             <Grid
                 Grid.Column="0"
                 HorizontalAlignment="Stretch"
                 Background="#262A32">
-                <StackPanel Margin="0,10" VerticalAlignment="Top">
+                <StackPanel
+                    x:Name="sidebarStackPanel"
+                    Margin="0,20"
+                    VerticalAlignment="Top">
+                    <Image
+                        Height="40"
+                        Margin="20,10"
+                        Source="D:\Minecraft-Server\v1.1-Remake\Minecraft Console\assets\icons\Logo\minehost.png" />
                     <Button
-                        Margin="5"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
                         Click="NavigateToServers"
                         Content="Servers"
-                        FontSize="25"
-                        Foreground="White" />
+                        Style="{StaticResource SidebarButtonStyle}"
+                        Tag="Servers" />
                     <Button
-                        Margin="5"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
+                        Click="NavigateToProfile"
+                        Content="Profile"
+                        Style="{StaticResource SidebarButtonStyle}"
+                        Tag="Profile" />
+                    <Button
                         Click="NavigateToSettings"
                         Content="Settings"
-                        FontSize="25"
-                        Foreground="White" />
+                        Style="{StaticResource SidebarButtonStyle}"
+                        Tag="Profile" />
                     <Button
-                        Margin="5"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        Click="NavigateToAccount"
-                        Content="Account"
-                        FontSize="25"
-                        Foreground="White" />
-                    <Button
-                        Margin="5"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
                         Click="NavigateToSupport"
                         Content="Support"
-                        FontSize="25"
-                        Foreground="White" />
+                        Style="{StaticResource SidebarButtonStyle}"
+                        Tag="Support" />
                 </StackPanel>
             </Grid>
 
             <!--  Main Content Area  -->
             <Grid Grid.Column="1">
-                <Grid x:Name="MainContent" Margin="0,0,0,0">
+                <Grid
+                    x:Name="MainContent"
+                    Margin="0,0,0,0"
+                    VerticalAlignment="Top">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <Grid x:Name="ServerGrid" Margin="10" />
+                        <Grid x:Name="ServerGrid" Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                        </Grid>
                     </ScrollViewer>
                 </Grid>
 
@@ -143,35 +194,218 @@
                     </Grid>
                     <Grid
                         x:Name="Manage"
-                        Height="200"
-                        Background="#262A32"
-                        Visibility="Collapsed">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock
-                                x:Name="SelectedServerLabel"
-                                Margin="0,10,0,10"
-                                FontSize="16"
-                                FontWeight="Bold"
-                                Foreground="White" />
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="Visible">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Image
+                            x:Name="ServerImage"
+                            Grid.RowSpan="2"
+                            Grid.Column="0"
+                            Height="300"
+                            MinWidth="200"
+                            Margin="0,0,25,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Source="D:\Minecraft-Server\v1.1-Remake\Minecraft Console\assets\Minecraft_Photo.png"
+                            Stretch="UniformToFill" />
+
+                        <Grid
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Margin="25">
                             <StackPanel Orientation="Horizontal">
+                                <StackPanel.Resources>
+                                    <Style x:Key="RoundedButtonStyle" TargetType="Button">
+                                        <Setter Property="Cursor" Value="Hand" />
+                                        <Setter Property="Width" Value="150" />
+                                        <Setter Property="Height" Value="45" />
+                                        <Setter Property="Margin" Value="5" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="FontSize" Value="20" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Foreground" Value="White" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border
+                                                        Padding="{TemplateBinding Padding}"
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="5">
+                                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="Opacity" Value="0.9" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsPressed" Value="True">
+                                                            <Setter Property="Opacity" Value="0.7" />
+                                                        </Trigger>
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Setter Property="Opacity" Value="0.5" />
+                                                            <Setter Property="Background" Value="#9E9E9E" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </StackPanel.Resources>
                                 <Button
-                                    Margin="5"
+                                    Background="#2781E6"
                                     Click="StartServer"
-                                    Content="Start" />
+                                    Content="Start"
+                                    Style="{StaticResource RoundedButtonStyle}" />
                                 <Button
-                                    Margin="5"
+                                    Background="#E92626"
                                     Click="StopServer"
-                                    Content="Stop" />
+                                    Content="Stop"
+                                    IsEnabled="False"
+                                    Style="{StaticResource RoundedButtonStyle}" />
                                 <Button
-                                    Margin="5"
+                                    Background="#B921FF"
                                     Click="RestartServer"
-                                    Content="Restart" />
+                                    Content="Restart"
+                                    IsEnabled="False"
+                                    Style="{StaticResource RoundedButtonStyle}" />
                             </StackPanel>
-                            <Button
-                                Margin="10"
-                                Click="NavigateToServers"
-                                Content="Back" />
-                        </StackPanel>
+                        </Grid>
+
+                        <Border
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Background="#262A32"
+                            CornerRadius="10">
+                            <Grid Margin="20">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock
+                                    x:Name="SelectedServerLabel"
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Margin="0,0,15,0"
+                                    FontSize="20"
+                                    FontWeight="Bold"
+                                    Foreground="White"
+                                    Text="Server Name" />
+
+                                <Grid
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="2"
+                                    Margin="0,10,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="0"
+                                        Margin="0,0,10,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="16"
+                                        Foreground="#F3BD38"
+                                        Text="&#xE700;" />
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Grid.Column="1"
+                                        FontSize="16"
+                                        FontWeight="Bold"
+                                        Foreground="White"
+                                        Text="Address:" />
+                                </Grid>
+
+                                <Border
+                                    Grid.Row="2"
+                                    Grid.ColumnSpan="4"
+                                    Height="30"
+                                    Margin="0,10,0,10"
+                                    Background="#1C2127"
+                                    CornerRadius="10">
+                                    <TextBlock
+                                        x:Name="addressTextBlock"
+                                        Margin="10"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
+                                        FontSize="16"
+                                        FontWeight="Bold"
+                                        Foreground="White"
+                                        Text="localhost"
+                                        TextAlignment="Center" />
+                                </Border>
+
+                                <Grid Grid.Row="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="0"
+                                        Margin="0,0,10,0"
+                                        VerticalAlignment="Center"
+                                        FontFamily="Segoe MDL2 Assets"
+                                        FontSize="16"
+                                        Foreground="#FFC107"
+                                        Text="&#xE10B;" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Grid.Column="1"
+                                        Margin="0,0,10,0"
+                                        FontSize="16"
+                                        FontWeight="Bold"
+                                        Foreground="White"
+                                        Text="Status:" />
+                                    <TextBlock
+                                        x:Name="statusTextBlock"
+                                        Grid.Row="2"
+                                        Grid.Column="2"
+                                        FontSize="16"
+                                        FontWeight="Bold"
+                                        Foreground="White"
+                                        Text="Offline" />
+                                    <Border
+                                        Grid.Row="2"
+                                        Grid.Column="3"
+                                        Width="15"
+                                        Height="15"
+                                        Margin="5,0,0,0"
+                                        HorizontalAlignment="Left"
+                                        Background="#FF3535"
+                                        CornerRadius="10" />
+                                    <!--  OFF hex value: #FF3535  -->
+                                    <!--  ON hex value: #87FF2C  -->
+                                </Grid>
+
+                            </Grid>
+                        </Border>
                     </Grid>
                     <Grid x:Name="Console" Visibility="Collapsed">
                         <Grid Margin="0,35,0,0">
@@ -184,48 +418,30 @@
                             <Grid
                                 Grid.Row="1"
                                 Grid.RowSpan="2"
-                                Margin="10,10,5,10">
+                                Margin="20,20,10,20">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="8*" />
                                     <RowDefinition Height="100*" />
                                     <RowDefinition Height="8*" />
                                 </Grid.RowDefinitions>
-                                <Grid
-                                    Grid.Row="0"
-                                    Grid.RowSpan="1"
-                                    Grid.Column="0">
-                                    <Border Padding="5" Background="#FFBBBBBB">
-                                        <TextBox
-                                            Name="ConsoleDisplayText"
-                                            VerticalAlignment="Center"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            Cursor="Arrow"
-                                            FontFamily="Consolas"
-                                            FontSize="15"
-                                            FontWeight="Bold"
-                                            IsReadOnly="True"
-                                            Text="Console:" />
-                                    </Border>
-                                </Grid>
 
                                 <Grid
-                                    Grid.Row="1"
+                                    Grid.Row="0"
                                     Grid.RowSpan="1"
                                     Grid.Column="0">
                                     <Border
                                         Grid.Row="2"
                                         Grid.RowSpan="1"
                                         Grid.Column="0"
-                                        Background="LightGray">
+                                        Background="#222428">
                                         <ScrollViewer x:Name="ConsoleWidth" VerticalScrollBarVisibility="Auto">
                                             <TextBox
                                                 x:Name="consoleValue"
                                                 Margin="5"
-                                                Background="LightGray"
+                                                Background="#222428"
                                                 BorderThickness="0"
                                                 FontFamily="Consolas"
                                                 FontSize="15"
+                                                Foreground="White"
                                                 IsReadOnly="True"
                                                 Text="{Binding Console}"
                                                 TextWrapping="Wrap" />
@@ -235,10 +451,10 @@
 
                                 <Grid
                                     x:Name="InputGrid"
-                                    Grid.Row="2"
+                                    Grid.Row="1"
                                     Grid.RowSpan="1"
                                     Grid.Column="0"
-                                    Background="#bbbbbb">
+                                    Background="#262A32">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="65" />
                                         <ColumnDefinition Width="600*" />
@@ -258,6 +474,7 @@
                                             FontFamily="Consolas"
                                             FontSize="14"
                                             FontWeight="Bold"
+                                            Foreground="White"
                                             IsReadOnly="True"
                                             Text="Input:"
                                             TextWrapping="Wrap" />
@@ -274,10 +491,11 @@
                                                 HorizontalAlignment="Stretch"
                                                 VerticalAlignment="Stretch"
                                                 Background="Transparent"
-                                                BorderBrush="Black"
+                                                BorderBrush="White"
                                                 BorderThickness="1"
                                                 FontFamily="Consolas"
                                                 FontSize="14"
+                                                Foreground="White"
                                                 SelectionBrush="#FF1F1F1F"
                                                 Text=""
                                                 TextWrapping="Wrap" />
@@ -299,87 +517,103 @@
                             <StackPanel
                                 Grid.Row="1"
                                 Grid.Column="1"
-                                Margin="5,10,10,10"
+                                Margin="10,20,20,20"
                                 VerticalAlignment="Top">
                                 <!--  Memory panel  -->
                                 <Border
+                                    Height="45"
                                     Margin="0,0,0,10"
                                     Padding="10"
-                                    Background="LightGray">
+                                    Background="#262A32">
                                     <TextBlock
                                         HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
                                         FontFamily="Consolas"
                                         FontSize="15"
                                         FontWeight="Bold"
+                                        Foreground="White"
                                         Text="Memory:" />
                                 </Border>
-                                <Border Margin="0,-46,0,10" Padding="10">
+                                <Border Margin="0,-50,0,10" Padding="10">
                                     <TextBlock
                                         x:Name="memoryUsage"
                                         HorizontalAlignment="Right"
                                         FontFamily="Consolas"
                                         FontSize="15"
+                                        Foreground="White"
                                         Text="{Binding MemoryUsage}" />
                                 </Border>
 
                                 <!--  Uptime panel  -->
                                 <Border
+                                    Height="45"
                                     Margin="0,0,0,10"
                                     Padding="10"
-                                    Background="LightGray">
+                                    Background="#262A32">
                                     <TextBlock
                                         HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
                                         FontFamily="Consolas"
                                         FontSize="15"
                                         FontWeight="Bold"
+                                        Foreground="White"
                                         Text="UpTime: " />
                                 </Border>
-                                <Border Margin="0,-46,0,0" Padding="10">
+                                <Border Margin="0,-50,0,0" Padding="10">
                                     <TextBlock
                                         x:Name="serverUpTime"
                                         HorizontalAlignment="Right"
                                         FontFamily="Consolas"
                                         FontSize="15"
+                                        Foreground="White"
                                         Text="{Binding UpTime}" />
                                 </Border>
 
                                 <Border
+                                    Height="45"
                                     Margin="0,0,0,10"
                                     Padding="10"
-                                    Background="LightGray">
+                                    Background="#262A32">
                                     <TextBlock
                                         HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
                                         FontFamily="Consolas"
                                         FontSize="15"
                                         FontWeight="Bold"
+                                        Foreground="White"
                                         Text="World Size:" />
                                 </Border>
-                                <Border Margin="0,-46,0,10" Padding="10">
+                                <Border Margin="0,-50,0,10" Padding="10">
                                     <TextBlock
                                         x:Name="worldSize"
                                         HorizontalAlignment="Right"
                                         FontFamily="Consolas"
                                         FontSize="15"
+                                        Foreground="White"
                                         Text="{Binding WorldSize}" />
                                 </Border>
 
                                 <Border
+                                    Height="45"
                                     Margin="0,0,0,10"
                                     Padding="10"
-                                    Background="LightGray">
+                                    Background="#262A32">
                                     <TextBlock
                                         HorizontalAlignment="Left"
+                                        VerticalAlignment="Center"
                                         FontFamily="Consolas"
                                         FontSize="15"
                                         FontWeight="Bold"
+                                        Foreground="White"
                                         Text="Online:" />
                                 </Border>
-                                <Border Margin="0,-46,0,10" Padding="10">
+                                <Border Margin="0,-50,0,10" Padding="10">
                                     <TextBlock
                                         x:Name="onlinePlayers"
                                         HorizontalAlignment="Right"
                                         FontFamily="Consolas"
                                         FontSize="15"
+                                        Foreground="White"
                                         Text="{Binding PlayersOnline}" />
                                 </Border>
                             </StackPanel>
@@ -451,12 +685,18 @@
                     </Grid>
                     <Grid x:Name="Stats" Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="30" Text="Stats" />
+                            <TextBlock
+                                FontSize="30"
+                                Foreground="White"
+                                Text="Stats" />
                         </StackPanel>
                     </Grid>
                     <Grid x:Name="Settings" Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock FontSize="30" Text="Settings" />
+                            <TextBlock
+                                FontSize="30"
+                                Foreground="White"
+                                Text="Settings" />
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -590,14 +830,15 @@
                                                         x:Name="SoftwareChangeBox"
                                                         Width="100"
                                                         SelectedIndex="0"
+                                                        SelectionChanged="ChangeSupportedVersions"
                                                         Style="{StaticResource InputComboBoxStyle}">
-                                                        <ComboBoxItem Content="Vanilla" />
+                                                        <!--<ComboBoxItem Content="Vanilla" />
                                                         <ComboBoxItem Content="Forge" />
                                                         <ComboBoxItem Content="NeoForge" />
                                                         <ComboBoxItem Content="Fabric" />
                                                         <ComboBoxItem Content="Quilt" />
                                                         <ComboBoxItem Content="Purpur" />
-                                                        <ComboBoxItem Content="Paper" />
+                                                        <ComboBoxItem Content="Paper" />-->
                                                     </ComboBox>
                                                 </StackPanel>
                                                 <StackPanel Margin="0,5,5,5" Orientation="Horizontal">
@@ -611,11 +852,11 @@
                                                         Width="100"
                                                         SelectedIndex="0"
                                                         Style="{StaticResource InputComboBoxStyle}">
-                                                        <ComboBoxItem Content="1.21.4" />
+                                                        <!--<ComboBoxItem Content="1.21.4" />
                                                         <ComboBoxItem Content="1.21.3" />
                                                         <ComboBoxItem Content="1.21.2" />
                                                         <ComboBoxItem Content="1.21.1" />
-                                                        <ComboBoxItem Content="1.21" />
+                                                        <ComboBoxItem Content="1.21" />-->
                                                     </ComboBox>
                                                 </StackPanel>
                                             </WrapPanel>
@@ -844,6 +1085,7 @@
                                         </StackPanel>
 
                                         <Button
+                                            x:Name="CreateServerBTN"
                                             Margin="0,20,0,0"
                                             HorizontalAlignment="Center"
                                             Click="CreateServer_Click"

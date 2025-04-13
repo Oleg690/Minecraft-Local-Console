@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Updater;
 using WpfAnimatedGif;
 
 namespace Minecraft_Console
@@ -19,11 +20,49 @@ namespace Minecraft_Console
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
+    public static class ButtonExtensions
+    {
+        public static readonly DependencyProperty IsSidebarSelectedProperty =
+            DependencyProperty.RegisterAttached(
+                "IsSidebarSelected",
+                typeof(bool),
+                typeof(ButtonExtensions),
+                new FrameworkPropertyMetadata(false, OnIsSidebarSelectedChanged));
+
+        public static bool GetIsSidebarSelected(DependencyObject obj)
+        {
+            return (bool)obj.GetValue(IsSidebarSelectedProperty);
+        }
+
+        public static void SetIsSidebarSelected(DependencyObject obj, bool value)
+        {
+            obj.SetValue(IsSidebarSelectedProperty, value);
+        }
+
+        private static void OnIsSidebarSelectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is Button button)
+            {
+                if ((bool)e.NewValue)
+                {
+                    button.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#22262D")); // Dark Gray
+                    button.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEC538")); // Gold
+                }
+                else
+                {
+                    button.Background = Brushes.Transparent;
+                    button.Foreground = Brushes.White;
+                }
+            }
+        }
+    }
 
     public partial class MainWindow : Window
     {
         private static readonly ServerInfoViewModel _viewModel = new();
         public static CancellationTokenSource cancellationTokenSource = new();
+
+        private Button? _selectedButton;
 
         private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
 
@@ -56,10 +95,51 @@ namespace Minecraft_Console
             _ = CheckRunningServersAsync();
         }
 
-        private void NavigateToServers(object sender, RoutedEventArgs e) => LoadServersPage();
-        private void NavigateToSettings(object sender, RoutedEventArgs e) => LoadPage("Settings Page");
-        private void NavigateToAccount(object sender, RoutedEventArgs e) => LoadPage("Account Page");
-        private void NavigateToSupport(object sender, RoutedEventArgs e) => LoadPage("Support Page");
+        private void NavigateToServers(object sender, RoutedEventArgs e)
+        {
+            SetSelectedButton(sender as Button);
+            LoadServersPage();
+        }
+        private void NavigateToSettings(object sender, RoutedEventArgs e)
+        {
+            SetSelectedButton(sender as Button);
+            LoadPage("Settings Page");
+        }
+        private void NavigateToProfile(object sender, RoutedEventArgs e)
+        {
+            SetSelectedButton(sender as Button);
+            LoadPage("Profile Page");
+        }
+        private void NavigateToSupport(object sender, RoutedEventArgs e)
+        {
+            SetSelectedButton(sender as Button);
+            LoadPage("Support Page");
+        }
+
+        private void SetSelectedButton(Button? button)
+        {
+            if (_selectedButton != null)
+            {
+                ButtonExtensions.SetIsSidebarSelected(_selectedButton, false);
+            }
+            _selectedButton = button;
+            if (_selectedButton != null)
+            {
+                ButtonExtensions.SetIsSidebarSelected(_selectedButton, true);
+            }
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(sidebarStackPanel); i++)
+            {
+                if (VisualTreeHelper.GetChild(sidebarStackPanel, i) is Button firstButton)
+                {
+                    SetSelectedButton(firstButton);
+                    break;
+                }
+            }
+        }
 
         // Paths setter func
         private static async void SetStaticPaths()
@@ -98,7 +178,7 @@ namespace Minecraft_Console
         // File Explorer funcs
         private void LoadFiles(string path)
         {
-            if (path[^1] == '\\') path = path[..^1]; 
+            if (path[^1] == '\\') path = path[..^1];
 
             if (CurrentPath == path) return;
 
@@ -618,7 +698,7 @@ namespace Minecraft_Console
             }
         }
 
-        // Load Servers Page Func
+        // Load Servers Page Funcs
         private void LoadServersPage()
         {
             SetStatsToEmpty();
@@ -629,103 +709,133 @@ namespace Minecraft_Console
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto
             };
 
-            Grid serverGrid = new()
+            WrapPanel serverPanel = new()
             {
-                Margin = new Thickness(10)
+                Margin = new Thickness(10),
+                HorizontalAlignment = HorizontalAlignment.Center
             };
 
-            Thickness buttonMargin = new(10);
-
-            // Define 3 columns
-            for (int i = 0; i < 3; i++)
-                serverGrid.ColumnDefinitions.Add(new ColumnDefinition());
-
-            int row = 0, col = 0;
-
-            // Get all worlds from the DB
+            Thickness buttonMargin = new(25);
             var worldsFromDb = dbChanger.SpecificDataFunc("SELECT worldNumber, name FROM worlds");
+            var existingDirs = Directory.Exists(rootWorldsFolder)
+                ? [.. Directory.GetDirectories(rootWorldsFolder).Select(Path.GetFileName)]
+                : new HashSet<string>();
 
-            if (Directory.Exists(rootWorldsFolder))
+            foreach (var worldEntry in worldsFromDb)
             {
-                HashSet<string> existingDirs = [.. Directory.GetDirectories(rootWorldsFolder)
-                    .Select(d => Path.GetFileName(d))];
+                if (worldEntry.Length < 2) continue;
 
-                foreach (var worldEntry in worldsFromDb)
-                {
-                    if (worldEntry.Length < 2) continue;
+                string worldNumber = worldEntry[0]?.ToString() ?? "";
+                string worldName = worldEntry[1]?.ToString() ?? "Unnamed World";
 
-                    string worldNumber = worldEntry[0]?.ToString() ?? "";
-                    string worldName = worldEntry[1]?.ToString() ?? "Unnamed World";
+                if (string.IsNullOrWhiteSpace(worldNumber) || !existingDirs.Contains(worldNumber))
+                    continue;
 
-                    if (string.IsNullOrWhiteSpace(worldNumber)) continue;
-
-                    // Check if the folder exists for this world
-                    if (!existingDirs.Contains(worldNumber)) continue;
-
-                    Button serverButton = new()
-                    {
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Content = worldName,
-                        Padding = new Thickness(10),
-                        Background = Brushes.LightGray,
-                        Margin = buttonMargin,
-                        HorizontalAlignment = HorizontalAlignment.Stretch,
-                        Height = 220,
-                        MaxWidth = 500
-                    };
-
-                    serverButton.Click += (sender, e) => OpenControlPanel(worldName, worldNumber);
-
-                    if (serverGrid.RowDefinitions.Count <= row)
-                        serverGrid.RowDefinitions.Add(new RowDefinition());
-
-                    Grid.SetRow(serverButton, row);
-                    Grid.SetColumn(serverButton, col);
-                    serverGrid.Children.Add(serverButton);
-
-                    col++;
-                    if (col >= 3)
-                    {
-                        col = 0;
-                        row++;
-                    }
-                }
+                var button = CreateStyledButton(worldName, buttonMargin, () => OpenControlPanel(worldName, worldNumber));
+                serverPanel.Children.Add(button);
             }
 
-            // Ensure space for the "Create" button
-            if (col >= 3)
-            {
-                col = 0;
-                row++;
-            }
+            var createButton = CreateStyledButton("Create Server", buttonMargin, CreateServerButton_Click);
+            serverPanel.Children.Add(createButton);
 
-            if (serverGrid.RowDefinitions.Count <= row)
-                serverGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
-
-            Button serverCreateButton = new()
-            {
-                VerticalAlignment = VerticalAlignment.Top,
-                Content = "Create Minecraft Server",
-                Padding = new Thickness(10),
-                Background = Brushes.LightGray,
-                Margin = buttonMargin,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                Height = 220,
-                MaxWidth = 500
-            };
-
-            serverCreateButton.Click += (sender, e) => CreateServerButton_Click();
-            Grid.SetRow(serverCreateButton, row);
-            Grid.SetColumn(serverCreateButton, col);
-            serverGrid.Children.Add(serverCreateButton);
-
-            scrollViewer.Content = serverGrid;
+            scrollViewer.Content = serverPanel;
             MainContent.Children.Add(scrollViewer);
+
             HideAllServerInfoGrids(true);
             MainContent.Visibility = Visibility.Visible;
             CreateServerPage.Visibility = Visibility.Collapsed;
+
+            SizeChanged += (s, e) => UpdateButtonSizes(serverPanel); // handle resize
+            UpdateButtonSizes(serverPanel); // initial sizing
         }
 
+        private void UpdateButtonSizes(WrapPanel panel)
+        {
+            double containerWidth = MainContent.ActualWidth;
+            double buttonMarginThickness = 2 * 25; // Left and Right margin
+            double minButtonWidth = 300; // Increased minimum width for a larger look
+            double aspectRatio = 662.5 / 326.0 * 1.5; // Adjusted aspect ratio to make them wider relative to height
+
+            int numberOfButtons = panel.Children.Count;
+            if (numberOfButtons == 0) return;
+
+            double availableWidth = containerWidth - (panel.Margin.Left + panel.Margin.Right);
+
+            foreach (Button btn in panel.Children)
+            {
+                double totalMargin = numberOfButtons * buttonMarginThickness;
+                double calculatedButtonWidth = (availableWidth - totalMargin) / numberOfButtons;
+                calculatedButtonWidth = Math.Max(minButtonWidth, calculatedButtonWidth);
+
+                btn.MinWidth = minButtonWidth;
+                btn.Width = calculatedButtonWidth;
+                btn.Height = calculatedButtonWidth / aspectRatio + 50;
+                btn.HorizontalAlignment = HorizontalAlignment.Stretch;
+            }
+        }
+
+        private static Button CreateStyledButton(string content, Thickness margin, Action onClick)
+        {
+            var button = new Button
+            {
+                Content = content,
+                Padding = new Thickness(10),
+                Background = (Brush?)new BrushConverter().ConvertFrom("#262A32") ?? Brushes.White,
+                Foreground = Brushes.White,
+                FontSize = 25,
+                Cursor = Cursors.Hand,
+                Margin = margin,
+                BorderBrush = Brushes.Transparent,
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                MinWidth = 300, // Match the minimum width in UpdateButtonSizes
+                Height = 0, // Reduced initial height
+                MaxWidth = 662.5,
+                Template = CreateRoundedButtonTemplate(20)
+            };
+
+            button.Click += (s, e) => onClick();
+            return button;
+        }
+
+        private static ControlTemplate CreateRoundedButtonTemplate(int radius)
+        {
+            var borderFactory = new FrameworkElementFactory(typeof(Border))
+            {
+                Name = "border"
+            };
+
+            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(radius));
+            borderFactory.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(BackgroundProperty));
+            borderFactory.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(BorderBrushProperty));
+            borderFactory.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(BorderThicknessProperty));
+
+            var contentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            contentPresenterFactory.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Center);
+            contentPresenterFactory.SetValue(VerticalAlignmentProperty, VerticalAlignment.Center);
+            contentPresenterFactory.SetValue(MarginProperty, new TemplateBindingExtension(PaddingProperty));
+            contentPresenterFactory.SetValue(ContentProperty, new TemplateBindingExtension(ContentProperty));
+            contentPresenterFactory.SetValue(ContentPresenter.ContentTemplateProperty, new TemplateBindingExtension(ContentTemplateProperty));
+
+            borderFactory.AppendChild(contentPresenterFactory);
+
+            var template = new ControlTemplate(typeof(Button))
+            {
+                VisualTree = borderFactory
+            };
+
+            var mouseOverTrigger = new Trigger
+            {
+                Property = IsMouseOverProperty,
+                Value = true
+            };
+            mouseOverTrigger.Setters.Add(new Setter(Border.BackgroundProperty,
+                new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F333D")), "border"));
+
+            template.Triggers.Add(mouseOverTrigger);
+
+            return template;
+        }
 
         // Loading other pages (temp)
         private void LoadPage(string pageName)
@@ -733,12 +843,15 @@ namespace Minecraft_Console
             SetStatsToEmpty();
 
             MainContent.Children.Clear();
+            MainContent.VerticalAlignment = VerticalAlignment.Stretch;
             MainContent.Children.Add(new Label
             {
                 Content = pageName,
+                Foreground = Brushes.White,
                 FontSize = 24,
                 HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Stretch,
+                VerticalContentAlignment = VerticalAlignment.Center
             });
 
             MainContent.Visibility = Visibility.Visible;
@@ -750,7 +863,7 @@ namespace Minecraft_Console
         {
             selectedServer = serverName;
             openWorldNumber = worldNumber;
-            SelectedServerLabel.Text = $"Manage Server: {serverName}";
+            SelectedServerLabel.Text = $"Server Name: {serverName}";
 
             if (string.IsNullOrEmpty(openWorldNumber))
             {
@@ -785,37 +898,24 @@ namespace Minecraft_Console
         // Server Handeling funcs
         private async void CreateServer_Click(object sender, RoutedEventArgs e)
         {
-            string software = ((ComboBoxItem)SoftwareChangeBox.SelectedItem)?.Content.ToString() ?? "";  // Default to Vanilla
-            string version = VersionsChangeBox.Text;  // e.g. 1.21.4
-            string worldName = ServerNameInput.Text;  // e.g. My World
-            int totalPlayers = Convert.ToInt32(SlotsInput.Text);
-            string Server_LocalComputerIP = NetworkSetup.GetLocalIP();
-            string Server_PublicComputerIP = await NetworkSetup.GetPublicIP();
-            int Server_Port = 25565;
-            int JMX_Port = 25562;
-            int RMI_Port = 25563;
-            int RCON_Port = 25575;
-            int memoryAlocator = 5000; // in MB
-            // Get memoryAlocator from settings
+            try
+            {
+                CreateServerBTN.IsEnabled = false;
 
-            //object[,] defaultWorldSettings = {
-            //    { "max-players", $"{totalPlayers}" },
-            //    { "gamemode", "survival" },
-            //    { "difficulty", "normal" },
-            //    { "white-list", "false" },
-            //    { "online-mode", "false" },
-            //    { "pvp", "true" },
-            //    { "enable-command-block", "true" },
-            //    { "allow-flight", "true" },
-            //    { "spawn-animals", "true" },
-            //    { "spawn-monsters", "true" },
-            //    { "spawn-npcs", "true" },
-            //    { "allow-nether", "true" },
-            //    { "force-gamemode", "false" },
-            //    { "spawn-protection", "0" }
-            //};
+                string software = ((ComboBoxItem)SoftwareChangeBox.SelectedItem)?.Content.ToString() ?? "";  // Default to Vanilla
+                string version = VersionsChangeBox.Text;  // e.g. 1.21.4
+                string worldName = ServerNameInput.Text;  // e.g. My World
+                int totalPlayers = Convert.ToInt32(SlotsInput.Text);
+                string Server_LocalComputerIP = NetworkSetup.GetLocalIP();
+                string Server_PublicComputerIP = await NetworkSetup.GetPublicIP();
+                int Server_Port = 25565;
+                int JMX_Port = 25562;
+                int RMI_Port = 25563;
+                int RCON_Port = 25575;
+                int memoryAlocator = 5000; // in MB
+                                           // Get memoryAlocator from settings
 
-            object[,] defaultWorldSettings = {
+                object[,] defaultWorldSettings = {
                 { "max-players", $"{totalPlayers}" },
                 { "gamemode", $"{GamemodeComboBox.SelectedItem.ToString() ?? string.Empty.ToLower()}" },
                 { "difficulty", $"{DifficultyComboBox.SelectedItem.ToString() ?? string.Empty.ToLower()}" },
@@ -832,30 +932,39 @@ namespace Minecraft_Console
                 { "spawn-protection", $"{Convert.ToInt32(SpawnProtectionInput.Text)}" }
             };
 
-            if (rootFolder == null || rootWorldsFolder == null || tempFolderPath == null || defaultServerPropertiesPath == null)
-            {
-                MessageBox.Show("One or more required paths are not set.");
-                return;
+                if (rootFolder == null || rootWorldsFolder == null || tempFolderPath == null || defaultServerPropertiesPath == null)
+                {
+                    MessageBox.Show("One or more required paths are not set.");
+                    return;
+                }
+
+                SetLoadingBarProgress(0);
+                LoadGIF();
+                LoadingScreen.Visibility = Visibility.Visible;
+
+                await Task.Run(async () =>
+                {
+                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
+                });
+
+                SetLoadingBarProgress(100);
+                await Task.Delay(500);
+                LoadingScreen.Visibility = Visibility.Collapsed;
+                UnloadGIF();
+
+                // After creating the server, go back to the server list
+                LoadServersPage();
+                MessageBox.Show($"Server Created!");
+                serverRunning = false;
             }
-
-            SetLoadingBarProgress(0);
-            LoadGIF();
-            LoadingScreen.Visibility = Visibility.Visible;
-
-            await Task.Run(async () =>
+            catch (Exception ex)
             {
-                await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
-            });
-
-            SetLoadingBarProgress(100);
-            await Task.Delay(500);
-            LoadingScreen.Visibility = Visibility.Collapsed;
-            UnloadGIF();
-
-            // After creating the server, go back to the server list
-            LoadServersPage();
-            MessageBox.Show($"Server Created!");
-            serverRunning = false;
+                CodeLogger.ConsoleLog($"Error creating the world. Error: {ex}");
+            }
+            finally
+            {
+                CreateServerBTN.IsEnabled = true;
+            }
         }
 
         private void StartServer(object sender, RoutedEventArgs e)
@@ -892,7 +1001,6 @@ namespace Minecraft_Console
                 RCON_Port = Convert.ToInt32(data[2]);
                 RMI_Port = Convert.ToInt32(data[3]);
             }
-
             if (string.IsNullOrEmpty(Server_PublicComputerIP))
             {
                 MessageBox.Show("Public IP address is not set.");
@@ -997,6 +1105,49 @@ namespace Minecraft_Console
             MainContent.Visibility = Visibility.Collapsed;
             CreateServerPage.Visibility = Visibility.Visible;
             ServerDropBox.Visibility = Visibility.Collapsed;
+
+            List<string> supportedSoftwares = VersionsUpdater.GetSupportedSoftwares();
+
+            SoftwareChangeBox.Items.Clear();
+            foreach (string software in supportedSoftwares)
+            {
+                ComboBoxItem item = new()
+                {
+                    Content = software,
+                    Tag = software
+                };
+                SoftwareChangeBox.Items.Add(item);
+            }
+            SoftwareChangeBox.SelectedIndex = 0; // Set default selection to the first item
+        }
+
+        private void ChangeSupportedVersions(object sender, SelectionChangedEventArgs e)
+        {
+            if (SoftwareChangeBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                string? selectedName = selectedItem.Content.ToString();
+
+                if (string.IsNullOrEmpty(selectedName))
+                {
+                    MessageBox.Show("Selected software is null.");
+                    return;
+                }
+
+                // Get versions for the selected software
+                List<string> versions = VersionsUpdater.GetSupportedVersions(selectedName);
+                VersionsChangeBox.Items.Clear();
+                foreach (string version in versions)
+                {
+                    ComboBoxItem item = new()
+                    {
+                        Content = version,
+                        Tag = version
+                    };
+                    VersionsChangeBox.Items.Add(item);
+                }
+
+                VersionsChangeBox.SelectedIndex = 0; // Set default selection to the first item
+            }
         }
 
         // Control Panel DropBox Handler
