@@ -20,7 +20,7 @@ def count_lines_in_files(directory, filenames):
             results[filename] = "File not found"
     return results
 
-directory = "D:\\Minecraft-Server\\v1.1-Remake\Minecraft Console"
+directory = "D:\\Minecraft-Server\\v1.1-Remake\\Minecraft Console"
 file_list = ["dbChanger.cs", "Logs.cs", "MinecraftServerStats.cs", "serverFileExplorer.cs", "ServerNetworkEnable.cs", "serverOperator.cs", "serverProprertiesChanger.cs", "versionsUpdater.cs", "MainWindow.xaml", "MainWindow.xaml.cs"]
 couner = 0
 

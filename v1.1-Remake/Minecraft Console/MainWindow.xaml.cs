@@ -11,15 +11,12 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using Updater;
 using WpfAnimatedGif;
 
 namespace Minecraft_Console
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    /// 
     public static class ButtonExtensions
     {
         public static readonly DependencyProperty IsSidebarSelectedProperty =
@@ -27,7 +24,7 @@ namespace Minecraft_Console
                 "IsSidebarSelected",
                 typeof(bool),
                 typeof(ButtonExtensions),
-                new FrameworkPropertyMetadata(false, OnIsSidebarSelectedChanged));
+                new FrameworkPropertyMetadata(false));
 
         public static bool GetIsSidebarSelected(DependencyObject obj)
         {
@@ -38,23 +35,6 @@ namespace Minecraft_Console
         {
             obj.SetValue(IsSidebarSelectedProperty, value);
         }
-
-        private static void OnIsSidebarSelectedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is Button button)
-            {
-                if ((bool)e.NewValue)
-                {
-                    button.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#22262D")); // Dark Gray
-                    button.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FEC538")); // Gold
-                }
-                else
-                {
-                    button.Background = Brushes.Transparent;
-                    button.Foreground = Brushes.White;
-                }
-            }
-        }
     }
 
     public partial class MainWindow : Window
@@ -64,6 +44,7 @@ namespace Minecraft_Console
 
         private Button? _selectedButton;
 
+        private static Dictionary<Button, bool> _previousButtonStates = [];
         private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
 
         private static string? Server_PublicComputerIP;
@@ -71,6 +52,7 @@ namespace Minecraft_Console
 
         public static Thread? ServerStatsThread = null;
 
+        public static bool serverStatus = false; // false -> Offline; true -> Online
         public static bool serverRunning = false;
         public static int loadingScreenProcentage = 0;
 
@@ -628,7 +610,7 @@ namespace Minecraft_Console
         }
 
         // Check if server is running
-        private static async Task CheckRunningServersAsync()
+        private async Task CheckRunningServersAsync()
         {
             List<object[]> dataDB = dbChanger.SpecificDataFunc($"SELECT worldNumber, Process_ID FROM worlds;");
 
@@ -653,6 +635,7 @@ namespace Minecraft_Console
 
                     serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
                     serverRunning = true;
+                    serverStatus = true;
 
                     List<object[]> serverData = dbChanger.SpecificDataFunc($"SELECT Server_Port, JMX_Port, RCON_Port, RMI_Port FROM worlds WHERE worldNumber = \"{worldNumber}\";");
 
@@ -693,6 +676,8 @@ namespace Minecraft_Console
                     });
                     ServerStatsThread.Start();
 
+                    UpdateButtonStates(StartBtn, StopBtn, RestartBtn);
+
                     break;
                 }
             }
@@ -721,6 +706,9 @@ namespace Minecraft_Console
                 ? [.. Directory.GetDirectories(rootWorldsFolder).Select(Path.GetFileName)]
                 : new HashSet<string>();
 
+            double buttonWidth, buttonHeight;
+            (buttonWidth, buttonHeight) = GetButtonDimensions(MainContent.ActualWidth, serverPanel.Children.Count + 1); // +1 for CreateServer
+
             foreach (var worldEntry in worldsFromDb)
             {
                 if (worldEntry.Length < 2) continue;
@@ -731,11 +719,11 @@ namespace Minecraft_Console
                 if (string.IsNullOrWhiteSpace(worldNumber) || !existingDirs.Contains(worldNumber))
                     continue;
 
-                var button = CreateStyledButton(worldName, buttonMargin, () => OpenControlPanel(worldName, worldNumber));
+                var button = CreateStyledButton(worldName, buttonMargin, () => OpenControlPanel(worldName, worldNumber), buttonWidth, buttonHeight);
                 serverPanel.Children.Add(button);
             }
 
-            var createButton = CreateStyledButton("Create Server", buttonMargin, CreateServerButton_Click);
+            var createButton = CreateStyledButton("Create Server", buttonMargin, CreateServerButton_Click, buttonWidth, buttonHeight);
             serverPanel.Children.Add(createButton);
 
             scrollViewer.Content = serverPanel;
@@ -774,7 +762,7 @@ namespace Minecraft_Console
             }
         }
 
-        private static Button CreateStyledButton(string content, Thickness margin, Action onClick)
+        private static Button CreateStyledButton(string content, Thickness margin, Action onClick, double width, double height)
         {
             var button = new Button
             {
@@ -788,14 +776,37 @@ namespace Minecraft_Console
                 BorderBrush = Brushes.Transparent,
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
-                MinWidth = 300, // Match the minimum width in UpdateButtonSizes
-                Height = 0, // Reduced initial height
-                MaxWidth = 662.5,
+                Width = width,
+                Height = height,
+                MaxWidth = 500,   // Optional - safety limit
+                MaxHeight = 250,  // Optional - safety limit
                 Template = CreateRoundedButtonTemplate(20)
             };
 
             button.Click += (s, e) => onClick();
             return button;
+        }
+
+        private static (double width, double height) GetButtonDimensions(double containerWidth, int buttonCount)
+        {
+            double margin = 2 * 25; // Left + Right margin per button
+            double minButtonWidth = 300;
+            double maxButtonWidth = 600;
+            double maxButtonHeight = 350;
+
+            double aspectRatio = 662.5 / 326.0 * 1.5;
+
+            if (buttonCount <= 0) buttonCount = 1;
+
+            double availableWidth = containerWidth - 20; // Account for WrapPanel margin
+            double totalMargin = buttonCount * margin;
+            double calculatedWidth = (availableWidth - totalMargin) / buttonCount;
+            calculatedWidth = Math.Clamp(calculatedWidth, minButtonWidth, maxButtonWidth);
+
+            double calculatedHeight = calculatedWidth / aspectRatio + 50;
+            calculatedHeight = Math.Min(calculatedHeight, maxButtonHeight);
+
+            return (calculatedWidth, calculatedHeight);
         }
 
         private static ControlTemplate CreateRoundedButtonTemplate(int radius)
@@ -915,22 +926,42 @@ namespace Minecraft_Console
                 int memoryAlocator = 5000; // in MB
                                            // Get memoryAlocator from settings
 
+                string max_players = totalPlayers.ToString().ToLowerInvariant();
+                string gamemode = (GamemodeComboBox.SelectedItem as string ?? string.Empty).ToLowerInvariant();
+                string difficulty = (DifficultyComboBox.SelectedItem as string ?? string.Empty).ToLowerInvariant();
+                string white_list = (WhitelistCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string online_mode = (CrackedCheckBox.IsChecked == true ? "false" : "true").ToLowerInvariant();
+                string pvp = (PVPCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string enable_command_block = (CommandblocksCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string allow_flight = (FlyCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string spawn_animals = (AnimalsCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string spawn_monsters = (MonsterCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string spawn_npcs = (VillagersCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string allow_nether = (NetherCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string force_gamemode = (ForceGamemodeCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
+                string spawn_protection = (SpawnProtectionInput.Text ?? string.Empty).ToLowerInvariant();
+
                 object[,] defaultWorldSettings = {
-                { "max-players", $"{totalPlayers}" },
-                { "gamemode", $"{GamemodeComboBox.SelectedItem.ToString() ?? string.Empty.ToLower()}" },
-                { "difficulty", $"{DifficultyComboBox.SelectedItem.ToString() ?? string.Empty.ToLower()}" },
-                { "white-list", $"{WhitelistCheckBox.IsChecked}" },
-                { "online-mode", $"{CrackedCheckBox.IsChecked}" },
-                { "pvp", $"{PVPCheckBox.IsChecked}" },
-                { "enable-command-block", $"{CommandblocksCheckBox.IsChecked}" },
-                { "allow-flight", $"{FlyCheckBox.IsChecked}" },
-                { "spawn-animals", $"{AnimalsCheckBox.IsChecked}" },
-                { "spawn-monsters", $"{MonsterCheckBox.IsChecked}" },
-                { "spawn-npcs", $"{VillagersCheckBox.IsChecked}" },
-                { "allow-nether", $"{NetherCheckBox.IsChecked}" },
-                { "force-gamemode", $"{ForceGamemodeCheckBox.IsChecked}" },
-                { "spawn-protection", $"{Convert.ToInt32(SpawnProtectionInput.Text)}" }
-            };
+                { "max-players", max_players },
+                { "gamemode", gamemode },
+                { "difficulty", difficulty },
+                { "white-list", white_list },
+                { "online-mode", online_mode },
+                { "pvp", pvp },
+                { "enable-command-block", enable_command_block },
+                { "allow-flight", allow_flight },
+                { "spawn-animals", spawn_animals },
+                { "spawn-monsters", spawn_monsters },
+                { "spawn-npcs", spawn_npcs },
+                { "allow-nether", allow_nether },
+                { "force-gamemode", force_gamemode },
+                { "spawn-protection", spawn_protection }
+                };
+
+                for (int i = 0; i < defaultWorldSettings.GetLength(0); i++)
+                {
+                    CodeLogger.ConsoleLog($"{defaultWorldSettings[i, 0]}: {defaultWorldSettings[i, 1]}");
+                }
 
                 if (rootFolder == null || rootWorldsFolder == null || tempFolderPath == null || defaultServerPropertiesPath == null)
                 {
@@ -942,15 +973,24 @@ namespace Minecraft_Console
                 LoadGIF();
                 LoadingScreen.Visibility = Visibility.Visible;
 
+                string creationResult = string.Empty;
+
                 await Task.Run(async () =>
                 {
-                    await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
+                    creationResult = await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
                 });
 
                 SetLoadingBarProgress(100);
                 await Task.Delay(500);
                 LoadingScreen.Visibility = Visibility.Collapsed;
                 UnloadGIF();
+
+                // ✅ Check if result is error
+                if (string.IsNullOrWhiteSpace(creationResult) || creationResult.StartsWith("Error", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show($"Failed to create server:\n{creationResult}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
                 // After creating the server, go back to the server list
                 LoadServersPage();
@@ -960,6 +1000,7 @@ namespace Minecraft_Console
             catch (Exception ex)
             {
                 CodeLogger.ConsoleLog($"Error creating the world. Error: {ex}");
+                MessageBox.Show("An unexpected error occurred. Check logs for details.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -967,9 +1008,9 @@ namespace Minecraft_Console
             }
         }
 
-        private void StartServer(object sender, RoutedEventArgs e)
+        private async void StartServer(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Starting server: {selectedServer}");
+            UpdateButtonStates(StartBtn, StopBtn, RestartBtn, disableAll: true);
 
             if (serverRunning)
             {
@@ -1009,13 +1050,21 @@ namespace Minecraft_Console
 
             Thread StartServerAsyncThread = new(async () => await ServerOperator.Start(openWorldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, noGUI: false, viewModel: _viewModel));
             StartServerAsyncThread.Start();
+
+            while (serverRunning == false)
+            {
+                await Task.Delay(500);
+            }
+
+            UpdateButtonStates(StartBtn, StopBtn, RestartBtn, changeAfterEnable: true);
         }
 
         private void StopServer(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Stopping server: {selectedServer}");
+            UpdateButtonStates(StartBtn, StopBtn, RestartBtn);
 
             serverRunning = false;
+            serverStatus = false;
             cancellationTokenSource.Cancel();
             List<object[]> serverData = dbChanger.SpecificDataFunc($"SELECT JMX_Port, RCON_Port FROM worlds WHERE worldNumber = \"{openWorldNumber}\";");
 
@@ -1043,12 +1092,13 @@ namespace Minecraft_Console
             Thread StopServerAsyncThread = new(async () => await ServerOperator.Stop("stop", openWorldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, "00:00"));
             StopServerAsyncThread.Start();
 
+            ServerStats.SetServerStatusOffline();
             SetStatsToEmpty(openWorldNumber);
         }
 
-        private void RestartServer(object sender, RoutedEventArgs e)
+        private async void RestartServer(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show($"Restarting server: {selectedServer}");
+            UpdateButtonStates(StartBtn, StopBtn, RestartBtn, disableAll: true);
 
             if (serverRunning == false)
             {
@@ -1096,6 +1146,13 @@ namespace Minecraft_Console
 
             Thread StartServerAsyncThread = new(async () => await ServerOperator.Start(openWorldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, noGUI: false, viewModel: _viewModel));
             StartServerAsyncThread.Start();
+
+            while (serverRunning == false)
+            {
+                await Task.Delay(500);
+            }
+
+            UpdateButtonStates(StartBtn, StopBtn, RestartBtn, changeAfterEnable: false);
         }
 
         // Create Server Page Show func
@@ -1287,6 +1344,47 @@ namespace Minecraft_Console
                 // Thrown when no process with the specified ID is running
                 return false;
             }
+        }
+
+        private static void UpdateButtonStates(Button startButton, Button stopButton, Button restartButton, bool disableAll = false, bool changeAfterEnable = false)
+        {
+            if (disableAll)
+            {
+                // Save current states
+                _previousButtonStates[startButton] = startButton.IsEnabled;
+                _previousButtonStates[stopButton] = stopButton.IsEnabled;
+                _previousButtonStates[restartButton] = restartButton.IsEnabled;
+
+                // Disable all
+                startButton.IsEnabled = false;
+                stopButton.IsEnabled = false;
+                restartButton.IsEnabled = false;
+                return;
+            }
+
+            // Restore saved states if available
+            if (_previousButtonStates.Count == 3)
+            {
+                startButton.IsEnabled = _previousButtonStates[startButton];
+                stopButton.IsEnabled = _previousButtonStates[stopButton];
+                restartButton.IsEnabled = _previousButtonStates[restartButton];
+                _previousButtonStates.Clear(); // Optional: Clear after restoring
+
+                if (changeAfterEnable)
+                {
+                    bool secondIsStartEnabled = startButton.IsEnabled;
+                    startButton.IsEnabled = !secondIsStartEnabled;
+                    stopButton.IsEnabled = secondIsStartEnabled;
+                    restartButton.IsEnabled = secondIsStartEnabled;
+                }
+                return;
+            }
+
+            // Normal logic: Start controls others
+            bool isStartEnabled = startButton.IsEnabled;
+            startButton.IsEnabled = !isStartEnabled;
+            stopButton.IsEnabled = isStartEnabled;
+            restartButton.IsEnabled = isStartEnabled;
         }
     }
 }

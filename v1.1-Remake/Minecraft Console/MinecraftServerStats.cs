@@ -1,37 +1,52 @@
-﻿using databaseChanger;
-using javax.management;
-using javax.management.remote;
-using javax.management.openmbean;
-using CreateServerFunc;
-using Newtonsoft.Json.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Diagnostics;
+﻿using CreateServerFunc;
+using databaseChanger;
 using java.util;
-using System.Runtime.Versioning;
-using System.IO;
+using javax.management;
+using javax.management.openmbean;
+using javax.management.remote;
 using Logger;
 using Minecraft_Console;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Sockets;
+using System.Runtime.Versioning;
+using System.Text;
+using System.Windows;
+using System.Windows.Media;
 
 namespace MinecraftServerStats
 {
     [SupportedOSPlatform("windows")]
     class ServerStats
     {
+        private static readonly MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
+
+        private static readonly Color ON_ServerStatusColor = (Color)ColorConverter.ConvertFromString("#87FF2C");
+        private static readonly Color OFF_ServerStatusColor = (Color)ColorConverter.ConvertFromString("#FF3535");
+
         public static async Task GetServerInfo(ServerInfoViewModel viewModel, string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
         {
-            if (MainWindow.serverRunning = true && (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port)))
+            if (MainWindow.serverRunning == true && (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port)))
             {
-                Console.WriteLine($"--------------------------------------------------");
-                Stopwatch stopwatch = new();
+                if (MainWindow.serverStatus == true)
+                {
+                    SetServerStatusOnline();
+                }
+                else
+                {
+                    SetServerStatusOffline();
+                }
 
-                // Get memory usage
+                Stopwatch stopwatch = new();
                 stopwatch.Start();
 
+                // Get server user and password for JMX
                 var serverData = dbChanger.SpecificDataFunc($"SELECT serverUser, serverTempPsw FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
                 user = serverData[0].ToString() ?? string.Empty;
                 psw = serverData[1].ToString() ?? string.Empty;
 
+                // Get memory usage
                 string memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw)[0];
                 long getUsedHeapMemoryTime = stopwatch.ElapsedMilliseconds;
                 string[] memoryData = { memoryUsage, getUsedHeapMemoryTime.ToString() };
@@ -70,6 +85,7 @@ namespace MinecraftServerStats
                 viewModel.Console = consoleOutputData[0];
                 stopwatch.Restart();
 
+                // Get elapsed time
                 long totalElapsedTime = getUsedHeapMemoryTime + getFolderSizeTime + getOnlinePlayersCountTime + getServerUpTime + consoleOutputTime;
                 int delayTime = Math.Max(0, 500 - (int)totalElapsedTime);
                 if (delayTime < 0) delayTime = 0;
@@ -464,6 +480,32 @@ namespace MinecraftServerStats
                 // Default fallback
                 return 754;
             }
+        }
+
+        public static void SetServerStatusOnline()
+        {
+            MainWindow.serverStatus = true;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                mainWindow.ServerStatusTextBlock.Text = "Online";
+                mainWindow.ServerStatusCircle.Background = new SolidColorBrush(ON_ServerStatusColor);
+                CodeLogger.ConsoleLog("SetServerStatusOnline 1");
+            });
+            CodeLogger.ConsoleLog("SetServerStatusOnline 2");
+        }
+
+        public static void SetServerStatusOffline()
+        {
+            MainWindow.serverStatus = false;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                mainWindow.ServerStatusTextBlock.Text = "Offline";
+                mainWindow.ServerStatusCircle.Background = new SolidColorBrush(OFF_ServerStatusColor);
+                CodeLogger.ConsoleLog("SetServerStatusOffline 1");
+            });
+            CodeLogger.ConsoleLog("SetServerStatusOffline 2");
         }
     }
 }
