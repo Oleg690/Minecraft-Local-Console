@@ -11,7 +11,6 @@
     Width="1200"
     Height="700"
     Icon="D:\Minecraft-Server\v1.1-Remake\Minecraft Console\assets\icons\Logo\logo.ico"
-    Loaded="OnLoaded"
     mc:Ignorable="d">
     <Window.Resources>
         <Style TargetType="TextBlock">
@@ -178,15 +177,184 @@
                 <!--  Server Control Panel (Initially Hidden)  -->
                 <Grid Panel.ZIndex="-1" Background="#1C2127">
                     <Grid x:Name="ServerControlPanelDropBox">
+                        <Grid.Resources>
+                            <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
+                                <Setter Property="Grid.Column" Value="1" />
+                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                <Setter Property="SelectedIndex" Value="0" />
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Setter Property="Width" Value="100" />
+                                <Setter Property="Height" Value="30" />
+                                <Setter Property="VerticalContentAlignment" Value="Center" />
+                                <Setter Property="FontSize" Value="14" />
+                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Padding" Value="5" />
+                                <Setter Property="Margin" Value="0,2,0,2" />
+                                <Setter Property="MaxDropDownHeight" Value="250" />
+                                <Setter Property="ItemContainerStyle">
+                                    <Setter.Value>
+                                        <Style TargetType="ListBoxItem">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListBoxItem">
+                                                        <Border
+                                                            x:Name="Bd"
+                                                            Width="{TemplateBinding Width}"
+                                                            Padding="7,4"
+                                                            Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="6"
+                                                            SnapsToDevicePixels="True">
+                                                            <ContentPresenter
+                                                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter Property="Cursor" Value="Hand" />
+                                                                <Setter TargetName="Bd" Property="Background" Value="#2c303a" />
+                                                                <Setter Property="Foreground" Value="White" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="#373c49" />
+                                                                <Setter Property="Foreground" Value="White" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ComboBox">
+                                            <Grid>
+                                                <Border
+                                                    x:Name="Border"
+                                                    Padding="5"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderThickness="0"
+                                                    CornerRadius="6"
+                                                    SnapsToDevicePixels="True">
+                                                    <Grid>
+                                                        <ContentPresenter
+                                                            x:Name="ContentSite"
+                                                            Margin="10,0,30,0"
+                                                            HorizontalAlignment="Left"
+                                                            VerticalAlignment="Center"
+                                                            Content="{TemplateBinding SelectionBoxItem}"
+                                                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                            ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}">
+                                                            <ContentPresenter.RenderTransform>
+                                                                <TranslateTransform X="0" Y="-1" />
+                                                            </ContentPresenter.RenderTransform>
+                                                        </ContentPresenter>
+
+                                                        <Canvas
+                                                            x:Name="ArrowCanvas"
+                                                            Width="12"
+                                                            Height="12"
+                                                            Margin="0,0,10,0"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center"
+                                                            RenderTransformOrigin="0.5,0.5">
+                                                            <Canvas.RenderTransform>
+                                                                <RotateTransform x:Name="ArrowRotation" Angle="90" />
+                                                            </Canvas.RenderTransform>
+                                                            <Line
+                                                                Stroke="White"
+                                                                StrokeEndLineCap="Round"
+                                                                StrokeStartLineCap="Round"
+                                                                StrokeThickness="2"
+                                                                X1="3"
+                                                                X2="6"
+                                                                Y1="4"
+                                                                Y2="7" />
+
+                                                            <Line
+                                                                Stroke="White"
+                                                                StrokeEndLineCap="Round"
+                                                                StrokeStartLineCap="Round"
+                                                                StrokeThickness="2"
+                                                                X1="9"
+                                                                X2="6"
+                                                                Y1="4"
+                                                                Y2="7" />
+                                                        </Canvas>
+                                                    </Grid>
+                                                </Border>
+
+                                                <Popup
+                                                    x:Name="Popup"
+                                                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                                    AllowsTransparency="True"
+                                                    Focusable="False"
+                                                    IsOpen="{TemplateBinding IsDropDownOpen}"
+                                                    Placement="Right"
+                                                    PopupAnimation="Slide">
+
+                                                    <Border
+                                                        Width="{TemplateBinding Width}"
+                                                        Padding="5"
+                                                        Background="#21242c"
+                                                        CornerRadius="6"
+                                                        SnapsToDevicePixels="True">
+                                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                        </ScrollViewer>
+                                                    </Border>
+                                                </Popup>
+                                            </Grid>
+
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsDropDownOpen" Value="True">
+                                                    <Trigger.EnterActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation
+                                                                    Storyboard.TargetName="ArrowRotation"
+                                                                    Storyboard.TargetProperty="Angle"
+                                                                    From="90"
+                                                                    To="270"
+                                                                    Duration="0:0:0.2" />
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </Trigger.EnterActions>
+                                                    <Trigger.ExitActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation
+                                                                    Storyboard.TargetName="ArrowRotation"
+                                                                    Storyboard.TargetProperty="Angle"
+                                                                    From="270"
+                                                                    To="90"
+                                                                    Duration="0:0:0.2" />
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </Trigger.ExitActions>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Border" Property="Background" Value="#2c313a" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Grid.Resources>
                         <ComboBox
                             x:Name="ServerDropBox"
-                            Width="100"
-                            Height="25"
                             Margin="10,10,10,10"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Top"
                             SelectedIndex="0"
                             SelectionChanged="ServerControlPanelDropBoxChanged"
+                            Style="{StaticResource InputComboBoxStyle}"
                             Visibility="Collapsed">
                             <ComboBoxItem Name="ManageCheckBox" Content="Manage" />
                             <ComboBoxItem Name="ConsoleCheckBox" Content="Console" />
@@ -709,7 +877,7 @@
                 </Grid>
 
                 <!--  Create Server Page (Initially Hidden)  -->
-                <Grid x:Name="CreateServerPage" Visibility="Collapsed">
+                <Grid x:Name="CreateServerPage" Visibility="Visible">
                     <Grid Background="#1C2127">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
@@ -799,6 +967,21 @@
                                             <Setter Property="HorizontalAlignment" Value="Right" />
                                             <Setter Property="VerticalContentAlignment" Value="Center" />
                                             <Setter Property="HorizontalScrollBarVisibility" Value="Auto" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="TextBox">
+                                                        <Border
+                                                            Background="{TemplateBinding Background}"
+                                                            CornerRadius="6"
+                                                            SnapsToDevicePixels="True">
+                                                            <ScrollViewer
+                                                                x:Name="PART_ContentHost"
+                                                                Margin="0"
+                                                                Padding="{TemplateBinding Padding}" />
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
                                         </Style>
 
                                         <Style x:Key="InputItemTextBoxStyle" TargetType="Border">
@@ -810,17 +993,162 @@
                                         <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
                                             <Setter Property="Grid.Column" Value="1" />
                                             <Setter Property="HorizontalAlignment" Value="Right" />
+                                            <Setter Property="SelectedIndex" Value="0" />
                                             <Setter Property="Cursor" Value="Hand" />
-                                            <Setter Property="Width" Value="100" />
+                                            <Setter Property="Width" Value="110" />
                                             <Setter Property="Height" Value="30" />
                                             <Setter Property="VerticalContentAlignment" Value="Center" />
                                             <Setter Property="FontSize" Value="14" />
-                                            <Setter Property="Padding" Value="5,0,0,0" />
+                                            <Setter Property="Foreground" Value="White" />
                                             <Setter Property="Background" Value="#262A32" />
-                                            <Setter Property="Foreground" Value="Black" />
                                             <Setter Property="BorderThickness" Value="0" />
                                             <Setter Property="Padding" Value="5" />
                                             <Setter Property="Margin" Value="0,2,0,2" />
+                                            <Setter Property="MaxDropDownHeight" Value="250" />
+                                            <Setter Property="ItemContainerStyle">
+                                                <Setter.Value>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="ListBoxItem">
+                                                                    <Border
+                                                                        x:Name="Bd"
+                                                                        Padding="7,4"
+                                                                        Background="{TemplateBinding Background}"
+                                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                                        CornerRadius="6"
+                                                                        SnapsToDevicePixels="True">
+                                                                        <ContentPresenter
+                                                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Cursor" Value="Hand" />
+                                                                            <Setter TargetName="Bd" Property="Background" Value="#2c303a" />
+                                                                            <Setter Property="Foreground" Value="White" />
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsSelected" Value="True">
+                                                                            <Setter TargetName="Bd" Property="Background" Value="#373c49" />
+                                                                            <Setter Property="Foreground" Value="White" />
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ComboBox">
+                                                        <Grid>
+                                                            <Border
+                                                                x:Name="Border"
+                                                                Background="{TemplateBinding Background}"
+                                                                BorderThickness="0"
+                                                                CornerRadius="6"
+                                                                SnapsToDevicePixels="True">
+                                                                <Grid>
+                                                                    <ContentPresenter
+                                                                        x:Name="ContentSite"
+                                                                        Margin="10,0,30,0"
+                                                                        HorizontalAlignment="Left"
+                                                                        VerticalAlignment="Center"
+                                                                        Content="{TemplateBinding SelectionBoxItem}"
+                                                                        ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                                        ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
+
+                                                                    <Canvas
+                                                                        x:Name="ArrowCanvas"
+                                                                        Width="12"
+                                                                        Height="12"
+                                                                        Margin="0,0,10,0"
+                                                                        HorizontalAlignment="Right"
+                                                                        VerticalAlignment="Center"
+                                                                        RenderTransformOrigin="0.5,0.5">
+                                                                        <Canvas.RenderTransform>
+                                                                            <RotateTransform x:Name="ArrowRotation" Angle="0" />
+                                                                        </Canvas.RenderTransform>
+                                                                        <Line
+                                                                            Stroke="White"
+                                                                            StrokeEndLineCap="Round"
+                                                                            StrokeStartLineCap="Round"
+                                                                            StrokeThickness="2"
+                                                                            X1="3"
+                                                                            X2="6"
+                                                                            Y1="4"
+                                                                            Y2="7" />
+
+                                                                        <Line
+                                                                            Stroke="White"
+                                                                            StrokeEndLineCap="Round"
+                                                                            StrokeStartLineCap="Round"
+                                                                            StrokeThickness="2"
+                                                                            X1="9"
+                                                                            X2="6"
+                                                                            Y1="4"
+                                                                            Y2="7" />
+                                                                    </Canvas>
+                                                                </Grid>
+                                                            </Border>
+
+                                                            <Popup
+                                                                x:Name="Popup"
+                                                                MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                                                AllowsTransparency="True"
+                                                                Focusable="False"
+                                                                IsOpen="{TemplateBinding IsDropDownOpen}"
+                                                                Placement="Bottom"
+                                                                PopupAnimation="Slide">
+
+                                                                <Border
+                                                                    Width="{TemplateBinding Width}"
+                                                                    Padding="5"
+                                                                    Background="#21242c"
+                                                                    CornerRadius="6"
+                                                                    SnapsToDevicePixels="True">
+                                                                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                                                                    </ScrollViewer>
+                                                                </Border>
+                                                            </Popup>
+                                                        </Grid>
+
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsDropDownOpen" Value="True">
+                                                                <Trigger.EnterActions>
+                                                                    <BeginStoryboard>
+                                                                        <Storyboard>
+                                                                            <DoubleAnimation
+                                                                                Storyboard.TargetName="ArrowRotation"
+                                                                                Storyboard.TargetProperty="Angle"
+                                                                                To="180"
+                                                                                Duration="0:0:0.2" />
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </Trigger.EnterActions>
+                                                                <Trigger.ExitActions>
+                                                                    <BeginStoryboard>
+                                                                        <Storyboard>
+                                                                            <DoubleAnimation
+                                                                                Storyboard.TargetName="ArrowRotation"
+                                                                                Storyboard.TargetProperty="Angle"
+                                                                                To="0"
+                                                                                Duration="0:0:0.2" />
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </Trigger.ExitActions>
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Border" Property="Background" Value="#2c313a" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
                                         </Style>
 
                                         <Style x:Key="ToggleCheckBoxStyle" TargetType="CheckBox">
@@ -831,25 +1159,100 @@
                                                 <Setter.Value>
                                                     <ControlTemplate TargetType="{x:Type CheckBox}">
                                                         <Grid>
+                                                            <!--  Background bar  -->
                                                             <Rectangle
                                                                 x:Name="Background"
-                                                                Width="45"
-                                                                Height="28"
-                                                                Fill="#4A4A4A"
-                                                                RadiusX="15"
-                                                                RadiusY="15" />
+                                                                Width="50"
+                                                                Height="32"
+                                                                Fill="#262A32"
+                                                                RadiusX="16"
+                                                                RadiusY="16" />
+
+                                                            <!--  Toggle ellipse  -->
                                                             <Ellipse
                                                                 x:Name="Thumb"
-                                                                Width="20"
-                                                                Height="20"
+                                                                Width="25"
+                                                                Height="25"
                                                                 Margin="4"
                                                                 HorizontalAlignment="Left"
-                                                                Fill="White" />
+                                                                VerticalAlignment="Center"
+                                                                Fill="#F62451" />
+
+                                                            <!--  Centered icon container  -->
+                                                            <Grid
+                                                                x:Name="IconContainer"
+                                                                Width="28"
+                                                                Height="28"
+                                                                Margin="2"
+                                                                HorizontalAlignment="Left"
+                                                                VerticalAlignment="Center">
+                                                                <!--  Cross Icon  -->
+                                                                <Grid
+                                                                    x:Name="CrossIcon"
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    RenderTransformOrigin="0.5,0.5">
+                                                                    <Grid.RenderTransform>
+                                                                        <TransformGroup>
+                                                                            <ScaleTransform />
+                                                                            <SkewTransform />
+                                                                            <RotateTransform />
+                                                                            <TranslateTransform X="-1" Y="-1" />
+                                                                        </TransformGroup>
+                                                                    </Grid.RenderTransform>
+                                                                    <Line
+                                                                        Stroke="White"
+                                                                        StrokeEndLineCap="Round"
+                                                                        StrokeStartLineCap="Round"
+                                                                        StrokeThickness="2.8"
+                                                                        X1="4"
+                                                                        X2="14"
+                                                                        Y1="4"
+                                                                        Y2="14" />
+                                                                    <Line
+                                                                        Stroke="White"
+                                                                        StrokeEndLineCap="Round"
+                                                                        StrokeStartLineCap="Round"
+                                                                        StrokeThickness="2.8"
+                                                                        X1="4"
+                                                                        X2="14"
+                                                                        Y1="14"
+                                                                        Y2="4" />
+                                                                </Grid>
+
+                                                                <!--  Checkmark Icon  -->
+                                                                <Grid
+                                                                    x:Name="CheckIcon"
+                                                                    HorizontalAlignment="Center"
+                                                                    VerticalAlignment="Center"
+                                                                    Visibility="Collapsed">
+                                                                    <Grid.RenderTransform>
+                                                                        <TransformGroup>
+                                                                            <ScaleTransform />
+                                                                            <SkewTransform />
+                                                                            <RotateTransform />
+                                                                            <TranslateTransform X="-1" Y="-1" />
+                                                                        </TransformGroup>
+                                                                    </Grid.RenderTransform>
+                                                                    <Path
+                                                                        Data="M3,10 L7,14 L14,4"
+                                                                        Stroke="White"
+                                                                        StrokeEndLineCap="Round"
+                                                                        StrokeLineJoin="Round"
+                                                                        StrokeStartLineCap="Round"
+                                                                        StrokeThickness="2.8" />
+                                                                </Grid>
+                                                            </Grid>
                                                         </Grid>
+
+                                                        <!--  Toggle behavior  -->
                                                         <ControlTemplate.Triggers>
                                                             <Trigger Property="IsChecked" Value="True">
                                                                 <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
-                                                                <Setter TargetName="Background" Property="Fill" Value="#4CAF50" />
+                                                                <Setter TargetName="IconContainer" Property="HorizontalAlignment" Value="Right" />
+                                                                <Setter TargetName="Thumb" Property="Fill" Value="#1FD78D" />
+                                                                <Setter TargetName="CrossIcon" Property="Visibility" Value="Collapsed" />
+                                                                <Setter TargetName="CheckIcon" Property="Visibility" Value="Visible" />
                                                             </Trigger>
                                                         </ControlTemplate.Triggers>
                                                     </ControlTemplate>
@@ -960,40 +1363,38 @@
                                                     Text="Version" />
                                             </Grid>
                                             <Grid Grid.Row="1">
-                                                <WrapPanel HorizontalAlignment="Center">
-                                                    <Border Style="{StaticResource SettingsVersionsItem}">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock
-                                                                Foreground="White"
-                                                                Style="{StaticResource DefaultTextStyle}"
-                                                                Text="Software" />
-                                                            <ComboBox
-                                                                x:Name="SoftwareChangeBox"
-                                                                SelectedIndex="0"
-                                                                SelectionChanged="ChangeSupportedVersions"
-                                                                Style="{StaticResource InputComboBoxStyle}" />
-                                                        </StackPanel>
-                                                    </Border>
+                                                <Border HorizontalAlignment="Center" Style="{StaticResource InputItemTextBoxStyle}">
+                                                    <WrapPanel HorizontalAlignment="Center">
+                                                        <Border Style="{StaticResource SettingsItem}">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Software" />
+                                                                <ComboBox
+                                                                    x:Name="SoftwareChangeBox"
+                                                                    SelectionChanged="ChangeSupportedVersions"
+                                                                    Style="{StaticResource InputComboBoxStyle}" />
+                                                            </Grid>
+                                                        </Border>
 
-                                                    <Border Style="{StaticResource SettingsVersionsItem}">
-                                                        <StackPanel Orientation="Horizontal">
-                                                            <TextBlock
-                                                                Width="100"
-                                                                Foreground="White"
-                                                                Style="{StaticResource DefaultTextStyle}"
-                                                                Text="Version" />
-                                                            <ComboBox
-                                                                x:Name="VersionsChangeBox"
-                                                                Width="100"
-                                                                SelectedIndex="0"
-                                                                Style="{StaticResource InputComboBoxStyle}" />
-                                                        </StackPanel>
-                                                    </Border>
-                                                </WrapPanel>
+                                                        <Border Style="{StaticResource SettingsItem}">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Version" />
+                                                                <ComboBox x:Name="VersionsChangeBox" Style="{StaticResource InputComboBoxStyle}" />
+                                                            </Grid>
+                                                        </Border>
+                                                    </WrapPanel>
+                                                </Border>
                                             </Grid>
                                         </Grid>
 
-                                        <Grid Grid.Row="2" Margin="0,10,0,10">
+                                        <Grid Grid.Row="2" Margin="0,10">
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="Auto" />
                                                 <RowDefinition Height="Auto" />
@@ -1016,52 +1417,37 @@
                                                             <StackPanel Orientation="Horizontal">
                                                                 <TextBlock
                                                                     Margin="0,0,10,0"
-                                                                    VerticalAlignment="Center"
+                                                                    VerticalAlignment="Bottom"
                                                                     FontFamily="Segoe MDL2 Assets"
                                                                     FontSize="20"
                                                                     Foreground="White"
                                                                     Text="&#xE116;" />
-                                                                <TextBlock
-                                                                    Width="Auto"
-                                                                    Style="{StaticResource DefaultTextStyle}"
-                                                                    Text="server.properties" />
+                                                                <TextBlock Style="{StaticResource DefaultTextStyle}" Text="server.properties" />
                                                             </StackPanel>
                                                         </Grid>
+
                                                         <Grid Grid.Row="1">
                                                             <WrapPanel HorizontalAlignment="Center">
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
 
-                                                                        <TextBlock
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Slots" />
-                                                                        <TextBox
-                                                                            x:Name="SlotsInput"
-                                                                            Margin="0,2,0,2"
-                                                                            Style="{StaticResource InputTextBoxStyle}"
-                                                                            Text="20" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Slots" />
+                                                                        <TextBox x:Name="SlotsInput" Style="{StaticResource InputTextBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Gamemode" />
-                                                                        <ComboBox
-                                                                            x:Name="GamemodeComboBox"
-                                                                            SelectedIndex="0"
-                                                                            Style="{StaticResource InputComboBoxStyle}">
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Gamemode" />
+                                                                        <ComboBox x:Name="GamemodeComboBox" Style="{StaticResource InputComboBoxStyle}">
                                                                             <sys:String>Survival</sys:String>
                                                                             <sys:String>Creative</sys:String>
                                                                             <sys:String>Adventure</sys:String>
@@ -1071,15 +1457,12 @@
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Difficulty" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Difficulty" />
                                                                         <ComboBox
                                                                             x:Name="DifficultyComboBox"
                                                                             SelectedIndex="2"
@@ -1093,217 +1476,144 @@
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Whitelist" />
-                                                                        <CheckBox
-                                                                            x:Name="WhitelistCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
-                                                                            Style="{StaticResource ToggleCheckBoxStyle}" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Whitelist" />
+                                                                        <CheckBox x:Name="WhitelistCheckBox" Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Cracked" />
-                                                                        <CheckBox
-                                                                            x:Name="CrackedCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
-                                                                            Style="{StaticResource ToggleCheckBoxStyle}" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Cracked" />
+                                                                        <CheckBox x:Name="CrackedCheckBox" Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="PVP" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="PVP" />
                                                                         <CheckBox
                                                                             x:Name="PVPCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
                                                                             IsChecked="True"
                                                                             Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Commandblocks" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Commandblocks" />
                                                                         <CheckBox
                                                                             x:Name="CommandblocksCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
                                                                             IsChecked="True"
                                                                             Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Fly" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Fly" />
                                                                         <CheckBox
                                                                             x:Name="FlyCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
                                                                             IsChecked="True"
                                                                             Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Animals" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Animals" />
                                                                         <CheckBox
                                                                             x:Name="AnimalsCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
                                                                             IsChecked="True"
                                                                             Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Monster" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Monster" />
                                                                         <CheckBox
                                                                             x:Name="MonsterCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
                                                                             IsChecked="True"
                                                                             Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Villagers" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Villagers" />
                                                                         <CheckBox
                                                                             x:Name="VillagersCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
                                                                             IsChecked="True"
                                                                             Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Nether" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Nether" />
                                                                         <CheckBox
                                                                             x:Name="NetherCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
                                                                             IsChecked="True"
                                                                             Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Force Gamemode" />
-                                                                        <CheckBox
-                                                                            x:Name="ForceGamemodeCheckBox"
-                                                                            Margin="5,0,0,0"
-                                                                            Content=""
-                                                                            Style="{StaticResource ToggleCheckBoxStyle}" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Force Gamemode" />
+                                                                        <CheckBox x:Name="ForceGamemodeCheckBox" Style="{StaticResource ToggleCheckBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
 
                                                                 <Border Style="{StaticResource SettingsItem}">
-                                                                    <Grid HorizontalAlignment="Stretch">
+                                                                    <Grid>
                                                                         <Grid.ColumnDefinitions>
                                                                             <ColumnDefinition Width="*" />
                                                                             <ColumnDefinition Width="*" />
                                                                         </Grid.ColumnDefinitions>
-                                                                        <TextBlock
-                                                                            Width="100"
-                                                                            Foreground="White"
-                                                                            Style="{StaticResource DefaultTextStyle}"
-                                                                            Text="Spawn Protection" />
-                                                                        <TextBox
-                                                                            x:Name="SpawnProtectionInput"
-                                                                            Padding="5"
-                                                                            Style="{StaticResource InputTextBoxStyle}"
-                                                                            Text="0" />
+                                                                        <TextBlock Style="{StaticResource DefaultTextStyle}" Text="Spawn Protection" />
+                                                                        <TextBox x:Name="SpawnProtectionInput" Style="{StaticResource InputTextBoxStyle}" />
                                                                     </Grid>
                                                                 </Border>
                                                             </WrapPanel>

@@ -8,15 +8,50 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
 using Updater;
 using WpfAnimatedGif;
 
 namespace Minecraft_Console
 {
+    public static class ComboBoxExtensions
+    {
+        public static void ToggleDropDownOnClick(this ComboBox comboBox)
+        {
+            comboBox.PreviewMouseLeftButtonDown += (sender, e) =>
+            {
+                if (!IsClickInsidePopupContent(comboBox, e))
+                {
+                    comboBox.IsDropDownOpen = !comboBox.IsDropDownOpen;
+                    e.Handled = true;
+                }
+            };
+        }
+
+        private static bool IsClickInsidePopupContent(ComboBox comboBox, MouseButtonEventArgs e)
+        {
+            var clickedElement = e.OriginalSource as DependencyObject;
+
+            while (clickedElement != null)
+            {
+                // Allow ComboBoxItem or ScrollBar clicks
+                if (clickedElement is ComboBoxItem || clickedElement is ScrollBar)
+                    return true;
+
+                // Bonus: if you have checkboxes, add:
+                if (clickedElement is CheckBox)
+                    return true;
+
+                clickedElement = VisualTreeHelper.GetParent(clickedElement);
+            }
+
+            return false;
+        }
+    }
+
     public static class ButtonExtensions
     {
         public static readonly DependencyProperty IsSidebarSelectedProperty =
@@ -73,6 +108,7 @@ namespace Minecraft_Console
             DataContext = _viewModel;
             CodeLogger.CreateLogFile();
             SetStaticPaths();
+            OnLoaded();
             LoadServersPage();
             _ = CheckRunningServersAsync();
         }
@@ -111,8 +147,14 @@ namespace Minecraft_Console
             }
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs e)
+        private void OnLoaded()
         {
+            GamemodeComboBox.ToggleDropDownOnClick();
+            DifficultyComboBox.ToggleDropDownOnClick();
+            SoftwareChangeBox.ToggleDropDownOnClick();
+            VersionsChangeBox.ToggleDropDownOnClick();
+            ServerDropBox.ToggleDropDownOnClick();
+
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(sidebarStackPanel); i++)
             {
                 if (VisualTreeHelper.GetChild(sidebarStackPanel, i) is Button firstButton)
@@ -762,7 +804,7 @@ namespace Minecraft_Console
             }
         }
 
-        private static Button CreateStyledButton(string content, Thickness margin, Action onClick, double width, double height)
+        private static Button CreateStyledButton(string content, Thickness margin, System.Action onClick, double width, double height)
         {
             var button = new Button
             {
@@ -913,55 +955,47 @@ namespace Minecraft_Console
             {
                 CreateServerBTN.IsEnabled = false;
 
-                string software = ((ComboBoxItem)SoftwareChangeBox.SelectedItem)?.Content.ToString() ?? "";  // Default to Vanilla
-                string version = VersionsChangeBox.Text;  // e.g. 1.21.4
-                string worldName = ServerNameInput.Text;  // e.g. My World
-                int totalPlayers = Convert.ToInt32(SlotsInput.Text);
-                string Server_LocalComputerIP = NetworkSetup.GetLocalIP();
-                string Server_PublicComputerIP = await NetworkSetup.GetPublicIP();
+                // Gather inputs
+                string software = ((ComboBoxItem)SoftwareChangeBox.SelectedItem)?.Content.ToString() ?? "";
+                string version = VersionsChangeBox.Text;
+                string worldName = ServerNameInput.Text;
+                if (!int.TryParse(SlotsInput.Text, out int totalPlayers))
+                {
+                    MessageBox.Show("Invalid number of slots.");
+                    return;
+                }
+
+                string localIP = NetworkSetup.GetLocalIP();
+                string publicIP = await NetworkSetup.GetPublicIP();
+
+                // Constants
                 int Server_Port = 25565;
                 int JMX_Port = 25562;
                 int RMI_Port = 25563;
                 int RCON_Port = 25575;
-                int memoryAlocator = 5000; // in MB
-                                           // Get memoryAlocator from settings
+                int memoryAlocator = 5000;
 
-                string max_players = totalPlayers.ToString().ToLowerInvariant();
-                string gamemode = (GamemodeComboBox.SelectedItem as string ?? string.Empty).ToLowerInvariant();
-                string difficulty = (DifficultyComboBox.SelectedItem as string ?? string.Empty).ToLowerInvariant();
-                string white_list = (WhitelistCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string online_mode = (CrackedCheckBox.IsChecked == true ? "false" : "true").ToLowerInvariant();
-                string pvp = (PVPCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string enable_command_block = (CommandblocksCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string allow_flight = (FlyCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string spawn_animals = (AnimalsCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string spawn_monsters = (MonsterCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string spawn_npcs = (VillagersCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string allow_nether = (NetherCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string force_gamemode = (ForceGamemodeCheckBox.IsChecked?.ToString() ?? string.Empty).ToLowerInvariant();
-                string spawn_protection = (SpawnProtectionInput.Text ?? string.Empty).ToLowerInvariant();
+                // Utility for checkboxes
+                string GetCheckBoxValue(CheckBox cb, bool invert = false) =>
+                    (invert ? !(cb.IsChecked ?? false) : cb.IsChecked ?? false).ToString().ToLowerInvariant();
 
-                object[,] defaultWorldSettings = {
-                { "max-players", max_players },
-                { "gamemode", gamemode },
-                { "difficulty", difficulty },
-                { "white-list", white_list },
-                { "online-mode", online_mode },
-                { "pvp", pvp },
-                { "enable-command-block", enable_command_block },
-                { "allow-flight", allow_flight },
-                { "spawn-animals", spawn_animals },
-                { "spawn-monsters", spawn_monsters },
-                { "spawn-npcs", spawn_npcs },
-                { "allow-nether", allow_nether },
-                { "force-gamemode", force_gamemode },
-                { "spawn-protection", spawn_protection }
-                };
-
-                for (int i = 0; i < defaultWorldSettings.GetLength(0); i++)
+                object[,] worldSettings =
                 {
-                    CodeLogger.ConsoleLog($"{defaultWorldSettings[i, 0]}: {defaultWorldSettings[i, 1]}");
-                }
+                    { "max-players", totalPlayers.ToString() },
+                    { "gamemode", (GamemodeComboBox.SelectedItem as string ?? "").ToLowerInvariant() },
+                    { "difficulty", (DifficultyComboBox.SelectedItem as string ?? "").ToLowerInvariant() },
+                    { "white-list", GetCheckBoxValue(WhitelistCheckBox) },
+                    { "online-mode", GetCheckBoxValue(CrackedCheckBox, invert: true) },
+                    { "pvp", GetCheckBoxValue(PVPCheckBox) },
+                    { "enable-command-block", GetCheckBoxValue(CommandblocksCheckBox) },
+                    { "allow-flight", GetCheckBoxValue(FlyCheckBox) },
+                    { "spawn-animals", GetCheckBoxValue(AnimalsCheckBox) },
+                    { "spawn-monsters", GetCheckBoxValue(MonsterCheckBox) },
+                    { "spawn-npcs", GetCheckBoxValue(VillagersCheckBox) },
+                    { "allow-nether", GetCheckBoxValue(NetherCheckBox) },
+                    { "force-gamemode", GetCheckBoxValue(ForceGamemodeCheckBox) },
+                    { "spawn-protection", (SpawnProtectionInput.Text ?? "").ToLowerInvariant() }
+                };
 
                 if (rootFolder == null || rootWorldsFolder == null || tempFolderPath == null || defaultServerPropertiesPath == null)
                 {
@@ -973,28 +1007,27 @@ namespace Minecraft_Console
                 LoadGIF();
                 LoadingScreen.Visibility = Visibility.Visible;
 
-                string creationResult = string.Empty;
-
-                await Task.Run(async () =>
-                {
-                    creationResult = await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
-                });
+                string creationResult = await Task.Run(() =>
+                    ServerCreator.CreateServerFunc(
+                    rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath,
+                    version, worldName, software, totalPlayers,
+                    worldSettings, memoryAlocator,
+                    localIP, Server_Port, JMX_Port, RCON_Port, RMI_Port
+                    )
+                );
 
                 SetLoadingBarProgress(100);
                 await Task.Delay(500);
                 LoadingScreen.Visibility = Visibility.Collapsed;
                 UnloadGIF();
 
-                // ✅ Check if result is error
                 if (string.IsNullOrWhiteSpace(creationResult) || creationResult.StartsWith("Error", StringComparison.OrdinalIgnoreCase))
                 {
                     MessageBox.Show($"Failed to create server:\n{creationResult}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                // After creating the server, go back to the server list
                 LoadServersPage();
-                MessageBox.Show($"Server Created!");
                 serverRunning = false;
             }
             catch (Exception ex)
@@ -1158,6 +1191,8 @@ namespace Minecraft_Console
         // Create Server Page Show func
         private void CreateServerButton_Click()
         {
+            ResetCreateServerButtons();
+
             // Switch to the create server page
             MainContent.Visibility = Visibility.Collapsed;
             CreateServerPage.Visibility = Visibility.Visible;
@@ -1385,6 +1420,26 @@ namespace Minecraft_Console
             startButton.IsEnabled = !isStartEnabled;
             stopButton.IsEnabled = isStartEnabled;
             restartButton.IsEnabled = isStartEnabled;
+        }
+
+        private void ResetCreateServerButtons()
+        {
+            ServerNameInput.Text = "";
+
+            SlotsInput.Text = "20";
+            GamemodeComboBox.SelectedIndex = 0;
+            DifficultyComboBox.SelectedIndex = 2;
+            WhitelistCheckBox.IsChecked = false;
+            CrackedCheckBox.IsChecked = false;
+            PVPCheckBox.IsChecked = true;
+            CommandblocksCheckBox.IsChecked = true;
+            FlyCheckBox.IsChecked = true;
+            AnimalsCheckBox.IsChecked = true;
+            MonsterCheckBox.IsChecked = true;
+            VillagersCheckBox.IsChecked = true;
+            NetherCheckBox.IsChecked = true;
+            ForceGamemodeCheckBox.IsChecked = false;
+            SpawnProtectionInput.Text = "0";
         }
     }
 }

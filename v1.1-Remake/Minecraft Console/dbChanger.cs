@@ -53,7 +53,7 @@ namespace databaseChanger
 
                     // Insert data
                     string insertDefaultSQL = $"insert into {dbName} (worldNumber, name, version, software, totalPlayers, rconPassword, Process_ID) values('123456789', 'Minecraft SMP', '1.21', 'Vanilla', '20', '123456789123456789', NULL);";
-                    if (insertOneDefaultSQLVerificator != false)
+                    if (insertOneDefaultSQLVerificator)
                     {
                         using SQLiteCommand insertCommand = new(insertDefaultSQL, connection);
                         insertCommand.ExecuteNonQuery();
@@ -65,16 +65,16 @@ namespace databaseChanger
                     CodeLogger.ConsoleLog($"Error: {ex.Message}");
                 }
             }
-            CodeLogger.ConsoleLog("Done!");
+            CodeLogger.ConsoleLog("Database created with success!");
         }
 
         public static List<object[]> SpecificDataFunc(string sqlQuery)
         {
             List<object[]> data = [];
 
-            if (File.Exists(dbPath) == false)
+            if (!File.Exists(dbPath))
             {
-                CodeLogger.ConsoleLog("Database file does not exist.");
+                CodeLogger.ConsoleLog("Database file does not exist. Creating...");
                 CreateDB("worlds");
             }
 
@@ -84,15 +84,13 @@ namespace databaseChanger
                 {
                     connection.Open();
 
-                    using (SQLiteCommand selectCommand = new(sqlQuery, connection))
-                    using (SQLiteDataReader reader = selectCommand.ExecuteReader())
+                    using SQLiteCommand selectCommand = new(sqlQuery, connection);
+                    using SQLiteDataReader reader = selectCommand.ExecuteReader();
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            object[] row = new object[reader.FieldCount];
-                            reader.GetValues(row);
-                            data.Add(row);
-                        }
+                        object[] row = new object[reader.FieldCount];
+                        reader.GetValues(row);
+                        data.Add(row);
                     }
                 }
                 catch (Exception ex)
@@ -108,6 +106,12 @@ namespace databaseChanger
         {
             List<object[]> data = [];
 
+            if (!File.Exists(dbPath))
+            {
+                CodeLogger.ConsoleLog("Database file does not exist. Creating...");
+                CreateDB("worlds");
+            }
+
             using (SQLiteConnection connection = new(connectionString))
             {
                 try
@@ -121,15 +125,13 @@ namespace databaseChanger
                         selectQuery = $"SELECT * FROM worlds WHERE worldNumber = {worldNumber};";
                     }
 
-                    using (SQLiteCommand selectCommand = new(selectQuery, connection))
-                    using (SQLiteDataReader reader = selectCommand.ExecuteReader())
+                    using SQLiteCommand selectCommand = new(selectQuery, connection);
+                    using SQLiteDataReader reader = selectCommand.ExecuteReader();
+                    while (reader.Read())
                     {
-                        while (reader.Read())
-                        {
-                            object[] row = new object[reader.FieldCount];
-                            reader.GetValues(row);
-                            data.Add(row);
-                        }
+                        object[] row = new object[reader.FieldCount];
+                        reader.GetValues(row);
+                        data.Add(row);
                     }
                 }
                 catch (Exception ex)
@@ -143,6 +145,12 @@ namespace databaseChanger
 
         public static void SetFunc(string worldNumber, string worldName, string Software, string version, string totalPlayers, string Server_Port, string JMX_Port, string RCON_Port, string RMI_Port, string rconPassword)
         {
+            if (!File.Exists(dbPath))
+            {
+                CodeLogger.ConsoleLog("Database file does not exist. Creating...");
+                CreateDB("worlds");
+            }
+
             // Establish connection
             using (SQLiteConnection connection = new(connectionString))
             {
@@ -154,10 +162,8 @@ namespace databaseChanger
                     // Create a command
                     string query = $"insert into worlds (worldNumber, name, version, software, totalPlayers, Server_Port, JMX_Port, RCON_Port, RMI_Port, rconPassword) values('{worldNumber}', '{worldName}', '{version}', '{Software}', '{totalPlayers}', '{Server_Port}', '{JMX_Port}', '{RCON_Port}', '{RMI_Port}', '{rconPassword}');";
                     // Insert Data
-                    using (SQLiteCommand command = new(query, connection))
-                    {
-                        command.ExecuteNonQuery();
-                    }
+                    using SQLiteCommand command = new(query, connection);
+                    command.ExecuteNonQuery();
                 }
                 catch (Exception ex)
                 {
@@ -173,31 +179,33 @@ namespace databaseChanger
 
         public static void DeleteWorldFromDB(string worldNumber)
         {
-            // Establish connection
-            using (SQLiteConnection connection = new(connectionString))
+            if (!File.Exists(dbPath))
             {
-                try
-                {
-                    // Open the connection
-                    connection.Open();
+                CodeLogger.ConsoleLog("Database file does not exist. Creating...");
+                CreateDB("worlds");
+            }
 
-                    // Create a command
-                    string query = $"DELETE FROM worlds WHERE worldNumber = '{worldNumber}';";
-                    // Insert Data
-                    using (SQLiteCommand command = new(query, connection))
-                    {
-                        command.ExecuteNonQuery();
-                        CodeLogger.ConsoleLog("World deleted from DB!");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    CodeLogger.ConsoleLog($"Error: {ex.Message}");
-                }
-                finally
-                {
-                    connection.Close();
-                }
+            // Establish connection
+            using SQLiteConnection connection = new(connectionString);
+            try
+            {
+                // Open the connection
+                connection.Open();
+
+                // Create a command
+                string query = $"DELETE FROM worlds WHERE worldNumber = '{worldNumber}';";
+                // Insert Data
+                using SQLiteCommand command = new(query, connection);
+                command.ExecuteNonQuery();
+                CodeLogger.ConsoleLog("World deleted from DB!");
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error: {ex.Message}");
+            }
+            finally
+            {
+                connection.Close();
             }
         }
     }
