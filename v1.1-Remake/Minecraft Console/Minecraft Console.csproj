@@ -18,6 +18,11 @@
     <None Remove="assets\Fonts\Istok Web\IstokWeb-BoldItalic.ttf" />
     <None Remove="assets\Fonts\Istok Web\IstokWeb-Italic.ttf" />
     <None Remove="assets\Fonts\Istok Web\IstokWeb-Regular.ttf" />
+    <None Remove="assets\Fonts\Itim\Itim-Regular.ttf" />
+    <None Remove="assets\Fonts\Jomhuria\Jomhuria-Regular.ttf" />
+    <None Remove="assets\icons\Logo\logo.ico" />
+    <None Remove="assets\icons\Logo\minehost.png" />
+    <None Remove="assets\Minecraft_Photo.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +52,19 @@
     <Resource Include="assets\Fonts\Istok Web\IstokWeb-BoldItalic.ttf" />
     <Resource Include="assets\Fonts\Istok Web\IstokWeb-Italic.ttf" />
     <Resource Include="assets\Fonts\Istok Web\IstokWeb-Regular.ttf" />
+    <Resource Include="assets\Fonts\Itim\Itim-Regular.ttf" />
+    <Resource Include="assets\Fonts\Jomhuria\Jomhuria-Regular.ttf" />
+    <Resource Include="assets\icons\Logo\logo.ico" />
+    <Resource Include="assets\icons\Logo\minehost.png" />
+    <Resource Include="assets\Minecraft_Photo.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="assets\Images\serverBtnImage.png">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

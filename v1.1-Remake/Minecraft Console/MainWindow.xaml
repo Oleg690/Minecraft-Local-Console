@@ -10,9 +10,12 @@
     Title="Minecraft Console"
     Width="1200"
     Height="700"
-    Icon="D:\Minecraft-Server\v1.1-Remake\Minecraft Console\assets\icons\Logo\logo.ico"
+    Icon="pack://application:,,,/assets/icons/Logo/logo.ico"
     mc:Ignorable="d">
     <Window.Resources>
+        <Style x:Key="ServerCardFont" TargetType="TextBlock">
+            <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Jomhuria/#Jomhuria" />
+        </Style>
         <Style TargetType="TextBlock">
             <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
         </Style>
@@ -129,7 +132,7 @@
                     <Image
                         Height="40"
                         Margin="20,10"
-                        Source="D:\Minecraft-Server\v1.1-Remake\Minecraft Console\assets\icons\Logo\minehost.png" />
+                        Source="pack://application:,,,/assets/icons/Logo/minehost.png" />
                     <Button
                         Click="NavigateToServers"
                         Content="Servers"
@@ -155,24 +158,7 @@
 
             <!--  Main Content Area  -->
             <Grid Grid.Column="1">
-                <Grid
-                    x:Name="MainContent"
-                    Margin="0,0,0,0"
-                    VerticalAlignment="Top">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <Grid x:Name="ServerGrid" Margin="10">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                        </Grid>
-                    </ScrollViewer>
-                </Grid>
+                <Grid x:Name="MainContent" VerticalAlignment="Top" />
 
                 <!--  Server Control Panel (Initially Hidden)  -->
                 <Grid Panel.ZIndex="-1" Background="#1C2127">
@@ -378,7 +364,7 @@
                         </Grid.RowDefinitions>
 
                         <Image
-                            x:Name="ServerImage"
+                            x:Name="ServerImageManage"
                             Grid.RowSpan="2"
                             Grid.Column="0"
                             Height="300"
@@ -386,7 +372,7 @@
                             Margin="0,0,25,0"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
-                            Source="D:\Minecraft-Server\v1.1-Remake\Minecraft Console\assets\Minecraft_Photo.png"
+                            Source="pack://application:,,,/assets/Minecraft_Photo.png"
                             Stretch="UniformToFill" />
 
                         <Grid
@@ -575,8 +561,6 @@
                                         HorizontalAlignment="Left"
                                         Background="#FF3535"
                                         CornerRadius="10" />
-                                    <!--  OFF hex value: #FF3535  -->
-                                    <!--  ON hex value: #87FF2C  -->
                                 </Grid>
 
                             </Grid>
@@ -877,7 +861,7 @@
                 </Grid>
 
                 <!--  Create Server Page (Initially Hidden)  -->
-                <Grid x:Name="CreateServerPage" Visibility="Visible">
+                <Grid x:Name="CreateServerPage" Visibility="Collapsed">
                     <Grid Background="#1C2127">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />

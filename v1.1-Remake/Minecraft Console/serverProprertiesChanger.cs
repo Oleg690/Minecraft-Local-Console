@@ -18,14 +18,12 @@ namespace serverPropriertiesChanger
                     throw new FileNotFoundException("The specified file does not exist.");
                 }
 
-                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (StreamReader reader = new StreamReader(filePath))
+                using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using StreamReader reader = new(filePath);
+                string? line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    string? line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        data += line + "\n";
-                    }
+                    data += line + "\n";
                 }
             }
             catch (Exception ex)
@@ -49,7 +47,7 @@ namespace serverPropriertiesChanger
                     throw new FileNotFoundException("The specified file does not exist.");
                 }
 
-                List<string> lines = new(File.ReadAllLines(filePath));
+                List<string> lines = [.. File.ReadAllLines(filePath)];
                 // Process each setting to modify the file content
                 for (int i = 0; i < settings.GetLength(0); i++)
                 {
@@ -60,10 +58,10 @@ namespace serverPropriertiesChanger
 
                         if (hardWrite && lineNumber == -1)
                         {
-                            File.AppendAllText(filePath, $"{settingKey}={settings[i, 1].ToString()}" + Environment.NewLine);
-                            lines = new(File.ReadAllLines(filePath));
+                            File.AppendAllText(filePath, $"{settingKey}={settings[i, 1]}" + Environment.NewLine);
+                            lines = [.. File.ReadAllLines(filePath)];
                             lineNumber = FindLineNumber(settingKey, lines);
-                            CodeLogger.ConsoleLog($"Created line with number {lineNumber} with the content {settingKey}={settings[i, 1].ToString()};");
+                            CodeLogger.ConsoleLog($"Created line with number {lineNumber} with the content {settingKey}={settings[i, 1]};");
                         }
                         else
                         {
@@ -72,7 +70,7 @@ namespace serverPropriertiesChanger
                             // Validate line number
                             if (lineNumber > lines.Count)
                             {
-                                throw new FormatException($"Line {lineNumber + 1} out of bound.");
+                                throw new FormatException($"Line {lineNumber + 3} out of bound.");
                             }
                             else if (lineNumber < 0)
                             {
@@ -82,14 +80,14 @@ namespace serverPropriertiesChanger
                             // Validate line format (contains '=')
                             if (lineContents.Length < 2)
                             {
-                                throw new FormatException($"Line {lineNumber + 1} does not contain an '=' separator.");
+                                throw new FormatException($"Line {lineNumber + 3} does not contain an '=' separator.");
                             }
 
                             string oldContent = lines[lineNumber]; // For debugging
-                            string newContent = lineContents[0] + "=" + settings[i, 1].ToString();
+                            string newContent = $"{lineContents[0]}={settings[i, 1]}";
                             lines[lineNumber] = newContent;
 
-                            CodeLogger.ConsoleLog($"Line {lineNumber + 1} was changed from: {oldContent}; to: {newContent};");
+                            CodeLogger.ConsoleLog($"Line {lineNumber + 3} was changed from: {oldContent}; to: {newContent};");
                         }
                     }
                     catch (Exception ex)

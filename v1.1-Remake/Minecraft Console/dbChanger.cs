@@ -6,66 +6,101 @@ namespace databaseChanger
 {
     class dbChanger
     {
-        public static readonly string? currentDirectory = Directory.GetCurrentDirectory();
-        public static readonly string? dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
-        public static readonly string? connectionString = $"Data Source={dbPath};Version=3;";
+        private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
+        private static readonly string? dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
+        private static readonly string? connectionString = $"Data Source={dbPath};Version=3;";
+
+        // Define column names as constants
+        private const string TableName = "worlds";
+        private const string ColumnId = "id";
+        private const string ColumnWorldNumber = "worldNumber";
+        private const string ColumnName = "name";
+        private const string ColumnVersion = "version";
+        private const string ColumnSoftware = "software";
+        private const string ColumnTotalPlayers = "totalPlayers";
+        private const string ColumnServerPort = "Server_Port";
+        private const string ColumnJmxPort = "JMX_Port";
+        private const string ColumnRconPort = "RCON_Port";
+        private const string ColumnRmiPort = "RMI_Port";
+        private const string ColumnRconPassword = "rconPassword";
+        private const string ColumnServerUser = "serverUser";
+        private const string ColumnServerTempPsw = "serverTempPsw";
+        private const string ColumnProcessId = "Process_ID";
+
+        private static SQLiteConnection? CreateConnection()
+        {
+            SQLiteConnection connection = new(connectionString);
+            try
+            {
+                connection.Open();
+                return connection;
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error opening database connection: {ex.Message}");
+                // Consider throwing the exception or returning null depending on your error handling strategy
+                return null;
+            }
+        }
+
         public static void CreateDB(string dbName, bool insertOneDefaultSQLVerificator = false)
         {
-            // Ensure the directory exists
-            string? directory = Path.GetDirectoryName(dbPath);
-            if (directory != null && !Directory.Exists(directory))
+            if (!Directory.Exists(Path.GetDirectoryName(dbPath)))
             {
-                Directory.CreateDirectory(directory);
-                CodeLogger.ConsoleLog($"Directory created: {directory}");
+                Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+                CodeLogger.ConsoleLog($"Directory created: {Path.GetDirectoryName(dbPath)}");
             }
 
-            // Establish connection
-            using (SQLiteConnection connection = new(connectionString))
+            using SQLiteConnection? connection = CreateConnection();
+            if (connection == null) return; // Exit if connection failed
+
+            try
             {
-                try
-                {
-                    // Open the connection
-                    connection.Open();
-                    CodeLogger.ConsoleLog("Connected to the database.");
+                string query = $"CREATE TABLE IF NOT EXISTS {dbName} (" +
+                               $"{ColumnId} integer primary key autoincrement," +
+                               $"{ColumnWorldNumber} text," +
+                               $"{ColumnName} text," +
+                               $"{ColumnVersion} text," +
+                               $"{ColumnSoftware} text," +
+                               $"{ColumnTotalPlayers} text," +
+                               $"{ColumnServerPort} text," +
+                               $"{ColumnJmxPort} text," +
+                               $"{ColumnRconPort} text," +
+                               $"{ColumnRmiPort} text," +
+                               $"{ColumnRconPassword} text," +
+                               $"{ColumnServerUser} text," +
+                               $"{ColumnServerTempPsw} text," +
+                               $"{ColumnProcessId} text" +
+                               $")";
+                using SQLiteCommand command = new(query, connection);
+                command.ExecuteNonQuery();
+                CodeLogger.ConsoleLog("Table created successfully.");
 
-                    // Create a command
-                    string query = $"CREATE TABLE IF NOT EXISTS {dbName} (" +
-                        $"id integer primary key autoincrement," +
-                        $"worldNumber text," +
-                        $"name text," +
-                        $"version text," +
-                        $"software text," +
-                        $"totalPlayers text," +
-                        $"Server_Port text," +
-                        $"JMX_Port text," +
-                        $"RCON_Port text," +
-                        $"RMI_Port text," +
-                        $"rconPassword text," +
-                        $"serverUser text," +
-                        $"serverTempPsw text," +
-                        $"Process_ID text" +
-                        $")";
-                    using (SQLiteCommand command = new(query, connection))
-                    {
-                        command.ExecuteNonQuery();
-                        CodeLogger.ConsoleLog("Table created successfully.");
-                    }
-
-                    // Insert data
-                    string insertDefaultSQL = $"insert into {dbName} (worldNumber, name, version, software, totalPlayers, rconPassword, Process_ID) values('123456789', 'Minecraft SMP', '1.21', 'Vanilla', '20', '123456789123456789', NULL);";
-                    if (insertOneDefaultSQLVerificator)
-                    {
-                        using SQLiteCommand insertCommand = new(insertDefaultSQL, connection);
-                        insertCommand.ExecuteNonQuery();
-                        CodeLogger.ConsoleLog("Data inserted successfully.");
-                    }
-                }
-                catch (Exception ex)
+                if (insertOneDefaultSQLVerificator)
                 {
-                    CodeLogger.ConsoleLog($"Error: {ex.Message}");
+                    string insertDefaultSQL = $"INSERT INTO {dbName} ({ColumnWorldNumber}, {ColumnName}, {ColumnVersion}, {ColumnSoftware}, {ColumnTotalPlayers}, {ColumnRconPassword}, {ColumnProcessId}) " +
+                                            $"VALUES (@worldNumber, @name, @version, @software, @totalPlayers, @rconPassword, @processId);";
+                    using SQLiteCommand insertCommand = new(insertDefaultSQL, connection);
+                    insertCommand.Parameters.AddWithValue("@worldNumber", "123456789");
+                    insertCommand.Parameters.AddWithValue("@name", "Minecraft SMP");
+                    insertCommand.Parameters.AddWithValue("@version", "1.21");
+                    insertCommand.Parameters.AddWithValue("@software", "Vanilla");
+                    insertCommand.Parameters.AddWithValue("@totalPlayers", "20");
+                    insertCommand.Parameters.AddWithValue("@rconPassword", "123456789123456789");
+                    insertCommand.Parameters.AddWithValue("@processId", (object)DBNull.Value); // Or null if your DB allows it directly
+                    insertCommand.ExecuteNonQuery();
+                    CodeLogger.ConsoleLog("Default data inserted successfully.");
                 }
             }
-            CodeLogger.ConsoleLog("Database created with success!");
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error during database creation: {ex.Message}");
+            }
+            finally
+            {
+                connection?.Close();
+            }
+            CodeLogger.ConsoleLog("Database creation process completed.");
         }
 
         public static List<object[]> SpecificDataFunc(string sqlQuery)
@@ -74,30 +109,31 @@ namespace databaseChanger
 
             if (!File.Exists(dbPath))
             {
-                CodeLogger.ConsoleLog("Database file does not exist. Creating...");
+                CodeLogger.ConsoleLog("Database file does not exist. Creating default 'worlds' table...");
                 CreateDB("worlds");
             }
 
-            using (SQLiteConnection connection = new(connectionString))
+            using SQLiteConnection? connection = CreateConnection();
+            if (connection == null) return data; // Exit if connection failed
+
+            try
             {
-                try
+                using SQLiteCommand selectCommand = new(sqlQuery, connection);
+                using SQLiteDataReader reader = selectCommand.ExecuteReader();
+                while (reader.Read())
                 {
-                    connection.Open();
-
-                    using SQLiteCommand selectCommand = new(sqlQuery, connection);
-                    using SQLiteDataReader reader = selectCommand.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        object[] row = new object[reader.FieldCount];
-                        reader.GetValues(row);
-                        data.Add(row);
-                    }
+                    object[] row = new object[reader.FieldCount];
+                    reader.GetValues(row);
+                    data.Add(row);
                 }
-                catch (Exception ex)
-                {
-                    CodeLogger.ConsoleLog(ex.ToString());
-                }
-
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error executing specific query: {ex}");
+            }
+            finally
+            {
+                connection?.Close();
             }
             return data;
         }
@@ -108,37 +144,35 @@ namespace databaseChanger
 
             if (!File.Exists(dbPath))
             {
-                CodeLogger.ConsoleLog("Database file does not exist. Creating...");
+                CodeLogger.ConsoleLog("Database file does not exist. Creating default 'worlds' table...");
                 CreateDB("worlds");
             }
 
-            using (SQLiteConnection connection = new(connectionString))
+            using SQLiteConnection? connection = CreateConnection();
+            if (connection == null) return data; // Exit if connection failed
+
+            try
             {
-                try
+                string selectQuery = $"SELECT {(verificator ? "*" : $"{ColumnId}, {ColumnWorldNumber}, {ColumnName}, {ColumnVersion}, {ColumnSoftware}, {ColumnTotalPlayers}, {ColumnServerPort}, {ColumnJmxPort}, {ColumnRconPort}, {ColumnRmiPort}")} " +
+                                     $"FROM {TableName} WHERE {ColumnWorldNumber} = @worldNumber;";
+
+                using SQLiteCommand selectCommand = new(selectQuery, connection);
+                selectCommand.Parameters.AddWithValue("@worldNumber", worldNumber);
+                using SQLiteDataReader reader = selectCommand.ExecuteReader();
+                while (reader.Read())
                 {
-                    connection.Open();
-
-                    string selectQuery = $"SELECT id, worldNumber, name, version, software, totalPlayers, Server_Port, JMX_Port, RCON_Port, RMI_Port FROM worlds WHERE worldNumber = {worldNumber};";
-
-                    if (verificator)
-                    {
-                        selectQuery = $"SELECT * FROM worlds WHERE worldNumber = {worldNumber};";
-                    }
-
-                    using SQLiteCommand selectCommand = new(selectQuery, connection);
-                    using SQLiteDataReader reader = selectCommand.ExecuteReader();
-                    while (reader.Read())
-                    {
-                        object[] row = new object[reader.FieldCount];
-                        reader.GetValues(row);
-                        data.Add(row);
-                    }
+                    object[] row = new object[reader.FieldCount];
+                    reader.GetValues(row);
+                    data.Add(row);
                 }
-                catch (Exception ex)
-                {
-                    CodeLogger.ConsoleLog(ex.ToString());
-                }
-
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error retrieving world data: {ex}");
+            }
+            finally
+            {
+                connection?.Close();
             }
             return data;
         }
@@ -147,65 +181,67 @@ namespace databaseChanger
         {
             if (!File.Exists(dbPath))
             {
-                CodeLogger.ConsoleLog("Database file does not exist. Creating...");
+                CodeLogger.ConsoleLog("Database file does not exist. Creating default 'worlds' table...");
                 CreateDB("worlds");
             }
 
-            // Establish connection
-            using (SQLiteConnection connection = new(connectionString))
-            {
-                try
-                {
-                    // Open the connection
-                    connection.Open();
+            using SQLiteConnection? connection = CreateConnection();
+            if (connection == null) return; // Exit if connection failed
 
-                    // Create a command
-                    string query = $"insert into worlds (worldNumber, name, version, software, totalPlayers, Server_Port, JMX_Port, RCON_Port, RMI_Port, rconPassword) values('{worldNumber}', '{worldName}', '{version}', '{Software}', '{totalPlayers}', '{Server_Port}', '{JMX_Port}', '{RCON_Port}', '{RMI_Port}', '{rconPassword}');";
-                    // Insert Data
-                    using SQLiteCommand command = new(query, connection);
-                    command.ExecuteNonQuery();
-                }
-                catch (Exception ex)
-                {
-                    CodeLogger.ConsoleLog($"Error: {ex.Message}");
-                }
-                finally
-                {
-                    connection.Close();
-                }
+            try
+            {
+                string query = $"INSERT INTO {TableName} ({ColumnWorldNumber}, {ColumnName}, {ColumnVersion}, {ColumnSoftware}, {ColumnTotalPlayers}, {ColumnServerPort}, {ColumnJmxPort}, {ColumnRconPort}, {ColumnRmiPort}, {ColumnRconPassword}) " +
+                               $"VALUES (@worldNumber, @name, @version, @software, @totalPlayers, @serverPort, @jmxPort, @rconPort, @rmiPort, @rconPassword);";
+                using SQLiteCommand command = new(query, connection);
+                command.Parameters.AddWithValue("@worldNumber", worldNumber);
+                command.Parameters.AddWithValue("@name", worldName);
+                command.Parameters.AddWithValue("@version", version);
+                command.Parameters.AddWithValue("@software", Software);
+                command.Parameters.AddWithValue("@totalPlayers", totalPlayers);
+                command.Parameters.AddWithValue("@serverPort", Server_Port);
+                command.Parameters.AddWithValue("@jmxPort", JMX_Port);
+                command.Parameters.AddWithValue("@rconPort", RCON_Port);
+                command.Parameters.AddWithValue("@rmiPort", RMI_Port);
+                command.Parameters.AddWithValue("@rconPassword", rconPassword);
+                command.ExecuteNonQuery();
+                CodeLogger.ConsoleLog("Data set successfully to the database!");
             }
-            CodeLogger.ConsoleLog("Data set succeasfully to database!");
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error setting data in database: {ex.Message}");
+            }
+            finally
+            {
+                connection?.Close();
+            }
         }
 
         public static void DeleteWorldFromDB(string worldNumber)
         {
             if (!File.Exists(dbPath))
             {
-                CodeLogger.ConsoleLog("Database file does not exist. Creating...");
+                CodeLogger.ConsoleLog("Database file does not exist. Creating default 'worlds' table...");
                 CreateDB("worlds");
             }
 
-            // Establish connection
-            using SQLiteConnection connection = new(connectionString);
+            using SQLiteConnection? connection = CreateConnection();
+            if (connection == null) return; // Exit if connection failed
+
             try
             {
-                // Open the connection
-                connection.Open();
-
-                // Create a command
-                string query = $"DELETE FROM worlds WHERE worldNumber = '{worldNumber}';";
-                // Insert Data
+                string query = $"DELETE FROM {TableName} WHERE {ColumnWorldNumber} = @worldNumber;";
                 using SQLiteCommand command = new(query, connection);
+                command.Parameters.AddWithValue("@worldNumber", worldNumber);
                 command.ExecuteNonQuery();
                 CodeLogger.ConsoleLog("World deleted from DB!");
             }
             catch (Exception ex)
             {
-                CodeLogger.ConsoleLog($"Error: {ex.Message}");
+                CodeLogger.ConsoleLog($"Error deleting world from database: {ex.Message}");
             }
             finally
             {
-                connection.Close();
+                connection?.Close();
             }
         }
     }

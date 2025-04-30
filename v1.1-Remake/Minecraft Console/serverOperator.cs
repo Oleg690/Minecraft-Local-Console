@@ -1,6 +1,8 @@
 ﻿using CoreRCON;
 using databaseChanger;
 using Logger;
+using Minecraft_Console;
+using MinecraftServerStats;
 using NetworkConfig;
 using serverPropriertiesChanger;
 using System.Diagnostics;
@@ -10,8 +12,6 @@ using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
 using Updater;
-using Minecraft_Console;
-using MinecraftServerStats;
 
 namespace CreateServerFunc
 {
@@ -654,8 +654,10 @@ namespace CreateServerFunc
 
             CodeLogger.ConsoleLog($"Starting {software} Server!");
 
+            object[] serverData = dbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
+
             string? toRunJarFile = string.Empty;
-            string GetVersionedJarFile() => Path.Combine(serverPath, dbChanger.SpecificDataFunc($"SELECT version FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() + ".jar");
+            string GetVersionedJarFile() => Path.Combine(serverPath, serverData[0].ToString() + ".jar");
 
             void SetServerArguments(string arguments)
             {
@@ -710,6 +712,7 @@ namespace CreateServerFunc
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\" WHERE worldNumber = \"{worldNumber}\";");
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = \"{user}\" WHERE worldNumber = \"{worldNumber}\";");
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = \"{psw}\" WHERE worldNumber = \"{worldNumber}\";");
+                object[] userData = { user, psw };
 
                 CodeLogger.ConsoleLog("Minecraft server started!");
 
@@ -736,7 +739,7 @@ namespace CreateServerFunc
                             MainWindow.serverStatus = true;
                             while (MainWindow.serverRunning && viewModel != null)
                             {
-                                await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
+                                await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, serverData, userData, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
                             }
                         }
                     }
@@ -763,7 +766,7 @@ namespace CreateServerFunc
                             MainWindow.serverStatus = true;
                             while (MainWindow.serverRunning == true && viewModel != null)
                             {
-                                await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
+                                await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, serverData, userData, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
                             }
                         }
                     }

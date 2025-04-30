@@ -1,4 +1,6 @@
-﻿using CreateServerFunc;
+﻿using com.sun.corba.se.spi.ior;
+using com.sun.source.tree;
+using CreateServerFunc;
 using databaseChanger;
 using java.util;
 using javax.management;
@@ -25,7 +27,7 @@ namespace MinecraftServerStats
         private static readonly Color ON_ServerStatusColor = (Color)ColorConverter.ConvertFromString("#87FF2C");
         private static readonly Color OFF_ServerStatusColor = (Color)ColorConverter.ConvertFromString("#FF3535");
 
-        public static async Task GetServerInfo(ServerInfoViewModel viewModel, string worldFolderPath, string worldNumber, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
+        public static async Task GetServerInfo(ServerInfoViewModel viewModel, string worldFolderPath, string worldNumber, object[] serverData, object[] userData, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
         {
             if (MainWindow.serverRunning == true && (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port)))
             {
@@ -42,9 +44,8 @@ namespace MinecraftServerStats
                 stopwatch.Start();
 
                 // Get server user and password for JMX
-                var serverData = dbChanger.SpecificDataFunc($"SELECT serverUser, serverTempPsw FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
-                user = serverData[0].ToString() ?? string.Empty;
-                psw = serverData[1].ToString() ?? string.Empty;
+                user = userData[0].ToString() ?? string.Empty;
+                psw = userData[1].ToString() ?? string.Empty;
 
                 // Get memory usage
                 string memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw)[0];
@@ -61,9 +62,8 @@ namespace MinecraftServerStats
                 stopwatch.Restart();
 
                 // Get online players
-                var data = dbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = '{worldNumber}';")[0];
-                string version = (string)data[0];
-                string maxPlayers = (string)data[1];
+                string version = (string)serverData[0];
+                string maxPlayers = (string)serverData[1];
 
                 string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
                 long getOnlinePlayersCountTime = stopwatch.ElapsedMilliseconds;
@@ -486,13 +486,18 @@ namespace MinecraftServerStats
         {
             MainWindow.serverStatus = true;
 
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                mainWindow.ServerStatusTextBlock.Text = "Online";
-                mainWindow.ServerStatusCircle.Background = new SolidColorBrush(ON_ServerStatusColor);
-                CodeLogger.ConsoleLog("SetServerStatusOnline 1");
-            });
-            CodeLogger.ConsoleLog("SetServerStatusOnline 2");
+                Application.Current?.Dispatcher.Invoke(() =>
+                    {
+                        mainWindow.ServerStatusTextBlock.Text = "Online";
+                        mainWindow.ServerStatusCircle.Background = new SolidColorBrush(ON_ServerStatusColor);
+                    });
+            }
+            catch (Exception)
+            {
+                return;
+            }
         }
 
         public static void SetServerStatusOffline()
@@ -503,9 +508,7 @@ namespace MinecraftServerStats
             {
                 mainWindow.ServerStatusTextBlock.Text = "Offline";
                 mainWindow.ServerStatusCircle.Background = new SolidColorBrush(OFF_ServerStatusColor);
-                CodeLogger.ConsoleLog("SetServerStatusOffline 1");
             });
-            CodeLogger.ConsoleLog("SetServerStatusOffline 2");
         }
     }
 }

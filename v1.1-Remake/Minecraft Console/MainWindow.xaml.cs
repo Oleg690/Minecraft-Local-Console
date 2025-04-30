@@ -12,6 +12,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using Updater;
 using WpfAnimatedGif;
 
@@ -134,6 +135,27 @@ namespace Minecraft_Console
             LoadPage("Support Page");
         }
 
+        private void LoadPage(string pageName)
+        {
+            SetStatsToEmpty();
+
+            MainContent.Children.Clear();
+            MainContent.VerticalAlignment = VerticalAlignment.Stretch;
+            MainContent.Children.Add(new Label
+            {
+                Content = pageName,
+                Foreground = Brushes.White,
+                FontSize = 24,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                VerticalContentAlignment = VerticalAlignment.Center
+            });
+
+            MainContent.Visibility = Visibility.Visible;
+            HideAllServerInfoGrids(true);
+            CreateServerPage.Visibility = Visibility.Collapsed;
+        }
+
         private void SetSelectedButton(Button? button)
         {
             if (_selectedButton != null)
@@ -168,11 +190,11 @@ namespace Minecraft_Console
         // Paths setter func
         private static async void SetStaticPaths()
         {
-            rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) ?? string.Empty;
-            rootWorldsFolder = Path.Combine(rootFolder, "worlds") ?? string.Empty;
-            serverVersionsPath = Path.Combine(rootFolder, "versions") ?? string.Empty;
-            tempFolderPath = Path.Combine(rootFolder, "temp") ?? string.Empty;
-            defaultServerPropertiesPath = Path.Combine(rootFolder, "Preset Files\\server.properties") ?? string.Empty;
+            rootFolder = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) ?? string.Empty;
+            rootWorldsFolder = System.IO.Path.Combine(rootFolder, "worlds") ?? string.Empty;
+            serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions") ?? string.Empty;
+            tempFolderPath = System.IO.Path.Combine(rootFolder, "temp") ?? string.Empty;
+            defaultServerPropertiesPath = System.IO.Path.Combine(rootFolder, "Preset Files\\server.properties") ?? string.Empty;
             Server_PublicComputerIP = await NetworkSetup.GetPublicIP() ?? string.Empty;
             Server_LocalComputerIP = NetworkSetup.GetLocalIP() ?? string.Empty;
         }
@@ -186,7 +208,7 @@ namespace Minecraft_Console
                 return;
             }
 
-            var image = new BitmapImage(new Uri(Path.Combine(rootFolder, "assets\\loadingAnimations\\mining0.gif")));
+            var image = new BitmapImage(new Uri(System.IO.Path.Combine(rootFolder, "assets\\loadingAnimations\\mining0.gif")));
             ImageBehavior.SetAnimatedSource(gifImage, image);
         }
         private void UnloadGIF()
@@ -215,7 +237,7 @@ namespace Minecraft_Console
 
         public void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            string? TEMP_CurrentPath = Path.GetDirectoryName(CurrentPath);
+            string? TEMP_CurrentPath = System.IO.Path.GetDirectoryName(CurrentPath);
             if (TEMP_CurrentPath == null)
             {
                 MessageBox.Show("Current path is null.");
@@ -281,7 +303,7 @@ namespace Minecraft_Console
                 Width = 30,
                 Height = 30,
                 Margin = new Thickness(5, 0, 5, 0),
-                Source = new BitmapImage(new Uri(Path.Combine(rootFolder, $"assets\\icons\\folder_file\\{Type}.png")))
+                Source = new BitmapImage(new Uri(System.IO.Path.Combine(rootFolder, $"assets\\icons\\folder_file\\{Type}.png")))
             };
             Grid.SetColumn(image, 1);
             grid.Children.Add(image);
@@ -433,12 +455,10 @@ namespace Minecraft_Console
             }
         }
 
-        public static void AddTextEditorItem(ListView listView, string filePath)
+        public static void AddTextEditorItem(ListView listView, string filePath, string fileContent)
         {
             // Clear ListView
             listView.Items.Clear();
-
-            string fileContent = ServerFileExplorer.ReadFromFile(filePath);
 
             // Outer border styling
             Border border = new()
@@ -458,7 +478,7 @@ namespace Minecraft_Console
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
             // Extract file name from filePath
-            string fileName = Path.GetFileName(filePath);
+            string fileName = System.IO.Path.GetFileName(filePath);
 
             // Create TextBlock for file name
             TextBlock fileNameTextBlock = new()
@@ -609,7 +629,7 @@ namespace Minecraft_Console
                 return;
             }
 
-            string combinedPath = Path.Combine(CurrentPath, fileName);
+            string combinedPath = System.IO.Path.Combine(CurrentPath, fileName);
             LoadFiles(combinedPath);
         }
 
@@ -621,7 +641,7 @@ namespace Minecraft_Console
                 return;
             }
 
-            string combinedPath = Path.Combine(CurrentPath, fileName);
+            string combinedPath = System.IO.Path.Combine(CurrentPath, fileName);
 
             // Array of supported extensions
             string[] supportedExtensions = {
@@ -634,20 +654,27 @@ namespace Minecraft_Console
                 // Minecraft server files specific extensions
                 ".yml", ".json", ".properties", ".conf", ".txt", ".log", ".toml"
             };
-
             // Get the file extension
-            string fileExtension = Path.GetExtension(combinedPath).ToLower();
+            string fileExtension = System.IO.Path.GetExtension(combinedPath).ToLower();
+
+            CodeLogger.ConsoleLog($"fileExtension: {fileExtension}");
+            string? fileContent = ServerFileExplorer.ReadFromFile(combinedPath);
+            if (fileContent == null)
+            {
+                return;
+            }
 
             // Check if the extension is supported
             if (supportedExtensions.Contains(fileExtension))
             {
                 CurrentPath = combinedPath;
-                AddTextEditorItem(Files_Folders_ListView, combinedPath);
+                AddTextEditorItem(Files_Folders_ListView, combinedPath, fileContent);
                 DisplayPathComponents(pathContainer, CurrentPath);
             }
             else
             {
                 MessageBox.Show($"File type '{fileExtension}' is not supported.", "Unsupported File", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
         }
 
@@ -660,6 +687,7 @@ namespace Minecraft_Console
             {
                 string worldNumber = dataDB[i][0].ToString() ?? string.Empty;
                 string worldProcess = dataDB[i][1].ToString() ?? string.Empty;
+
 
                 if (dataDB[i][1] != DBNull.Value)
                 {
@@ -675,27 +703,20 @@ namespace Minecraft_Console
                         return;
                     }
 
-                    serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
+                    serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, worldNumber);
                     serverRunning = true;
                     serverStatus = true;
 
-                    List<object[]> serverData = dbChanger.SpecificDataFunc($"SELECT Server_Port, JMX_Port, RCON_Port, RMI_Port FROM worlds WHERE worldNumber = \"{worldNumber}\";");
+                    object[] serverData = dbChanger.SpecificDataFunc($"SELECT Server_Port, JMX_Port, RCON_Port, RMI_Port, version, totalPlayers, serverUser, serverTempPsw FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
 
-                    int Server_Port = 0;
-                    int JMX_Port = 0;
-                    int RCON_Port = 0;
-                    int RMI_Port = 0;
-
-                    foreach (object[] data in serverData)
-                    {
-                        Server_Port = Convert.ToInt32(data[0]);
-                        JMX_Port = Convert.ToInt32(data[1]);
-                        RCON_Port = Convert.ToInt32(data[2]);
-                        RMI_Port = Convert.ToInt32(data[3]);
-                    }
+                    int Server_Port = Convert.ToInt32(serverData[0]);
+                    int JMX_Port = Convert.ToInt32(serverData[1]);
+                    int RCON_Port = Convert.ToInt32(serverData[2]);
+                    int RMI_Port = Convert.ToInt32(serverData[3]);
+                    object[] serverRunData = { serverData[4], serverData[5] };
+                    object[] userData = { serverData[6], serverData[7] };
 
                     dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{worldProcess}\" WHERE worldNumber = \"{worldNumber}\";");
-
 
                     if (string.IsNullOrEmpty(Server_PublicComputerIP))
                     {
@@ -712,8 +733,7 @@ namespace Minecraft_Console
                     {
                         while (!cancellationTokenSource.Token.IsCancellationRequested && serverRunning && (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port)))
                         {
-                            CodeLogger.ConsoleLog("Correct: " + serverRunning);
-                            await ServerStats.GetServerInfo(_viewModel, serverDirectoryPath, worldNumber, Server_PublicComputerIP, JMX_Port, RCON_Port, Server_Port);
+                            await ServerStats.GetServerInfo(_viewModel, serverDirectoryPath, worldNumber, serverRunData, userData, Server_PublicComputerIP, JMX_Port, RCON_Port, Server_Port);
                         }
                     });
                     ServerStatsThread.Start();
@@ -742,10 +762,11 @@ namespace Minecraft_Console
                 HorizontalAlignment = HorizontalAlignment.Center
             };
 
+            int cornerRadius = 20;
             Thickness buttonMargin = new(25);
-            var worldsFromDb = dbChanger.SpecificDataFunc("SELECT worldNumber, name FROM worlds");
+            var worldsFromDb = dbChanger.SpecificDataFunc("SELECT worldNumber, name, version, totalPlayers, Process_ID FROM worlds");
             var existingDirs = Directory.Exists(rootWorldsFolder)
-                ? [.. Directory.GetDirectories(rootWorldsFolder).Select(Path.GetFileName)]
+                ? [.. Directory.GetDirectories(rootWorldsFolder).Select(System.IO.Path.GetFileName)]
                 : new HashSet<string>();
 
             double buttonWidth, buttonHeight;
@@ -757,15 +778,18 @@ namespace Minecraft_Console
 
                 string worldNumber = worldEntry[0]?.ToString() ?? "";
                 string worldName = worldEntry[1]?.ToString() ?? "Unnamed World";
+                string worldVersion = worldEntry[2]?.ToString() ?? "";
+                string worldTotalPlayers = worldEntry[3]?.ToString() ?? "";
+                string processID = worldEntry[4]?.ToString() ?? "";
 
                 if (string.IsNullOrWhiteSpace(worldNumber) || !existingDirs.Contains(worldNumber))
                     continue;
 
-                var button = CreateStyledButton(worldName, buttonMargin, () => OpenControlPanel(worldName, worldNumber), buttonWidth, buttonHeight);
+                var button = CreateStyledButton(cornerRadius, worldName, worldVersion, worldTotalPlayers, processID, buttonMargin, () => OpenControlPanel(worldName, worldNumber), buttonWidth, buttonHeight);
                 serverPanel.Children.Add(button);
             }
 
-            var createButton = CreateStyledButton("Create Server", buttonMargin, CreateServerButton_Click, buttonWidth, buttonHeight);
+            var createButton = CreateStyledCreateButton(buttonMargin, cornerRadius, CreateServerButton_Click, buttonWidth, buttonHeight);
             serverPanel.Children.Add(createButton);
 
             scrollViewer.Content = serverPanel;
@@ -779,64 +803,554 @@ namespace Minecraft_Console
             UpdateButtonSizes(serverPanel); // initial sizing
         }
 
-        private void UpdateButtonSizes(WrapPanel panel)
+        // Funcs for showing the created servers
+        private void UpdateButtonSizes(WrapPanel panel, double shrinkIntensity = 2.0)
         {
             double containerWidth = MainContent.ActualWidth;
-            double buttonMarginThickness = 2 * 25; // Left and Right margin
-            double minButtonWidth = 300; // Increased minimum width for a larger look
-            double aspectRatio = 662.5 / 326.0 * 1.5; // Adjusted aspect ratio to make them wider relative to height
+            double buttonMarginThickness = 50;
+            double minButtonWidth = 250;
+            double aspectRatio = 3.0;
 
             int numberOfButtons = panel.Children.Count;
             if (numberOfButtons == 0) return;
 
             double availableWidth = containerWidth - (panel.Margin.Left + panel.Margin.Right);
+            double totalMargin = numberOfButtons * buttonMarginThickness;
+            double baseButtonWidth = Math.Max(minButtonWidth, (availableWidth - totalMargin) / numberOfButtons);
+            double baseButtonHeight = baseButtonWidth / aspectRatio + 50;
+
+            // Scaling factors
+            double titleFontScale = 0.075;
+            double infoFontScale = 0.06;
+            double statusFontScale = 0.11;
+            double statusGridWidthScale = 0.25;
+            double statusGridHeightScale = 0.15;
+            double statusMarginScale = 0.05;
+            double statusInnerMarginScale = 0.1;
+            double plusSignWidthScale = 0.05;
+            double plusSignHeightScale = 0.05;
+            double circleSizeScale = 0.16;
+            double plusThicknessScale = 0.001;
+
+            // Max factors
+            double maxTitleFontSize = 40.0;
+            double maxFontSize = 25.0;
+            double maxSatusFontSize = 60.0;
+            double maxGridWidth = 130.0;
+            double maxPlusSize = 25.0;
+            double maxCircleSize = 70.0;
 
             foreach (Button btn in panel.Children)
             {
-                double totalMargin = numberOfButtons * buttonMarginThickness;
-                double calculatedButtonWidth = (availableWidth - totalMargin) / numberOfButtons;
-                calculatedButtonWidth = Math.Max(minButtonWidth, calculatedButtonWidth);
-
                 btn.MinWidth = minButtonWidth;
-                btn.Width = calculatedButtonWidth;
-                btn.Height = calculatedButtonWidth / aspectRatio + 50;
+                btn.Width = baseButtonWidth;
+                btn.Height = baseButtonHeight;
                 btn.HorizontalAlignment = HorizontalAlignment.Stretch;
+
+                double scaledHeight = btn.Height * shrinkIntensity;
+
+                if (btn.Content is not Grid grid) continue;
+
+                // Get references to the TextBlocks once per button
+                TextBlock? nameText = FindChildByName<TextBlock>(grid, "ServerNameVisualLabel", true);
+                TextBlock? versionText = FindChildByName<TextBlock>(grid, "ServerVersionVisualisationLabel", true);
+                TextBlock? playersText = FindChildByName<TextBlock>(grid, "ServerTotalPlayersVisualisationLabel", true);
+                Grid? statusGrid = FindChildByName<Grid>(grid, "GridForON_OFF_Status", true);
+                TextBlock? createServerTextBlock = FindChildByName<TextBlock>(grid, "CreateServerTextBlock", true);
+                Ellipse? createServerCircle = FindChildByName<Ellipse>(grid, "CreateServerCircle", true);
+                Rectangle? plusHorizontal = FindChildByName<Rectangle>(grid, "CreateServerPlusHorizontal", true);
+                Rectangle? plusVertical = FindChildByName<Rectangle>(grid, "CreateServerPlusVertical", true);
+
+                // Resize text elements
+                if (nameText != null)
+                {
+                    nameText.FontSize = Math.Min(maxTitleFontSize, scaledHeight * titleFontScale);
+                }
+
+                if (versionText != null)
+                {
+                    versionText.FontSize = Math.Min(maxFontSize, scaledHeight * infoFontScale);
+                }
+
+                if (playersText != null)
+                {
+                    playersText.FontSize = Math.Min(maxFontSize, scaledHeight * infoFontScale);
+                }
+
+                if (createServerTextBlock != null)
+                {
+                    createServerTextBlock.FontSize = Math.Min(maxTitleFontSize, scaledHeight * titleFontScale);
+                }
+
+                // Resize status grid and its content
+                if (statusGrid != null)
+                {
+                    double gridWidthCalculated = scaledHeight * statusGridWidthScale;
+                    double gridHeightCalculated = scaledHeight * statusGridHeightScale;
+
+                    double gridWidth = Math.Min(maxGridWidth, gridWidthCalculated);
+                    double gridHeight = gridWidth / (statusGridWidthScale / statusGridHeightScale); // Maintain aspect ratio
+
+                    double margin = scaledHeight * statusMarginScale;
+                    statusGrid.Width = gridWidth;
+                    statusGrid.Height = gridHeight;
+                    statusGrid.Margin = new Thickness(0, 0, margin, 0);
+
+                    if (statusGrid.Children.OfType<Border>().FirstOrDefault() is Border border)
+                    {
+                        border.Width = gridWidth;
+                        border.Height = gridHeight;
+
+                        if (border.Child is TextBlock statusText)
+                        {
+                            statusText.FontSize = Math.Min(maxSatusFontSize, scaledHeight * statusFontScale);
+                            double innerMarginValue = gridHeight * statusInnerMarginScale;
+                            statusText.Margin = new Thickness(0, innerMarginValue, 0, 0);
+                        }
+                    }
+                }
+
+                // Resize the Plus
+                if (createServerCircle != null)
+                {
+                    double circleSize = Math.Min(maxCircleSize, scaledHeight * circleSizeScale);
+                    createServerCircle.Width = circleSize;
+                    createServerCircle.Height = circleSize;
+                }
+
+                if (plusHorizontal != null)
+                {
+                    double plusWidth = Math.Min(maxPlusSize, scaledHeight * plusSignWidthScale);
+                    double plusHeight = Math.Max(2, scaledHeight * plusThicknessScale);
+                    plusHorizontal.Width = plusWidth;
+                    plusHorizontal.Height = plusHeight;
+                }
+
+                if (plusVertical != null)
+                {
+                    double plusWidth = Math.Max(2, scaledHeight * plusThicknessScale);
+                    double plusHeight = Math.Min(maxPlusSize, scaledHeight * plusSignHeightScale);
+                    plusVertical.Width = plusWidth;
+                    plusVertical.Height = plusHeight;
+                }
             }
         }
 
-        private static Button CreateStyledButton(string content, Thickness margin, System.Action onClick, double width, double height)
+        public static void ApplyButtonStyle(Button button, int cornerRadius)
+        {
+            // Create the Border element that will be used in the ControlTemplate
+            var borderFactory = new FrameworkElementFactory(typeof(Border))
+            {
+                Name = "border"
+            };
+            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(cornerRadius));
+            borderFactory.SetValue(Border.ClipToBoundsProperty, true);
+            borderFactory.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(BackgroundProperty));
+            borderFactory.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(BorderBrushProperty));
+            borderFactory.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(BorderThicknessProperty));
+
+            var contentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
+            contentPresenterFactory.SetValue(MarginProperty, new TemplateBindingExtension(PaddingProperty));
+            contentPresenterFactory.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+            contentPresenterFactory.SetValue(VerticalAlignmentProperty, VerticalAlignment.Stretch);
+
+            borderFactory.AppendChild(contentPresenterFactory);
+
+            // Create ControlTemplate with trigger for IsMouseOver
+            var template = new ControlTemplate(typeof(Button))
+            {
+                VisualTree = borderFactory
+            };
+
+            // Add trigger for mouse over
+            var trigger = new Trigger
+            {
+                Property = IsMouseOverProperty,
+                Value = true
+            };
+            trigger.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(47, 51, 61)), "border"));
+
+            template.Triggers.Add(trigger);
+
+            // Create the Style
+            var style = new Style(typeof(Button));
+            style.Setters.Add(new Setter(BackgroundProperty, new SolidColorBrush(Color.FromRgb(38, 42, 50))));
+            style.Setters.Add(new Setter(BorderThicknessProperty, new Thickness(0)));
+            style.Setters.Add(new Setter(ForegroundProperty, Brushes.White));
+            style.Setters.Add(new Setter(FontSizeProperty, 25.0));
+            style.Setters.Add(new Setter(TemplateProperty, template));
+
+            // Apply style to the button
+            button.Style = style;
+        }
+
+        private static Button CreateStyledCreateButton(Thickness margin, int cornerRadius, Action onClick, double width, double height)
         {
             var button = new Button
             {
-                Content = content,
-                Padding = new Thickness(10),
                 Background = (Brush?)new BrushConverter().ConvertFrom("#262A32") ?? Brushes.White,
                 Foreground = Brushes.White,
                 FontSize = 25,
                 Cursor = Cursors.Hand,
                 Margin = margin,
-                BorderBrush = Brushes.Transparent,
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
+                BorderThickness = new Thickness(0),
+                ClipToBounds = true,
                 Width = width,
                 Height = height,
                 MaxWidth = 500,   // Optional - safety limit
                 MaxHeight = 250,  // Optional - safety limit
-                Template = CreateRoundedButtonTemplate(20)
             };
+
+            ApplyButtonStyle(button, cornerRadius);
+            button.MouseEnter += (s, e) => ApplyHoverEffect(button, true);
+            button.MouseLeave += (s, e) => ApplyHoverEffect(button, false);
+
+            button.Content = CreateButtonInnerGrid();
 
             button.Click += (s, e) => onClick();
             return button;
         }
 
+        private static Button CreateStyledButton(int cornerRadius, string name, string version, string totalPlayers, string processID, Thickness margin, Action onClick, double width, double height)
+        {
+            var button = new Button
+            {
+                Background = (Brush?)new BrushConverter().ConvertFrom("#262A32") ?? Brushes.White,
+                Foreground = Brushes.White,
+                FontSize = 25,
+                Cursor = Cursors.Hand,
+                Margin = margin,
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                BorderThickness = new Thickness(0),
+                ClipToBounds = true,
+                Width = width,
+                Height = height,
+                MaxWidth = 500,   // Optional - safety limit
+                MaxHeight = 250,  // Optional - safety limit
+            };
+
+            ApplyButtonStyle(button, cornerRadius);
+            button.MouseEnter += (s, e) => ApplyHoverEffect(button, true);
+            button.MouseLeave += (s, e) => ApplyHoverEffect(button, false);
+
+            button.Content = ButtonInnerGrid(name, version, totalPlayers, processID);
+
+            button.Click += (s, e) => onClick();
+            return button;
+        }
+
+        public static Grid CreateButtonInnerGrid()
+        {
+            // Create the main Grid
+            Grid mainGrid = new();
+            mainGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1, GridUnitType.Star) });
+            mainGrid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(1, GridUnitType.Star) });
+
+            // Create the TextBlock for "Create Server"
+            TextBlock textBlock = new()
+            {
+                Name = "CreateServerTextBlock",
+                Text = "Create Server",
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(0, 0, 0, 5)
+            };
+            Grid.SetRow(textBlock, 0);
+            mainGrid.Children.Add(textBlock);
+
+            // Create the Grid for the circle and plus
+            Grid bottomGrid = new()
+            {
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Top
+            };
+            Grid.SetRow(bottomGrid, 1);
+            mainGrid.Children.Add(bottomGrid);
+
+            // Create the circle
+            Ellipse circle = new()
+            {
+                Name = "CreateServerCircle",
+                Width = 45,
+                Height = 45,
+                Fill = new SolidColorBrush(Color.FromRgb(217, 217, 217)) // #D9D9D9
+            };
+            bottomGrid.Children.Add(circle);
+
+            // Create the plus sign (as two rectangles)
+            Rectangle plusHorizontal = new()
+            {
+                Name = "CreateServerPlusHorizontal",
+                Width = 14,
+                Height = 2,
+                Fill = Brushes.Black,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            bottomGrid.Children.Add(plusHorizontal);
+
+            Rectangle plusVertical = new()
+            {
+                Name = "CreateServerPlusVertical",
+                Width = 2,
+                Height = 14,
+                Fill = Brushes.Black,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            bottomGrid.Children.Add(plusVertical);
+
+            return mainGrid;
+        }
+
+        private static Grid ButtonInnerGrid(string name, string version, string totalPlayers, string processID)
+        {
+            var mainGrid = new Grid();
+
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(0.8, GridUnitType.Star) });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+            // Top grid with image and label
+            var topGrid = new Grid();
+            Grid.SetRow(topGrid, 0);
+
+            var image = new Image
+            {
+                Stretch = Stretch.UniformToFill,
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Source = rootFolder != null
+                    ? new BitmapImage(new Uri(System.IO.Path.Combine(rootFolder, "assets\\Images\\serverBtnImage.png")))
+                    : throw new InvalidOperationException("Root folder is not set."),
+                Name = "IndividualServerImage"
+            };
+
+            void UpdateClip()
+            {
+                image.Clip = new RectangleGeometry
+                {
+                    RadiusX = 20,
+                    RadiusY = 20,
+                    Rect = new Rect(0, 0, image.ActualWidth, image.ActualHeight)
+                };
+            }
+
+            image.Loaded += (s, e) => UpdateClip();
+            image.SizeChanged += (s, e) => UpdateClip();
+
+            topGrid.Children.Add(image);
+
+            var topBorder = new Border
+            {
+                Margin = new Thickness(0, 0, 0, -2),
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Background = new BrushConverter().ConvertFrom("#262A32") as Brush,
+                CornerRadius = new CornerRadius(0, 25, 0, 0)
+            };
+
+            // Create hover style
+            var borderStyle = new Style(typeof(Border));
+            borderStyle.Setters.Add(new Setter(Border.BackgroundProperty, new BrushConverter().ConvertFrom("#262A32")));
+            borderStyle.Triggers.Add(new Trigger
+            {
+                Property = Border.IsMouseOverProperty,
+                Value = true,
+                Setters = {
+                    new Setter(Border.BackgroundProperty, new BrushConverter().ConvertFrom("#2F333D"))
+                }
+            });
+            topBorder.Style = borderStyle;
+
+            var serverNameText = new TextBlock
+            {
+                Name = "ServerNameVisualLabel",
+                Padding = new Thickness(10, 10, 15, 6),
+                FontFamily = new FontFamily(new Uri("pack://application:,,,/"), "./assets/Fonts/Itim/#Itim"),
+                Background = Brushes.Transparent,
+                Foreground = Brushes.White,
+                Text = name
+            };
+
+            topBorder.Child = serverNameText;
+            topGrid.Children.Add(topBorder);
+
+            mainGrid.Children.Add(topGrid);
+
+            // Bottom grid with version, players and ON/OFF status
+            var bottomGrid = new Grid();
+            Grid.SetRow(bottomGrid, 1);
+
+            bottomGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            bottomGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var leftInfoGrid = new Grid();
+            leftInfoGrid.RowDefinitions.Add(new RowDefinition());
+            leftInfoGrid.RowDefinitions.Add(new RowDefinition());
+
+            var versionText = new TextBlock
+            {
+                FontFamily = new FontFamily(new Uri("pack://application:,,,/"), "./assets/Fonts/Itim/#Itim"),
+                Name = "ServerVersionVisualisationLabel",
+                Margin = new Thickness(10, 0, 0, 15),
+                VerticalAlignment = VerticalAlignment.Bottom,
+                FontSize = 18,
+                Foreground = Brushes.White,
+                Text = $"Version: {version}"
+            };
+            Grid.SetRow(versionText, 0);
+
+            var playersText = new TextBlock
+            {
+                FontFamily = new FontFamily(new Uri("pack://application:,,,/"), "./assets/Fonts/Itim/#Itim"),
+                Name = "ServerTotalPlayersVisualisationLabel",
+                Margin = new Thickness(10, 0, 0, 15),
+                VerticalAlignment = VerticalAlignment.Top,
+                FontSize = 18,
+                Foreground = Brushes.White,
+                Text = $"Total Players: {totalPlayers}"
+            };
+            Grid.SetRow(playersText, 1);
+
+            leftInfoGrid.Children.Add(versionText);
+            leftInfoGrid.Children.Add(playersText);
+
+            Grid.SetColumn(leftInfoGrid, 0);
+            bottomGrid.Children.Add(leftInfoGrid);
+
+            var statusGrid = new Grid
+            {
+                Name = "GridForON_OFF_Status",
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Stretch,
+                Margin = new Thickness(0, 0, 30, 0) // Add a right margin of 30
+            };
+            Grid.SetColumn(statusGrid, 1);
+
+            string[] serverStatus = GetServerStatus(processID);
+
+            var statusBorder = new Border
+            {
+                Width = 100,
+                Height = 55,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Background = new BrushConverter().ConvertFrom("#3B414D") as Brush,
+                CornerRadius = new CornerRadius(5)
+            };
+
+            var statusText = new TextBlock
+            {
+                FontFamily = new FontFamily(new Uri("pack://application:,,,/"), "./assets/Fonts/Jomhuria/#Jomhuria"),
+                Margin = new Thickness(0, 7, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 50,
+                Foreground = new BrushConverter().ConvertFrom(serverStatus[1]) as Brush,
+                Text = serverStatus[0]
+            };
+
+            statusBorder.Child = statusText;
+            statusGrid.Children.Add(statusBorder);
+            bottomGrid.Children.Add(statusGrid);
+
+            mainGrid.Children.Add(bottomGrid);
+
+            return mainGrid;
+        }
+
+        private static void ApplyHoverEffect(Button button, bool isHovered)
+        {
+            if (button.Content is Grid mainGrid)
+            {
+                // Imaginea
+                var image = FindChild<Image>(mainGrid, "IndividualServerImage");
+                if (image != null)
+                {
+                    image.Opacity = isHovered ? 0.85 : 1.0;
+                }
+
+                // Borderul cu text
+                var nameBorder = FindChild<Border>(mainGrid, null, child =>
+                {
+                    return child is Border b && b.Child is TextBlock tb && tb.Name == "ServerNameVisualLabel";
+                });
+                if (nameBorder != null)
+                {
+                    nameBorder.Background = isHovered
+                        ? new SolidColorBrush(Color.FromRgb(47, 51, 61))  // #2F333D
+                        : new SolidColorBrush(Color.FromRgb(38, 42, 50)); // #262A32
+                }
+            }
+        }
+
+        private static T? FindChildByName<T>(DependencyObject parent, string name, bool searchInChildren = false) where T : FrameworkElement
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild && typedChild.Name == name)
+                    return typedChild;
+
+                var result = FindChildByName<T>(child, name);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        private static T? FindChild<T>(DependencyObject parent, string? name = null, Func<T, bool>? predicate = null) where T : DependencyObject
+        {
+            if (parent == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T tChild)
+                {
+                    if ((string.IsNullOrEmpty(name) || (tChild is FrameworkElement fe && fe.Name == name)) &&
+                        (predicate == null || predicate(tChild)))
+                        return tChild;
+                }
+
+                var result = FindChild<T>(child, name, predicate);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        private static string[] GetServerStatus(string processID)
+        {
+            if (string.IsNullOrWhiteSpace(processID) || !int.TryParse(processID, out int pid))
+                return ["OFF", "#FF5151"];
+
+            try
+            {
+                var process = Process.GetProcessById(pid);
+                if (!process.HasExited)
+                    return ["ON", "#62FF59"];
+            }
+            catch (Exception) { }
+
+            return ["OFF", "#FF5151"];
+        }
+
         private static (double width, double height) GetButtonDimensions(double containerWidth, int buttonCount)
         {
             double margin = 2 * 25; // Left + Right margin per button
-            double minButtonWidth = 300;
-            double maxButtonWidth = 600;
-            double maxButtonHeight = 350;
+            double minButtonWidth = 250;
+            double maxButtonWidth = 500;
+            double maxButtonHeight = 250;
 
-            double aspectRatio = 662.5 / 326.0 * 1.5;
+            double aspectRatio = 500 / 250 * 1.5;
 
             if (buttonCount <= 0) buttonCount = 1;
 
@@ -851,67 +1365,7 @@ namespace Minecraft_Console
             return (calculatedWidth, calculatedHeight);
         }
 
-        private static ControlTemplate CreateRoundedButtonTemplate(int radius)
-        {
-            var borderFactory = new FrameworkElementFactory(typeof(Border))
-            {
-                Name = "border"
-            };
-
-            borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(radius));
-            borderFactory.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(BackgroundProperty));
-            borderFactory.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(BorderBrushProperty));
-            borderFactory.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(BorderThicknessProperty));
-
-            var contentPresenterFactory = new FrameworkElementFactory(typeof(ContentPresenter));
-            contentPresenterFactory.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Center);
-            contentPresenterFactory.SetValue(VerticalAlignmentProperty, VerticalAlignment.Center);
-            contentPresenterFactory.SetValue(MarginProperty, new TemplateBindingExtension(PaddingProperty));
-            contentPresenterFactory.SetValue(ContentProperty, new TemplateBindingExtension(ContentProperty));
-            contentPresenterFactory.SetValue(ContentPresenter.ContentTemplateProperty, new TemplateBindingExtension(ContentTemplateProperty));
-
-            borderFactory.AppendChild(contentPresenterFactory);
-
-            var template = new ControlTemplate(typeof(Button))
-            {
-                VisualTree = borderFactory
-            };
-
-            var mouseOverTrigger = new Trigger
-            {
-                Property = IsMouseOverProperty,
-                Value = true
-            };
-            mouseOverTrigger.Setters.Add(new Setter(Border.BackgroundProperty,
-                new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2F333D")), "border"));
-
-            template.Triggers.Add(mouseOverTrigger);
-
-            return template;
-        }
-
-        // Loading other pages (temp)
-        private void LoadPage(string pageName)
-        {
-            SetStatsToEmpty();
-
-            MainContent.Children.Clear();
-            MainContent.VerticalAlignment = VerticalAlignment.Stretch;
-            MainContent.Children.Add(new Label
-            {
-                Content = pageName,
-                Foreground = Brushes.White,
-                FontSize = 24,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                VerticalContentAlignment = VerticalAlignment.Center
-            });
-
-            MainContent.Visibility = Visibility.Visible;
-            HideAllServerInfoGrids(true);
-            CreateServerPage.Visibility = Visibility.Collapsed;
-        }
-
+        // Open Control Panel Funcs
         private void OpenControlPanel(string serverName, string worldNumber)
         {
             selectedServer = serverName;
@@ -929,11 +1383,12 @@ namespace Minecraft_Console
                 return;
             }
 
-            serverDirectoryPath = Path.Combine(rootWorldsFolder, openWorldNumber);
+            serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, openWorldNumber);
 
             // Show control panel, hide server list
             MainContent.Visibility = Visibility.Collapsed;
             ServerDropBox.Visibility = Visibility.Visible;
+
 
             LoadFiles(serverDirectoryPath);
             SetStatsToEmpty(openWorldNumber);
@@ -1057,7 +1512,7 @@ namespace Minecraft_Console
                 return;
             }
 
-            serverDirectoryPath = Path.Combine(rootWorldsFolder, openWorldNumber);
+            serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, openWorldNumber);
 
             int memoryAlocator = 5000; // in MB
 
@@ -1145,7 +1600,7 @@ namespace Minecraft_Console
                 return;
             }
 
-            serverDirectoryPath = Path.Combine(rootWorldsFolder, openWorldNumber);
+            serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, openWorldNumber);
 
             int memoryAlocator = 5000; // in MB
 
@@ -1330,7 +1785,7 @@ namespace Minecraft_Console
                 return;
             }
 
-            serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
+            serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, worldNumber);
 
             string? maxPlayers = dbChanger.SpecificDataFunc($"SELECT totalPlayers FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0][0].ToString() ?? string.Empty;
             string WorldSize = ServerStats.GetFolderSize(serverDirectoryPath);
