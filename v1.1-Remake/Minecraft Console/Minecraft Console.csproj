@@ -41,7 +41,7 @@
 
   <ItemGroup>
     <Folder Include="database\" />
-    <Folder Include="Logs\" />
+    <Folder Include="logs\" />
     <Folder Include="versions\" />
     <Folder Include="temp\" />
     <Folder Include="worlds\" />
@@ -52,8 +52,12 @@
     <Resource Include="assets\Fonts\Istok Web\IstokWeb-BoldItalic.ttf" />
     <Resource Include="assets\Fonts\Istok Web\IstokWeb-Italic.ttf" />
     <Resource Include="assets\Fonts\Istok Web\IstokWeb-Regular.ttf" />
-    <Resource Include="assets\Fonts\Itim\Itim-Regular.ttf" />
-    <Resource Include="assets\Fonts\Jomhuria\Jomhuria-Regular.ttf" />
+    <Resource Include="assets\Fonts\Itim\Itim-Regular.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\Fonts\Jomhuria\Jomhuria-Regular.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="assets\icons\Logo\logo.ico" />
     <Resource Include="assets\icons\Logo\minehost.png" />
     <Resource Include="assets\Minecraft_Photo.png">

@@ -8797,11 +8797,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Minecraft-Server\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
+      "projectUniqueName": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
       "projectName": "Minecraft Console",
-      "projectPath": "D:\\Minecraft-Server\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
+      "projectPath": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
       "packagesPath": "C:\\Users\\crist\\.nuget\\packages\\",
-      "outputPath": "D:\\Minecraft-Server\\v1.1-Remake\\Minecraft Console\\obj\\",
+      "outputPath": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "D:\\Visual Studio Code for C\\Shares\\NuGetPackages"

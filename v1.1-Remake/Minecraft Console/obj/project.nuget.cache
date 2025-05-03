@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "O2lxMBTvtOY=",
+  "dgSpecHash": "w7GfG3VNSa4=",
   "success": true,
-  "projectFilePath": "D:\\Minecraft-Server\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
+  "projectFilePath": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\crist\\.nuget\\packages\\corercon\\5.4.2\\corercon.5.4.2.nupkg.sha512",
     "C:\\Users\\crist\\.nuget\\packages\\entityframework\\6.5.1\\entityframework.6.5.1.nupkg.sha512",

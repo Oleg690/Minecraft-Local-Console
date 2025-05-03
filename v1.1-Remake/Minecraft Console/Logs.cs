@@ -6,7 +6,7 @@ namespace Logger
     public static class CodeLogger
     {
         public static readonly string rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))) ?? string.Empty;
-        private static readonly string LogsPath = Path.Combine(rootFolder, "Logs");
+        private static readonly string LogsPath = Path.Combine(rootFolder, "logs");
         private static readonly Random rng = new(); // at top of class
 
         public static void CreateLogFile(int maxLogFiles = 10)
