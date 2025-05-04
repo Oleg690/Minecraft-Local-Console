@@ -674,7 +674,7 @@ namespace Updater
 
         // ------------------------ ↓ Main Updater Funcs ↓ ------------------------
 
-        public static async Task Update(string serverVersionsPath)
+        public static async Task<bool> Update(string serverVersionsPath)
         {
             CodeLogger.ConsoleLog("--------------------------------------------");
             CodeLogger.ConsoleLog("Starting versions updater for all softwares.");
@@ -703,9 +703,11 @@ namespace Updater
             CodeLogger.ConsoleLog("--------------------------");
             CodeLogger.ConsoleLog("All softwares are updated!");
             CodeLogger.ConsoleLog("--------------------------");
+
+            return true;
         }
 
-        public static async Task Update(string serverVersionsPath, string software)
+        public static async Task<bool> Update(string serverVersionsPath, string software)
         {
             CodeLogger.ConsoleLog("--------------------------------------------");
             CodeLogger.ConsoleLog($"Starting versions updater for {software}.");
@@ -724,9 +726,11 @@ namespace Updater
             CodeLogger.ConsoleLog("-------------------------");
             CodeLogger.ConsoleLog("All versions are updated!");
             CodeLogger.ConsoleLog("-------------------------");
+
+            return true;
         }
 
-        public static async Task Update(string serverVersionsPath, string software, string version)
+        public static async Task<bool> Update(string serverVersionsPath, string software, string version)
         {
             CodeLogger.ConsoleLog("--------------------------------------------");
             CodeLogger.ConsoleLog($"Starting versions updater for {software}.");
@@ -745,6 +749,8 @@ namespace Updater
             CodeLogger.ConsoleLog("-------------------------");
             CodeLogger.ConsoleLog("All versions are updated!");
             CodeLogger.ConsoleLog("-------------------------");
+
+            return true;
         }
 
         public static List<string> GetSupportedSoftwares()

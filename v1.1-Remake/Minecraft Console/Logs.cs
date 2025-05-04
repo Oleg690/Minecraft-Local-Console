@@ -65,6 +65,7 @@ namespace Logger
             File.Create(latestLogPath).Close();
             //Console.WriteLine("New log file created: latest.log");
         }
+
         public static void DeleteOldLogs(string LogsPath, int maxLogFiles)
         {
             var logFiles = Directory.GetFiles(LogsPath, "*.gz")

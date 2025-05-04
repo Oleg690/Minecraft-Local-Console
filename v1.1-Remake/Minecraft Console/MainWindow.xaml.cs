@@ -26,7 +26,7 @@ namespace Minecraft_Console
         {
             comboBox.PreviewMouseLeftButtonDown += (sender, e) =>
             {
-                if (!IsClickInsidePopupContent(comboBox, e))
+                if (!IsClickInsidePopupContent(e))
                 {
                     comboBox.IsDropDownOpen = !comboBox.IsDropDownOpen;
                     e.Handled = true;
@@ -34,7 +34,7 @@ namespace Minecraft_Console
             };
         }
 
-        private static bool IsClickInsidePopupContent(ComboBox comboBox, MouseButtonEventArgs e)
+        private static bool IsClickInsidePopupContent(MouseButtonEventArgs e)
         {
             var clickedElement = e.OriginalSource as DependencyObject;
 
@@ -431,7 +431,7 @@ namespace Minecraft_Console
                 int memoryAlocator = 5000;
 
                 // Utility for checkboxes
-                string GetCheckBoxValue(CheckBox cb, bool invert = false) =>
+                static string GetCheckBoxValue(CheckBox cb, bool invert = false) =>
                     (invert ? !(cb.IsChecked ?? false) : cb.IsChecked ?? false).ToString().ToLowerInvariant();
 
                 object[,] worldSettings =
@@ -462,7 +462,7 @@ namespace Minecraft_Console
                 LoadGIF();
                 LoadingScreen.Visibility = Visibility.Visible;
 
-                string creationStatus = await Task.Run(() =>
+                string[] creationStatus = await Task.Run(() =>
                     ServerCreator.CreateServerFunc(
                     rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath,
                     version, worldName, software, totalPlayers,
@@ -479,12 +479,23 @@ namespace Minecraft_Console
                 LoadServersPage();
                 serverRunning = false;
 
-                PopupWindow.CreateStatusPopup("Success", "Server created.", PopupHost); // TO DO
+                if (creationStatus[0] == "Error" && creationStatus.Length == 3)
+                {
+                    File.Delete(Path.Combine(rootWorldsFolder, creationStatus[2]));
+                }
+
+                PopupWindow.CreateStatusPopup(creationStatus[0], creationStatus[1], PopupHost); // TO DO
             }
             catch (Exception ex)
             {
+                if (rootFolder == null)
+                {
+                    MessageBox.Show("Root folder is not set.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
                 CodeLogger.ConsoleLog($"Error creating the world. Error: {ex}");
-                MessageBox.Show("An unexpected error occurred. Check logs for details.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"An unexpected error occurred. Check logs for details. Path: {Path.Combine(rootFolder, "logs\\latest.log")}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

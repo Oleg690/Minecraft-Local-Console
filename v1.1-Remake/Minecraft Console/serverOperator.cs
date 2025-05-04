@@ -1,9 +1,11 @@
-﻿using CoreRCON;
+﻿using com.sun.corba.se.spi.ior;
+using CoreRCON;
 using databaseChanger;
 using Logger;
 using Minecraft_Console;
 using MinecraftServerStats;
 using NetworkConfig;
+using org.w3c.dom;
 using serverPropriertiesChanger;
 using System.Diagnostics;
 using System.IO;
@@ -23,7 +25,7 @@ namespace CreateServerFunc
 
         private static readonly TimeSpan DelayTime = TimeSpan.FromHours(72);
 
-        public static async Task<string> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, string defaultServerPropertiesPath, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true)
+        public static async Task<string[]> CreateServerFunc(string rootFolder, string rootWorldsFolder, string tempFolderPath, string defaultServerPropertiesPath, string version, string worldName, string software, int totalPlayers, object[,] worldSettings, int ProcessMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, string? worldNumber = null, bool Server_Auto_Start = true, bool Insert_Into_DB = true)
         {
             MainWindow.SetLoadingBarProgress(5);
 
@@ -35,7 +37,9 @@ namespace CreateServerFunc
 
             // 🔧 Run version check and early abort if the file doesn't exist
             string softwarePath = Path.Combine(rootFolder, "versions", software);
-            await CheckVersions(rootFolder, software, version);
+            bool versionStatus = await CheckVersions(rootFolder, software, version);
+            if (!versionStatus)
+                return ServerOperator.LogError($"Encountered error while downloading version {version} for {software}!");
 
             // double check the file exists now
             string jarFileName = GetJarFilePath(rootFolder, software, version);
@@ -108,10 +112,12 @@ namespace CreateServerFunc
                 { "Quilt", $"-jar \"{jarPath}\" install server {version} --download-server" }
             };
 
+            object[] verificator = [];
+
             if (requiresInstallation.TryGetValue(software, out var arguments))
             {
                 processInfo.Arguments = arguments;
-                BasicServerInstaller(processInfo, software);
+                verificator = BasicServerInstaller(processInfo, software);
 
                 if (software == "Quilt")
                 {
@@ -120,14 +126,32 @@ namespace CreateServerFunc
                 }
             }
 
+            if (verificator.Length != 0)
+            {
+                if (!Convert.ToBoolean(verificator[0]))
+                {
+                    CodeLogger.ConsoleLog($"{verificator[1]}");
+                    return ["Error", $"{verificator[1]}"];
+                }
+            }
+
             // 🔁 Final server init
-            await BasicServerInitializator(
+            verificator = await BasicServerInitializator(
                 software, customDirectory, jarPath,
                 rconSettings, worldSettings, ProcessMemoryAlocation,
                 uniqueNumber, worldName, version, totalPlayers,
                 rconPassword, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port,
                 Insert_Into_DB
             );
+
+            if (verificator.Length != 0)
+            {
+                if (!Convert.ToBoolean(verificator[0]))
+                {
+                    CodeLogger.ConsoleLog($"{verificator[1]}");
+                    return ["Error", $"{verificator[1]}"];
+                }
+            }
 
             // 🧹 Clean up temp values
             dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{uniqueNumber}\";");
@@ -137,13 +161,12 @@ namespace CreateServerFunc
             CodeLogger.ConsoleLog("World Created Successfully");
             MainWindow.SetLoadingBarProgress(100);
 
-            return uniqueNumber;
-
+            return ["Success", "World created", $"{uniqueNumber}"];
         }
 
         // -------------------------------- Help Functions --------------------------------
 
-        private static void BasicServerInstaller(ProcessStartInfo processInfo, string software)
+        private static object[] BasicServerInstaller(ProcessStartInfo processInfo, string software)
         {
             try
             {
@@ -151,6 +174,7 @@ namespace CreateServerFunc
                 {
                     int currentProgress = 0;
                     int checksumCount = 0;
+                    bool installSuccess = false;
 
                     process.OutputDataReceived += (sender, e) =>
                     {
@@ -192,11 +216,12 @@ namespace CreateServerFunc
                                 MainWindow.SetLoadingBarProgress(35);
                                 CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Processing bundled files...");
                             }
-                            else if (e.Data.Contains("The server installed successfully") && currentProgress < 100)
+                            else if (e.Data.Contains("The server installed successfully"))
                             {
                                 currentProgress = 100;
                                 MainWindow.SetLoadingBarProgress(40);
                                 CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Installation complete!");
+                                installSuccess = true;
                             }
                         }
                         else
@@ -220,33 +245,59 @@ namespace CreateServerFunc
 
                     CodeLogger.ConsoleLog($"Minecraft {software} server installation is starting...");
                     process.WaitForExit();
-                }
 
-                CodeLogger.ConsoleLog("Installation completed!");
-                MainWindow.loadingScreenProcentage = 45;
+                    CodeLogger.ConsoleLog("Installation completed!");
+                    MainWindow.loadingScreenProcentage = 45;
+
+                    return [installSuccess, "Installation completed!"];
+                }
             }
             catch (Exception ex)
             {
                 CodeLogger.ConsoleLog($"Error: {ex.Message}");
+                return [false, ex.Message];
             }
         }
 
-        private static async Task BasicServerInitializator(string software, string customDirectory, string JarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Insert_Into_DB = false)
+        private static async Task<object[]> BasicServerInitializator(string software, string customDirectory, string JarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Insert_Into_DB = false)
         {
             try
             {
-                if (Insert_Into_DB) dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{software}", $"{version}", $"{totalPlayers}", $"{Server_Port}", $"{JMX_Port}", $"{RCON_Port}", $"{RMI_Port}", $"{rconPassword}");
+                if (Insert_Into_DB)
+                {
+                    dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{software}", $"{version}", $"{totalPlayers}", $"{Server_Port}", $"{JMX_Port}", $"{RCON_Port}", $"{RMI_Port}", $"{rconPassword}");
+                }
+
                 MainWindow.SetLoadingBarProgress(50);
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
+
+                object[] firstStartExitCode = await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
+                if (Convert.ToInt32(firstStartExitCode[0]) != 0)
+                {
+                    CodeLogger.ConsoleLog($"Server failed to start the first time. Exit code: {firstStartExitCode[0]}");
+                    return [false, firstStartExitCode[1]];
+                }
+
                 MainWindow.SetLoadingBarProgress(70);
+
                 AcceptEULA(JarPath);
+
                 MainWindow.SetLoadingBarProgress(75);
-                await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
+
+                object[] secondStartExitCode = await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
+                if (Convert.ToInt32(secondStartExitCode[0]) != 0)
+                {
+                    CodeLogger.ConsoleLog($"Server failed to start the second time. Exit code: {secondStartExitCode[0]}");
+                    return [false, secondStartExitCode[1]];
+                }
+
                 MainWindow.SetLoadingBarProgress(99);
+
+                return [true, "Success"]; // Success
             }
             catch (Exception ex)
             {
                 CodeLogger.ConsoleLog($"Error: {ex.Message}");
+                return [false, ex.Message]; // Failure
             }
         }
 
@@ -462,68 +513,88 @@ namespace CreateServerFunc
             return true; // Run if the timestamp is corrupted
         }
 
-        private static async Task CheckVersions(string rootFolder, string software, string version)
+        private static async Task<bool> CheckVersions(string rootFolder, string software, string version)
         {
-            //CodeLogger.ConsoleLog($"Software: '{software}'; Version: '{version}';");
-
-            string serverVersionsPath = Path.Combine(rootFolder, "versions");
-            string softwarePath = Path.Combine(serverVersionsPath, software);
-
-            // Ensure software folder exists
-            if (!Directory.Exists(softwarePath))
+            try
             {
-                Directory.CreateDirectory(softwarePath);
-            }
+                string serverVersionsPath = Path.Combine(rootFolder, "versions");
+                string softwarePath = Path.Combine(serverVersionsPath, software);
 
-            // Ensure the version is actually supported
-            if (!VersionsUpdater.CheckVersionExists(software, version) && software != "Fabric" && software != "Quilt")
-            {
-                CodeLogger.ConsoleLog($"Version '{version}' is not supported for software '{software}'. Aborting.");
-                return;
-            }
-
-            var localFiles = Directory.GetFiles(softwarePath, "*.jar");
-            bool exists = localFiles.Any(file => file.Contains(version));
-
-            if ((software == "Fabric" || software == "Quilt"))
-            {
-                if (ShouldRunNow() || localFiles.Length == 0)
+                // Ensure the software directory exists
+                if (!Directory.Exists(softwarePath))
                 {
-                    CodeLogger.ConsoleLog("Checking for updates (installer-based software)...");
+                    Directory.CreateDirectory(softwarePath);
+                }
 
-                    await VersionsUpdater.Update(serverVersionsPath, software);
+                // Verify version validity (except for Fabric or Quilt which are installer based)
+                if (!VersionsUpdater.CheckVersionExists(software, version) && software != "Fabric" && software != "Quilt")
+                {
+                    CodeLogger.ConsoleLog($"Version '{version}' is not supported for software '{software}'. Aborting.");
+                    return false;
+                }
 
-                    File.WriteAllText(UpdaterLastCheck ?? throw new Exception("Failed to write in the UpdaterLastCheck.txt file."), DateTime.UtcNow.ToString("o"));
+                var localFiles = Directory.GetFiles(softwarePath, "*.jar");
+                bool exists = localFiles.Any(file => file.Contains(version));
 
-                    localFiles = Directory.GetFiles(softwarePath, "*.jar");
-
-                    if (localFiles.Length == 0)
+                if (software == "Fabric" || software == "Quilt")
+                {
+                    if (ShouldRunNow() || localFiles.Length == 0)
                     {
-                        CodeLogger.ConsoleLog($"[ERROR] Installer for '{software}' could not be downloaded.");
-                        return;
+                        CodeLogger.ConsoleLog("Checking for updates (installer-based software)...");
+
+                        bool updated = await VersionsUpdater.Update(serverVersionsPath, software);
+                        if (!updated)
+                        {
+                            CodeLogger.ConsoleLog($"[ERROR] Failed to update installer for '{software}'.");
+                            return false;
+                        }
+
+                        if (string.IsNullOrEmpty(UpdaterLastCheck))
+                        {
+                            throw new Exception("UpdaterLastCheck file path is not defined.");
+                        }
+                        File.WriteAllText(UpdaterLastCheck, DateTime.UtcNow.ToString("o"));
+
+                        localFiles = Directory.GetFiles(softwarePath, "*.jar");
+                        if (localFiles.Length == 0)
+                        {
+                            CodeLogger.ConsoleLog($"[ERROR] Installer for '{software}' could not be downloaded.");
+                            return false;
+                        }
                     }
                 }
-            }
-            else
-            {
-                if (!exists)
+                else
                 {
-                    CodeLogger.ConsoleLog($"Version '{version}' not found locally. Attempting to download...");
-
-                    await VersionsUpdater.Update(serverVersionsPath, software, version);
-
-                    localFiles = Directory.GetFiles(softwarePath, "*.jar");
-                    exists = localFiles.Any(file => file.Contains(version));
-
                     if (!exists)
                     {
-                        CodeLogger.ConsoleLog($"[ERROR] Failed to download '{software}' version '{version}'. Aborting.");
-                        return;
+                        CodeLogger.ConsoleLog($"Version '{version}' not found locally. Attempting to download...");
+
+                        bool updated = await VersionsUpdater.Update(serverVersionsPath, software, version);
+                        if (!updated)
+                        {
+                            CodeLogger.ConsoleLog($"[ERROR] Failed to download '{software}' version '{version}'. Aborting.");
+                            return false;
+                        }
+
+                        localFiles = Directory.GetFiles(softwarePath, "*.jar");
+                        exists = localFiles.Any(file => file.Contains(version));
+
+                        if (!exists)
+                        {
+                            CodeLogger.ConsoleLog($"[ERROR] Downloaded '{software}' version '{version}' not found after update.");
+                            return false;
+                        }
                     }
                 }
-            }
 
-            CodeLogger.ConsoleLog($"'{software}' version '{version}' is ready.");
+                CodeLogger.ConsoleLog($"'{software}' version '{version}' is ready.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"[EXCEPTION] {ex.Message}");
+                return false;
+            }
         }
 
         private static async Task WaitForPortClosure(int rconPort, int jmxPort)
@@ -564,7 +635,7 @@ namespace CreateServerFunc
         private static ProcessStartInfo? serverProcessInfo = new();
 
         // ------------------------- Main Server Operator Commands -------------------------
-        public static async Task Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ServerInfoViewModel? viewModel = null)
+        public static async Task<object[]> Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ServerInfoViewModel? viewModel = null)
         {
             bool verificator = true;
 
@@ -574,7 +645,6 @@ namespace CreateServerFunc
                 {
                     CodeLogger.ConsoleLog(errorMessage);
                     verificator = false;
-                    return;
                 }
             }
 
@@ -584,16 +654,15 @@ namespace CreateServerFunc
                 {
                     CodeLogger.ConsoleLog(errorMessage);
                     verificator = false;
-                    return;
                 }
             }
 
             ValidateInput(worldNumber, "No worldNumber was supplied!");
             ValidateDirectory(serverPath, "No local server files were found!");
 
-            string? software = dbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';")[0][0].ToString() ?? String.Empty;
+            string? software = dbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';")[0][0]?.ToString() ?? string.Empty;
             ValidateInput(software, "No software was supplied!");
-            if (!verificator) return;
+            if (!verificator) return [-1, "No software was supplied!"];
 
             while (IsPortInUse(RCON_Port) || IsPortInUse(JMX_Port))
             {
@@ -606,7 +675,6 @@ namespace CreateServerFunc
                 await NetworkSetup.Setup(Server_Port, JMX_Port, RMI_Port);
             }
 
-            //           ↓ For debugging! ↓
             CodeLogger.ConsoleLog($"World Number: '{worldNumber}'");
             CodeLogger.ConsoleLog($"Software: '{software}'");
 
@@ -672,31 +740,43 @@ namespace CreateServerFunc
                 case "Purpur":
                 case "Paper":
                     toRunJarFile = GetVersionedJarFile();
+                    if (string.IsNullOrEmpty(toRunJarFile) || !File.Exists(toRunJarFile))
+                    {
+                        CodeLogger.ConsoleLog("Versioned JAR file not found for Vanilla-like server!");
+                        return [-1, "Versioned JAR file not found for Vanilla-like server!"];
+                    }
                     SetServerArguments($"{Server_Settings} -jar \"{toRunJarFile}\"");
                     break;
+
                 case "Forge":
                     string winArgsPath = FindFileInFolder(Path.Combine(serverPath, "libraries"), "win_args.txt");
                     if (!string.IsNullOrEmpty(winArgsPath)) winArgsPath = $"@\"{winArgsPath}\"";
 
-                    toRunJarFile = FindClosestJarFile(serverPath, "forge-");
-                    if (string.IsNullOrEmpty(toRunJarFile))
+                    toRunJarFile = FindClosestJarFile(serverPath, "forge-") ?? FindClosestJarFile(serverPath, "minecraft_server");
+                    if (string.IsNullOrEmpty(toRunJarFile) || !File.Exists(toRunJarFile))
                     {
-                        toRunJarFile = FindClosestJarFile(serverPath, "minecraft_server");
+                        CodeLogger.ConsoleLog("No Forge server JAR file found!");
+                        return [-1, "No Forge server JAR file found!"];
                     }
-                    if (string.IsNullOrEmpty(toRunJarFile)) CodeLogger.ConsoleLog("No server file found");
 
                     SetServerArguments($"{Server_Settings} {winArgsPath} {toRunJarFile}");
                     break;
+
                 case "Fabric":
                 case "Quilt":
                     toRunJarFile = FindClosestJarFile(serverPath, "server");
-                    if (string.IsNullOrEmpty(toRunJarFile)) CodeLogger.ConsoleLog("No server file found");
+                    if (string.IsNullOrEmpty(toRunJarFile) || !File.Exists(toRunJarFile))
+                    {
+                        CodeLogger.ConsoleLog("No Fabric/Quilt server JAR file found!");
+                        return [-1, "No Fabric/Quilt server JAR file found!"];
+                    }
 
                     SetServerArguments($"{Server_Settings} {toRunJarFile}");
                     break;
+
                 default:
                     CodeLogger.ConsoleLog($"Invalid software type!");
-                    return;
+                    return [-1, "Invalid software type!"];
             }
 
             serverProcessInfo.Arguments += noGUI ? " nogui" : "";
@@ -706,7 +786,7 @@ namespace CreateServerFunc
                 if (process == null)
                 {
                     CodeLogger.ConsoleLog("Failed to start the Minecraft server!");
-                    return;
+                    return [-1, "Failed to start the Minecraft server!"];
                 }
 
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\" WHERE worldNumber = \"{worldNumber}\";");
@@ -718,18 +798,17 @@ namespace CreateServerFunc
 
                 RecordServerStart();
 
-                //          ↓ For output traking ↓
                 process.OutputDataReceived += async (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
-                        Console.WriteLine($"{e.Data}"); // For debugging
+                        Console.WriteLine($"{e.Data}");
 
                         if (Auto_Stop && (e.Data.Contains("You need to agree to the EULA") || e.Data.Contains("Done")))
                         {
                             Kill(RCON_Port, JMX_Port);
                         }
-                        else if (Auto_Stop == true && e.Data.Contains("RCON running on"))
+                        else if (Auto_Stop && e.Data.Contains("RCON running on"))
                         {
                             Kill(RCON_Port, JMX_Port);
                         }
@@ -745,18 +824,17 @@ namespace CreateServerFunc
                     }
                 };
 
-                //     ↓ For error output traking ↓
                 process.ErrorDataReceived += async (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
-                        Console.WriteLine($"e: {e.Data}"); // For debugging
+                        Console.WriteLine($"e: {e.Data}");
 
                         if (Auto_Stop && (e.Data.Contains("You need to agree to the EULA") || e.Data.Contains("Done")))
                         {
                             Kill(RCON_Port, JMX_Port);
                         }
-                        else if (Auto_Stop == true && e.Data.Contains("RCON running on"))
+                        else if (Auto_Stop && e.Data.Contains("RCON running on"))
                         {
                             Kill(RCON_Port, JMX_Port);
                         }
@@ -764,7 +842,7 @@ namespace CreateServerFunc
                         {
                             MainWindow.serverRunning = true;
                             MainWindow.serverStatus = true;
-                            while (MainWindow.serverRunning == true && viewModel != null)
+                            while (MainWindow.serverRunning && viewModel != null)
                             {
                                 await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, serverData, userData, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
                             }
@@ -776,7 +854,13 @@ namespace CreateServerFunc
                 process.BeginErrorReadLine();
 
                 process.WaitForExit();
-                CodeLogger.ConsoleLog($"Process for the server has stopped with exit code: {process.ExitCode}");
+
+                string message = process.ExitCode != 0
+                    ? $"Server process exited with code: {process.ExitCode}"
+                    : "Server process exited successfully.";
+
+                CodeLogger.ConsoleLog(message);
+                return [0, message];
             }
         }
 
@@ -920,10 +1004,10 @@ namespace CreateServerFunc
             return true;
         }
 
-        public static string LogError(string message)
+        public static string[] LogError(string message)
         {
             CodeLogger.ConsoleLog(message);
-            return message;
+            return ["Error", message];
         }
 
         private static void BackupWorldFiles(string[,] worldFilesPaths, string tempFolderPath, string rootWorldFilesFolder, bool useSecondColumn)
