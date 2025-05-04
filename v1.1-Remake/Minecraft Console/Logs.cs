@@ -7,7 +7,7 @@ namespace Logger
     {
         public static readonly string rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Directory.GetCurrentDirectory()))) ?? string.Empty;
         private static readonly string LogsPath = Path.Combine(rootFolder, "logs");
-        private static readonly Random rng = new(); // at top of class
+        private static readonly Random rng = new();
 
         public static void CreateLogFile(int maxLogFiles = 10)
         {

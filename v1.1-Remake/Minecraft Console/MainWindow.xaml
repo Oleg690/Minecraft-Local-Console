@@ -28,6 +28,13 @@
     </Window.Resources>
 
     <Grid>
+        <!--  Popup WIndow  -->
+        <Grid
+            x:Name="PopupHost"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Panel.ZIndex="1000" />
+
         <!--  Loading Animation  -->
         <Grid
             x:Name="LoadingScreen"

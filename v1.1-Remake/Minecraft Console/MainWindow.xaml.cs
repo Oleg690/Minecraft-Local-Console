@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Updater;
 using WpfAnimatedGif;
+using PopupCreator;
 
 namespace Minecraft_Console
 {
@@ -103,7 +104,7 @@ namespace Minecraft_Console
         private static string? serverDirectoryPath;
         private static string? selectedServer = "";
         private static string? openWorldNumber;
-
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -347,11 +348,11 @@ namespace Minecraft_Console
                 if (string.IsNullOrWhiteSpace(worldNumber) || !existingDirs.Contains(worldNumber))
                     continue;
 
-                var button = ServerCards.CreateStyledButton(cornerRadius, worldName, worldVersion, worldTotalPlayers, processID, buttonMargin, () => OpenControlPanel(worldName, worldNumber));
+                var button = ServerCard.CreateStyledButton(cornerRadius, worldName, worldVersion, worldTotalPlayers, processID, buttonMargin, () => OpenControlPanel(worldName, worldNumber));
                 serverPanel.Children.Add(button);
             }
 
-            var createButton = ServerCards.CreateStyledCreateButton(buttonMargin, cornerRadius, CreateServerButton_Click);
+            var createButton = ServerCard.CreateStyledCreateButton(buttonMargin, cornerRadius, CreateServerButton_Click);
             serverPanel.Children.Add(createButton);
 
             scrollViewer.Content = serverPanel;
@@ -361,8 +362,8 @@ namespace Minecraft_Console
             MainContent.Visibility = Visibility.Visible;
             CreateServerPage.Visibility = Visibility.Collapsed;
 
-            SizeChanged += (s, e) => ServerCards.UpdateButtonSizes(serverPanel, MainContent.ActualWidth); // handle resize
-            ServerCards.UpdateButtonSizes(serverPanel, MainContent.ActualWidth); // initial sizing
+            SizeChanged += (s, e) => ServerCard.UpdateButtonSizes(serverPanel, MainContent.ActualWidth); // handle resize
+            ServerCard.UpdateButtonSizes(serverPanel, MainContent.ActualWidth); // initial sizing
         }
 
         // Open Control Panel Funcs
@@ -461,7 +462,7 @@ namespace Minecraft_Console
                 LoadGIF();
                 LoadingScreen.Visibility = Visibility.Visible;
 
-                string creationResult = await Task.Run(() =>
+                string creationStatus = await Task.Run(() =>
                     ServerCreator.CreateServerFunc(
                     rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath,
                     version, worldName, software, totalPlayers,
@@ -469,20 +470,16 @@ namespace Minecraft_Console
                     localIP, Server_Port, JMX_Port, RCON_Port, RMI_Port
                     )
                 );
-
+                
                 SetLoadingBarProgress(100);
                 await Task.Delay(500);
                 LoadingScreen.Visibility = Visibility.Collapsed;
                 UnloadGIF();
 
-                if (string.IsNullOrWhiteSpace(creationResult) || creationResult.StartsWith("Error", StringComparison.OrdinalIgnoreCase))
-                {
-                    MessageBox.Show($"Failed to create server:\n{creationResult}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
                 LoadServersPage();
                 serverRunning = false;
+
+                PopupWindow.CreateStatusPopup("Success", "Server created.", PopupHost); // TO DO
             }
             catch (Exception ex)
             {

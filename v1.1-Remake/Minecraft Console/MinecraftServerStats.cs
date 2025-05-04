@@ -1,7 +1,4 @@
-﻿using com.sun.corba.se.spi.ior;
-using com.sun.source.tree;
-using CreateServerFunc;
-using databaseChanger;
+﻿using CreateServerFunc;
 using java.util;
 using javax.management;
 using javax.management.openmbean;
@@ -380,28 +377,24 @@ namespace MinecraftServerStats
 
         private static byte[] CreateHandshakePacket(string serverAddress, int serverPort, int protocolVersion)
         {
-            using (MemoryStream ms = new MemoryStream())
-            {
-                // Write Packet ID (0x00) as VarInt.
-                WriteVarInt(ms, 0x00);
-                // Write protocol version as VarInt.
-                WriteVarInt(ms, protocolVersion);
-                // Write server address (as a string with its length).
-                WriteString(ms, serverAddress);
-                // Write server port (unsigned short, big endian).
-                ms.WriteByte((byte)(serverPort >> 8));
-                ms.WriteByte((byte)(serverPort & 0xFF));
-                // Write next state (1 for status).
-                WriteVarInt(ms, 1);
-                byte[] packetData = ms.ToArray();
+            using MemoryStream ms = new();
+            // Write Packet ID (0x00) as VarInt.
+            WriteVarInt(ms, 0x00);
+            // Write protocol version as VarInt.
+            WriteVarInt(ms, protocolVersion);
+            // Write server address (as a string with its length).
+            WriteString(ms, serverAddress);
+            // Write server port (unsigned short, big endian).
+            ms.WriteByte((byte)(serverPort >> 8));
+            ms.WriteByte((byte)(serverPort & 0xFF));
+            // Write next state (1 for status).
+            WriteVarInt(ms, 1);
+            byte[] packetData = ms.ToArray();
 
-                using (MemoryStream finalMs = new MemoryStream())
-                {
-                    WriteVarInt(finalMs, packetData.Length);
-                    finalMs.Write(packetData, 0, packetData.Length);
-                    return finalMs.ToArray();
-                }
-            }
+            using MemoryStream finalMs = new();
+            WriteVarInt(finalMs, packetData.Length);
+            finalMs.Write(packetData, 0, packetData.Length);
+            return finalMs.ToArray();
         }
 
         private static void WriteVarInt(Stream stream, int value)

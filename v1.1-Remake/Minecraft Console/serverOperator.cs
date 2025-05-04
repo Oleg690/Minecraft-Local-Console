@@ -65,11 +65,11 @@ namespace CreateServerFunc
 
             object[,] rconSettings =
             {
-        { "enable-rcon", "true" },
-        { "rcon.password", $"{rconPassword}" },
-        { "rcon.port", $"{RCON_Port}" },
-        { "enable-query", "true" },
-    };
+                { "enable-rcon", "true" },
+                { "rcon.password", $"{rconPassword}" },
+                { "rcon.port", $"{RCON_Port}" },
+                { "enable-query", "true" },
+            };
 
             CodeLogger.ConsoleLog($"Setting world settings...");
 

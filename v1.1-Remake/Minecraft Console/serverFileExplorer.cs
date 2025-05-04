@@ -1,6 +1,5 @@
 ﻿using Logger;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace FileExplorer
@@ -91,32 +90,6 @@ namespace FileExplorer
 
             return result;
         }
-
-        //public static string? ReadFromFile(string path)
-        //{
-        //    if (!File.Exists(path))
-        //    {
-        //        return null;
-        //    }
-
-        //    try
-        //    {
-        //        using FileStream fs = new(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-        //        using StreamReader sr = new(fs);
-        //        return sr.ReadToEnd();
-        //    }
-        //    catch (IOException ex)
-        //    {
-        //        CodeLogger.ConsoleLog($"File '{path}' is likely being used by another process: {ex.Message}");
-        //        MessageBox.Show($"File '{path}' is currently in use and cannot be read.", "File In Use", MessageBoxButton.OK, MessageBoxImage.Warning);
-        //        return null;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show($"Error reading file '{path}':\n{ex.Message}", "Read Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-        //        return null;
-        //    }
-        //}
 
         public static string? ReadFromFile(string path)
         {

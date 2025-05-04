@@ -42,8 +42,8 @@
   <ItemGroup>
     <Folder Include="database\" />
     <Folder Include="logs\" />
-    <Folder Include="versions\" />
     <Folder Include="temp\" />
+    <Folder Include="versions\" />
     <Folder Include="worlds\" />
   </ItemGroup>
 
