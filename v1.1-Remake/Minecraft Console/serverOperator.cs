@@ -1,11 +1,7 @@
-﻿using com.sun.corba.se.spi.ior;
-using CoreRCON;
-using databaseChanger;
+﻿using CoreRCON;
 using Logger;
 using Minecraft_Console;
-using MinecraftServerStats;
 using NetworkConfig;
-using org.w3c.dom;
 using serverPropriertiesChanger;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Windows;
 using Updater;
 
 namespace CreateServerFunc
@@ -635,7 +632,7 @@ namespace CreateServerFunc
         private static ProcessStartInfo? serverProcessInfo = new();
 
         // ------------------------- Main Server Operator Commands -------------------------
-        public static async Task<object[]> Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ServerInfoViewModel? viewModel = null)
+        public static async Task<object[]> Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ServerInfoViewModel? viewModel = null, Action<string>? onServerRunning = null)
         {
             bool verificator = true;
 
@@ -792,13 +789,13 @@ namespace CreateServerFunc
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\" WHERE worldNumber = \"{worldNumber}\";");
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = \"{user}\" WHERE worldNumber = \"{worldNumber}\";");
                 dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = \"{psw}\" WHERE worldNumber = \"{worldNumber}\";");
-                object[] userData = { user, psw };
+                object[] userData = [user, psw];
 
                 CodeLogger.ConsoleLog("Minecraft server started!");
 
                 RecordServerStart();
 
-                process.OutputDataReceived += async (sender, e) =>
+                process.OutputDataReceived += (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
@@ -814,17 +811,13 @@ namespace CreateServerFunc
                         }
                         else if (e.Data.Contains("RCON running on"))
                         {
+                            onServerRunning?.Invoke(worldNumber);
                             MainWindow.serverRunning = true;
-                            MainWindow.serverStatus = true;
-                            while (MainWindow.serverRunning && viewModel != null)
-                            {
-                                await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, serverData, userData, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
-                            }
                         }
                     }
                 };
 
-                process.ErrorDataReceived += async (sender, e) =>
+                process.ErrorDataReceived += (sender, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Data))
                     {
@@ -840,12 +833,8 @@ namespace CreateServerFunc
                         }
                         else if (e.Data.Contains("RCON running on"))
                         {
+                            onServerRunning?.Invoke(worldNumber);
                             MainWindow.serverRunning = true;
-                            MainWindow.serverStatus = true;
-                            while (MainWindow.serverRunning && viewModel != null)
-                            {
-                                await ServerStats.GetServerInfo(viewModel, serverPath, worldNumber, serverData, userData, ipAddress, JMX_Port, RCON_Port, Server_Port, user, psw);
-                            }
                         }
                     }
                 };
@@ -864,13 +853,15 @@ namespace CreateServerFunc
             }
         }
 
-        public static async Task Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, int JMX_Port, string time = "00:00")
+        public static async Task Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, string time = "00:00")
         {
             if (string.IsNullOrEmpty(worldNumber))
             {
                 CodeLogger.ConsoleLog("No worldNumber was supplied!");
                 return;
             }
+
+            MainWindow.serverRunning = false;
 
             await Countdown(time, operation, worldNumber, RCON_Port, ipAddress);
 

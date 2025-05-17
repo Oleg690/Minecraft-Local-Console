@@ -19,24 +19,10 @@ namespace MinecraftServerStats
     [SupportedOSPlatform("windows")]
     class ServerStats
     {
-        private static readonly MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-
-        private static readonly Color ON_ServerStatusColor = (Color)ColorConverter.ConvertFromString("#87FF2C");
-        private static readonly Color OFF_ServerStatusColor = (Color)ColorConverter.ConvertFromString("#FF3535");
-
         public static async Task GetServerInfo(ServerInfoViewModel viewModel, string worldFolderPath, string worldNumber, object[] serverData, object[] userData, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
         {
-            if (MainWindow.serverRunning == true && (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port)))
+            if (MainWindow.serverRunning == true)
             {
-                if (MainWindow.serverStatus == true)
-                {
-                    SetServerStatusOnline();
-                }
-                else
-                {
-                    SetServerStatusOffline();
-                }
-
                 Stopwatch stopwatch = new();
                 stopwatch.Start();
 
@@ -47,14 +33,14 @@ namespace MinecraftServerStats
                 // Get memory usage
                 string memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw)[0];
                 long getUsedHeapMemoryTime = stopwatch.ElapsedMilliseconds;
-                string[] memoryData = { memoryUsage, getUsedHeapMemoryTime.ToString() };
+                string[] memoryData = [memoryUsage, getUsedHeapMemoryTime.ToString()];
                 viewModel.MemoryUsage = memoryData[0];
                 stopwatch.Restart();
 
                 // Get world folder size
                 string worldSize = GetFolderSize(worldFolderPath);
                 long getFolderSizeTime = stopwatch.ElapsedMilliseconds;
-                string[] worldData = { worldSize, getFolderSizeTime.ToString() };
+                string[] worldData = [worldSize, getFolderSizeTime.ToString()];
                 viewModel.WorldSize = worldData[0];
                 stopwatch.Restart();
 
@@ -64,23 +50,25 @@ namespace MinecraftServerStats
 
                 string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
                 long getOnlinePlayersCountTime = stopwatch.ElapsedMilliseconds;
-                string[] playersData = { playersResult, getOnlinePlayersCountTime.ToString() };
+                string[] playersData = [playersResult, getOnlinePlayersCountTime.ToString()];
                 viewModel.PlayersOnline = $"{playersData[0]} / {maxPlayers}";
                 stopwatch.Restart();
 
                 // Get server uptime
                 string upTime = GetServerUptime(worldFolderPath);
                 long getServerUpTime = stopwatch.ElapsedMilliseconds;
-                string[] uptimeData = { upTime, getServerUpTime.ToString() };
+                string[] uptimeData = [upTime, getServerUpTime.ToString()];
                 viewModel.UpTime = uptimeData[0];
                 stopwatch.Restart();
 
                 // Get console output
                 string consoleOutput = GetConsoleOutput(worldFolderPath);
                 long consoleOutputTime = stopwatch.ElapsedMilliseconds;
-                string[] consoleOutputData = { consoleOutput, consoleOutputTime.ToString() };
+                string[] consoleOutputData = [consoleOutput, consoleOutputTime.ToString()];
                 viewModel.Console = consoleOutputData[0];
                 stopwatch.Restart();
+
+                CodeLogger.ConsoleLog($"Updating VM for {worldNumber}: {viewModel.MemoryUsage}");
 
                 // Get elapsed time
                 long totalElapsedTime = getUsedHeapMemoryTime + getFolderSizeTime + getOnlinePlayersCountTime + getServerUpTime + consoleOutputTime;
@@ -473,35 +461,6 @@ namespace MinecraftServerStats
                 // Default fallback
                 return 754;
             }
-        }
-
-        public static void SetServerStatusOnline()
-        {
-            MainWindow.serverStatus = true;
-
-            try
-            {
-                Application.Current?.Dispatcher.Invoke(() =>
-                    {
-                        mainWindow.ServerStatusTextBlock.Text = "Online";
-                        mainWindow.ServerStatusCircle.Background = new SolidColorBrush(ON_ServerStatusColor);
-                    });
-            }
-            catch (Exception)
-            {
-                return;
-            }
-        }
-
-        public static void SetServerStatusOffline()
-        {
-            MainWindow.serverStatus = false;
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                mainWindow.ServerStatusTextBlock.Text = "Offline";
-                mainWindow.ServerStatusCircle.Background = new SolidColorBrush(OFF_ServerStatusColor);
-            });
         }
     }
 }

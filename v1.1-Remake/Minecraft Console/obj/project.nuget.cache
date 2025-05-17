@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "w7GfG3VNSa4=",
+  "dgSpecHash": "JojtAYulYMc=",
   "success": true,
   "projectFilePath": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
   "expectedPackageFiles": [
@@ -76,8 +76,10 @@
     {
       "code": "NU1701",
       "level": "Warning",
-      "warningLevel": 1,
       "message": "Package 'Open.NAT 2.1.0' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net8.0-windows7.0'. This package may not be fully compatible with your project.",
+      "projectPath": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
+      "warningLevel": 1,
+      "filePath": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\Minecraft Console.csproj",
       "libraryId": "Open.NAT",
       "targetGraphs": [
         "net8.0-windows7.0"

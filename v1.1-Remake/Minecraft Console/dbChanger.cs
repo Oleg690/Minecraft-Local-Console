@@ -2,8 +2,7 @@
 using System.Data.SQLite;
 using System.IO;
 
-namespace databaseChanger
-{
+namespace Minecraft_Console { 
     class dbChanger
     {
         private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
@@ -87,7 +86,7 @@ namespace databaseChanger
                     insertCommand.Parameters.AddWithValue("@software", "Vanilla");
                     insertCommand.Parameters.AddWithValue("@totalPlayers", "20");
                     insertCommand.Parameters.AddWithValue("@rconPassword", "123456789123456789");
-                    insertCommand.Parameters.AddWithValue("@processId", (object)DBNull.Value); // Or null if your DB allows it directly
+                    insertCommand.Parameters.AddWithValue("@processId", DBNull.Value); // Or null if your DB allows it directly
                     insertCommand.ExecuteNonQuery();
                     CodeLogger.ConsoleLog("Default data inserted successfully.");
                 }

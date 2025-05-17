@@ -1,181 +1,69 @@
-﻿using FileExplorer;
-using Logger;
-using Minecraft_Console;
+﻿using Logger;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Xml;
 
-namespace FileExplorerCardsCreator
+namespace Minecraft_Console.UI
 {
     public class FileExplorerCards : Window
     {
-        private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
-        private static readonly string? rootFolder = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory)));
+        private static readonly Color NormalItemColor = Color.FromRgb(38, 42, 50);
+        private static readonly Color HoverItemColor = Color.FromRgb(50, 55, 65);
 
-        public static void LoadFiles(string path, ListView Files_Folders_ListView, StackPanel pathContainer)
+        //private List<string> GetSelectedItems()
+        //{
+        //    var selectedItems = new List<string>();
+
+        //    // Get the parent container that holds all items
+        //    var container = FindVisualParent<Grid>(ExplorerParent);
+        //    if (container == null) return selectedItems;
+
+        //    // Find all borders with checked checkboxes
+        //    foreach (var child in container.Children)
+        //    {
+        //        if (child is Border border &&
+        //            FindVisualChild<CheckBox>(border) is CheckBox checkBox &&
+        //            checkBox.IsChecked == true &&
+        //            border.Tag is string itemName)
+        //        {
+        //            selectedItems.Add(itemName);
+        //        }
+        //    }
+
+        //    return selectedItems;
+        //}
+
+        public static void LoadFiles(string path, Grid grid, StackPanel panel)
         {
             if (path[^1] == '\\') path = path[..^1];
 
             if (MainWindow.CurrentPath == path) return;
 
             MainWindow.CurrentPath = path;
-            List<string[]> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(MainWindow.CurrentPath);
-            AddToListView(Files_Folders, Files_Folders_ListView, pathContainer);
+            List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(MainWindow.CurrentPath);
+            CreateExplorerItems(grid, Files_Folders, panel);
 
-            DisplayPathComponents(MainWindow.CurrentPath, Files_Folders_ListView, pathContainer);
+            DisplayPathComponents(MainWindow.CurrentPath, grid, panel);
         }
 
-        public static Grid CreateGrid(int id, string Name, string Type)
-        {
-            if (string.IsNullOrEmpty(rootFolder))
-            {
-                MessageBox.Show("Root folder is not set.");
-                return new Grid(); // Return an empty grid
-            }
-
-            // Create Grid
-            Grid grid = new()
-            {
-                Name = $"Element_{id}",
-                Height = 30,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                Background = Brushes.Transparent
-            };
-
-            // Define Columns
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            // Create CheckBox
-            CheckBox checkBox = new()
-            {
-                Margin = new Thickness(5),
-                VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                Width = 16,
-                Height = 16,
-                LayoutTransform = new ScaleTransform(1.5, 1.5),
-                RenderTransformOrigin = new Point(0.5, 0.5),
-                Background = Brushes.White,
-                BorderBrush = Brushes.Transparent,
-            };
-
-            Grid.SetColumn(checkBox, 0);
-            grid.Children.Add(checkBox);
-
-            // Create Image
-            Image image = new()
-            {
-                Width = 30,
-                Height = 30,
-                Margin = new Thickness(5, 0, 5, 0),
-                Source = new BitmapImage(new Uri(System.IO.Path.Combine(rootFolder, $"assets\\icons\\folder_file\\{Type}.png")))
-            };
-            Grid.SetColumn(image, 1);
-            grid.Children.Add(image);
-
-            // Create Button (Library)
-            TextBlock itemOpenButton = new()
-            {
-                Padding = new Thickness(5, 0, 5, 0),
-                VerticalAlignment = VerticalAlignment.Top,
-                Background = Brushes.Transparent,
-                Text = Name,
-                FontSize = 25,
-                Foreground = Brushes.White
-            };
-            Grid.SetColumn(itemOpenButton, 2);
-            grid.Children.Add(itemOpenButton);
-
-            // Create Button (...)
-            Button optionsButton = new()
-            {
-                Margin = new Thickness(5, 0, 5, 0),
-                Padding = new Thickness(5, 0, 5, 0),
-                Width = 40,
-                Background = Brushes.Transparent,
-                Foreground = Brushes.White,
-                HorizontalAlignment = HorizontalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-                BorderThickness = new Thickness(2),
-                BorderBrush = Brushes.White,
-            };
-
-            // Create a Viewbox to contain the content
-            Viewbox viewBox = new()
-            {
-                Stretch = Stretch.Uniform, // Maintain aspect ratio
-                StretchDirection = StretchDirection.DownOnly, // Only scale down
-                VerticalAlignment = VerticalAlignment.Center, // Center vertically
-                HorizontalAlignment = HorizontalAlignment.Center, // Center horizontally
-
-                Child = new TextBlock
-                {
-                    Text = "...",
-                    FontSize = 25,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                }
-            };
-
-            optionsButton.Content = viewBox; // Set the Viewbox as the button's content
-
-            Grid.SetColumn(optionsButton, 3);
-            grid.Children.Add(optionsButton);
-
-            return grid;
-        }
-
-        public static void AddToListView(List<string[]> Files_Folders, ListView Files_Folders_ListView, StackPanel pathContainer)
-        {
-            Files_Folders_ListView.Items.Clear();
-
-            if (Files_Folders.Count > 0)
-            {
-                for (int i = 0; i < Files_Folders.Count; i++)
-                {
-                    string fileType = Files_Folders[i][0];
-                    string fileName = Files_Folders[i][1];
-
-                    ListViewItem item = new()
-                    {
-                        HorizontalContentAlignment = HorizontalAlignment.Stretch,
-                        Margin = new Thickness(0, 0, 0, 5),
-                    };
-
-                    Border border = new()
-                    {
-                        CornerRadius = new CornerRadius(10),
-                        Padding = new Thickness(10, 10, 10, 10),
-                        Child = CreateGrid(i + 1, fileName, fileType),
-                        Background = new BrushConverter().ConvertFromString("#262A32") as SolidColorBrush,
-                    };
-
-                    item.Content = border;
-
-                    if (fileType == "file")
-                    {
-                        item.MouseDoubleClick += (sender, e) => OpenFile(fileName, Files_Folders_ListView, pathContainer);
-                    }
-                    else if (fileType == "folder")
-                    {
-                        item.MouseDoubleClick += (sender, e) => OpenFolder(fileName, Files_Folders_ListView, pathContainer);
-                    }
-
-                    Files_Folders_ListView.Items.Add(item);
-                }
-            }
-        }
-
-        public static void DisplayPathComponents(string fullPath, ListView Files_Folders_ListView, StackPanel panel)
+        public static void DisplayPathComponents(string fullPath, Grid grid, StackPanel panel)
         {
             panel.Children.Clear(); // clear previous buttons
             List<string[][]> components = ServerFileExplorer.GetStructuredPathComponents(fullPath);
+
+            panel.Children.Add(new TextBlock
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = 25,
+                FontWeight = FontWeights.Bold,
+                Foreground = new SolidColorBrush(Color.FromRgb(124, 124, 124)),
+                Text = "/",
+                RenderTransform = new TranslateTransform(0, -2)
+            });
 
             for (int i = 0; i < components.Count; i++)
             {
@@ -184,20 +72,13 @@ namespace FileExplorerCardsCreator
 
                 var btn = new Button
                 {
-                    Content = folderName,
-                    Tag = fullDirPath,
-                    Margin = new Thickness(0),
-                    FontSize = 16,
-                    FontWeight = FontWeights.SemiBold,
                     Background = Brushes.Transparent,
-                    Foreground = Brushes.Gray,
                     BorderBrush = Brushes.Transparent,
                     BorderThickness = new Thickness(0),
                     Cursor = Cursors.Hand,
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    MinWidth = 0,
-                    Template = (ControlTemplate)panel.FindResource("PathButtonTemplate")
+                    Content = folderName,
+                    Tag = fullDirPath,
+                    Template = (ControlTemplate)panel.FindResource("PathButtonTemplate"),
                 };
 
                 btn.Click += (s, e) =>
@@ -205,7 +86,7 @@ namespace FileExplorerCardsCreator
                     string? pathToLoad = ((Button)s).Tag?.ToString();
                     if (pathToLoad != null)
                     {
-                        LoadFiles(pathToLoad, Files_Folders_ListView, panel);
+                        LoadFiles(pathToLoad, grid, panel);
                     }
                 };
 
@@ -215,183 +96,386 @@ namespace FileExplorerCardsCreator
                 {
                     panel.Children.Add(new TextBlock
                     {
-                        Text = "\\",
-                        FontSize = 16,
-                        Foreground = Brushes.White,
-                        FontWeight = FontWeights.Bold,
                         VerticalAlignment = VerticalAlignment.Center,
+                        FontSize = 25,
+                        FontWeight = FontWeights.Bold,
+                        Foreground = new SolidColorBrush(Color.FromRgb(124, 124, 124)),
+                        Text = "/",
+                        RenderTransform = new TranslateTransform(0, -2)
                     });
                 }
             }
         }
 
-        public static void AddTextEditorItem(ListView listView, string filePath, string fileContent)
+        public static void CreateExplorerItems(Grid parentGrid, List<List<string>> items, StackPanel panel)
         {
-            // Clear ListView
-            listView.Items.Clear();
+            // Clear existing children except the first row (assuming it's headers)
+            parentGrid.Children.Clear();
+            parentGrid.RowDefinitions.Clear();
 
-            // Outer border styling
-            Border border = new()
+            for (int i = 0; i < items.Count; i++)
             {
-                Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#222428")),
-                BorderThickness = new Thickness(1),
-                BorderBrush = Brushes.Gray,
-                CornerRadius = new CornerRadius(10),
-                Margin = new Thickness(10, 10, 10, 10),
-                Padding = new Thickness(10),
-                VerticalAlignment = VerticalAlignment.Stretch,
-                Height = double.NaN
-            };
+                var item = items[i];
+                if (item.Count < 2) continue; // Skip invalid entries
 
-            Grid grid = new();
-            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+                string itemName = item[0];
+                string itemType = item[1].ToLower();
+                string path = item[2];
 
-            // Extract file name from filePath
-            string fileName = System.IO.Path.GetFileName(filePath);
+                // Add row definition for the new item
+                parentGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            // Create TextBlock for file name
-            TextBlock fileNameTextBlock = new()
-            {
-                Text = fileName,
-                FontSize = 22, // Adjust as needed
-                Foreground = Brushes.White,
-                FontWeight = FontWeights.Bold,
-                VerticalAlignment = VerticalAlignment.Center,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Margin = new Thickness(0, 0, 10, 10) // Add some margin
-            };
-
-            Button saveButton = new()
-            {
-                Content = "Save",
-                FontSize = 14,
-                Padding = new Thickness(10, 5, 10, 5),
-                HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Top,
-                Background = new SolidColorBrush(Color.FromRgb(0x3a, 0x8f, 0xf1)),
-                Foreground = Brushes.White,
-                BorderBrush = Brushes.Transparent,
-                Margin = new Thickness(0, 0, 0, 10),
-                Cursor = Cursors.Hand
-            };
-
-            TextBox textBox = new()
-            {
-                Text = fileContent,
-                AcceptsReturn = true,
-                TextWrapping = TextWrapping.Wrap,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto, // Enable TextBox scrollbars
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-                Background = new SolidColorBrush(Color.FromRgb(0x33, 0x33, 0x33)),
-                Foreground = Brushes.White,
-                BorderBrush = Brushes.Transparent,
-                FontSize = 14,
-                Padding = new Thickness(10),
-                Margin = new Thickness(0, 0, 0, 0)
-            };
-
-            saveButton.Click += (s, e) =>
-            {
-                try
+                // Create the border container
+                Border explorerItem = new()
                 {
-                    ServerFileExplorer.WriteToFile(filePath, textBox.Text);
-                    MessageBox.Show("Saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
+                    Name = $"itemName",
+                    Background = new SolidColorBrush(Color.FromRgb(38, 42, 50)),
+                    CornerRadius = new CornerRadius(10),
+                    Height = 50,
+                    Cursor = Cursors.Hand,
+                    Margin = new Thickness(5),
+                    Tag = path
+                };
+
+                // Set event handlers
+                explorerItem.MouseEnter += ItemHoverOn;
+                explorerItem.MouseLeave += ItemHoverOff;
+
+                if (itemType == "file")
                 {
-                    MessageBox.Show($"Error saving file:\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    explorerItem.MouseLeftButtonDown += (sender, e) => OpenFile(itemName, parentGrid, panel);
                 }
-            };
-
-            // Add fileNameTextBlock to the grid
-            grid.Children.Add(fileNameTextBlock);
-            Grid.SetRow(fileNameTextBlock, 0);
-            Grid.SetColumn(fileNameTextBlock, 0);
-
-            // Add saveButton to the grid
-            grid.Children.Add(saveButton);
-            Grid.SetRow(saveButton, 0);
-            Grid.SetColumn(saveButton, 1); // Place it in the second column (adjust if needed)
-            Grid.SetColumnSpan(saveButton, 1); // Ensure it only spans one column
-
-            // Add textBox to the grid
-            grid.Children.Add(textBox);
-            Grid.SetRow(textBox, 1);
-            Grid.SetColumn(textBox, 0);
-            Grid.SetColumnSpan(textBox, 2); // Make it span both columns
-
-            // Define column definitions to arrange the elements
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) }); // Allow the file name to take remaining space
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto }); // Allow the button to take its natural size
-
-            border.Child = grid;
-
-            ScrollViewer scrollViewer = new()
-            {
-                Content = border,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Disabled, // Disable ScrollViewer scroll
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-                HorizontalContentAlignment = HorizontalAlignment.Stretch,
-                VerticalContentAlignment = VerticalAlignment.Stretch,
-                Margin = new Thickness(0)
-            };
-
-            ListViewItem listItem = new()
-            {
-                Content = scrollViewer,
-                BorderThickness = new Thickness(0),
-                Padding = new Thickness(0),
-                HorizontalContentAlignment = HorizontalAlignment.Stretch,
-                VerticalContentAlignment = VerticalAlignment.Stretch,
-                VerticalAlignment = VerticalAlignment.Stretch,
-            };
-
-            Style style = new(typeof(ListViewItem), (Style)listView.FindResource(typeof(ListViewItem)));
-
-            style.Setters.Add(new Setter(BackgroundProperty, Brushes.Transparent));
-            style.Setters.Add(new Setter(FocusVisualStyleProperty, null));
-            style.Setters.Add(new Setter(TemplateProperty, CreateListViewItemTemplate()));
-
-            scrollViewer.SetValue(VerticalAlignmentProperty, VerticalAlignment.Stretch);
-            scrollViewer.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
-
-            listItem.Style = style;
-
-            listItem.MaxHeight = listView.ActualHeight;
-
-            listView.Items.Add(listItem);
-
-            listView.VerticalContentAlignment = VerticalAlignment.Stretch;
-            listView.VerticalAlignment = VerticalAlignment.Stretch;
-
-            listView.SizeChanged += (s, e) =>
-            {
-                foreach (ListViewItem item in listView.Items)
+                else if (itemType == "folder")
                 {
-                    item.MaxHeight = listView.ActualHeight;
+                    explorerItem.MouseLeftButtonDown += (sender, e) => OpenFolder(itemName, parentGrid, panel);
                 }
-            };
+
+                // Set position in grid
+                Grid.SetRow(explorerItem, i);
+                Grid.SetColumnSpan(explorerItem, 1);
+
+                string ExplorerItemGrid =
+                $@"<Grid xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width='Auto'/>
+                        <ColumnDefinition Width='Auto'/>
+                        <ColumnDefinition Width='*'/>
+                        <ColumnDefinition Width='Auto'/>
+                    </Grid.ColumnDefinitions>
+                
+                    <CheckBox Grid.Column='0' Margin='10' VerticalAlignment='Center' Cursor='Hand'>
+                        <CheckBox.LayoutTransform>
+                            <ScaleTransform ScaleX='1.5' ScaleY='1.5'/>
+                        </CheckBox.LayoutTransform>
+                        <CheckBox.Template>
+                            <ControlTemplate TargetType='{{x:Type CheckBox}}'>
+                                <StackPanel>
+                                    <Border x:Name='Border' Width='20' Height='20' Background='Transparent' BorderBrush='White' BorderThickness='2' CornerRadius='2'>
+                                        <Path x:Name='CheckMark' Data='M 0 6 L 4 10 L 12 2' Stretch='Uniform' Stroke='White' StrokeThickness='2.2' Visibility='Collapsed'/>
+                                    </Border>
+                                    <ContentPresenter Margin='5,0,0,0' HorizontalAlignment='Left' VerticalAlignment='Center'/>
+                                </StackPanel>
+                
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property='IsChecked' Value='True'>
+                                        <Setter TargetName='CheckMark' Property='Visibility' Value='Visible'/>
+                                    </Trigger>
+                
+                                    <Trigger Property='IsMouseOver' Value='True'>
+                                        <Trigger.EnterActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimation Storyboard.TargetName='Border' Storyboard.TargetProperty='BorderBrush.Color' To='#D0D0D0' Duration='0:0:0.2'/>
+                                                    <ColorAnimation Storyboard.TargetName='CheckMark' Storyboard.TargetProperty='Stroke.Color' To='#D0D0D0' Duration='0:0:0.2'/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.EnterActions>
+                
+                                        <Trigger.ExitActions>
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <ColorAnimation Storyboard.TargetName='Border' Storyboard.TargetProperty='BorderBrush.Color' To='White' Duration='0:0:0.2'/>
+                                                    <ColorAnimation Storyboard.TargetName='CheckMark' Storyboard.TargetProperty='Stroke.Color' To='White' Duration='0:0:0.2'/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </Trigger.ExitActions>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </CheckBox.Template>
+                    </CheckBox>
+                
+                    <Image Grid.Column='1' Width='30' Height='30' Margin='5' VerticalAlignment='Center' Source='pack://application:,,,/assets/icons/folder_file/{itemType}.png'/>
+                
+                    <TextBlock x:Name='ItemNameTextBlock' Grid.Column='2' Margin='5,4,10,0' VerticalAlignment='Center' FontSize='25' Foreground='White' Text='{itemName}'/>
+                
+                    <ComboBox x:Name='FilesDropdown'
+                              Grid.Column='3'
+                              Width='40'
+                              Margin='10'
+                              Background='Transparent'
+                              BorderThickness='0'
+                              Cursor='Hand'
+                              FontSize='14'
+                              Foreground='White'
+                              IsEditable='False'
+                              ScrollViewer.HorizontalScrollBarVisibility='Auto'
+                              ScrollViewer.VerticalScrollBarVisibility='Auto'>
+                
+                        <ComboBox.Resources>
+                            <Style TargetType='ComboBoxItem'>
+                                <Setter Property='Background' Value='#FF333333'/>
+                                <Setter Property='Foreground' Value='White'/>
+                                <Setter Property='BorderThickness' Value='0'/>
+                                <Setter Property='Template'>
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType='ComboBoxItem'>
+                                            <Border x:Name='Bd' Padding='8,4' Background='{{TemplateBinding Background}}' BorderBrush='{{TemplateBinding BorderBrush}}' BorderThickness='{{TemplateBinding BorderThickness}}' CornerRadius='4'>
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property='IsHighlighted' Value='true'>
+                                                    <Setter TargetName='Bd' Property='Background' Value='#FF555555'/>
+                                                </Trigger>
+                                                <Trigger Property='IsMouseOver' Value='true'>
+                                                    <Setter TargetName='Bd' Property='Background' Value='#FF444444'/>
+                                                    <Setter TargetName='Bd' Property='CornerRadius' Value='4'/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ComboBox.Resources>
+                
+                        <ComboBox.Template>
+                            <ControlTemplate TargetType='ComboBox'>
+                                <Grid>
+                                    <ToggleButton x:Name='ToggleButton'
+                                                  HorizontalAlignment='Stretch'
+                                                  Background='Transparent'
+                                                  BorderBrush='White'
+                                                  BorderThickness='3'
+                                                  ClickMode='Press'
+                                                  Focusable='false'
+                                                  IsChecked='{{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={{RelativeSource TemplatedParent}}}}'>
+                                        <ToggleButton.Template>
+                                            <ControlTemplate TargetType='ToggleButton'>
+                                                <Border x:Name='Border'
+                                                        Background='{{TemplateBinding Background}}'
+                                                        BorderBrush='{{TemplateBinding BorderBrush}}'
+                                                        BorderThickness='{{TemplateBinding BorderThickness}}'
+                                                        CornerRadius='5'>
+                                                    <ContentPresenter HorizontalAlignment='Center' VerticalAlignment='Center'/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property='IsMouseOver' Value='True'>
+                                                        <Setter TargetName='Border' Property='Background' Value='#1AFFFFFF'/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </ToggleButton.Template>
+                                        <TextBlock Margin='0,-12,0,0'
+                                                   HorizontalAlignment='Center'
+                                                   VerticalAlignment='Center'
+                                                   FontFamily='Sans Serif Collection'
+                                                   FontSize='30'
+                                                   Foreground='White'
+                                                   Text='...'
+                                                   TextAlignment='Center'/>
+                                    </ToggleButton>
+                                    <Popup x:Name='Popup'
+                                           AllowsTransparency='True'
+                                           Focusable='False'
+                                           IsOpen='{{TemplateBinding IsDropDownOpen}}'
+                                           Placement='Bottom'
+                                           PopupAnimation='Slide'>
+                                        <Border MinWidth='{{Binding ActualWidth, RelativeSource={{RelativeSource TemplatedParent}}}}'
+                                                Background='#FF333333'
+                                                BorderBrush='#FF555555'
+                                                BorderThickness='1'
+                                                CornerRadius='4'>
+                                            <ScrollViewer>
+                                                <ItemsPresenter/>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Popup>
+                                </Grid>
+                            </ControlTemplate>
+                        </ComboBox.Template>
+                
+                        <ComboBox.Style>
+                            <Style TargetType='ComboBox'>
+                                <Setter Property='OverridesDefaultStyle' Value='True'/>
+                            </Style>
+                        </ComboBox.Style>
+                
+                        <ComboBoxItem Content='Rename'
+                                      Cursor='Hand'
+                                      FontFamily='pack://application:,,,/assets/Fonts/Istok Web/#Istok Web'
+                                      FontSize='18'/>
+                        <ComboBoxItem Content='Move'
+                                      Cursor='Hand'
+                                      FontFamily='pack://application:,,,/assets/Fonts/Istok Web/#Istok Web'
+                                      FontSize='18'/>
+                        <ComboBoxItem Content='Delete'
+                                      Cursor='Hand'
+                                      FontFamily='pack://application:,,,/assets/Fonts/Istok Web/#Istok Web'
+                                      FontSize='18'/>
+                    </ComboBox>
+                </Grid>";
+
+                var stringReader = new StringReader(ExplorerItemGrid);
+                var xmlReader = XmlReader.Create(stringReader);
+                var element = (UIElement)XamlReader.Load(xmlReader);
+
+                if (element is Grid grid)
+                {
+                    var comboBox = grid.Children.OfType<ComboBox>().FirstOrDefault(cb => cb.Name == "FilesDropdown");
+
+                    if (comboBox != null)
+                    {
+                        comboBox.SelectionChanged += FilesDropdown_SelectionChanged;
+                    }
+                }
+
+                explorerItem.Child = element;
+
+                // Add to parent grid
+                parentGrid.Children.Add(explorerItem);
+
+                if (!string.IsNullOrEmpty(MainWindow.CurrentPath))
+                {
+                    DisplayPathComponents(MainWindow.CurrentPath, parentGrid, panel);
+                }
+                else
+                {
+                    MessageBox.Show("CurrentPath is null or empty. Unable to display path components.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
         }
 
-        private static ControlTemplate CreateListViewItemTemplate()
+        private static void ItemHoverOn(object sender, MouseEventArgs e)
         {
-            ControlTemplate template = new(typeof(ListViewItem));
-            FrameworkElementFactory borderFactory = new(typeof(Border));
-            borderFactory.SetValue(Border.BackgroundProperty, Brushes.Transparent);
-            borderFactory.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+            if (sender is not Border border || IsHoveringOverType<CheckBox>(e, border))
+                return;
 
-            FrameworkElementFactory contentPresenterFactory = new(typeof(ContentPresenter));
-            contentPresenterFactory.SetValue(VerticalAlignmentProperty, VerticalAlignment.Stretch);
-            contentPresenterFactory.SetValue(HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
-
-            borderFactory.AppendChild(contentPresenterFactory);
-            template.VisualTree = borderFactory;
-            return template;
+            border.Background = new SolidColorBrush(HoverItemColor);
         }
 
-        // Funcs for handeling files and folders
-        private static void OpenFolder(string fileName, ListView Files_Folders_ListView, StackPanel pathContainer)
+        private static void ItemHoverOff(object sender, MouseEventArgs e)
+        {
+            if (sender is not Border border)
+                return;
+
+            border.Background = new SolidColorBrush(NormalItemColor);
+        }
+
+        private static bool IsHoveringOverType<T>(MouseEventArgs e, Border border) where T : DependencyObject
+        {
+            var position = e.GetPosition(border);
+            var hit = border.InputHitTest(position) as DependencyObject;
+
+            while (hit != null)
+            {
+                if (hit is T)
+                    return true;
+
+                hit = VisualTreeHelper.GetParent(hit);
+            }
+
+            return false;
+        }
+
+        private static void FolderOpenHandler(object sender, MouseButtonEventArgs e)
+        {
+            // Don't handle if the click was on a checkbox
+            if (e.OriginalSource is DependencyObject clickedElement &&
+                FindVisualParent<CheckBox>(clickedElement) != null)
+            {
+                return;
+            }
+
+            if (sender is Border border && border.Tag is string itemName)
+            {
+                MessageBox.Show($"Border clicked for item: {itemName}");
+            }
+        }
+
+        private static void FilesDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not ComboBox comboBox ||
+                comboBox.SelectedItem is not ComboBoxItem selectedItem ||
+                selectedItem.Content == null)
+            {
+                return;
+            }
+
+            string? selectedAction = selectedItem.Content.ToString();
+
+            // Execute the appropriate action based on selection
+            switch (selectedAction)
+            {
+                case "Rename":
+                    ExecuteFileAction(comboBox, "Rename");
+                    break;
+                case "Move":
+                    ExecuteFileAction(comboBox, "Move");
+                    break;
+                case "Delete":
+                    ExecuteFileAction(comboBox, "Delete");
+                    break;
+            }
+
+            ResetDropdown(comboBox);
+        }
+
+        private static void ResetDropdown(ComboBox comboBox)
+        {
+            comboBox.SelectedItem = null;
+            comboBox.IsDropDownOpen = false;
+        }
+
+        private static void ExecuteFileAction(ComboBox comboBox, string action)
+        {
+            if (MainWindow.CurrentPath == null)
+            {
+                MessageBox.Show("CurrentPath not is not set!");
+                return;
+            }
+
+            string itemName = GetContextName(comboBox);
+            string itemPath = Path.Combine(MainWindow.CurrentPath, itemName);
+            MessageBox.Show($"{action} clicked for: {itemPath}");
+        }
+
+        private static string GetContextName(ComboBox comboBox)
+        {
+            var parentGrid = FindVisualParent<Grid>(comboBox);
+            if (parentGrid == null) return "Unknown item";
+
+            // Find the TextBlock in column 2 (assuming it contains the item name)
+            var textBlock = parentGrid.Children
+                .OfType<TextBlock>()
+                .FirstOrDefault(tb => Grid.GetColumn(tb) == 2);
+
+            return textBlock?.Text ?? "Unknown item";
+        }
+
+        private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            while (child != null)
+            {
+                if (child is T parent)
+                    return parent;
+
+                child = VisualTreeHelper.GetParent(child);
+            }
+            return null;
+        }
+
+        // File / Folder opening funcs
+        private static void OpenFolder(string fileName, Grid parentGrid, StackPanel panel)
         {
             if (string.IsNullOrEmpty(MainWindow.CurrentPath))
             {
@@ -399,22 +483,23 @@ namespace FileExplorerCardsCreator
                 return;
             }
 
-            string combinedPath = System.IO.Path.Combine(MainWindow.CurrentPath, fileName);
-            LoadFiles(combinedPath, Files_Folders_ListView, pathContainer);
+            MainWindow.CurrentPath = Path.Combine(MainWindow.CurrentPath, fileName);
+
+            List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(MainWindow.CurrentPath);
+            CreateExplorerItems(parentGrid, Files_Folders, panel);
         }
 
-        private static void OpenFile(string fileName, ListView Files_Folders_ListView, StackPanel pathContainer)
+        private static void OpenFile(string fileName, Grid parentGrid, StackPanel panel)
         {
-            if (string.IsNullOrEmpty(MainWindow.CurrentPath))
+            if (MainWindow.CurrentPath == null)
             {
-                MessageBox.Show("Current path is null.");
+                MessageBox.Show("CurrentPath not is not set!");
                 return;
             }
 
-            string combinedPath = System.IO.Path.Combine(MainWindow.CurrentPath, fileName);
+            string combinedPath = Path.Combine(MainWindow.CurrentPath, fileName);
 
-            // Array of supported extensions
-            string[] supportedExtensions = {
+            string[] supportedExtensions = [
                 ".txt", ".cs", ".js", ".html", ".css", ".json", ".xml", ".log",
                 ".py", ".java", ".cpp", ".c", ".h", ".php", ".rb", ".go", ".swift",
                 ".ts", ".jsx", ".tsx", ".vue", ".sh", ".bat", ".ini", ".config",
@@ -423,29 +508,151 @@ namespace FileExplorerCardsCreator
                 ".diff", ".patch", ".cmake", ".dockerfile", ".gitignore", ".env", ".properties",
                 // Minecraft server files specific extensions
                 ".yml", ".json", ".properties", ".conf", ".txt", ".log", ".toml"
-            };
-            // Get the file extension
-            string fileExtension = System.IO.Path.GetExtension(combinedPath).ToLower();
+            ];
+            string fileExtension = Path.GetExtension(combinedPath).ToLower();
 
-            CodeLogger.ConsoleLog($"fileExtension: {fileExtension}");
-            string? fileContent = ServerFileExplorer.ReadFromFile(combinedPath);
-            if (fileContent == null)
+            if (!supportedExtensions.Contains(fileExtension))
+            {
+                MessageBox.Show($"File type '{fileExtension}' is not supported for viewing.", "Unsupported File Type", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            string? content = ServerFileExplorer.ReadFromFile(combinedPath) ?? "";
+            if (content == null)
             {
                 return;
             }
 
-            // Check if the extension is supported
-            if (supportedExtensions.Contains(fileExtension))
+            parentGrid.Children.Clear();
+
+            string xaml =
+                  $@"<ScrollViewer xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
+                                  xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+                                  VerticalScrollBarVisibility='Disabled'
+                                  HorizontalScrollBarVisibility='Disabled'
+                                  HorizontalContentAlignment='Stretch'
+                                  VerticalContentAlignment='Stretch'
+                                  Margin='0'>
+                      <Border Background='#222428'
+                              BorderBrush='Gray'
+                              BorderThickness='1'
+                              CornerRadius='10'
+                              Margin='10'
+                              Padding='10'
+                              VerticalAlignment='Stretch'>
+                        <Grid>
+                          <Grid.RowDefinitions>
+                            <RowDefinition Height='Auto' />
+                            <RowDefinition Height='*' />
+                          </Grid.RowDefinitions>
+                          <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width='*' />
+                            <ColumnDefinition Width='Auto' />
+                          </Grid.ColumnDefinitions>
+                    
+                          <TextBlock Text='{fileName}'
+                                     FontSize='22'
+                                     FontWeight='Bold'
+                                     Foreground='White'
+                                     VerticalAlignment='Center'
+                                     HorizontalAlignment='Left'
+                                     Margin='0,0,10,10'
+                                     Grid.Row='0'
+                                     Grid.Column='0' />
+                    
+                          <Button x:Name='ExplorerSaveButton'
+                                  Content='Save'
+                                  FontSize='14'
+                                  Padding='10,5'
+                                  HorizontalAlignment='Right'
+                                  VerticalAlignment='Top'
+                                  Background='#3a8ff1'
+                                  Foreground='White'
+                                  BorderBrush='Transparent'
+                                  Cursor='Hand'
+                                  Margin='0,0,0,10'
+                                  Grid.Row='0'
+                                  Grid.Column='1' />
+                    
+                          <TextBox x:Name='LogTextBox'
+                                   AcceptsReturn='True'
+                                   TextWrapping='Wrap'
+                                   VerticalScrollBarVisibility='Auto'
+                                   HorizontalScrollBarVisibility='Disabled'
+                                   Background='#333333'
+                                   Foreground='White'
+                                   BorderBrush='Transparent'
+                                   FontSize='16'
+                                   Padding='10'
+                                   Margin='0'
+                                   Grid.Row='1'
+                                   Grid.Column='0'
+                                   Grid.ColumnSpan='2' />
+                        </Grid>
+                      </Border>
+                    </ScrollViewer>";
+
+            var stringReader = new StringReader(xaml);
+            var xmlReader = XmlReader.Create(stringReader);
+            var element = (UIElement)XamlReader.Load(xmlReader);
+
+            parentGrid.Children.Add(element);
+
+            MainWindow.CurrentPath = combinedPath;
+
+            if (!string.IsNullOrEmpty(MainWindow.CurrentPath))
             {
-                MainWindow.CurrentPath = combinedPath;
-                AddTextEditorItem(Files_Folders_ListView, combinedPath, fileContent);
-                DisplayPathComponents(MainWindow.CurrentPath, Files_Folders_ListView, pathContainer);
+                DisplayPathComponents(MainWindow.CurrentPath, parentGrid, panel);
             }
             else
             {
-                MessageBox.Show($"File type '{fileExtension}' is not supported.", "Unsupported File", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("CurrentPath is null or empty. Unable to display path components.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            // Correctly cast the object to TextBox
+            if (FindLogicalChildByName<TextBox>(element, "LogTextBox") is not TextBox logTextBox)
+            {
+                CodeLogger.ConsoleLog("LogTextBox not found in XAML.");
                 return;
             }
+
+            logTextBox.Text = content;
+
+            if (FindLogicalChildByName<Button>(element, "ExplorerSaveButton") is not Button saveButton)
+            {
+                CodeLogger.ConsoleLog("ExplorerSaveButton not found in XAML.");
+                return;
+            }
+
+            saveButton.Click += (s, e) =>
+            {
+                try
+                {
+                    ServerFileExplorer.WriteToFile(MainWindow.CurrentPath, logTextBox.Text);
+                    MessageBox.Show("Saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving file:\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            };
+        }
+
+        static T? FindLogicalChildByName<T>(DependencyObject parent, string name) where T : FrameworkElement
+        {
+            foreach (object child in LogicalTreeHelper.GetChildren(parent))
+            {
+                if (child is FrameworkElement fe)
+                {
+                    if (fe is T typedChild && fe.Name == name)
+                        return typedChild;
+
+                    var foundChild = FindLogicalChildByName<T>(fe, name);
+                    if (foundChild != null)
+                        return foundChild;
+                }
+            }
+            return null;
         }
     }
 }

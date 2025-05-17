@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using jdk.nashorn.@internal.ir;
+using System.IO;
 using System.IO.Compression;
 
 namespace Logger
@@ -87,7 +88,7 @@ namespace Logger
             }
         }
 
-        public static void ConsoleLog(string message)
+        public static void ConsoleLog(object message)
         {
             string timestamp = $"[{DateTime.Now:ddMMMyyyy HH:mm:ss.fff}] ";
 
@@ -107,6 +108,11 @@ namespace Logger
                 Console.WriteLine("Error logging: " + ex.Message);
                 ConsoleLog("Error logging: " + ex.Message);
             }
+        }
+
+        public static void ConsoleLog()
+        {
+            return;
         }
     }
 }

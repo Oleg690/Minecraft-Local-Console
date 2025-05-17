@@ -7,7 +7,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace ServerCardsCreator
+namespace Minecraft_Console.UI
 {
     public class ServerCard : Window
     {
@@ -168,7 +168,7 @@ namespace ServerCardsCreator
                 Name = "border"
             };
             borderFactory.SetValue(Border.CornerRadiusProperty, new CornerRadius(cornerRadius));
-            borderFactory.SetValue(Border.ClipToBoundsProperty, true);
+            borderFactory.SetValue(ClipToBoundsProperty, true);
             borderFactory.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(BackgroundProperty));
             borderFactory.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(BorderBrushProperty));
             borderFactory.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(BorderThicknessProperty));
@@ -235,7 +235,7 @@ namespace ServerCardsCreator
             return button;
         }
 
-        public static Button CreateStyledButton(int cornerRadius, string name, string version, string totalPlayers, string processID, Thickness margin, Action onClick)
+        public static Button CreateStyledButton(string worldNumber, int cornerRadius, string name, string version, string totalPlayers, string processID, Thickness margin, Action onClick)
         {
             var button = new Button
             {
@@ -244,6 +244,7 @@ namespace ServerCardsCreator
                 FontSize = 25,
                 Cursor = Cursors.Hand,
                 Margin = margin,
+                Tag = worldNumber,
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 BorderThickness = new Thickness(0),
@@ -534,12 +535,12 @@ namespace ServerCardsCreator
                 var child = VisualTreeHelper.GetChild(parent, i);
                 if (child is T tChild)
                 {
-                    if ((string.IsNullOrEmpty(name) || (tChild is FrameworkElement fe && fe.Name == name)) &&
+                    if ((string.IsNullOrEmpty(name) || tChild is FrameworkElement fe && fe.Name == name) &&
                         (predicate == null || predicate(tChild)))
                         return tChild;
                 }
 
-                var result = FindChild<T>(child, name, predicate);
+                var result = FindChild(child, name, predicate);
                 if (result != null)
                     return result;
             }

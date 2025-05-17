@@ -1,64 +1,82 @@
 ﻿using System.ComponentModel;
 
+namespace Minecraft_Console;
+
 public class ServerInfoViewModel : INotifyPropertyChanged
 {
-    private string? _memoryUsage = "0%";
-    private string? _worldSize = "0 MB";
-    private string? _playersOnline = "0 / 0";
-    private string? _upTime = "00:00:00";
-    private string? _console = "Offline";
+    private string _memoryUsage = "0%";
+    private string _worldSize = "0 MB";
+    private string _playersOnline = "0 / 0";
+    private string _upTime = "00:00:00";
+    private string _console = "Offline";
 
     public string MemoryUsage
     {
-        get => _memoryUsage ?? string.Empty;
+        get => _memoryUsage;
         set
         {
-            _memoryUsage = value;
-            OnPropertyChanged(nameof(MemoryUsage));
+            if (_memoryUsage != value)
+            {
+                _memoryUsage = value;
+                OnPropertyChanged(nameof(MemoryUsage));
+            }
         }
     }
 
     public string WorldSize
     {
-        get => _worldSize ?? string.Empty;
+        get => _worldSize;
         set
         {
-            _worldSize = value;
-            OnPropertyChanged(nameof(WorldSize));
+            if (_worldSize != value)
+            {
+                _worldSize = value;
+                OnPropertyChanged(nameof(WorldSize));
+            }
         }
     }
 
     public string PlayersOnline
     {
-        get => _playersOnline ?? string.Empty;
+        get => _playersOnline;
         set
         {
-            _playersOnline = value;
-            OnPropertyChanged(nameof(PlayersOnline));
+            if (_playersOnline != value)
+            {
+                _playersOnline = value;
+                OnPropertyChanged(nameof(PlayersOnline));
+            }
         }
     }
 
     public string UpTime
     {
-        get => _upTime ?? string.Empty;
+        get => _upTime;
         set
         {
-            _upTime = value;
-            OnPropertyChanged(nameof(UpTime));
+            if (_upTime != value)
+            {
+                _upTime = value;
+                OnPropertyChanged(nameof(UpTime));
+            }
         }
     }
 
     public string Console
     {
-        get => _console ?? string.Empty;
+        get => _console;
         set
         {
-            _console = value;
-            OnPropertyChanged(nameof(Console));
+            if (_console != value)
+            {
+                _console = value;
+                OnPropertyChanged(nameof(Console));
+            }
         }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
     protected void OnPropertyChanged(string propertyName)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

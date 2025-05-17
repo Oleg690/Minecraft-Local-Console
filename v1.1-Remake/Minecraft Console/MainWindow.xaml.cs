@@ -1,11 +1,8 @@
 ﻿using CreateServerFunc;
-using databaseChanger;
-using FileExplorer;
-using FileExplorerCardsCreator;
 using Logger;
-using MinecraftServerStats;
+using Minecraft_Console.ServerControl;
+using Minecraft_Console.UI;
 using NetworkConfig;
-using ServerCardsCreator;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -16,7 +13,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Updater;
 using WpfAnimatedGif;
-using PopupCreator;
 
 namespace Minecraft_Console
 {
@@ -78,11 +74,9 @@ namespace Minecraft_Console
     public partial class MainWindow : Window
     {
         private static readonly ServerInfoViewModel _viewModel = new();
-        public static CancellationTokenSource cancellationTokenSource = new();
-
         private Button? _selectedButton;
+        private ServerManager _serverManager;
 
-        private static Dictionary<Button, bool> _previousButtonStates = [];
         private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
 
         private static string? Server_PublicComputerIP;
@@ -104,16 +98,17 @@ namespace Minecraft_Console
         private static string? serverDirectoryPath;
         private static string? selectedServer = "";
         private static string? openWorldNumber;
-        
+
         public MainWindow()
         {
             InitializeComponent();
             DataContext = _viewModel;
+            _serverManager = new ServerManager(_viewModel);
             CodeLogger.CreateLogFile();
             SetStaticPaths();
             OnLoaded();
             LoadServersPage();
-            _ = CheckRunningServersAsync();
+            //_ = CheckRunningServersAsync();
         }
 
         private void NavigateToServers(object sender, RoutedEventArgs e)
@@ -139,8 +134,6 @@ namespace Minecraft_Console
 
         private void LoadPage(string pageName)
         {
-            SetStatsToEmpty();
-
             MainContent.Children.Clear();
             MainContent.VerticalAlignment = VerticalAlignment.Stretch;
             MainContent.Children.Add(new Label
@@ -224,89 +217,18 @@ namespace Minecraft_Console
         }
 
         // File Explorer funcs
-        public void BackButton_Click(object sender, RoutedEventArgs e)
+        public void ChangeAllCheckBoxes(object sender, RoutedEventArgs e)
         {
-            string? TEMP_CurrentPath = System.IO.Path.GetDirectoryName(CurrentPath);
-            if (TEMP_CurrentPath == null)
+            var container = FindVisualParent<Grid>(ExplorerParent);
+            if (container == null) return;
+
+            bool shouldCheck = SelectAllCheckBox.IsChecked == true;
+
+            foreach (var checkBox in FindVisualChildren<CheckBox>(container))
             {
-                MessageBox.Show("Current path is null.");
-                return;
-            }
-            string[] pathParts = TEMP_CurrentPath.Split("\\");
-
-            if (pathParts[^1] != "worlds")
-            {
-                CurrentPath = TEMP_CurrentPath;
-
-                List<string[]> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(CurrentPath);
-                FileExplorerCards.AddToListView(Files_Folders, Files_Folders_ListView, pathContainer);
-
-                FileExplorerCards.DisplayPathComponents(CurrentPath, Files_Folders_ListView, pathContainer);
-            }
-        }
-
-        // Check if server is running
-        private async Task CheckRunningServersAsync()
-        {
-            List<object[]> dataDB = dbChanger.SpecificDataFunc($"SELECT worldNumber, Process_ID FROM worlds;");
-
-            for (int i = 0; i < dataDB.Count; i++)
-            {
-                string worldNumber = dataDB[i][0].ToString() ?? string.Empty;
-                string worldProcess = dataDB[i][1].ToString() ?? string.Empty;
-
-                if (dataDB[i][1] != DBNull.Value)
+                if (checkBox != SelectAllCheckBox) // avoid checking the controller itself
                 {
-                    if (!IsProcessRunning(Convert.ToInt32(worldProcess)))
-                    {
-                        dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL, serverTempPsw = NULL, Process_ID = NULL WHERE worldNumber = \"{worldNumber}\";");
-                        return;
-                    }
-
-                    if (rootWorldsFolder == null || string.IsNullOrEmpty(worldNumber))
-                    {
-                        MessageBox.Show("Required paths are not set.");
-                        return;
-                    }
-
-                    serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, worldNumber);
-                    serverRunning = true;
-                    serverStatus = true;
-
-                    object[] serverData = dbChanger.SpecificDataFunc($"SELECT Server_Port, JMX_Port, RCON_Port, RMI_Port, version, totalPlayers, serverUser, serverTempPsw FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
-
-                    int Server_Port = Convert.ToInt32(serverData[0]);
-                    int JMX_Port = Convert.ToInt32(serverData[1]);
-                    int RCON_Port = Convert.ToInt32(serverData[2]);
-                    int RMI_Port = Convert.ToInt32(serverData[3]);
-                    object[] serverRunData = { serverData[4], serverData[5] };
-                    object[] userData = { serverData[6], serverData[7] };
-
-                    dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{worldProcess}\" WHERE worldNumber = \"{worldNumber}\";");
-
-                    if (string.IsNullOrEmpty(Server_PublicComputerIP))
-                    {
-                        Server_PublicComputerIP = await NetworkSetup.GetPublicIP() ?? string.Empty;
-
-                        if (string.IsNullOrEmpty(Server_PublicComputerIP))
-                        {
-                            MessageBox.Show("Public IP address is not set.");
-                            return;
-                        }
-                    }
-
-                    ServerStatsThread = new(async () =>
-                    {
-                        while (!cancellationTokenSource.Token.IsCancellationRequested && serverRunning && (ServerOperator.IsPortInUse(JMX_Port) || ServerOperator.IsPortInUse(RCON_Port)))
-                        {
-                            await ServerStats.GetServerInfo(_viewModel, serverDirectoryPath, worldNumber, serverRunData, userData, Server_PublicComputerIP, JMX_Port, RCON_Port, Server_Port);
-                        }
-                    });
-                    ServerStatsThread.Start();
-
-                    UpdateButtonStates(StartBtn, StopBtn, RestartBtn);
-
-                    break;
+                    checkBox.IsChecked = shouldCheck;
                 }
             }
         }
@@ -314,7 +236,6 @@ namespace Minecraft_Console
         // Load Servers Page Funcs
         private void LoadServersPage()
         {
-            SetStatsToEmpty();
             MainContent.Children.Clear();
 
             ScrollViewer scrollViewer = new()
@@ -332,7 +253,7 @@ namespace Minecraft_Console
             Thickness buttonMargin = new(25);
             var worldsFromDb = dbChanger.SpecificDataFunc("SELECT worldNumber, name, version, totalPlayers, Process_ID FROM worlds");
             var existingDirs = Directory.Exists(rootWorldsFolder)
-                ? [.. Directory.GetDirectories(rootWorldsFolder).Select(System.IO.Path.GetFileName)]
+                ? [.. Directory.GetDirectories(rootWorldsFolder).Select(Path.GetFileName)]
                 : new HashSet<string>();
 
             foreach (var worldEntry in worldsFromDb)
@@ -348,7 +269,8 @@ namespace Minecraft_Console
                 if (string.IsNullOrWhiteSpace(worldNumber) || !existingDirs.Contains(worldNumber))
                     continue;
 
-                var button = ServerCard.CreateStyledButton(cornerRadius, worldName, worldVersion, worldTotalPlayers, processID, buttonMargin, () => OpenControlPanel(worldName, worldNumber));
+                var button = ServerCard.CreateStyledButton(worldNumber, cornerRadius, worldName, worldVersion, worldTotalPlayers, processID, buttonMargin, () => OpenControlPanel(worldName, worldNumber));
+
                 serverPanel.Children.Add(button);
             }
 
@@ -371,7 +293,7 @@ namespace Minecraft_Console
         {
             selectedServer = serverName;
             openWorldNumber = worldNumber;
-            SelectedServerLabel.Text = $"Server Name: {serverName}";
+            //SelectedServerLabel.Text = $"Server Name: {serverName}";
 
             if (string.IsNullOrEmpty(openWorldNumber))
             {
@@ -384,14 +306,17 @@ namespace Minecraft_Console
                 return;
             }
 
-            serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, openWorldNumber);
+            serverDirectoryPath = Path.Combine(rootWorldsFolder, openWorldNumber);
+            CurrentPath = serverDirectoryPath;
 
             // Show control panel, hide server list
             MainContent.Visibility = Visibility.Collapsed;
+            ServerDropBox.SelectedIndex = 0;
             ServerDropBox.Visibility = Visibility.Visible;
 
-            FileExplorerCards.LoadFiles(serverDirectoryPath, Files_Folders_ListView, pathContainer);
-            SetStatsToEmpty(openWorldNumber);
+            List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(CurrentPath);
+            FileExplorerCards.CreateExplorerItems(ExplorerParent, Files_Folders, pathContainer);
+
             if (ServerDropBox.SelectedItem is ComboBoxItem selectedItem)
             {
                 string? selectedName = selectedItem.Content.ToString();
@@ -470,7 +395,7 @@ namespace Minecraft_Console
                     localIP, Server_Port, JMX_Port, RCON_Port, RMI_Port
                     )
                 );
-                
+
                 SetLoadingBarProgress(100);
                 await Task.Delay(500);
                 LoadingScreen.Visibility = Visibility.Collapsed;
@@ -503,152 +428,107 @@ namespace Minecraft_Console
             }
         }
 
-        private async void StartServer(object sender, RoutedEventArgs e)
-        {
-            UpdateButtonStates(StartBtn, StopBtn, RestartBtn, disableAll: true);
+        //private async void StartServer()
+        //{
+        //    Dispatcher.Invoke(() => DisableAllButtons(openWorldNumber));
 
-            if (serverRunning)
-            {
-                MessageBox.Show("An server is already running.");
-                return;
-            }
+        //    try
+        //    {
+        //        if (string.IsNullOrWhiteSpace(openWorldNumber) ||
+        //            string.IsNullOrWhiteSpace(rootWorldsFolder) ||
+        //            string.IsNullOrWhiteSpace(Server_PublicComputerIP) ||
+        //            string.IsNullOrWhiteSpace(serverDirectoryPath) ||
+        //            _serverManager == null)
+        //        {
+        //            MessageBox.Show("Some required fields are not set. Cannot start the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        //            return;
+        //        }
 
-            if (rootWorldsFolder == null || openWorldNumber == null)
-            {
-                MessageBox.Show("Required paths are not set.");
-                return;
-            }
+        //        bool success = await _serverManager.StartServer(
+        //            openWorldNumber,
+        //            rootWorldsFolder,
+        //            Server_PublicComputerIP,
+        //            () => serverRunning,
+        //            () => serverRunning = true,
+        //            serverDirectoryPath,
+        //            onServerRunning: (_) =>
+        //            {
+        //                Dispatcher.Invoke(() =>
+        //                {
+        //                    ToggleButtonStates(openWorldNumber, true);
+        //                });
+        //            }
+        //        );
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"An error occurred while starting the server:\n{ex.Message}", "Start Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        Dispatcher.Invoke(() => SetDefaultButtonStates(openWorldNumber, true));
+        //    }
+        //}
 
-            serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, openWorldNumber);
+        //private async void StopServer()
+        //{
+        //    Dispatcher.Invoke(() => DisableAllButtons(openWorldNumber));
 
-            int memoryAlocator = 5000; // in MB
+        //    try
+        //    {
+        //        if (string.IsNullOrWhiteSpace(openWorldNumber) ||
+        //            string.IsNullOrWhiteSpace(Server_LocalComputerIP) ||
+        //            _serverManager == null)
+        //        {
+        //            MessageBox.Show("Some required fields are not set. Cannot stop the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        //            return;
+        //        }
 
-            List<object[]> serverData = dbChanger.SpecificDataFunc($"SELECT Server_Port, JMX_Port, RCON_Port, RMI_Port FROM worlds WHERE worldNumber = \"{openWorldNumber}\";");
+        //        bool success = await ServerManager.StopServer(
+        //            openWorldNumber, Server_LocalComputerIP,
+        //            () => { serverRunning = false; serverStatus = false; }
+        //        );
 
-            int Server_Port = 0;
-            int JMX_Port = 0;
-            int RCON_Port = 0;
-            int RMI_Port = 0;
+        //        Dispatcher.Invoke(() => ToggleButtonStates(openWorldNumber, !success));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"An error occurred while stopping the server:\n{ex.Message}", "Stop Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        Dispatcher.Invoke(() => SetDefaultButtonStates(openWorldNumber, true));
+        //    }
+        //}
 
-            foreach (object[] data in serverData)
-            {
-                Server_Port = Convert.ToInt32(data[0]);
-                JMX_Port = Convert.ToInt32(data[1]);
-                RCON_Port = Convert.ToInt32(data[2]);
-                RMI_Port = Convert.ToInt32(data[3]);
-            }
-            if (string.IsNullOrEmpty(Server_PublicComputerIP))
-            {
-                MessageBox.Show("Public IP address is not set.");
-                return;
-            }
+        //private async void RestartServer()
+        //{
+        //    Dispatcher.Invoke(() => DisableAllButtons(openWorldNumber));
 
-            Thread StartServerAsyncThread = new(async () => await ServerOperator.Start(openWorldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, noGUI: false, viewModel: _viewModel));
-            StartServerAsyncThread.Start();
+        //    try
+        //    {
+        //        if (string.IsNullOrWhiteSpace(openWorldNumber) ||
+        //            string.IsNullOrWhiteSpace(rootWorldsFolder) ||
+        //            string.IsNullOrWhiteSpace(Server_LocalComputerIP) ||
+        //            string.IsNullOrWhiteSpace(Server_PublicComputerIP) ||
+        //            _serverManager == null)
+        //        {
+        //            MessageBox.Show("Some required fields are not set. Cannot restart the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        //            return;
+        //        }
 
-            while (serverRunning == false)
-            {
-                await Task.Delay(500);
-            }
-
-            UpdateButtonStates(StartBtn, StopBtn, RestartBtn, changeAfterEnable: true);
-        }
-
-        private void StopServer(object sender, RoutedEventArgs e)
-        {
-            UpdateButtonStates(StartBtn, StopBtn, RestartBtn);
-
-            serverRunning = false;
-            serverStatus = false;
-            cancellationTokenSource.Cancel();
-            List<object[]> serverData = dbChanger.SpecificDataFunc($"SELECT JMX_Port, RCON_Port FROM worlds WHERE worldNumber = \"{openWorldNumber}\";");
-
-            int JMX_Port = 0;
-            int RCON_Port = 0;
-
-            foreach (object[] data in serverData)
-            {
-                JMX_Port = Convert.ToInt32(data[0]);
-                RCON_Port = Convert.ToInt32(data[1]);
-            }
-
-            if (string.IsNullOrEmpty(Server_LocalComputerIP))
-            {
-                MessageBox.Show("Public IP address is not set.");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(openWorldNumber))
-            {
-                MessageBox.Show("World number is null.");
-                return;
-            }
-
-            Thread StopServerAsyncThread = new(async () => await ServerOperator.Stop("stop", openWorldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, "00:00"));
-            StopServerAsyncThread.Start();
-
-            ServerStats.SetServerStatusOffline();
-            SetStatsToEmpty(openWorldNumber);
-        }
-
-        private async void RestartServer(object sender, RoutedEventArgs e)
-        {
-            UpdateButtonStates(StartBtn, StopBtn, RestartBtn, disableAll: true);
-
-            if (serverRunning == false)
-            {
-                MessageBox.Show("No server is running.");
-                return;
-            }
-
-            if (rootWorldsFolder == null || openWorldNumber == null)
-            {
-                MessageBox.Show("Required paths are not set.");
-                return;
-            }
-
-            serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, openWorldNumber);
-
-            int memoryAlocator = 5000; // in MB
-
-            List<object[]> serverData = dbChanger.SpecificDataFunc($"SELECT Server_Port, JMX_Port, RCON_Port, RMI_Port FROM worlds WHERE worldNumber = \"{openWorldNumber}\";");
-
-            int Server_Port = 0;
-            int JMX_Port = 0;
-            int RCON_Port = 0;
-            int RMI_Port = 0;
-
-            foreach (object[] data in serverData)
-            {
-                Server_Port = Convert.ToInt32(data[0]);
-                JMX_Port = Convert.ToInt32(data[1]);
-                RCON_Port = Convert.ToInt32(data[2]);
-                RMI_Port = Convert.ToInt32(data[3]);
-            }
-
-            if (string.IsNullOrEmpty(Server_LocalComputerIP) || string.IsNullOrEmpty(Server_PublicComputerIP))
-            {
-                MessageBox.Show("Public or Local IP address is not set.");
-                return;
-            }
-
-            serverRunning = false;
-            cancellationTokenSource.Cancel();
-            Thread StopServerAsyncThread = new(async () => await ServerOperator.Stop("stop", openWorldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, "00:00"));
-            StopServerAsyncThread.Start();
-
-            SetStatsToEmpty(openWorldNumber);
-
-            Thread StartServerAsyncThread = new(async () => await ServerOperator.Start(openWorldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, noGUI: false, viewModel: _viewModel));
-            StartServerAsyncThread.Start();
-
-            while (serverRunning == false)
-            {
-                await Task.Delay(500);
-            }
-
-            UpdateButtonStates(StartBtn, StopBtn, RestartBtn, changeAfterEnable: false);
-        }
+        //        bool success = await _serverManager.RestartServer(
+        //            openWorldNumber, rootWorldsFolder, Server_LocalComputerIP, Server_PublicComputerIP,
+        //            () => serverRunning,
+        //            onServerRunning: (_) =>
+        //            {
+        //                Dispatcher.Invoke(() =>
+        //                {
+        //                    SetDefaultButtonStates(openWorldNumber, false);
+        //                });
+        //            }
+        //        );
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"An error occurred while restarting the server:\n{ex.Message}", "Restart Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        //        Dispatcher.Invoke(() => SetDefaultButtonStates(openWorldNumber, true));
+        //    }
+        //}
 
         // Create Server Page Show func
         private void CreateServerButton_Click()
@@ -721,55 +601,55 @@ namespace Minecraft_Console
         }
 
         // Send Command to Server
-        private async void Send_Command(object sender, RoutedEventArgs e)
-        {
-            string? command = inputValue.Text;
-            if (serverRunning == false)
-            {
-                MessageBox.Show("Server is not running.");
-                return;
-            }
-            if (string.IsNullOrEmpty(command))
-            {
-                MessageBox.Show("Please enter a command.");
-                return;
-            }
-            if (command == "stop")
-            {
-                MessageBox.Show("Stop the server from the button in the manager tab.");
-                return;
-            }
-            if (string.IsNullOrEmpty(openWorldNumber))
-            {
-                MessageBox.Show("Stop the server from the button in the manager tab.");
-                return;
-            }
+        //private async void Send_Command(object sender, RoutedEventArgs e)
+        //{
+        //    string? command = inputValue.Text;
+        //    if (serverRunning == false)
+        //    {
+        //        MessageBox.Show("Server is not running.");
+        //        return;
+        //    }
+        //    if (string.IsNullOrEmpty(command))
+        //    {
+        //        MessageBox.Show("Please enter a command.");
+        //        return;
+        //    }
+        //    if (command == "stop")
+        //    {
+        //        MessageBox.Show("Stop the server from the button in the manager tab.");
+        //        return;
+        //    }
+        //    if (string.IsNullOrEmpty(openWorldNumber))
+        //    {
+        //        MessageBox.Show("Stop the server from the button in the manager tab.");
+        //        return;
+        //    }
 
-            try
-            {
-                string query = $"SELECT RCON_Port FROM worlds WHERE worldNumber = {openWorldNumber};";
-                string? RCON_Port = dbChanger.SpecificDataFunc(query)[0][0].ToString() ?? string.Empty;
+        //    try
+        //    {
+        //        string query = $"SELECT RCON_Port FROM worlds WHERE worldNumber = {openWorldNumber};";
+        //        string? RCON_Port = dbChanger.SpecificDataFunc(query)[0][0].ToString() ?? string.Empty;
 
-                if (string.IsNullOrEmpty(RCON_Port))
-                {
-                    MessageBox.Show("Failed to retrieve the RCON port.");
-                    return;
-                }
+        //        if (string.IsNullOrEmpty(RCON_Port))
+        //        {
+        //            MessageBox.Show("Failed to retrieve the RCON port.");
+        //            return;
+        //        }
 
-                if (string.IsNullOrEmpty(Server_LocalComputerIP))
-                {
-                    MessageBox.Show("Local IP is not set.");
-                    return;
-                }
+        //        if (string.IsNullOrEmpty(Server_LocalComputerIP))
+        //        {
+        //            MessageBox.Show("Local IP is not set.");
+        //            return;
+        //        }
 
-                await ServerOperator.InputForServer(command, openWorldNumber, Convert.ToInt32(RCON_Port), Server_LocalComputerIP);
-                inputValue.Text = "";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"An error occurred: {ex.Message}");
-            }
-        }
+        //        await ServerOperator.InputForServer(command, openWorldNumber, Convert.ToInt32(RCON_Port), Server_LocalComputerIP);
+        //        //inputValue.Text = "";
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"An error occurred: {ex.Message}");
+        //    }
+        //}
 
         // Loading Screen Progress Bar Setter
         public static void SetLoadingBarProgress(int percentage)
@@ -781,42 +661,6 @@ namespace Minecraft_Console
                 mainWindow.progresBar.Width = width;
             });
             loadingScreenProcentage = percentage;
-        }
-
-        // Set stats to empty
-        private static void SetStatsToEmpty(string? worldNumber)
-        {
-            if (rootWorldsFolder == null || worldNumber == null)
-            {
-                MessageBox.Show("Required paths are not set.");
-                return;
-            }
-
-            serverDirectoryPath = System.IO.Path.Combine(rootWorldsFolder, worldNumber);
-
-            string? maxPlayers = dbChanger.SpecificDataFunc($"SELECT totalPlayers FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0][0].ToString() ?? string.Empty;
-            string WorldSize = ServerStats.GetFolderSize(serverDirectoryPath);
-            string? ConsoleOutput = ServerStats.GetConsoleOutput(serverDirectoryPath);
-            if (_viewModel != null)
-            {
-                _viewModel.Console = ConsoleOutput;
-                _viewModel.MemoryUsage = "0%";
-                _viewModel.UpTime = "00:00:00";
-                _viewModel.WorldSize = WorldSize;
-                _viewModel.PlayersOnline = $"0 / {maxPlayers}";
-            }
-        }
-
-        private static void SetStatsToEmpty()
-        {
-            if (_viewModel != null)
-            {
-                _viewModel.Console = "";
-                _viewModel.MemoryUsage = "0%";
-                _viewModel.UpTime = "00:00:00";
-                _viewModel.WorldSize = "0 MB";
-                _viewModel.PlayersOnline = $"0 / 0";
-            }
         }
 
         private void HideAllServerInfoGrids(bool verificator = false)
@@ -833,6 +677,7 @@ namespace Minecraft_Console
         {
             try
             {
+                if (pid <= 0) return false;
                 Process process = Process.GetProcessById(pid);
                 return !process.HasExited;
             }
@@ -841,47 +686,6 @@ namespace Minecraft_Console
                 // Thrown when no process with the specified ID is running
                 return false;
             }
-        }
-
-        private static void UpdateButtonStates(Button startButton, Button stopButton, Button restartButton, bool disableAll = false, bool changeAfterEnable = false)
-        {
-            if (disableAll)
-            {
-                // Save current states
-                _previousButtonStates[startButton] = startButton.IsEnabled;
-                _previousButtonStates[stopButton] = stopButton.IsEnabled;
-                _previousButtonStates[restartButton] = restartButton.IsEnabled;
-
-                // Disable all
-                startButton.IsEnabled = false;
-                stopButton.IsEnabled = false;
-                restartButton.IsEnabled = false;
-                return;
-            }
-
-            // Restore saved states if available
-            if (_previousButtonStates.Count == 3)
-            {
-                startButton.IsEnabled = _previousButtonStates[startButton];
-                stopButton.IsEnabled = _previousButtonStates[stopButton];
-                restartButton.IsEnabled = _previousButtonStates[restartButton];
-                _previousButtonStates.Clear(); // Optional: Clear after restoring
-
-                if (changeAfterEnable)
-                {
-                    bool secondIsStartEnabled = startButton.IsEnabled;
-                    startButton.IsEnabled = !secondIsStartEnabled;
-                    stopButton.IsEnabled = secondIsStartEnabled;
-                    restartButton.IsEnabled = secondIsStartEnabled;
-                }
-                return;
-            }
-
-            // Normal logic: Start controls others
-            bool isStartEnabled = startButton.IsEnabled;
-            startButton.IsEnabled = !isStartEnabled;
-            stopButton.IsEnabled = isStartEnabled;
-            restartButton.IsEnabled = isStartEnabled;
         }
 
         private void ResetCreateServerButtons()
@@ -902,6 +706,35 @@ namespace Minecraft_Console
             NetherCheckBox.IsChecked = true;
             ForceGamemodeCheckBox.IsChecked = false;
             SpawnProtectionInput.Text = "0";
+        }
+
+        private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            while (child != null)
+            {
+                if (child is T parent)
+                    return parent;
+
+                child = VisualTreeHelper.GetParent(child);
+            }
+            return null;
+        }
+
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+
+            int childCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T t)
+                    yield return t;
+
+                foreach (var descendant in FindVisualChildren<T>(child))
+                    yield return descendant;
+            }
         }
     }
 }

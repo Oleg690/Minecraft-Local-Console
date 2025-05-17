@@ -2,13 +2,13 @@
 using System.IO;
 using System.Windows;
 
-namespace FileExplorer
+namespace Minecraft_Console
 {
     class ServerFileExplorer
     {
-        public static List<string[]> GetFoldersAndFiles(string? folderPath)
+        public static List<List<string>> GetFoldersAndFiles(string? folderPath)
         {
-            List<string[]> allItems = [];
+            List<List<string>> allItems = [];
 
             if (folderPath == null || !Directory.Exists(folderPath))
             {
@@ -23,8 +23,7 @@ namespace FileExplorer
                 foreach (var folder in folders)
                 {
                     string folderName = Path.GetFileName(folder); // Get only the folder name
-                    Console.WriteLine($"Folder: {folderName}");
-                    allItems.Add(["folder", folderName]);
+                    allItems.Add([folderName, "folder", folder]);
                 }
 
                 // Get all files in the root folder
@@ -32,8 +31,7 @@ namespace FileExplorer
                 foreach (var file in files)
                 {
                     string fileName = Path.GetFileName(file); // Get only the file name
-                    Console.WriteLine($"File: {fileName}");
-                    allItems.Add(["file", fileName]);
+                    allItems.Add([fileName, "file", file]);
                 }
             }
             catch (Exception ex)

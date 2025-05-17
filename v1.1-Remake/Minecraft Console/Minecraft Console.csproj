@@ -20,6 +20,8 @@
     <None Remove="assets\Fonts\Istok Web\IstokWeb-Regular.ttf" />
     <None Remove="assets\Fonts\Itim\Itim-Regular.ttf" />
     <None Remove="assets\Fonts\Jomhuria\Jomhuria-Regular.ttf" />
+    <None Remove="assets\icons\folder_file\file.png" />
+    <None Remove="assets\icons\folder_file\folder.png" />
     <None Remove="assets\icons\Logo\logo.ico" />
     <None Remove="assets\icons\Logo\minehost.png" />
     <None Remove="assets\Minecraft_Photo.png" />
@@ -43,6 +45,7 @@
     <Folder Include="database\" />
     <Folder Include="logs\" />
     <Folder Include="temp\" />
+    <Folder Include="UI\ServerPanel\" />
     <Folder Include="versions\" />
     <Folder Include="worlds\" />
   </ItemGroup>
@@ -56,6 +59,12 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\Fonts\Jomhuria\Jomhuria-Regular.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\icons\folder_file\file.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\icons\folder_file\folder.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\icons\Logo\logo.ico" />
