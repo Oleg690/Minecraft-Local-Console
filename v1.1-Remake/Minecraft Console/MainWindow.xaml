@@ -95,13 +95,13 @@
                                             <ColorAnimation
                                                 Storyboard.TargetName="border"
                                                 Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                To="#FFC8E6C9"
+                                                To="#4d90db"
                                                 Duration="0:0:0.2" />
-                                            <ColorAnimation
+                                            <!--<ColorAnimation
                                                 Storyboard.TargetName="border"
                                                 Storyboard.TargetProperty="(Button.Foreground).(SolidColorBrush.Color)"
                                                 To="#FF9E9E9E"
-                                                Duration="0:0:0.2" />
+                                                Duration="0:0:0.2" />-->
                                         </Storyboard>
                                     </VisualState>
                                 </VisualStateGroup>
@@ -185,13 +185,13 @@
                                             <ColorAnimation
                                                 Storyboard.TargetName="border"
                                                 Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                To="#FFC8E6C9"
+                                                To="#c44745"
                                                 Duration="0:0:0.2" />
-                                            <ColorAnimation
+                                            <!--<ColorAnimation
                                                 Storyboard.TargetName="border"
                                                 Storyboard.TargetProperty="(Button.Foreground).(SolidColorBrush.Color)"
                                                 To="#FF9E9E9E"
-                                                Duration="0:0:0.2" />
+                                                Duration="0:0:0.2" />-->
                                         </Storyboard>
                                     </VisualState>
                                 </VisualStateGroup>
@@ -1108,17 +1108,23 @@
                                                                 RadiusX="16"
                                                                 RadiusY="16" />
 
-                                                            <!--  Toggle ellipse  -->
+                                                            <!--  Toggle ellipse with animations  -->
                                                             <Ellipse
                                                                 x:Name="Thumb"
                                                                 Width="25"
                                                                 Height="25"
                                                                 Margin="4"
                                                                 HorizontalAlignment="Left"
-                                                                VerticalAlignment="Center"
-                                                                Fill="#F62451" />
+                                                                VerticalAlignment="Center">
+                                                                <Ellipse.Fill>
+                                                                    <SolidColorBrush x:Name="ThumbBrush" Color="#F62451" />
+                                                                </Ellipse.Fill>
+                                                                <Ellipse.RenderTransform>
+                                                                    <TranslateTransform x:Name="ThumbTransform" X="0" />
+                                                                </Ellipse.RenderTransform>
+                                                            </Ellipse>
 
-                                                            <!--  Centered icon container  -->
+                                                            <!--  Centered icon container with animations  -->
                                                             <Grid
                                                                 x:Name="IconContainer"
                                                                 Width="28"
@@ -1126,11 +1132,16 @@
                                                                 Margin="2"
                                                                 HorizontalAlignment="Left"
                                                                 VerticalAlignment="Center">
-                                                                <!--  Cross Icon  -->
+                                                                <Grid.RenderTransform>
+                                                                    <TranslateTransform x:Name="IconTransform" X="0" />
+                                                                </Grid.RenderTransform>
+
+                                                                <!--  Cross Icon with opacity animation  -->
                                                                 <Grid
                                                                     x:Name="CrossIcon"
                                                                     HorizontalAlignment="Center"
                                                                     VerticalAlignment="Center"
+                                                                    Opacity="1"
                                                                     RenderTransformOrigin="0.5,0.5">
                                                                     <Grid.RenderTransform>
                                                                         <TransformGroup>
@@ -1160,12 +1171,13 @@
                                                                         Y2="4" />
                                                                 </Grid>
 
-                                                                <!--  Checkmark Icon  -->
+                                                                <!--  Checkmark Icon with opacity animation  -->
                                                                 <Grid
                                                                     x:Name="CheckIcon"
                                                                     HorizontalAlignment="Center"
                                                                     VerticalAlignment="Center"
-                                                                    Visibility="Collapsed">
+                                                                    Opacity="0"
+                                                                    RenderTransformOrigin="0.5,0.5">
                                                                     <Grid.RenderTransform>
                                                                         <TransformGroup>
                                                                             <ScaleTransform />
@@ -1185,14 +1197,92 @@
                                                             </Grid>
                                                         </Grid>
 
-                                                        <!--  Toggle behavior  -->
                                                         <ControlTemplate.Triggers>
                                                             <Trigger Property="IsChecked" Value="True">
-                                                                <Setter TargetName="Thumb" Property="HorizontalAlignment" Value="Right" />
-                                                                <Setter TargetName="IconContainer" Property="HorizontalAlignment" Value="Right" />
-                                                                <Setter TargetName="Thumb" Property="Fill" Value="#1FD78D" />
-                                                                <Setter TargetName="CrossIcon" Property="Visibility" Value="Collapsed" />
-                                                                <Setter TargetName="CheckIcon" Property="Visibility" Value="Visible" />
+                                                                <Trigger.EnterActions>
+                                                                    <BeginStoryboard>
+                                                                        <Storyboard>
+                                                                            <!--  Thumb animations  -->
+                                                                            <DoubleAnimation
+                                                                                DecelerationRatio="0.5"
+                                                                                Storyboard.TargetName="ThumbTransform"
+                                                                                Storyboard.TargetProperty="X"
+                                                                                To="18"
+                                                                                Duration="0:0:0.2" />
+
+                                                                            <ColorAnimation
+                                                                                Storyboard.TargetName="ThumbBrush"
+                                                                                Storyboard.TargetProperty="Color"
+                                                                                To="#1FD78D"
+                                                                                Duration="0:0:0.2" />
+
+                                                                            <!--  Icon container animation  -->
+                                                                            <DoubleAnimation
+                                                                                DecelerationRatio="0.5"
+                                                                                Storyboard.TargetName="IconTransform"
+                                                                                Storyboard.TargetProperty="X"
+                                                                                To="18"
+                                                                                Duration="0:0:0.2" />
+
+                                                                            <!--  Cross fade out  -->
+                                                                            <DoubleAnimation
+                                                                                BeginTime="0:0:0.05"
+                                                                                Storyboard.TargetName="CrossIcon"
+                                                                                Storyboard.TargetProperty="Opacity"
+                                                                                To="0"
+                                                                                Duration="0:0:0.15" />
+
+                                                                            <!--  Checkmark fade in  -->
+                                                                            <DoubleAnimation
+                                                                                BeginTime="0:0:0.05"
+                                                                                Storyboard.TargetName="CheckIcon"
+                                                                                Storyboard.TargetProperty="Opacity"
+                                                                                To="1"
+                                                                                Duration="0:0:0.15" />
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </Trigger.EnterActions>
+                                                                <Trigger.ExitActions>
+                                                                    <BeginStoryboard>
+                                                                        <Storyboard>
+                                                                            <!--  Thumb animations  -->
+                                                                            <DoubleAnimation
+                                                                                DecelerationRatio="0.5"
+                                                                                Storyboard.TargetName="ThumbTransform"
+                                                                                Storyboard.TargetProperty="X"
+                                                                                To="0"
+                                                                                Duration="0:0:0.2" />
+
+                                                                            <ColorAnimation
+                                                                                Storyboard.TargetName="ThumbBrush"
+                                                                                Storyboard.TargetProperty="Color"
+                                                                                To="#F62451"
+                                                                                Duration="0:0:0.2" />
+
+                                                                            <!--  Icon container animation  -->
+                                                                            <DoubleAnimation
+                                                                                DecelerationRatio="0.5"
+                                                                                Storyboard.TargetName="IconTransform"
+                                                                                Storyboard.TargetProperty="X"
+                                                                                To="0"
+                                                                                Duration="0:0:0.2" />
+
+                                                                            <!--  Cross fade in  -->
+                                                                            <DoubleAnimation
+                                                                                Storyboard.TargetName="CrossIcon"
+                                                                                Storyboard.TargetProperty="Opacity"
+                                                                                To="1"
+                                                                                Duration="0:0:0.15" />
+
+                                                                            <!--  Checkmark fade out  -->
+                                                                            <DoubleAnimation
+                                                                                Storyboard.TargetName="CheckIcon"
+                                                                                Storyboard.TargetProperty="Opacity"
+                                                                                To="0"
+                                                                                Duration="0:0:0.15" />
+                                                                        </Storyboard>
+                                                                    </BeginStoryboard>
+                                                                </Trigger.ExitActions>
                                                             </Trigger>
                                                         </ControlTemplate.Triggers>
                                                     </ControlTemplate>
@@ -1284,7 +1374,7 @@
                                                         HorizontalAlignment="Stretch"
                                                         Background="Transparent"
                                                         HorizontalScrollBarVisibility="Auto"
-                                                        MaxLength="50"
+                                                        MaxLength="15"
                                                         Style="{StaticResource InputTextBoxStyleServerName}" />
                                                 </Border>
                                             </Grid>

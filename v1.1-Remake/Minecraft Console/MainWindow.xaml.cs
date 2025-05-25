@@ -4,6 +4,7 @@ using Minecraft_Console.ServerControl;
 using Minecraft_Console.UI;
 using NetworkConfig;
 using System.IO;
+using System.IO.Compression;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -95,6 +96,7 @@ namespace Minecraft_Console
         private static string? serverVersionsPath;
         private static string? tempFolderPath;
         private static string? defaultServerPropertiesPath;
+        private static string? userData;
         public static string? CurrentPath;
 
         private static string? serverDirectoryPath;
@@ -108,9 +110,24 @@ namespace Minecraft_Console
             _serverManager = new ServerManager(_viewModel);
             CodeLogger.CreateLogFile(5);
             SetStaticPaths();
+            LoadDataJSONFile();
             OnLoaded();
             LoadServersPage();
             //_ = CheckRunningServersAsync();
+        }
+
+        private static void LoadDataJSONFile()
+        {
+            if (string.IsNullOrEmpty(userData))
+            {
+                throw new InvalidOperationException("The 'userData' path is not set.");
+            }
+
+            JsonHelper.CreateJsonIfNotExists(userData, new Dictionary<string, object>
+            {
+                { "runningServerMemory", "5000" },
+                { "archivePath", $"{Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")}" }
+            });
         }
 
         private void NavigateToServers(object sender, RoutedEventArgs e)
@@ -192,6 +209,7 @@ namespace Minecraft_Console
             serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions") ?? string.Empty;
             tempFolderPath = System.IO.Path.Combine(rootFolder, "temp") ?? string.Empty;
             defaultServerPropertiesPath = System.IO.Path.Combine(rootFolder, "Preset Files\\server.properties") ?? string.Empty;
+            userData = System.IO.Path.Combine(rootFolder, "data\\userData.json") ?? string.Empty;
             Server_PublicComputerIP = await NetworkSetup.GetPublicIP() ?? string.Empty;
             Server_LocalComputerIP = NetworkSetup.GetLocalIP() ?? string.Empty;
         }
@@ -340,6 +358,11 @@ namespace Minecraft_Console
         // Server Handeling funcs
         private async void CreateServer_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrEmpty(userData))
+            {
+                throw new InvalidOperationException("The 'userData' path is not set.");
+            }
+
             try
             {
                 CreateServerBTN.IsEnabled = false;
@@ -357,12 +380,13 @@ namespace Minecraft_Console
                 string localIP = NetworkSetup.GetLocalIP();
                 string publicIP = await NetworkSetup.GetPublicIP();
 
-                // Constants
+                // Server ports
                 int Server_Port = 25565;
                 int JMX_Port = 25562;
                 int RMI_Port = 25563;
                 int RCON_Port = 25575;
-                int memoryAlocator = 5000;
+                // Server Memory Allocator
+                int memoryAllocator = Convert.ToInt32(JsonHelper.GetOrSetValue(userData, "runningServerMemory")?.ToString());
 
                 // Utility for checkboxes
                 static string GetCheckBoxValue(CheckBox cb, bool invert = false) =>
@@ -400,7 +424,7 @@ namespace Minecraft_Console
                     ServerCreator.CreateServerFunc(
                     rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath,
                     version, worldName, software, totalPlayers,
-                    worldSettings, memoryAlocator,
+                    worldSettings, memoryAllocator,
                     localIP, Server_Port, JMX_Port, RCON_Port, RMI_Port
                     )
                 );
@@ -755,29 +779,160 @@ namespace Minecraft_Console
         }
 
         // To do: Implement the following methods for file operations
-        private void ExplorerArhiveBtn(object sender, RoutedEventArgs e)
+        private async void ExplorerArhiveBtn(object sender, RoutedEventArgs e)
         {
-            object[] selectedItems = FileExplorerCards.ShowSelectedItems(ExplorerParent);
-
-            MessageBox.Show($"Arhiving {selectedItems[1]} items");
-            List<string> itemPaths = selectedItems[2] as List<string> ?? [];
-
-            foreach (var item in itemPaths)
+            try
             {
-                CodeLogger.ConsoleLog($"Arhiving file: {item}");
+                ArhiveBtn.IsEnabled = false;
+                DeleteBtn.IsEnabled = false;
+
+                if (string.IsNullOrEmpty(userData))
+                {
+                    MessageBox.Show("The 'userData' path is not set.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                object[] selectedItems = FileExplorerCards.ShowSelectedItems(ExplorerParent);
+                List<string> itemPaths = selectedItems[2] as List<string> ?? [];
+                string downloadsPath = JsonHelper.GetOrSetValue(userData, "archivePath")?.ToString() ?? string.Empty;
+
+                await Task.Run(() => AchiveExplorerItems(itemPaths, downloadsPath));
+
+                CodeLogger.ConsoleLog($"Archived successfully to: {downloadsPath}");
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error archiving items: {ex.Message}");
+                MessageBox.Show($"An error occurred while archiving items: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(CurrentPath);
+                FileExplorerCards.CreateExplorerItems(ExplorerParent, Files_Folders, pathContainer);
+
+                await Task.Delay(300);
+
+                ArhiveBtn.IsEnabled = true;
+                DeleteBtn.IsEnabled = true;
             }
         }
 
-        private void ExplorerDeleteBtn(object sender, RoutedEventArgs e)
+        private async void ExplorerDeleteBtn(object sender, RoutedEventArgs e)
         {
-            object[] selectedItems = FileExplorerCards.ShowSelectedItems(ExplorerParent);
-
-            MessageBox.Show($"Deleting {selectedItems[1]} items");
-            List<string> itemPaths = selectedItems[2] as List<string> ?? [];
-
-            foreach (var item in itemPaths)
+            try
             {
-                CodeLogger.ConsoleLog($"Deleting file: {item}");
+                ArhiveBtn.IsEnabled = false;
+                DeleteBtn.IsEnabled = false;
+
+                object[] selectedItems = FileExplorerCards.ShowSelectedItems(ExplorerParent);
+                List<string> itemPaths = selectedItems[2] as List<string> ?? [];
+
+                foreach (var item in itemPaths)
+                {
+                    await Task.Run(() => DeleteExplorerItems(item));
+                }
+
+                CodeLogger.ConsoleLog($"Items deleted succeasfully!");
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error deleting items: {ex.Message}");
+                MessageBox.Show($"An error occurred while deleting items: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            finally
+            {
+                List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(CurrentPath);
+                FileExplorerCards.CreateExplorerItems(ExplorerParent, Files_Folders, pathContainer);
+
+                await Task.Delay(300);
+
+                ArhiveBtn.IsEnabled = true;
+                DeleteBtn.IsEnabled = true;
+            }
+        }
+
+        private static void DeleteExplorerItems(string item)
+        {
+            if (Directory.Exists(item))
+            {
+                Directory.Delete(item, true); // Delete directory and its contents
+            }
+            else if (File.Exists(item))
+            {
+                File.Delete(item); // Delete file
+            }
+            else
+            {
+                CodeLogger.ConsoleLog($"Item not found: {item}");
+            }
+        }
+
+        public static void AchiveExplorerItems(List<string> paths, string destinationFolder)
+        {
+            if (!Directory.Exists(destinationFolder))
+            {
+                Directory.CreateDirectory(destinationFolder);
+            }
+
+            // Generate random file name that doesn't exist
+            string baseName = "archive";
+            string zipPath = Path.Combine(destinationFolder, baseName + ".zip");
+            int counter = 1;
+
+            while (File.Exists(zipPath))
+            {
+                zipPath = Path.Combine(destinationFolder, $"{baseName} ({counter}).zip");
+                counter++;
+            }
+
+            // Temp folder to stage all files/folders
+            string tempRoot = Path.Combine(Path.GetTempPath(), "ArchiveTemp_" + Guid.NewGuid());
+            Directory.CreateDirectory(tempRoot);
+
+            foreach (string path in paths)
+            {
+                if (File.Exists(path))
+                {
+                    string fileName = Path.GetFileName(path);
+                    File.Copy(path, Path.Combine(tempRoot, fileName), true);
+                }
+                else if (Directory.Exists(path))
+                {
+                    string folderName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
+                    string destFolder = Path.Combine(tempRoot, folderName);
+                    DirectoryCopy(path, destFolder, true);
+                }
+            }
+
+            // Create zip from temp folder
+            ZipFile.CreateFromDirectory(tempRoot, zipPath);
+
+            // Clean up temp
+            Directory.Delete(tempRoot, true);
+        }
+
+        private static void DirectoryCopy(string sourceDir, string destDir, bool copySubDirs)
+        {
+            DirectoryInfo dir = new(sourceDir);
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException("Source directory not found: " + sourceDir);
+
+            Directory.CreateDirectory(destDir);
+
+            foreach (FileInfo file in dir.GetFiles())
+            {
+                string targetFilePath = Path.Combine(destDir, file.Name);
+                file.CopyTo(targetFilePath, true);
+            }
+
+            if (copySubDirs)
+            {
+                foreach (DirectoryInfo subdir in dir.GetDirectories())
+                {
+                    string newDestDir = Path.Combine(destDir, subdir.Name);
+                    DirectoryCopy(subdir.FullName, newDestDir, copySubDirs);
+                }
             }
         }
     }

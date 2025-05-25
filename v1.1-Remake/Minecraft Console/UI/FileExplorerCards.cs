@@ -90,6 +90,7 @@ namespace Minecraft_Console.UI
 
         public static void CreateExplorerItems(Grid parentGrid, List<List<string>> items, StackPanel panel)
         {
+            ResetExplorerPopup();
             parentGrid.Children.Clear();
             parentGrid.RowDefinitions.Clear();
 
@@ -126,7 +127,8 @@ namespace Minecraft_Console.UI
                     Height = 50,
                     Cursor = Cursors.Hand,
                     Margin = new Thickness(5),
-                    Tag = path
+                    Tag = path,
+                    Opacity = 0
                 };
 
                 explorerItem.MouseEnter += ItemHoverOn;
@@ -364,6 +366,20 @@ namespace Minecraft_Console.UI
 
                 explorerItem.Child = element;
                 internalGrid.Children.Add(explorerItem);
+
+                // --- Animation Logic ---
+                DoubleAnimation fadeInAnimation = new()
+                {
+                    To = 1, // Fade to full opacity
+                    Duration = TimeSpan.FromSeconds(0.5), // Duration of the fade-in
+                    BeginTime = TimeSpan.FromSeconds(i * 0.025) // Stagger the start time for each item
+                };
+
+                Storyboard storyboard = new();
+                Storyboard.SetTarget(fadeInAnimation, explorerItem);
+                Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(UIElement.OpacityProperty));
+                storyboard.Children.Add(fadeInAnimation);
+                storyboard.Begin();
             }
 
             if (!string.IsNullOrEmpty(MainWindow.CurrentPath))
@@ -464,11 +480,13 @@ namespace Minecraft_Console.UI
                   $@"<Border 
                              xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
                              xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+                             x:Name='EditorBorder'
                              Background='#222428'
                              BorderThickness='0'
                              CornerRadius='10'
                              Margin='5'
-                             Padding='10'>
+                             Padding='10'
+                             Opacity='0'>
                         <Grid>
                              <Grid.RowDefinitions>
                                <RowDefinition Height='Auto' />
@@ -544,6 +562,24 @@ namespace Minecraft_Console.UI
 
             parentGrid.Children.Add(element);
             parentGrid.SizeChanged += UpdateScrollViewer;
+
+            if (element is Border editorBorder)
+            {
+                DoubleAnimation fadeInAnimation = new()
+                {
+                    From = 0.0,
+                    To = 1.0,
+                    Duration = new Duration(TimeSpan.FromSeconds(0.2)), // Adjust duration as needed
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } // Optional: Add an easing function
+                };
+
+                Storyboard.SetTarget(fadeInAnimation, editorBorder);
+                Storyboard.SetTargetProperty(fadeInAnimation, new PropertyPath(OpacityProperty));
+
+                Storyboard fadeInStoryboard = new();
+                fadeInStoryboard.Children.Add(fadeInAnimation);
+                fadeInStoryboard.Begin();
+            }
 
             MainWindow.CurrentPath = combinedPath;
 
@@ -762,7 +798,7 @@ namespace Minecraft_Console.UI
             return selectedItems;
         }
 
-        private static void ResetExplorerPopup()
+        public static void ResetExplorerPopup()
         {
             if (Application.Current.MainWindow is MainWindow mainWindow)
             {

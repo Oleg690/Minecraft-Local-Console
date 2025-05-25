@@ -45,7 +45,7 @@ namespace Minecraft_Console.UI
             double baseButtonHeight = baseButtonWidth / aspectRatio + 50;
 
             // Scaling factors
-            double titleFontScale = 0.075;
+            double titleFontScale = 0.07;
             double infoFontScale = 0.06;
             double statusFontScale = 0.11;
             double statusGridWidthScale = 0.25;

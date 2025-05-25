@@ -43,6 +43,7 @@
 
   <ItemGroup>
     <Folder Include="database\" />
+    <Folder Include="data\" />
     <Folder Include="logs\" />
     <Folder Include="temp\" />
     <Folder Include="versions\" />
