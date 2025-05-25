@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -237,7 +238,7 @@ namespace Minecraft_Console.UI
 
         public static Button CreateStyledButton(string worldNumber, int cornerRadius, string name, string version, string totalPlayers, string processID, Thickness margin, Action onClick)
         {
-            var button = new Button
+            Button button = new()
             {
                 Background = DarkBrush,
                 Foreground = Brushes.White,
@@ -250,7 +251,7 @@ namespace Minecraft_Console.UI
                 BorderThickness = new Thickness(0),
                 ClipToBounds = true,
                 MaxWidth = 500,   // Optional - safety limit
-                MaxHeight = 250,  // Optional - safety limit
+                MaxHeight = 250  // Optional - safety limit
             };
 
             ApplyButtonStyle(button, cornerRadius);
@@ -562,6 +563,35 @@ namespace Minecraft_Console.UI
             catch (Exception) { }
 
             return ["OFF", "#FF5151"];
+        }
+
+        public static void AnimateFadeIn(UIElement element)
+        {
+            DoubleAnimation fadeIn = new()
+            {
+                From = 0,
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            // Optional: add a subtle scale animation too
+            ScaleTransform scale = new(0.95, 0.95);
+            element.RenderTransform = scale;
+            element.RenderTransformOrigin = new Point(0.5, 0.5);
+
+            DoubleAnimation scaleUp = new()
+            {
+                From = 0.95,
+                To = 1,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+
+            // Start animations
+            element.BeginAnimation(OpacityProperty, fadeIn);
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty, scaleUp);
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty, scaleUp);
         }
     }
 }

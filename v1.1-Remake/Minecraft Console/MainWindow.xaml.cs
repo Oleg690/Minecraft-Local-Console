@@ -3,7 +3,6 @@ using Logger;
 using Minecraft_Console.ServerControl;
 using Minecraft_Console.UI;
 using NetworkConfig;
-using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +10,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Updater;
 using WpfAnimatedGif;
 
@@ -77,6 +77,8 @@ namespace Minecraft_Console
         private Button? _selectedButton;
         private ServerManager _serverManager;
 
+        public bool ExplorerPopupStatus = false;
+
         private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
 
         private static string? Server_PublicComputerIP;
@@ -104,7 +106,7 @@ namespace Minecraft_Console
             InitializeComponent();
             DataContext = _viewModel;
             _serverManager = new ServerManager(_viewModel);
-            CodeLogger.CreateLogFile();
+            CodeLogger.CreateLogFile(5);
             SetStaticPaths();
             OnLoaded();
             LoadServersPage();
@@ -237,6 +239,7 @@ namespace Minecraft_Console
         private void LoadServersPage()
         {
             MainContent.Children.Clear();
+            MainContent.Opacity = 0;
 
             ScrollViewer scrollViewer = new()
             {
@@ -246,7 +249,8 @@ namespace Minecraft_Console
             WrapPanel serverPanel = new()
             {
                 Margin = new Thickness(10),
-                HorizontalAlignment = HorizontalAlignment.Center
+                HorizontalAlignment = HorizontalAlignment.Center,
+                Orientation = Orientation.Horizontal
             };
 
             int cornerRadius = 20;
@@ -281,11 +285,19 @@ namespace Minecraft_Console
             MainContent.Children.Add(scrollViewer);
 
             HideAllServerInfoGrids(true);
-            MainContent.Visibility = Visibility.Visible;
             CreateServerPage.Visibility = Visibility.Collapsed;
+            MainContent.Visibility = Visibility.Visible;
 
-            SizeChanged += (s, e) => ServerCard.UpdateButtonSizes(serverPanel, MainContent.ActualWidth); // handle resize
-            ServerCard.UpdateButtonSizes(serverPanel, MainContent.ActualWidth); // initial sizing
+            // Handle dynamic resizing
+            SizeChanged += (s, e) => ServerCard.UpdateButtonSizes(serverPanel, MainContent.ActualWidth);
+
+            // Delay initial sizing to ensure layout is updated
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ServerCard.UpdateButtonSizes(serverPanel, MainContent.ActualWidth);
+            }), DispatcherPriority.Loaded);
+
+            ServerCard.AnimateFadeIn(MainContent);
         }
 
         // Open Control Panel Funcs
@@ -313,9 +325,6 @@ namespace Minecraft_Console
             MainContent.Visibility = Visibility.Collapsed;
             ServerDropBox.SelectedIndex = 0;
             ServerDropBox.Visibility = Visibility.Visible;
-
-            List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(CurrentPath);
-            FileExplorerCards.CreateExplorerItems(ExplorerParent, Files_Folders, pathContainer);
 
             if (ServerDropBox.SelectedItem is ComboBoxItem selectedItem)
             {
@@ -531,6 +540,7 @@ namespace Minecraft_Console
         //}
 
         // Create Server Page Show func
+
         private void CreateServerButton_Click()
         {
             ResetCreateServerButtons();
@@ -596,6 +606,12 @@ namespace Minecraft_Console
                 if (FindName(selectedName) is Grid selectedGrid)
                 {
                     selectedGrid.Visibility = Visibility.Visible;
+
+                    if (selectedName == "Files")
+                    {
+                        List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(CurrentPath);
+                        FileExplorerCards.CreateExplorerItems(ExplorerParent, Files_Folders, pathContainer);
+                    }
                 }
             }
         }
@@ -652,6 +668,7 @@ namespace Minecraft_Console
         //}
 
         // Loading Screen Progress Bar Setter
+
         public static void SetLoadingBarProgress(int percentage)
         {
             int width = (int)(400 * (percentage / 100.0));
@@ -659,8 +676,8 @@ namespace Minecraft_Console
             {
                 MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
                 mainWindow.progresBar.Width = width;
+                loadingScreenProcentage = percentage;
             });
-            loadingScreenProcentage = percentage;
         }
 
         private void HideAllServerInfoGrids(bool verificator = false)
@@ -673,20 +690,20 @@ namespace Minecraft_Console
             if (ServerDropBox != null && verificator == true) ServerDropBox.Visibility = Visibility.Collapsed;
         }
 
-        private static bool IsProcessRunning(int pid)
-        {
-            try
-            {
-                if (pid <= 0) return false;
-                Process process = Process.GetProcessById(pid);
-                return !process.HasExited;
-            }
-            catch (ArgumentException)
-            {
-                // Thrown when no process with the specified ID is running
-                return false;
-            }
-        }
+        //private static bool IsProcessRunning(int pid)
+        //{
+        //    try
+        //    {
+        //        if (pid <= 0) return false;
+        //        Process process = Process.GetProcessById(pid);
+        //        return !process.HasExited;
+        //    }
+        //    catch (ArgumentException)
+        //    {
+        //        // Thrown when no process with the specified ID is running
+        //        return false;
+        //    }
+        //}
 
         private void ResetCreateServerButtons()
         {
@@ -734,6 +751,33 @@ namespace Minecraft_Console
 
                 foreach (var descendant in FindVisualChildren<T>(child))
                     yield return descendant;
+            }
+        }
+
+        // To do: Implement the following methods for file operations
+        private void ExplorerArhiveBtn(object sender, RoutedEventArgs e)
+        {
+            object[] selectedItems = FileExplorerCards.ShowSelectedItems(ExplorerParent);
+
+            MessageBox.Show($"Arhiving {selectedItems[1]} items");
+            List<string> itemPaths = selectedItems[2] as List<string> ?? [];
+
+            foreach (var item in itemPaths)
+            {
+                CodeLogger.ConsoleLog($"Arhiving file: {item}");
+            }
+        }
+
+        private void ExplorerDeleteBtn(object sender, RoutedEventArgs e)
+        {
+            object[] selectedItems = FileExplorerCards.ShowSelectedItems(ExplorerParent);
+
+            MessageBox.Show($"Deleting {selectedItems[1]} items");
+            List<string> itemPaths = selectedItems[2] as List<string> ?? [];
+
+            foreach (var item in itemPaths)
+            {
+                CodeLogger.ConsoleLog($"Deleting file: {item}");
             }
         }
     }

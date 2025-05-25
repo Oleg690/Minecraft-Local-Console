@@ -45,7 +45,6 @@
     <Folder Include="database\" />
     <Folder Include="logs\" />
     <Folder Include="temp\" />
-    <Folder Include="UI\ServerPanel\" />
     <Folder Include="versions\" />
     <Folder Include="worlds\" />
   </ItemGroup>

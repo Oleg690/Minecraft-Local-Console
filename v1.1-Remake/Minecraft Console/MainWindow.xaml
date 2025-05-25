@@ -25,6 +25,187 @@
         <Style TargetType="ListViewItem">
             <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
         </Style>
+
+
+        <Style x:Key="ArhiveButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1974da" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8"
+                            RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="scaleTransform" ScaleX="1" ScaleY="1" />
+                            </Border.RenderTransform>
+                            <ContentPresenter
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                RecognizesAccessKey="True" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+
+                                    <!--  Normal state  -->
+                                    <VisualState x:Name="Normal" />
+
+                                    <!--  MouseOver  -->
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="border"
+                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                To="#2781e6"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <!--  Pressed  -->
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="border"
+                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                To="#1768c3"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="scaleTransform"
+                                                Storyboard.TargetProperty="ScaleX"
+                                                To="0.97"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="scaleTransform"
+                                                Storyboard.TargetProperty="ScaleY"
+                                                To="0.97"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <!--  Disabled  -->
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="border"
+                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                To="#FFC8E6C9"
+                                                Duration="0:0:0.2" />
+                                            <ColorAnimation
+                                                Storyboard.TargetName="border"
+                                                Storyboard.TargetProperty="(Button.Foreground).(SolidColorBrush.Color)"
+                                                To="#FF9E9E9E"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+
+                                <VisualStateGroup x:Name="FocusStates">
+                                    <VisualState x:Name="Focused" />
+                                    <VisualState x:Name="Unfocused" />
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DeleteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#df2c29" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="8"
+                            RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform x:Name="scaleTransform" ScaleX="1" ScaleY="1" />
+                            </Border.RenderTransform>
+                            <ContentPresenter
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                RecognizesAccessKey="True" />
+
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+
+                                    <!--  Normal state  -->
+                                    <VisualState x:Name="Normal" />
+
+                                    <!--  MouseOver  -->
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="border"
+                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                To="#e63a37"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <!--  Pressed  -->
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="border"
+                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                To="#cf221f"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="scaleTransform"
+                                                Storyboard.TargetProperty="ScaleX"
+                                                To="0.97"
+                                                Duration="0:0:0.1" />
+                                            <DoubleAnimation
+                                                Storyboard.TargetName="scaleTransform"
+                                                Storyboard.TargetProperty="ScaleY"
+                                                To="0.97"
+                                                Duration="0:0:0.1" />
+                                        </Storyboard>
+                                    </VisualState>
+
+                                    <!--  Disabled  -->
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <ColorAnimation
+                                                Storyboard.TargetName="border"
+                                                Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                To="#FFC8E6C9"
+                                                Duration="0:0:0.2" />
+                                            <ColorAnimation
+                                                Storyboard.TargetName="border"
+                                                Storyboard.TargetProperty="(Button.Foreground).(SolidColorBrush.Color)"
+                                                To="#FF9E9E9E"
+                                                Duration="0:0:0.2" />
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+
+                                <VisualStateGroup x:Name="FocusStates">
+                                    <VisualState x:Name="Focused" />
+                                    <VisualState x:Name="Unfocused" />
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -165,7 +346,10 @@
 
             <!--  Main Content Area  -->
             <Grid Grid.Column="1">
-                <Grid x:Name="MainContent" VerticalAlignment="Top" />
+                <Grid
+                    x:Name="MainContent"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch" />
 
                 <!--  Server Control Panel (Initially Hidden)  -->
                 <Grid Panel.ZIndex="-1" Background="#1C2127">
@@ -360,7 +544,7 @@
                         x:Name="Manage"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Visibility="Visible">
+                        Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <TextBlock
                                 FontSize="30"
@@ -377,16 +561,97 @@
                         </StackPanel>
                     </Grid>
                     <Grid x:Name="Files" Visibility="Collapsed">
+                        <Border
+                            x:Name="SelectionPopup"
+                            Width="310"
+                            Height="110"
+                            Margin="30"
+                            VerticalAlignment="Top"
+                            Panel.ZIndex="2000"
+                            Background="#21242c"
+                            ClipToBounds="True"
+                            CornerRadius="10"
+                            Visibility="Hidden">
+                            <Border.RenderTransform>
+                                <TranslateTransform X="0" Y="-160" />
+                            </Border.RenderTransform>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0">
+                                    <TextBlock
+                                        x:Name="ExplorerPopupText"
+                                        Margin="10,10,10,0"
+                                        FontSize="20"
+                                        FontWeight="SemiBold"
+                                        Foreground="White"
+                                        Text="Selected: 1" />
+                                </Grid>
+                                <Grid Grid.Row="1" Margin="10,5,10,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button
+                                        x:Name="ArhiveBtn"
+                                        Grid.Column="0"
+                                        Margin="0,0,5,0"
+                                        Click="ExplorerArhiveBtn"
+                                        Style="{StaticResource ArhiveButtonStyle}">
+                                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                            <TextBlock
+                                                Margin="0,0,5,0"
+                                                VerticalAlignment="Center"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontWeight="Light"
+                                                Text="&#xE7B8;" />
+                                            <TextBlock VerticalAlignment="Center" Text="Archive">
+                                                <TextBlock.RenderTransform>
+                                                    <TranslateTransform X="0" Y="2" />
+                                                </TextBlock.RenderTransform>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <Button
+                                        x:Name="DeleteBtn"
+                                        Grid.Column="1"
+                                        Margin="5,0,0,0"
+                                        Click="ExplorerDeleteBtn"
+                                        Style="{StaticResource DeleteButtonStyle}">
+
+                                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                            <TextBlock
+                                                Margin="0,0,5,0"
+                                                VerticalAlignment="Center"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontWeight="Light"
+                                                Text="&#xE74D;" />
+                                            <TextBlock VerticalAlignment="Center" Text="Delete">
+                                                <TextBlock.RenderTransform>
+                                                    <TranslateTransform X="0" Y="2" />
+                                                </TextBlock.RenderTransform>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </Grid>
+                        </Border>
                         <Grid Margin="0,35,0,0">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
                             </Grid.RowDefinitions>
 
-                            <StackPanel Margin="25,15,25,10" Orientation="Horizontal">
+                            <StackPanel
+                                Grid.Row="0"
+                                Margin="25,15,25,10"
+                                Orientation="Horizontal">
                                 <CheckBox
                                     x:Name="SelectAllCheckBox"
-                                    Grid.Column="0"
                                     Margin="10"
                                     VerticalAlignment="Center"
                                     Checked="ChangeAllCheckBoxes"
@@ -525,18 +790,12 @@
                                 </ScrollViewer>
                             </StackPanel>
 
-                            <ScrollViewer
+                            <Grid
+                                x:Name="ExplorerParent"
                                 Grid.Row="1"
                                 Margin="20,0,20,20"
-                                CanContentScroll="True"
-                                HorizontalScrollBarVisibility="Auto"
-                                VerticalScrollBarVisibility="Auto">
-
-                                <Grid
-                                    x:Name="ExplorerParent"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Top" />
-                            </ScrollViewer>
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch" />
                         </Grid>
                     </Grid>
                     <Grid x:Name="Stats" Visibility="Collapsed">

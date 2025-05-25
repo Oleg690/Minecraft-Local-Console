@@ -5,51 +5,32 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Xml;
 
 namespace Minecraft_Console.UI
 {
     public class FileExplorerCards : Window
     {
+        // === Constants ===
         private static readonly Color NormalItemColor = Color.FromRgb(38, 42, 50);
         private static readonly Color HoverItemColor = Color.FromRgb(50, 55, 65);
 
-        //private List<string> GetSelectedItems()
-        //{
-        //    var selectedItems = new List<string>();
-
-        //    // Get the parent container that holds all items
-        //    var container = FindVisualParent<Grid>(ExplorerParent);
-        //    if (container == null) return selectedItems;
-
-        //    // Find all borders with checked checkboxes
-        //    foreach (var child in container.Children)
-        //    {
-        //        if (child is Border border &&
-        //            FindVisualChild<CheckBox>(border) is CheckBox checkBox &&
-        //            checkBox.IsChecked == true &&
-        //            border.Tag is string itemName)
-        //        {
-        //            selectedItems.Add(itemName);
-        //        }
-        //    }
-
-        //    return selectedItems;
-        //}
-
+        // === Entry Point ===
         public static void LoadFiles(string path, Grid grid, StackPanel panel)
         {
             if (path[^1] == '\\') path = path[..^1];
-
             if (MainWindow.CurrentPath == path) return;
 
+            ResetExplorerPopup();
             MainWindow.CurrentPath = path;
-            List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(MainWindow.CurrentPath);
-            CreateExplorerItems(grid, Files_Folders, panel);
 
+            var filesAndFolders = ServerFileExplorer.GetFoldersAndFiles(MainWindow.CurrentPath);
+            CreateExplorerItems(grid, filesAndFolders, panel);
             DisplayPathComponents(MainWindow.CurrentPath, grid, panel);
         }
 
+        // === Explorer Rendering ===
         public static void DisplayPathComponents(string fullPath, Grid grid, StackPanel panel)
         {
             panel.Children.Clear(); // clear previous buttons
@@ -109,23 +90,34 @@ namespace Minecraft_Console.UI
 
         public static void CreateExplorerItems(Grid parentGrid, List<List<string>> items, StackPanel panel)
         {
-            // Clear existing children except the first row (assuming it's headers)
             parentGrid.Children.Clear();
             parentGrid.RowDefinitions.Clear();
+
+            ScrollViewer scrollViewer = new()
+            {
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+                Margin = new Thickness(0),
+                Padding = new Thickness(0)
+            };
+
+            Grid internalGrid = new();
+            scrollViewer.Content = internalGrid;
+            parentGrid.Children.Add(scrollViewer);
 
             for (int i = 0; i < items.Count; i++)
             {
                 var item = items[i];
-                if (item.Count < 2) continue; // Skip invalid entries
+                if (item.Count < 2) continue;
 
                 string itemName = item[0];
                 string itemType = item[1].ToLower();
                 string path = item[2];
+                string fileSize = item.Count > 3 ? item[3] : "";
+                string lastOpened = item.Count > 4 ? item[4] : "";
 
-                // Add row definition for the new item
-                parentGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                internalGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-                // Create the border container
                 Border explorerItem = new()
                 {
                     Name = $"itemName",
@@ -137,33 +129,28 @@ namespace Minecraft_Console.UI
                     Tag = path
                 };
 
-                // Set event handlers
                 explorerItem.MouseEnter += ItemHoverOn;
                 explorerItem.MouseLeave += ItemHoverOff;
 
                 if (itemType == "file")
-                {
                     explorerItem.MouseLeftButtonDown += (sender, e) => OpenFile(itemName, parentGrid, panel);
-                }
                 else if (itemType == "folder")
-                {
                     explorerItem.MouseLeftButtonDown += (sender, e) => OpenFolder(itemName, parentGrid, panel);
-                }
 
-                // Set position in grid
                 Grid.SetRow(explorerItem, i);
                 Grid.SetColumnSpan(explorerItem, 1);
 
                 string ExplorerItemGrid =
                 $@"<Grid xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width='Auto'/>
-                        <ColumnDefinition Width='Auto'/>
-                        <ColumnDefinition Width='*'/>
-                        <ColumnDefinition Width='Auto'/>
+                        <ColumnDefinition Width='Auto' />
+                        <ColumnDefinition Width='Auto' />
+                        <ColumnDefinition Width='*' />
+                        <ColumnDefinition Width='Auto' />
+                        <ColumnDefinition Width='Auto' />
                     </Grid.ColumnDefinitions>
                 
-                    <CheckBox Grid.Column='0' Margin='10' VerticalAlignment='Center' Cursor='Hand'>
+                    <CheckBox x:Name='itemCheckBox' Grid.Column='0' Margin='10' VerticalAlignment='Center' Cursor='Hand'>
                         <CheckBox.LayoutTransform>
                             <ScaleTransform ScaleX='1.5' ScaleY='1.5'/>
                         </CheckBox.LayoutTransform>
@@ -209,8 +196,40 @@ namespace Minecraft_Console.UI
                 
                     <TextBlock x:Name='ItemNameTextBlock' Grid.Column='2' Margin='5,4,10,0' VerticalAlignment='Center' FontSize='25' Foreground='White' Text='{itemName}'/>
                 
+                    <Grid
+                        Grid.Column='3'
+                        Width='350'
+                        Margin='0,0,20,0'
+                        HorizontalAlignment='Stretch'
+                        VerticalAlignment='Center'>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width='Auto' />
+                            <ColumnDefinition Width='*' />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                            x:Name='ItemMemoryTextBlock'
+                            Grid.Column='0'
+                            Margin='5,6,10,0'
+                            HorizontalAlignment='Left'
+                            VerticalAlignment='Center'
+                            FontSize='20'
+                            Foreground='#a5a5a5'
+                            Text='{fileSize}' />
+
+                        <TextBlock
+                            x:Name='ItemLastTimeOpenedTextBlock'
+                            Grid.Column='1'
+                            Margin='5,6,10,0'
+                            HorizontalAlignment='Right'
+                            VerticalAlignment='Center'
+                            FontSize='20'
+                            Foreground='#a5a5a5'
+                            Text='{lastOpened}' />
+                    </Grid>
+
                     <ComboBox x:Name='FilesDropdown'
-                              Grid.Column='3'
+                              Grid.Column='4'
                               Width='40'
                               Margin='10'
                               Background='Transparent'
@@ -332,29 +351,28 @@ namespace Minecraft_Console.UI
                 if (element is Grid grid)
                 {
                     var comboBox = grid.Children.OfType<ComboBox>().FirstOrDefault(cb => cb.Name == "FilesDropdown");
-
                     if (comboBox != null)
-                    {
                         comboBox.SelectionChanged += FilesDropdown_SelectionChanged;
+
+                    var checkBox = grid.Children.OfType<CheckBox>().FirstOrDefault(cb => cb.Name == "itemCheckBox");
+                    if (checkBox != null)
+                    {
+                        checkBox.Checked += ExplorerCheckBox_Checked;
+                        checkBox.Unchecked += ExplorerCheckBox_Unchecked;
                     }
                 }
 
                 explorerItem.Child = element;
-
-                // Add to parent grid
-                parentGrid.Children.Add(explorerItem);
-
-                if (!string.IsNullOrEmpty(MainWindow.CurrentPath))
-                {
-                    DisplayPathComponents(MainWindow.CurrentPath, parentGrid, panel);
-                }
-                else
-                {
-                    MessageBox.Show("CurrentPath is null or empty. Unable to display path components.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
+                internalGrid.Children.Add(explorerItem);
             }
+
+            if (!string.IsNullOrEmpty(MainWindow.CurrentPath))
+                DisplayPathComponents(MainWindow.CurrentPath, parentGrid, panel);
+            else
+                MessageBox.Show("CurrentPath is null or empty. Unable to display path components.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
+        // === Item Events ===
         private static void ItemHoverOn(object sender, MouseEventArgs e)
         {
             if (sender is not Border border || IsHoveringOverType<CheckBox>(e, border))
@@ -387,94 +405,7 @@ namespace Minecraft_Console.UI
             return false;
         }
 
-        private static void FolderOpenHandler(object sender, MouseButtonEventArgs e)
-        {
-            // Don't handle if the click was on a checkbox
-            if (e.OriginalSource is DependencyObject clickedElement &&
-                FindVisualParent<CheckBox>(clickedElement) != null)
-            {
-                return;
-            }
-
-            if (sender is Border border && border.Tag is string itemName)
-            {
-                MessageBox.Show($"Border clicked for item: {itemName}");
-            }
-        }
-
-        private static void FilesDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (sender is not ComboBox comboBox ||
-                comboBox.SelectedItem is not ComboBoxItem selectedItem ||
-                selectedItem.Content == null)
-            {
-                return;
-            }
-
-            string? selectedAction = selectedItem.Content.ToString();
-
-            // Execute the appropriate action based on selection
-            switch (selectedAction)
-            {
-                case "Rename":
-                    ExecuteFileAction(comboBox, "Rename");
-                    break;
-                case "Move":
-                    ExecuteFileAction(comboBox, "Move");
-                    break;
-                case "Delete":
-                    ExecuteFileAction(comboBox, "Delete");
-                    break;
-            }
-
-            ResetDropdown(comboBox);
-        }
-
-        private static void ResetDropdown(ComboBox comboBox)
-        {
-            comboBox.SelectedItem = null;
-            comboBox.IsDropDownOpen = false;
-        }
-
-        private static void ExecuteFileAction(ComboBox comboBox, string action)
-        {
-            if (MainWindow.CurrentPath == null)
-            {
-                MessageBox.Show("CurrentPath not is not set!");
-                return;
-            }
-
-            string itemName = GetContextName(comboBox);
-            string itemPath = Path.Combine(MainWindow.CurrentPath, itemName);
-            MessageBox.Show($"{action} clicked for: {itemPath}");
-        }
-
-        private static string GetContextName(ComboBox comboBox)
-        {
-            var parentGrid = FindVisualParent<Grid>(comboBox);
-            if (parentGrid == null) return "Unknown item";
-
-            // Find the TextBlock in column 2 (assuming it contains the item name)
-            var textBlock = parentGrid.Children
-                .OfType<TextBlock>()
-                .FirstOrDefault(tb => Grid.GetColumn(tb) == 2);
-
-            return textBlock?.Text ?? "Unknown item";
-        }
-
-        private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
-        {
-            while (child != null)
-            {
-                if (child is T parent)
-                    return parent;
-
-                child = VisualTreeHelper.GetParent(child);
-            }
-            return null;
-        }
-
-        // File / Folder opening funcs
+        // === File/Folder Opening ===
         private static void OpenFolder(string fileName, Grid parentGrid, StackPanel panel)
         {
             if (string.IsNullOrEmpty(MainWindow.CurrentPath))
@@ -482,6 +413,8 @@ namespace Minecraft_Console.UI
                 MessageBox.Show("Current path is null.");
                 return;
             }
+
+            ResetExplorerPopup();
 
             MainWindow.CurrentPath = Path.Combine(MainWindow.CurrentPath, fileName);
 
@@ -496,6 +429,8 @@ namespace Minecraft_Console.UI
                 MessageBox.Show("CurrentPath not is not set!");
                 return;
             }
+
+            ResetExplorerPopup();
 
             string combinedPath = Path.Combine(MainWindow.CurrentPath, fileName);
 
@@ -526,77 +461,89 @@ namespace Minecraft_Console.UI
             parentGrid.Children.Clear();
 
             string xaml =
-                  $@"<ScrollViewer xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
-                                  xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
-                                  VerticalScrollBarVisibility='Disabled'
-                                  HorizontalScrollBarVisibility='Disabled'
-                                  HorizontalContentAlignment='Stretch'
-                                  VerticalContentAlignment='Stretch'
-                                  Margin='0'>
-                      <Border Background='#222428'
-                              BorderBrush='Gray'
-                              BorderThickness='1'
-                              CornerRadius='10'
-                              Margin='10'
-                              Padding='10'
-                              VerticalAlignment='Stretch'>
+                  $@"<Border 
+                             xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'
+                             xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
+                             Background='#222428'
+                             BorderThickness='0'
+                             CornerRadius='10'
+                             Margin='5'
+                             Padding='10'>
                         <Grid>
-                          <Grid.RowDefinitions>
-                            <RowDefinition Height='Auto' />
-                            <RowDefinition Height='*' />
-                          </Grid.RowDefinitions>
-                          <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width='*' />
-                            <ColumnDefinition Width='Auto' />
-                          </Grid.ColumnDefinitions>
-                    
-                          <TextBlock Text='{fileName}'
-                                     FontSize='22'
-                                     FontWeight='Bold'
+                             <Grid.RowDefinitions>
+                               <RowDefinition Height='Auto' />
+                               <RowDefinition Height='*' />
+                             </Grid.RowDefinitions>
+                             <Grid.ColumnDefinitions>
+                               <ColumnDefinition Width='*' />
+                               <ColumnDefinition Width='Auto' />
+                             </Grid.ColumnDefinitions>
+                             
+                             <TextBlock Text='{fileName}'
+                                        FontSize='22'
+                                        FontWeight='Bold'
+                                        Foreground='White'
+                                        VerticalAlignment='Center'
+                                        HorizontalAlignment='Left'
+                                        Margin='0,0,10,10'
+                                        Grid.Row='0'
+                                        Grid.Column='0' />
+                             
+                             <Button x:Name='ExplorerSaveButton'
+                                     Content='Save'
+                                     FontSize='14'
+                                     Padding='10,5'
+                                     HorizontalAlignment='Right'
+                                     VerticalAlignment='Top'
+                                     Background='#3a8ff1'
                                      Foreground='White'
-                                     VerticalAlignment='Center'
-                                     HorizontalAlignment='Left'
-                                     Margin='0,0,10,10'
+                                     BorderBrush='Transparent'
+                                     Cursor='Hand'
+                                     Margin='0,0,0,10'
                                      Grid.Row='0'
-                                     Grid.Column='0' />
-                    
-                          <Button x:Name='ExplorerSaveButton'
-                                  Content='Save'
-                                  FontSize='14'
-                                  Padding='10,5'
-                                  HorizontalAlignment='Right'
-                                  VerticalAlignment='Top'
-                                  Background='#3a8ff1'
-                                  Foreground='White'
-                                  BorderBrush='Transparent'
-                                  Cursor='Hand'
-                                  Margin='0,0,0,10'
-                                  Grid.Row='0'
-                                  Grid.Column='1' />
-                    
-                          <TextBox x:Name='LogTextBox'
-                                   AcceptsReturn='True'
-                                   TextWrapping='Wrap'
-                                   VerticalScrollBarVisibility='Auto'
-                                   HorizontalScrollBarVisibility='Disabled'
-                                   Background='#333333'
-                                   Foreground='White'
-                                   BorderBrush='Transparent'
-                                   FontSize='16'
-                                   Padding='10'
-                                   Margin='0'
-                                   Grid.Row='1'
-                                   Grid.Column='0'
-                                   Grid.ColumnSpan='2' />
+                                     Grid.Column='1' />
+                            
+                            <ScrollViewer x:Name='EditorScrollViewer'
+                                          Grid.Row='1' 
+                                          Grid.Column='0' 
+                                          Grid.ColumnSpan='2'
+                                          VerticalScrollBarVisibility='Auto'
+                                          HorizontalScrollBarVisibility='Auto'
+                                          MaxHeight='{parentGrid.ActualHeight - 72}'>
+                                          <TextBox
+                                              x:Name='LogTextBox'
+                                              Margin='0'
+                                              Padding='10'
+                                              AcceptsReturn='True'
+                                              Background='#333333'
+                                              BorderBrush='Transparent'
+                                              BorderThickness='0'
+                                              FocusVisualStyle='{{x:Null}}'
+                                              FontSize='16'
+                                              Foreground='White'
+                                              TextWrapping='Wrap'>
+                                          <TextBox.Style>
+                                              <Style BasedOn='{{StaticResource {{x:Type TextBox}}}}' TargetType='TextBox'>
+                                                  <Setter Property='Template'>
+                                                      <Setter.Value>
+                                                          <ControlTemplate TargetType='TextBox'>
+                                                              <ScrollViewer x:Name='PART_ContentHost' Background='{{TemplateBinding Background}}' />
+                                                          </ControlTemplate>
+                                                      </Setter.Value>
+                                                  </Setter>
+                                              </Style>
+                                          </TextBox.Style>
+                                        </TextBox>
+                            </ScrollViewer>
                         </Grid>
-                      </Border>
-                    </ScrollViewer>";
+                      </Border>";
 
             var stringReader = new StringReader(xaml);
             var xmlReader = XmlReader.Create(stringReader);
             var element = (UIElement)XamlReader.Load(xmlReader);
 
             parentGrid.Children.Add(element);
+            parentGrid.SizeChanged += UpdateScrollViewer;
 
             MainWindow.CurrentPath = combinedPath;
 
@@ -636,6 +583,243 @@ namespace Minecraft_Console.UI
                     MessageBox.Show($"Error saving file:\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             };
+        }
+
+        private static void UpdateScrollViewer(object sender, SizeChangedEventArgs e)
+        {
+            if (sender is Grid parentGrid && parentGrid.Children.Count > 0)
+            {
+                var scrollViewer = FindVisualChild<ScrollViewer>(parentGrid);
+                if (scrollViewer != null)
+                {
+                    scrollViewer.MaxHeight = parentGrid.ActualHeight - 72; // Adjust based on your layout
+                }
+            }
+        }
+
+        // === Dropdown & Context Menu ===
+        private static void FilesDropdown_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (sender is not ComboBox comboBox ||
+                comboBox.SelectedItem is not ComboBoxItem selectedItem ||
+                selectedItem.Content == null)
+            {
+                return;
+            }
+
+            string? selectedAction = selectedItem.Content.ToString();
+
+            // Execute the appropriate action based on selection
+            switch (selectedAction)
+            {
+                case "Rename":
+                    ExecuteFileAction(comboBox, "Rename");
+                    break;
+                case "Move":
+                    ExecuteFileAction(comboBox, "Move");
+                    break;
+                case "Delete":
+                    ExecuteFileAction(comboBox, "Delete");
+                    break;
+            }
+
+            comboBox.SelectedItem = null;
+            comboBox.IsDropDownOpen = false;
+        }
+
+        private static void ExecuteFileAction(ComboBox comboBox, string action)
+        {
+            if (MainWindow.CurrentPath == null)
+            {
+                MessageBox.Show("CurrentPath not is not set!");
+                return;
+            }
+
+            string itemName = GetContextName(comboBox);
+            string itemPath = Path.Combine(MainWindow.CurrentPath, itemName);
+            MessageBox.Show($"{action} clicked for: {itemPath}");
+        }
+
+        private static string GetContextName(ComboBox comboBox)
+        {
+            var parentGrid = FindVisualParent<Grid>(comboBox);
+            if (parentGrid == null) return "Unknown item";
+
+            // Find the TextBlock in column 2 (assuming it contains the item name)
+            var textBlock = parentGrid.Children
+                .OfType<TextBlock>()
+                .FirstOrDefault(tb => Grid.GetColumn(tb) == 2);
+
+            return textBlock?.Text ?? "Unknown item";
+        }
+
+        // === Selection/Checkbox Popup ===
+        private static void ExplorerCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+            {
+                object[] selectedItems = ShowSelectedItems(mainWindow.ExplorerParent);
+                mainWindow.ExplorerPopupText.Text = selectedItems[0].ToString();
+
+                mainWindow.ExplorerPopupStatus = true;
+                ExplorerStatusMove(mainWindow.ExplorerPopupStatus, mainWindow.SelectionPopup);
+            }
+        }
+
+        private static void ExplorerCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+            {
+                object[] selectedItems = ShowSelectedItems(mainWindow.ExplorerParent);
+                mainWindow.ExplorerPopupText.Text = selectedItems[0].ToString();
+
+                _ = int.TryParse(selectedItems[1].ToString(), out int counter);
+                mainWindow.ExplorerPopupStatus = counter > 0;
+                ExplorerStatusMove(mainWindow.ExplorerPopupStatus, mainWindow.SelectionPopup);
+            }
+        }
+
+        private static void ExplorerStatusMove(bool status, Border Popup)
+        {
+            if (status)
+            {
+                ShowSelectionPopup(Popup);
+            }
+            else
+            {
+                HideSelectionPopup(Popup);
+            }
+        }
+
+        private static void ShowSelectionPopup(Border SelectionPopup)
+        {
+            SelectionPopup.Visibility = Visibility.Visible;
+
+            // Get the TranslateTransform from the border
+            if (SelectionPopup.RenderTransform is not TranslateTransform transform)
+            {
+                transform = new TranslateTransform();
+                SelectionPopup.RenderTransform = transform;
+            }
+
+            // Create the animation
+            DoubleAnimation slideIn = new()
+            {
+                To = 0,       // End Y position (visible)
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut } // Smooth glide
+            };
+
+            transform.BeginAnimation(TranslateTransform.YProperty, slideIn);
+        }
+
+        private static void HideSelectionPopup(Border SelectionPopup)
+        {
+            if (SelectionPopup.RenderTransform is not TranslateTransform transform)
+            {
+                transform = new TranslateTransform();
+                SelectionPopup.RenderTransform = transform;
+            }
+
+            DoubleAnimation slideOut = new()
+            {
+                To = -160,
+                Duration = TimeSpan.FromMilliseconds(300),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+            };
+
+            slideOut.Completed += (s, e) => SelectionPopup.Visibility = Visibility.Hidden;
+
+            transform.BeginAnimation(TranslateTransform.YProperty, slideOut);
+        }
+
+        public static object[] ShowSelectedItems(Grid ExplorerParent)
+        {
+            var selectedItems = GetSelectedItems(ExplorerParent);
+            var message = selectedItems.Count == 0
+                ? "No items selected"
+                : $"Selected items: {selectedItems.Count}";
+
+            return [message, selectedItems.Count.ToString(), selectedItems];
+        }
+
+        private static List<string> GetSelectedItems(Grid explorerParent)
+        {
+            var selectedItems = new List<string>();
+
+            // Recursively get all Border elements inside explorerParent
+            var allBorders = FindVisualChildren<Border>(explorerParent);
+
+            foreach (var border in allBorders)
+            {
+                var checkBox = FindVisualChild<CheckBox>(border);
+                if (checkBox != null && checkBox.IsChecked == true && border.Tag is string itemName)
+                {
+                    selectedItems.Add(itemName);
+                }
+            }
+
+            return selectedItems;
+        }
+
+        private static void ResetExplorerPopup()
+        {
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.SelectAllCheckBox.IsChecked = false;
+                mainWindow.ExplorerPopupStatus = false;
+
+                mainWindow.ExplorerPopupText.Text = "No selected items";
+                HideSelectionPopup(mainWindow.SelectionPopup);
+            }
+        }
+
+        // === Visual Tree Helpers ===
+        private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t)
+                    return t;
+
+                var foundChild = FindVisualChild<T>(child);
+                if (foundChild != null)
+                    return foundChild;
+            }
+            return null;
+        }
+
+        private static T? FindVisualParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            while (child != null)
+            {
+                if (child is T parent)
+                    return parent;
+
+                child = VisualTreeHelper.GetParent(child);
+            }
+            return null;
+        }
+
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+                    if (child is T t)
+                    {
+                        yield return t;
+                    }
+
+                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    {
+                        yield return childOfChild;
+                    }
+                }
+            }
         }
 
         static T? FindLogicalChildByName<T>(DependencyObject parent, string name) where T : FrameworkElement
