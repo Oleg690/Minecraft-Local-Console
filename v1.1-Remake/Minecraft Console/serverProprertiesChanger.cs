@@ -1,7 +1,6 @@
-﻿using Logger;
-using System.IO;
+﻿using System.IO;
 
-namespace serverPropriertiesChanger
+namespace Minecraft_Console
 {
     class DataChanger
     {

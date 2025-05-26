@@ -1,5 +1,4 @@
-﻿using Logger;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -339,6 +338,10 @@ namespace Minecraft_Console.UI
                                       Cursor='Hand'
                                       FontFamily='pack://application:,,,/assets/Fonts/Istok Web/#Istok Web'
                                       FontSize='18'/>
+                        <ComboBoxItem Content='Archive'
+                                      Cursor='Hand'
+                                      FontFamily='pack://application:,,,/assets/Fonts/Istok Web/#Istok Web'
+                                      FontSize='18'/>
                         <ComboBoxItem Content='Delete'
                                       Cursor='Hand'
                                       FontFamily='pack://application:,,,/assets/Fonts/Istok Web/#Istok Web'
@@ -646,34 +649,115 @@ namespace Minecraft_Console.UI
             string? selectedAction = selectedItem.Content.ToString();
 
             // Execute the appropriate action based on selection
-            switch (selectedAction)
+            if (Application.Current.MainWindow is MainWindow mainWindow)
             {
-                case "Rename":
-                    ExecuteFileAction(comboBox, "Rename");
-                    break;
-                case "Move":
-                    ExecuteFileAction(comboBox, "Move");
-                    break;
-                case "Delete":
-                    ExecuteFileAction(comboBox, "Delete");
-                    break;
-            }
+                switch (selectedAction)
+                {
+                    case "Rename":
+                        ExecuteFileAction(comboBox, "Rename", mainWindow.PopupHost);
+                        break;
+                    case "Move":
+                        ExecuteFileAction(comboBox, "Move", mainWindow.PopupHost);
+                        break;
+                    case "Archive":
+                        ExecuteFileAction(comboBox, "Archive", mainWindow.PopupHost);
+                        break;
+                    case "Delete":
+                        ExecuteFileAction(comboBox, "Delete", mainWindow.PopupHost);
+                        break;
+                }
 
-            comboBox.SelectedItem = null;
-            comboBox.IsDropDownOpen = false;
+                comboBox.SelectedItem = null;
+                comboBox.IsDropDownOpen = false;
+
+                List<List<string>> Files_Folders = ServerFileExplorer.GetFoldersAndFiles(MainWindow.CurrentPath);
+                CreateExplorerItems(mainWindow.ExplorerParent, Files_Folders, mainWindow.pathContainer);
+            }
         }
 
-        private static void ExecuteFileAction(ComboBox comboBox, string action)
+        private async static void ExecuteFileAction(ComboBox comboBox, string action, Grid PopupHost)
         {
             if (MainWindow.CurrentPath == null)
             {
                 MessageBox.Show("CurrentPath not is not set!");
+                CodeLogger.ConsoleLog("CurrentPath not is not set!");
+                return;
+            }
+
+            if (MainWindow.userDataPath == null)
+            {
+                MessageBox.Show("userDataPath not is not set!");
+                CodeLogger.ConsoleLog("userDataPath not is not set!");
                 return;
             }
 
             string itemName = GetContextName(comboBox);
             string itemPath = Path.Combine(MainWindow.CurrentPath, itemName);
-            MessageBox.Show($"{action} clicked for: {itemPath}");
+
+            if (action == "Rename")
+            {
+                MessageBox.Show($"{action} clicked for: {itemPath}");
+            }
+            else if (action == "Move")
+            {
+                MessageBox.Show($"{action} clicked for: {itemPath}");
+            }
+            else if (action == "Archive")
+            {
+                try
+                {
+                    string downloadsPath = JsonHelper.GetOrSetValue(MainWindow.userDataPath, "archivePath")?.ToString() ?? string.Empty;
+                    List<string> path = [itemPath];
+
+                    string[] archivingStatus = await Task.Run(() => MainWindow.AchiveExplorerItems(path, downloadsPath));
+
+                    PopupWindow.CreateStatusPopup(archivingStatus[0], archivingStatus[1], PopupHost);
+                }
+                catch (Exception ex)
+                {
+                    PopupWindow.CreateStatusPopup("Error", $"Error archiving {Path.GetFileName(itemPath)}. {ex}", PopupHost);
+                }
+            }
+            else if (action == "Delete")
+            {
+                try
+                {
+                    string status = "";
+                    string message = $"";
+
+                    if (File.Exists(itemPath))
+                    {
+                        File.Delete(itemPath);
+                        status = "Success";
+                        message = $"File {itemName} deleted successfully.";
+                    }
+                    else if (Directory.Exists(itemPath))
+                    {
+                        Directory.Delete(itemPath, true);
+                        status = "Success";
+                        message = $"Directory {itemName} deleted successfully.";
+                    }
+                    else
+                    {
+                        status = "Error";
+                        message = $"Item not found: {itemName}";
+                    }
+
+                    PopupWindow.CreateStatusPopup(status, message, PopupHost);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    PopupWindow.CreateStatusPopup("Error", $"Access denied for deletion.", PopupHost);
+                }
+                catch (IOException ex) when (ex.Message.Contains("being used by another process"))
+                {
+                    PopupWindow.CreateStatusPopup("Error", $"Item in use.", PopupHost);
+                }
+                catch (Exception ex)
+                {
+                    PopupWindow.CreateStatusPopup("Error", $"Error deleting {Path.GetFileName(itemPath)}. {ex}", PopupHost);
+                }
+            }
         }
 
         private static string GetContextName(ComboBox comboBox)

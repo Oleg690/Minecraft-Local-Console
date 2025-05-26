@@ -1,5 +1,4 @@
-﻿using Logger;
-using Open.Nat;
+﻿using Open.Nat;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -11,7 +10,7 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Windows;
 
-namespace NetworkConfig
+namespace Minecraft_Console
 {
     [SupportedOSPlatform("windows")]
     class NetworkSetup

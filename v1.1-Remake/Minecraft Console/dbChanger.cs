@@ -1,5 +1,4 @@
-﻿using Logger;
-using System.Data.SQLite;
+﻿using System.Data.SQLite;
 using System.IO;
 
 namespace Minecraft_Console { 

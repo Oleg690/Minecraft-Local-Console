@@ -2,11 +2,10 @@
 using System.Xml;
 using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
-using Logger;
 using System.Net.Http;
 using System.IO;
 
-namespace Updater
+namespace Minecraft_Console
 {
     class VersionsUpdater
     {

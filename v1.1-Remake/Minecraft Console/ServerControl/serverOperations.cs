@@ -1,5 +1,4 @@
-﻿using CreateServerFunc;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 
 namespace Minecraft_Console.ServerControl;

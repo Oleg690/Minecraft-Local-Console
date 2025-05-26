@@ -1,8 +1,8 @@
-﻿using jdk.nashorn.@internal.ir;
+﻿using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 
-namespace Logger
+namespace Minecraft_Console
 {
     public static class CodeLogger
     {
@@ -13,15 +13,23 @@ namespace Logger
         public static void CreateLogFile(int maxLogFiles = 10)
         {
             if (LogsPath == null)
-            {
                 throw new InvalidOperationException("LogsPath cannot be null.");
-            }
 
-            Directory.CreateDirectory(LogsPath);
+            if (!Directory.Exists(LogsPath))
+                Directory.CreateDirectory(LogsPath);
+
             string latestLogPath = Path.Combine(LogsPath, "latest.log");
 
             if (File.Exists(latestLogPath))
             {
+                FileInfo logInfo = new(latestLogPath);
+
+                // If file is empty, don't create a new one
+                if (logInfo.Length == 0)
+                {
+                    return;
+                }
+
                 string timestamp = DateTime.Now.ToString("yyyy-MMM-dd");
                 string archivedLogName;
                 string archivedLogPath;
@@ -49,7 +57,6 @@ namespace Logger
                     }
 
                     File.Delete(archivedLogPath);
-
                     //Console.WriteLine($"Log compressed: {gzipFilePath}");
                 }
                 catch (Exception ex)
@@ -90,29 +97,20 @@ namespace Logger
 
         public static void ConsoleLog(object message)
         {
-            string timestamp = $"[{DateTime.Now:ddMMMyyyy HH:mm:ss.fff}] ";
-
-            string logLine = timestamp + message;
-
             try
             {
                 if (LogsPath != null)
                 {
+                    string timestamp = $"[{DateTime.Now:ddMMMyyyy HH:mm:ss.fff}] ";
+                    string logLine = timestamp + message;
+                    
                     File.AppendAllText(Path.Combine(LogsPath, "latest.log"), logLine + Environment.NewLine);
                 }
-
-                Console.WriteLine(message);
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error logging: " + ex.Message);
-                ConsoleLog("Error logging: " + ex.Message);
+                Debug.WriteLine($"Error writing to log file: {ex.Message}");
             }
-        }
-
-        public static void ConsoleLog()
-        {
-            return;
         }
     }
 }

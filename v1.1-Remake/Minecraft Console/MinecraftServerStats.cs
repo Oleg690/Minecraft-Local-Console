@@ -1,20 +1,15 @@
-﻿using CreateServerFunc;
-using java.util;
+﻿using java.util;
 using javax.management;
 using javax.management.openmbean;
 using javax.management.remote;
-using Logger;
-using Minecraft_Console;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
-using System.Windows;
-using System.Windows.Media;
 
-namespace MinecraftServerStats
+namespace Minecraft_Console
 {
     [SupportedOSPlatform("windows")]
     class ServerStats
@@ -110,9 +105,9 @@ namespace MinecraftServerStats
 
                 long freeHeap = maxHeap - usedHeap;
 
-                string freeHeapPercentage = (((double)freeHeap / maxHeap) * 100).ToString("0.00");
+                string freeHeapPercentage = ((double)freeHeap / maxHeap * 100).ToString("0.00");
 
-                string usedHeapPercentage = (((double)usedHeap / maxHeap) * 100).ToString("0.00");
+                string usedHeapPercentage = ((double)usedHeap / maxHeap * 100).ToString("0.00");
 
                 return [$"{usedHeapPercentage}%", $"{freeHeapPercentage}%"];
             }
@@ -210,7 +205,7 @@ namespace MinecraftServerStats
                         byte[] lengthBytes = new byte[2];
                         if (stream.Read(lengthBytes, 0, 2) != 2)
                             return "Incomplete legacy packet";
-                        short stringLength = (short)((lengthBytes[0] << 8) | lengthBytes[1]);
+                        short stringLength = (short)(lengthBytes[0] << 8 | lengthBytes[1]);
                         int byteLength = stringLength * 2;
 
                         byte[] stringBytes = new byte[byteLength];
@@ -413,8 +408,8 @@ namespace MinecraftServerStats
                 if (readByte == -1)
                     throw new EndOfStreamException();
                 read = (byte)readByte;
-                int value = (read & 0b01111111);
-                result |= (value << (7 * numRead));
+                int value = read & 0b01111111;
+                result |= value << 7 * numRead;
                 numRead++;
                 if (numRead > 5)
                     throw new Exception("VarInt is too big");

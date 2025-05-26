@@ -77,7 +77,7 @@ namespace Minecraft_Console.UI
 
             var bottomBorder = new Border
             {
-                Background = ConvertBrush("#262A32"),
+                Background = ConvertBrush("#21242c"),
                 CornerRadius = new CornerRadius(0, 0, 15, 15),
                 Padding = new Thickness(20, 10, 20, 10)
             };
@@ -169,6 +169,8 @@ namespace Minecraft_Console.UI
                 SlideOutAndRemove(mainBorder);
             };
             timer.Start();
+
+            CodeLogger.ConsoleLog(message);
         }
 
         private static void RepositionPopups()

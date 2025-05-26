@@ -1,8 +1,5 @@
-﻿using CreateServerFunc;
-using Logger;
-using Minecraft_Console.ServerControl;
+﻿using Minecraft_Console.ServerControl;
 using Minecraft_Console.UI;
-using NetworkConfig;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
@@ -12,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Updater;
 using WpfAnimatedGif;
 
 namespace Minecraft_Console
@@ -76,7 +72,7 @@ namespace Minecraft_Console
     {
         private static readonly ServerInfoViewModel _viewModel = new();
         private Button? _selectedButton;
-        private ServerManager _serverManager;
+        private readonly ServerManager _serverManager;
 
         public bool ExplorerPopupStatus = false;
 
@@ -96,7 +92,7 @@ namespace Minecraft_Console
         private static string? serverVersionsPath;
         private static string? tempFolderPath;
         private static string? defaultServerPropertiesPath;
-        private static string? userData;
+        public static string? userDataPath;
         public static string? CurrentPath;
 
         private static string? serverDirectoryPath;
@@ -118,12 +114,12 @@ namespace Minecraft_Console
 
         private static void LoadDataJSONFile()
         {
-            if (string.IsNullOrEmpty(userData))
+            if (string.IsNullOrEmpty(userDataPath))
             {
                 throw new InvalidOperationException("The 'userData' path is not set.");
             }
 
-            JsonHelper.CreateJsonIfNotExists(userData, new Dictionary<string, object>
+            JsonHelper.CreateJsonIfNotExists(userDataPath, new Dictionary<string, object>
             {
                 { "runningServerMemory", "5000" },
                 { "archivePath", $"{Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")}" }
@@ -209,7 +205,7 @@ namespace Minecraft_Console
             serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions") ?? string.Empty;
             tempFolderPath = System.IO.Path.Combine(rootFolder, "temp") ?? string.Empty;
             defaultServerPropertiesPath = System.IO.Path.Combine(rootFolder, "Preset Files\\server.properties") ?? string.Empty;
-            userData = System.IO.Path.Combine(rootFolder, "data\\userData.json") ?? string.Empty;
+            userDataPath = System.IO.Path.Combine(rootFolder, "data\\userData.json") ?? string.Empty;
             Server_PublicComputerIP = await NetworkSetup.GetPublicIP() ?? string.Empty;
             Server_LocalComputerIP = NetworkSetup.GetLocalIP() ?? string.Empty;
         }
@@ -358,7 +354,7 @@ namespace Minecraft_Console
         // Server Handeling funcs
         private async void CreateServer_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(userData))
+            if (string.IsNullOrEmpty(userDataPath))
             {
                 throw new InvalidOperationException("The 'userData' path is not set.");
             }
@@ -386,7 +382,7 @@ namespace Minecraft_Console
                 int RMI_Port = 25563;
                 int RCON_Port = 25575;
                 // Server Memory Allocator
-                int memoryAllocator = Convert.ToInt32(JsonHelper.GetOrSetValue(userData, "runningServerMemory")?.ToString());
+                int memoryAllocator = Convert.ToInt32(JsonHelper.GetOrSetValue(userDataPath, "runningServerMemory")?.ToString());
 
                 // Utility for checkboxes
                 static string GetCheckBoxValue(CheckBox cb, bool invert = false) =>
@@ -434,15 +430,15 @@ namespace Minecraft_Console
                 LoadingScreen.Visibility = Visibility.Collapsed;
                 UnloadGIF();
 
-                LoadServersPage();
                 serverRunning = false;
+
+                PopupWindow.CreateStatusPopup(creationStatus[0], creationStatus[1], PopupHost);
 
                 if (creationStatus[0] == "Error" && creationStatus.Length == 3)
                 {
-                    File.Delete(Path.Combine(rootWorldsFolder, creationStatus[2]));
+                    ServerOperator.DeleteServer(creationStatus[2], Path.Combine(rootWorldsFolder, creationStatus[2])); // Auto-delete the server if creation failed
+                    PopupWindow.CreateStatusPopup("Info", "Creation failed – Server auto-deleted.", PopupHost);
                 }
-
-                PopupWindow.CreateStatusPopup(creationStatus[0], creationStatus[1], PopupHost); // TO DO
             }
             catch (Exception ex)
             {
@@ -458,6 +454,7 @@ namespace Minecraft_Console
             finally
             {
                 CreateServerBTN.IsEnabled = true;
+                LoadServersPage();
             }
         }
 
@@ -786,7 +783,7 @@ namespace Minecraft_Console
                 ArhiveBtn.IsEnabled = false;
                 DeleteBtn.IsEnabled = false;
 
-                if (string.IsNullOrEmpty(userData))
+                if (string.IsNullOrEmpty(userDataPath))
                 {
                     MessageBox.Show("The 'userData' path is not set.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
@@ -794,11 +791,11 @@ namespace Minecraft_Console
 
                 object[] selectedItems = FileExplorerCards.ShowSelectedItems(ExplorerParent);
                 List<string> itemPaths = selectedItems[2] as List<string> ?? [];
-                string downloadsPath = JsonHelper.GetOrSetValue(userData, "archivePath")?.ToString() ?? string.Empty;
+                string downloadsPath = JsonHelper.GetOrSetValue(userDataPath, "archivePath")?.ToString() ?? string.Empty;
 
-                await Task.Run(() => AchiveExplorerItems(itemPaths, downloadsPath));
+                string[] archivingStatus = await Task.Run(() => AchiveExplorerItems(itemPaths, downloadsPath));
 
-                CodeLogger.ConsoleLog($"Archived successfully to: {downloadsPath}");
+                PopupWindow.CreateStatusPopup(archivingStatus[0], archivingStatus[1], PopupHost);
             }
             catch (Exception ex)
             {
@@ -827,12 +824,9 @@ namespace Minecraft_Console
                 object[] selectedItems = FileExplorerCards.ShowSelectedItems(ExplorerParent);
                 List<string> itemPaths = selectedItems[2] as List<string> ?? [];
 
-                foreach (var item in itemPaths)
-                {
-                    await Task.Run(() => DeleteExplorerItems(item));
-                }
+                string[] deletingStatus = await Task.Run(() => DeleteExplorerItems(itemPaths));
 
-                CodeLogger.ConsoleLog($"Items deleted succeasfully!");
+                PopupWindow.CreateStatusPopup(deletingStatus[0], deletingStatus[1], PopupHost);
             }
             catch (Exception ex)
             {
@@ -852,64 +846,111 @@ namespace Minecraft_Console
             }
         }
 
-        private static void DeleteExplorerItems(string item)
+        private static string[] DeleteExplorerItems(List<string> items)
         {
-            if (Directory.Exists(item))
+            if (items == null || items.Count == 0)
+                return ["Error", "No items provided for deletion."];
+
+            List<string> errors = [];
+            int deletedCount = 0;
+
+            foreach (string item in items)
             {
-                Directory.Delete(item, true); // Delete directory and its contents
+                try
+                {
+                    if (Directory.Exists(item))
+                    {
+                        Directory.Delete(item, true);
+                        deletedCount++;
+                    }
+                    else if (File.Exists(item))
+                    {
+                        File.Delete(item);
+                        deletedCount++;
+                    }
+                    else
+                    {
+                        errors.Add($"Item not found: {item}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Failed to delete '{item}': {ex.Message}");
+                }
             }
-            else if (File.Exists(item))
+
+            if (errors.Count == 0)
             {
-                File.Delete(item); // Delete file
+                return ["Success", $"All {deletedCount} items deleted successfully."];
+            }
+            else if (deletedCount > 0)
+            {
+                return ["Info", $"{deletedCount} items deleted. {errors.Count} failed. Details: {string.Join(" | ", errors)}"];
             }
             else
             {
-                CodeLogger.ConsoleLog($"Item not found: {item}");
+                return ["Error", $"No items deleted. Errors: {string.Join(" | ", errors)}"];
             }
         }
 
-        public static void AchiveExplorerItems(List<string> paths, string destinationFolder)
+        public static string[] AchiveExplorerItems(List<string> paths, string destinationFolder)
         {
-            if (!Directory.Exists(destinationFolder))
+            try
             {
-                Directory.CreateDirectory(destinationFolder);
-            }
+                if (paths == null || paths.Count == 0)
+                    return ["Error", "No items provided to archive."];
 
-            // Generate random file name that doesn't exist
-            string baseName = "archive";
-            string zipPath = Path.Combine(destinationFolder, baseName + ".zip");
-            int counter = 1;
-
-            while (File.Exists(zipPath))
-            {
-                zipPath = Path.Combine(destinationFolder, $"{baseName} ({counter}).zip");
-                counter++;
-            }
-
-            // Temp folder to stage all files/folders
-            string tempRoot = Path.Combine(Path.GetTempPath(), "ArchiveTemp_" + Guid.NewGuid());
-            Directory.CreateDirectory(tempRoot);
-
-            foreach (string path in paths)
-            {
-                if (File.Exists(path))
+                if (!Directory.Exists(destinationFolder))
                 {
-                    string fileName = Path.GetFileName(path);
-                    File.Copy(path, Path.Combine(tempRoot, fileName), true);
+                    Directory.CreateDirectory(destinationFolder);
                 }
-                else if (Directory.Exists(path))
+
+                // Generate unique zip file name
+                string baseName = "archive";
+                string zipPath = Path.Combine(destinationFolder, baseName + ".zip");
+                int counter = 1;
+                while (File.Exists(zipPath))
                 {
-                    string folderName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
-                    string destFolder = Path.Combine(tempRoot, folderName);
-                    DirectoryCopy(path, destFolder, true);
+                    zipPath = Path.Combine(destinationFolder, $"{baseName} ({counter}).zip");
+                    counter++;
                 }
+
+                // Temp folder to stage files/folders
+                string tempRoot = Path.Combine(Path.GetTempPath(), "ArchiveTemp_" + Guid.NewGuid());
+                Directory.CreateDirectory(tempRoot);
+
+                foreach (string path in paths)
+                {
+                    if (File.Exists(path))
+                    {
+                        string fileName = Path.GetFileName(path);
+                        File.Copy(path, Path.Combine(tempRoot, fileName), true);
+                    }
+                    else if (Directory.Exists(path))
+                    {
+                        string folderName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
+                        string destFolder = Path.Combine(tempRoot, folderName);
+                        DirectoryCopy(path, destFolder, true);
+                    }
+                    else
+                    {
+                        return ["Error", $"Path does not exist: {path}"];
+                    }
+                }
+
+                // Create zip
+                ZipFile.CreateFromDirectory(tempRoot, zipPath);
+
+                // Clean up temp
+                Directory.Delete(tempRoot, true);
+
+                return ["Success", $"Archive created successfully at: {zipPath}"];
+            }
+            catch (Exception ex)
+            {
+                return ["Error", ex.Message];
             }
 
-            // Create zip from temp folder
-            ZipFile.CreateFromDirectory(tempRoot, zipPath);
-
-            // Clean up temp
-            Directory.Delete(tempRoot, true);
         }
 
         private static void DirectoryCopy(string sourceDir, string destDir, bool copySubDirs)

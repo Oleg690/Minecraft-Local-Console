@@ -1,18 +1,12 @@
 ﻿using CoreRCON;
-using Logger;
-using Minecraft_Console;
-using NetworkConfig;
-using serverPropriertiesChanger;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
-using System.Windows;
-using Updater;
 
-namespace CreateServerFunc
+namespace Minecraft_Console
 {
     [SupportedOSPlatform("windows")]
     class ServerCreator
@@ -128,7 +122,7 @@ namespace CreateServerFunc
                 if (!Convert.ToBoolean(verificator[0]))
                 {
                     CodeLogger.ConsoleLog($"{verificator[1]}");
-                    return ["Error", $"{verificator[1]}"];
+                    return ["Error", $"{verificator[1]}", $"{uniqueNumber}"];
                 }
             }
 
@@ -146,7 +140,7 @@ namespace CreateServerFunc
                 if (!Convert.ToBoolean(verificator[0]))
                 {
                     CodeLogger.ConsoleLog($"{verificator[1]}");
-                    return ["Error", $"{verificator[1]}"];
+                    return ["Error", $"{verificator[1]}", $"{uniqueNumber}"];
                 }
             }
 
@@ -1165,7 +1159,7 @@ namespace CreateServerFunc
             int minutes = int.Parse(parts[0]);
             int seconds = int.Parse(parts[1]);
 
-            return (minutes * 60) + seconds;
+            return minutes * 60 + seconds;
         }
 
         public static bool IsPortInUse(int port)
