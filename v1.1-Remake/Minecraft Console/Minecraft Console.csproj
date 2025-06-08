@@ -24,6 +24,8 @@
     <None Remove="assets\icons\folder_file\folder.png" />
     <None Remove="assets\icons\Logo\logo.ico" />
     <None Remove="assets\icons\Logo\minehost.png" />
+    <None Remove="assets\icons\Manage Panel Icons\Heart.png" />
+    <None Remove="assets\icons\Manage Panel Icons\Wifi.png" />
     <None Remove="assets\Minecraft_Photo.png" />
   </ItemGroup>
 
@@ -43,7 +45,6 @@
 
   <ItemGroup>
     <Folder Include="database\" />
-    <Folder Include="data\" />
     <Folder Include="logs\" />
     <Folder Include="temp\" />
     <Folder Include="versions\" />
@@ -69,6 +70,12 @@
     </Resource>
     <Resource Include="assets\icons\Logo\logo.ico" />
     <Resource Include="assets\icons\Logo\minehost.png" />
+    <Resource Include="assets\icons\Manage Panel Icons\Heart.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\icons\Manage Panel Icons\Wifi.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="assets\Minecraft_Photo.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>

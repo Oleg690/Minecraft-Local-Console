@@ -2,9 +2,9 @@
 using System.Windows;
 
 namespace Minecraft_Console.ServerControl;
-public class ServerManager(ServerInfoViewModel viewModel)
+public class ServerManager(ViewModel viewModel)
 {
-    private readonly ServerInfoViewModel _viewModel = viewModel;
+    private readonly ViewModel _viewModel = viewModel;
 
     public async Task<bool> StartServer(string worldNumber, string rootWorldsFolder, string publicIP, Func<bool> isServerRunning, Action setServerRunningTrue, string serverDirectoryPath, Action<string>? onServerRunning = null)
     {
@@ -123,7 +123,7 @@ public class ServerManager(ServerInfoViewModel viewModel)
     {
         serverPort = jmxPort = rconPort = rmiPort = 0;
 
-        var data = dbChanger.SpecificDataFunc(
+        var data = DbChanger.SpecificDataFunc(
             $"SELECT Server_Port, JMX_Port, RCON_Port, RMI_Port FROM worlds WHERE worldNumber = \"{worldNumber}\";"
         );
 
@@ -142,7 +142,7 @@ public class ServerManager(ServerInfoViewModel viewModel)
     {
         rconPort = 0;
 
-        var data = dbChanger.SpecificDataFunc(
+        var data = DbChanger.SpecificDataFunc(
             $"SELECT RCON_Port FROM worlds WHERE worldNumber = \"{worldNumber}\";"
         );
 

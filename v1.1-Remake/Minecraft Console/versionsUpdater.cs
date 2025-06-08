@@ -871,11 +871,11 @@ namespace Minecraft_Console
                 throw new InvalidOperationException("The path to the supported versions XML file is not set.");
             }
 
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new();
             doc.Load(versionsSupprortListXML);
 
             XmlNodeList? softwareNodes = doc.SelectNodes("/minecraft_softwares/software");
-            List<object> softwareList = new List<object>();
+            List<object> softwareList = [];
 
             if (softwareNodes == null)
             {

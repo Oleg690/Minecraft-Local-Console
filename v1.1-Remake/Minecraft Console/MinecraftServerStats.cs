@@ -14,7 +14,7 @@ namespace Minecraft_Console
     [SupportedOSPlatform("windows")]
     class ServerStats
     {
-        public static async Task GetServerInfo(ServerInfoViewModel viewModel, string worldFolderPath, string worldNumber, object[] serverData, object[] userData, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
+        public static async Task GetServerInfo(ViewModel viewModel, string worldFolderPath, string worldNumber, object[] serverData, object[] userData, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
         {
             if (MainWindow.serverRunning == true)
             {
@@ -29,14 +29,14 @@ namespace Minecraft_Console
                 string memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw)[0];
                 long getUsedHeapMemoryTime = stopwatch.ElapsedMilliseconds;
                 string[] memoryData = [memoryUsage, getUsedHeapMemoryTime.ToString()];
-                viewModel.MemoryUsage = memoryData[0];
+                //viewModel.MemoryUsage = memoryData[0];
                 stopwatch.Restart();
 
                 // Get world folder size
                 string worldSize = GetFolderSize(worldFolderPath);
                 long getFolderSizeTime = stopwatch.ElapsedMilliseconds;
                 string[] worldData = [worldSize, getFolderSizeTime.ToString()];
-                viewModel.WorldSize = worldData[0];
+                //viewModel.WorldSize = worldData[0];
                 stopwatch.Restart();
 
                 // Get online players
@@ -46,24 +46,24 @@ namespace Minecraft_Console
                 string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
                 long getOnlinePlayersCountTime = stopwatch.ElapsedMilliseconds;
                 string[] playersData = [playersResult, getOnlinePlayersCountTime.ToString()];
-                viewModel.PlayersOnline = $"{playersData[0]} / {maxPlayers}";
+                //viewModel.PlayersOnline = $"{playersData[0]} / {maxPlayers}";
                 stopwatch.Restart();
 
                 // Get server uptime
                 string upTime = GetServerUptime(worldFolderPath);
                 long getServerUpTime = stopwatch.ElapsedMilliseconds;
                 string[] uptimeData = [upTime, getServerUpTime.ToString()];
-                viewModel.UpTime = uptimeData[0];
+                //viewModel.UpTime = uptimeData[0];
                 stopwatch.Restart();
 
                 // Get console output
                 string consoleOutput = GetConsoleOutput(worldFolderPath);
                 long consoleOutputTime = stopwatch.ElapsedMilliseconds;
                 string[] consoleOutputData = [consoleOutput, consoleOutputTime.ToString()];
-                viewModel.Console = consoleOutputData[0];
+                //viewModel.Console = consoleOutputData[0];
                 stopwatch.Restart();
 
-                CodeLogger.ConsoleLog($"Updating VM for {worldNumber}: {viewModel.MemoryUsage}");
+                //CodeLogger.ConsoleLog($"Updating VM for {worldNumber}: {viewModel.MemoryUsage}");
 
                 // Get elapsed time
                 long totalElapsedTime = getUsedHeapMemoryTime + getFolderSizeTime + getOnlinePlayersCountTime + getServerUpTime + consoleOutputTime;

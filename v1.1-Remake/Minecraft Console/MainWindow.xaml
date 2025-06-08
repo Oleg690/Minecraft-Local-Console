@@ -13,6 +13,8 @@
     Icon="pack://application:,,,/assets/icons/Logo/logo.ico"
     mc:Ignorable="d">
     <Window.Resources>
+        <SolidColorBrush x:Key="StatusBrush" Color="#FF3535" />
+
         <Style x:Key="ServerCardFont" TargetType="TextBlock">
             <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Jomhuria/#Jomhuria" />
         </Style>
@@ -25,7 +27,6 @@
         <Style TargetType="ListViewItem">
             <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
         </Style>
-
 
         <Style x:Key="ArhiveButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#1974da" />
@@ -545,12 +546,588 @@
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Visibility="Collapsed">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock
-                                FontSize="30"
-                                Foreground="White"
-                                Text="Manage" />
-                        </StackPanel>
+
+                        <Grid.Resources>
+                            <Style x:Key="TextBlockDefaultStyle" TargetType="TextBlock">
+                                <Setter Property="FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
+                                <Setter Property="FontSize" Value="25" />
+                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                            </Style>
+
+                            <Style x:Key="ButtonStyle" TargetType="Button">
+                                <Setter Property="FontSize" Value="35" />
+                                <Setter Property="Foreground" Value="White" />
+
+                                <!--  TEMP  -->
+                                <Setter Property="Background" Value="DarkGray" />
+                                <!--  TEMP  -->
+
+                                <Setter Property="FontWeight" Value="Bold" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Cursor" Value="Hand" />
+
+                                <Setter Property="Width" Value="170" />
+                                <Setter Property="Height" Value="80" />
+                            </Style>
+                        </Grid.Resources>
+                        <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
+                            <Grid Margin="100">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Grid
+                                    Grid.Column="0"
+                                    Margin="10,0,0,0"
+                                    VerticalAlignment="Center">
+                                    <Image
+                                        Width="300"
+                                        Height="450"
+                                        Source="pack://application:,,,/assets/Minecraft_Photo.png"
+                                        Stretch="UniformToFill">
+                                        <Image.Clip>
+                                            <RectangleGeometry
+                                                RadiusX="20"
+                                                RadiusY="20"
+                                                Rect="0,0,300,450" />
+                                        </Image.Clip>
+                                    </Image>
+                                </Grid>
+                                <Grid Grid.Column="1" VerticalAlignment="Center">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <Button
+                                            x:Name="StartBtn"
+                                            Grid.Column="0"
+                                            HorizontalAlignment="Right"
+                                            Click="StartServer"
+                                            Content="Start"
+                                            IsEnabled="False"
+                                            Style="{StaticResource ButtonStyle}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border
+                                                        x:Name="border"
+                                                        Background="#2781E6"
+                                                        CornerRadius="15"
+                                                        SnapsToDevicePixels="True">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                                        <Border.RenderTransform>
+                                                            <ScaleTransform ScaleX="1" ScaleY="1" />
+                                                        </Border.RenderTransform>
+                                                        <Border.RenderTransformOrigin>0.5,0.5</Border.RenderTransformOrigin>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <!--  Hover  -->
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                            To="#4591EB"
+                                                                            Duration="0:0:0.2" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                            To="#2781E6"
+                                                                            Duration="0:0:0.2" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+
+                                                        <!--  Pressed  -->
+                                                        <Trigger Property="IsPressed" Value="True">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                            To="0.95"
+                                                                            Duration="0:0:0.1" />
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                            To="0.95"
+                                                                            Duration="0:0:0.1" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                            To="1"
+                                                                            Duration="0:0:0.1" />
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                            To="1"
+                                                                            Duration="0:0:0.1" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+
+                                                        <!--  Disabled  -->
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="Opacity"
+                                                                            From="1"
+                                                                            To="0.4"
+                                                                            Duration="0:0:0.3" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="Opacity"
+                                                                            From="0.4"
+                                                                            To="1.0"
+                                                                            Duration="0:0:0.3" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                        <Button
+                                            x:Name="StopBtn"
+                                            Grid.Column="1"
+                                            Margin="30,0"
+                                            Click="StopServer"
+                                            Content="Stop"
+                                            IsEnabled="False"
+                                            Style="{StaticResource ButtonStyle}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border
+                                                        x:Name="border"
+                                                        Background="#E92626"
+                                                        CornerRadius="15"
+                                                        SnapsToDevicePixels="True">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                                        <Border.RenderTransform>
+                                                            <ScaleTransform ScaleX="1" ScaleY="1" />
+                                                        </Border.RenderTransform>
+                                                        <Border.RenderTransformOrigin>0.5,0.5</Border.RenderTransformOrigin>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <!--  Hover  -->
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                            To="#F04A4A"
+                                                                            Duration="0:0:0.2" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                            To="#E92626"
+                                                                            Duration="0:0:0.2" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+
+                                                        <!--  Pressed  -->
+                                                        <Trigger Property="IsPressed" Value="True">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                            To="0.95"
+                                                                            Duration="0:0:0.1" />
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                            To="0.95"
+                                                                            Duration="0:0:0.1" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                            To="1"
+                                                                            Duration="0:0:0.1" />
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                            To="1"
+                                                                            Duration="0:0:0.1" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+
+                                                        <!--  Disabled  -->
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="Opacity"
+                                                                            From="1"
+                                                                            To="0.4"
+                                                                            Duration="0:0:0.3" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="Opacity"
+                                                                            From="0.4"
+                                                                            To="1.0"
+                                                                            Duration="0:0:0.3" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                        <Button
+                                            x:Name="RestartBtn"
+                                            Grid.Column="2"
+                                            HorizontalAlignment="Left"
+                                            Click="RestartServer"
+                                            Content="Restart"
+                                            IsEnabled="False"
+                                            Style="{StaticResource ButtonStyle}">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border
+                                                        x:Name="border"
+                                                        Background="#B921FF"
+                                                        CornerRadius="15"
+                                                        SnapsToDevicePixels="True">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                                                        <Border.RenderTransform>
+                                                            <ScaleTransform ScaleX="1" ScaleY="1" />
+                                                        </Border.RenderTransform>
+                                                        <Border.RenderTransformOrigin>0.5,0.5</Border.RenderTransformOrigin>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <!--  Hover  -->
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                            To="#CD52FF"
+                                                                            Duration="0:0:0.2" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <ColorAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                                                            To="#B921FF"
+                                                                            Duration="0:0:0.2" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+
+                                                        <!--  Pressed  -->
+                                                        <Trigger Property="IsPressed" Value="True">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                            To="0.95"
+                                                                            Duration="0:0:0.1" />
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                            To="0.95"
+                                                                            Duration="0:0:0.1" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                            To="1"
+                                                                            Duration="0:0:0.1" />
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                            To="1"
+                                                                            Duration="0:0:0.1" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+
+                                                        <!--  Disabled  -->
+                                                        <Trigger Property="IsEnabled" Value="False">
+                                                            <Trigger.EnterActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="Opacity"
+                                                                            From="1"
+                                                                            To="0.4"
+                                                                            Duration="0:0:0.3" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.EnterActions>
+                                                            <Trigger.ExitActions>
+                                                                <BeginStoryboard>
+                                                                    <Storyboard>
+                                                                        <DoubleAnimation
+                                                                            Storyboard.TargetName="border"
+                                                                            Storyboard.TargetProperty="Opacity"
+                                                                            From="0.4"
+                                                                            To="1.0"
+                                                                            Duration="0:0:0.3" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </Trigger.ExitActions>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                        </Button>
+                                    </Grid>
+                                    <Border
+                                        Grid.Row="1"
+                                        Width="750"
+                                        Margin="30"
+                                        Padding="20"
+                                        Background="#262A32"
+                                        CornerRadius="20">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <Grid Grid.Row="0" Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock
+                                                    Grid.Column="0"
+                                                    Margin="0,0,20,10"
+                                                    FontSize="35"
+                                                    Style="{StaticResource TextBlockDefaultStyle}"
+                                                    Text="Server Name:" />
+                                                <TextBlock
+                                                    x:Name="serverNameBlock"
+                                                    Grid.Column="1"
+                                                    Margin="0,0,0,10"
+                                                    FontSize="35"
+                                                    Style="{StaticResource TextBlockDefaultStyle}"
+                                                    Text="Wolrd 1" />
+                                            </Grid>
+
+                                            <Grid Grid.Row="1" Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Image
+                                                    Grid.Column="0"
+                                                    Width="30"
+                                                    Source="pack://application:,,,/assets/icons/Manage Panel Icons/Wifi.png"
+                                                    Stretch="Uniform">
+                                                    <Image.RenderTransform>
+                                                        <TranslateTransform Y="-3" />
+                                                    </Image.RenderTransform>
+                                                </Image>
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    Margin="10,0,0,0"
+                                                    Style="{StaticResource TextBlockDefaultStyle}"
+                                                    Text="Adress:" />
+                                            </Grid>
+
+                                            <Grid Grid.Row="2" Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Border
+                                                    Grid.Column="0"
+                                                    Padding="15,10"
+                                                    Background="#1C2127"
+                                                    CornerRadius="10">
+                                                    <TextBlock Style="{StaticResource TextBlockDefaultStyle}" Text="localhost">
+
+                                                        <TextBlock.RenderTransform>
+                                                            <TranslateTransform Y="2" />
+                                                        </TextBlock.RenderTransform>
+                                                    </TextBlock>
+                                                </Border>
+                                            </Grid>
+
+                                            <Grid Grid.Row="3">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RenderTransform>
+                                                    <TranslateTransform Y="5" />
+                                                </Grid.RenderTransform>
+                                                <Image
+                                                    Grid.Column="0"
+                                                    Width="30"
+                                                    Source="pack://application:,,,/assets/icons/Manage Panel Icons/Heart.png"
+                                                    Stretch="Uniform">
+
+                                                    <Image.RenderTransform>
+                                                        <TranslateTransform Y="-8" />
+                                                    </Image.RenderTransform>
+                                                </Image>
+                                                <TextBlock
+                                                    Grid.Column="1"
+                                                    Margin="10,0,0,0"
+                                                    Style="{StaticResource TextBlockDefaultStyle}"
+                                                    Text="Status:" />
+                                                <TextBlock
+                                                    x:Name="statusText"
+                                                    Grid.Column="2"
+                                                    Margin="10,0,0,0"
+                                                    Style="{StaticResource TextBlockDefaultStyle}"
+                                                    Text="Offline" />
+                                                <Grid
+                                                    Grid.Column="3"
+                                                    Width="50"
+                                                    Height="50"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center">
+
+                                                    <Grid.RenderTransform>
+                                                        <TranslateTransform X="-5" Y="-6" />
+                                                    </Grid.RenderTransform>
+                                                    <!--  Ripple Ellipse  -->
+                                                    <Ellipse
+                                                        Width="15"
+                                                        Height="15"
+                                                        Fill="{StaticResource StatusBrush}"
+                                                        StrokeThickness="2" />
+
+                                                    <!--  Glow Animation Layer  -->
+                                                    <Ellipse
+                                                        x:Name="Ripple"
+                                                        Width="15"
+                                                        Height="15"
+                                                        Fill="{StaticResource StatusBrush}"
+                                                        Opacity="0.5"
+                                                        RenderTransformOrigin="0.5,0.5">
+                                                        <Ellipse.RenderTransform>
+                                                            <ScaleTransform ScaleX="1" ScaleY="1" />
+                                                        </Ellipse.RenderTransform>
+
+                                                        <Ellipse.Triggers>
+                                                            <EventTrigger RoutedEvent="Loaded">
+                                                                <BeginStoryboard>
+                                                                    <Storyboard RepeatBehavior="Forever">
+                                                                        <DoubleAnimation
+                                                                            AutoReverse="False"
+                                                                            Storyboard.TargetProperty="Opacity"
+                                                                            From="0.5"
+                                                                            To="0"
+                                                                            Duration="0:0:1" />
+
+                                                                        <DoubleAnimation
+                                                                            AutoReverse="False"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                            From="1"
+                                                                            To="2"
+                                                                            Duration="0:0:1" />
+
+                                                                        <DoubleAnimation
+                                                                            AutoReverse="False"
+                                                                            Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                            From="1"
+                                                                            To="2"
+                                                                            Duration="0:0:1" />
+                                                                    </Storyboard>
+                                                                </BeginStoryboard>
+                                                            </EventTrigger>
+                                                        </Ellipse.Triggers>
+                                                    </Ellipse>
+                                                </Grid>
+                                            </Grid>
+
+                                            <Grid />
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Viewbox>
                     </Grid>
                     <Grid x:Name="Console" Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

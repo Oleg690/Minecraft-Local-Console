@@ -9,6 +9,14 @@
     {
       "AbsoluteMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|d:\\minecraft-console\\v1.1-remake\\minecraft console\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|d:\\minecraft-console\\v1.1-remake\\minecraft console\\logs\\latest.log||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|solutionrelative:logs\\latest.log||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|d:\\minecraft-console\\v1.1-remake\\minecraft console\\serveroperator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|solutionrelative:serveroperator.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -41,7 +49,7 @@
               "RelativeDocumentMoniker": "MainWindow.xaml.cs",
               "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\MainWindow.xaml.cs",
               "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAAOAAAAAAAAAAAIA0wAwBAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAJcCAAAAAAAAAAAcwKQCAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-04T13:01:15.952Z",
               "IsPinned": true,
@@ -54,6 +62,32 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "serverOperator.cs",
+              "DocumentMoniker": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\serverOperator.cs",
+              "RelativeDocumentMoniker": "serverOperator.cs",
+              "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\serverOperator.cs",
+              "RelativeToolTip": "serverOperator.cs",
+              "ViewState": "AgIAAG8CAAAAAAAAAAAAAH4CAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-06-07T15:29:16.607Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "latest.log",
+              "DocumentMoniker": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\logs\\latest.log",
+              "RelativeDocumentMoniker": "logs\\latest.log",
+              "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\logs\\latest.log",
+              "RelativeToolTip": "logs\\latest.log",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-06-08T16:47:36.075Z",
+              "EditorCaption": ""
             }
           ]
         }

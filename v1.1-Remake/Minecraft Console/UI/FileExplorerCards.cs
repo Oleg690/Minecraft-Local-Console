@@ -684,7 +684,7 @@ namespace Minecraft_Console.UI
                 return;
             }
 
-            if (MainWindow.userDataPath == null)
+            if (MainWindow.appDataPath == null)
             {
                 MessageBox.Show("userDataPath not is not set!");
                 CodeLogger.ConsoleLog("userDataPath not is not set!");
@@ -706,7 +706,7 @@ namespace Minecraft_Console.UI
             {
                 try
                 {
-                    string downloadsPath = JsonHelper.GetOrSetValue(MainWindow.userDataPath, "archivePath")?.ToString() ?? string.Empty;
+                    string downloadsPath = JsonHelper.GetOrSetValue(MainWindow.appDataPath, "archivePath")?.ToString() ?? string.Empty;
                     List<string> path = [itemPath];
 
                     string[] archivingStatus = await Task.Run(() => MainWindow.AchiveExplorerItems(path, downloadsPath));

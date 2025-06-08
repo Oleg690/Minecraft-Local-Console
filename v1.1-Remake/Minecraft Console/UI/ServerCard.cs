@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -236,7 +235,7 @@ namespace Minecraft_Console.UI
             return button;
         }
 
-        public static Button CreateStyledButton(string worldNumber, int cornerRadius, string name, string version, string totalPlayers, string processID, Thickness margin, Action onClick)
+        public static Button CreateStyledButton(string worldNumber, int cornerRadius, string name, string version, string totalPlayers, string processID, Thickness margin, int IsRunning, Action onClick)
         {
             Button button = new()
             {
@@ -258,7 +257,7 @@ namespace Minecraft_Console.UI
             button.MouseEnter += (s, e) => ApplyHoverEffect(button, true);
             button.MouseLeave += (s, e) => ApplyHoverEffect(button, false);
 
-            button.Content = ButtonInnerGrid(name, version, totalPlayers, processID);
+            button.Content = ButtonInnerGrid(name, version, totalPlayers, IsRunning);
 
             button.Click += (s, e) => onClick();
             return button;
@@ -328,7 +327,7 @@ namespace Minecraft_Console.UI
             return mainGrid;
         }
 
-        private static Grid ButtonInnerGrid(string name, string version, string totalPlayers, string processID)
+        private static Grid ButtonInnerGrid(string name, string version, string totalPlayers, int IsRunningStatus)
         {
             var mainGrid = new Grid();
 
@@ -452,7 +451,12 @@ namespace Minecraft_Console.UI
             };
             Grid.SetColumn(statusGrid, 1);
 
-            string[] serverStatus = GetServerStatus(processID);
+            string[] serverStatus = ["OFF", "#FF5151"];
+
+            if (IsRunningStatus == 0)
+            {
+                serverStatus = ["ON", "#62FF59"];
+            }
 
             var statusBorder = new Border
             {
@@ -547,22 +551,6 @@ namespace Minecraft_Console.UI
             }
 
             return null;
-        }
-
-        private static string[] GetServerStatus(string processID)
-        {
-            if (string.IsNullOrWhiteSpace(processID) || !int.TryParse(processID, out int pid))
-                return ["OFF", "#FF5151"];
-
-            try
-            {
-                var process = Process.GetProcessById(pid);
-                if (!process.HasExited)
-                    return ["ON", "#62FF59"];
-            }
-            catch (Exception) { }
-
-            return ["OFF", "#FF5151"];
         }
 
         public static void AnimateFadeIn(UIElement element)

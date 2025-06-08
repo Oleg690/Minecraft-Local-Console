@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Minecraft_Console
 {
@@ -36,7 +37,7 @@ namespace Minecraft_Console
             string jarFileName = GetJarFilePath(rootFolder, software, version);
             string jarFilePath = Path.Combine(softwarePath, jarFileName);
             if (string.IsNullOrEmpty(jarFileName) || !File.Exists(jarFilePath))
-                return ServerOperator.LogError($"Server .jar file for {software} {version} is missing after update attempt!");
+                return ServerOperator.LogError($"Server .jar file for {software} {version} is missing after download attempt!");
 
             // 🔌 Check ports and networking
             if (!ServerOperator.CheckFilesAndNetworkSettings(Server_Port, JMX_Port, RMI_Port))
@@ -145,9 +146,9 @@ namespace Minecraft_Console
             }
 
             // 🧹 Clean up temp values
-            dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{uniqueNumber}\";");
-            dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL WHERE worldNumber = \"{uniqueNumber}\";");
-            dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = NULL WHERE worldNumber = \"{uniqueNumber}\";");
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{uniqueNumber}\";");
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL WHERE worldNumber = \"{uniqueNumber}\";");
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = NULL WHERE worldNumber = \"{uniqueNumber}\";");
 
             CodeLogger.ConsoleLog("World Created Successfully");
             MainWindow.SetLoadingBarProgress(100);
@@ -256,7 +257,7 @@ namespace Minecraft_Console
             {
                 if (Insert_Into_DB)
                 {
-                    dbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{software}", $"{version}", $"{totalPlayers}", $"{Server_Port}", $"{JMX_Port}", $"{RCON_Port}", $"{RMI_Port}", $"{rconPassword}");
+                    DbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{software}", $"{version}", $"{totalPlayers}", $"{Server_Port}", $"{JMX_Port}", $"{RCON_Port}", $"{RMI_Port}", $"{rconPassword}");
                 }
 
                 MainWindow.SetLoadingBarProgress(50);
@@ -402,7 +403,7 @@ namespace Minecraft_Console
             {
                 // Get all folder names in the root directory
                 string[] folders = Directory.GetDirectories(rootFolder);
-                List<object[]> worldExistingNumbers = dbChanger.SpecificDataFunc("SELECT worldNumber FROM worlds;");
+                List<object[]> worldExistingNumbers = DbChanger.SpecificDataFunc("SELECT worldNumber FROM worlds;");
 
                 foreach (string folder in folders)
                 {
@@ -525,7 +526,13 @@ namespace Minecraft_Console
                 }
 
                 var localFiles = Directory.GetFiles(softwarePath, "*.jar");
-                bool exists = localFiles.Any(file => file.Contains(version));
+                bool exists = localFiles.Any(file =>
+                {
+                    string fileName = Path.GetFileName(file);
+                    string fileVersion = fileName.Split('-')[1].Replace(".jar", "");
+
+                    return fileVersion == version;
+                });
 
                 if (software == "Fabric" || software == "Quilt")
                 {
@@ -599,7 +606,7 @@ namespace Minecraft_Console
 
         private static string GetRconPassword(string worldNumber)
         {
-            List<object[]> data = dbChanger.GetFunc(worldNumber, true);
+            List<object[]> data = DbChanger.GetFunc(worldNumber, true);
             return data.Count > 0 ? (string)data[0][10] : GeneratePassword(20);
         }
 
@@ -626,8 +633,9 @@ namespace Minecraft_Console
         private static ProcessStartInfo? serverProcessInfo = new();
 
         // ------------------------- Main Server Operator Commands -------------------------
-        public static async Task<object[]> Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ServerInfoViewModel? viewModel = null, Action<string>? onServerRunning = null)
+        public static async Task<object[]> Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ViewModel? viewModel = null, Action<string>? onServerRunning = null)
         {
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET startingStatus = 'starting' WHERE worldNumber = '{worldNumber}';");
             bool verificator = true;
 
             void ValidateInput(string input, string errorMessage)
@@ -651,7 +659,7 @@ namespace Minecraft_Console
             ValidateInput(worldNumber, "No worldNumber was supplied!");
             ValidateDirectory(serverPath, "No local server files were found!");
 
-            string? software = dbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';")[0][0]?.ToString() ?? string.Empty;
+            string? software = DbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';")[0][0]?.ToString() ?? string.Empty;
             ValidateInput(software, "No software was supplied!");
             if (!verificator) return [-1, "No software was supplied!"];
 
@@ -713,7 +721,7 @@ namespace Minecraft_Console
 
             CodeLogger.ConsoleLog($"Starting {software} Server!");
 
-            object[] serverData = dbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
+            object[] serverData = DbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
 
             string? toRunJarFile = string.Empty;
             string GetVersionedJarFile() => Path.Combine(serverPath, serverData[0].ToString() + ".jar");
@@ -780,9 +788,7 @@ namespace Minecraft_Console
                     return [-1, "Failed to start the Minecraft server!"];
                 }
 
-                dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\" WHERE worldNumber = \"{worldNumber}\";");
-                dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = \"{user}\" WHERE worldNumber = \"{worldNumber}\";");
-                dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = \"{psw}\" WHERE worldNumber = \"{worldNumber}\";");
+                DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\", serverUser = \"{user}\", serverTempPsw = \"{psw}\" WHERE worldNumber = \"{worldNumber}\";");
                 object[] userData = [user, psw];
 
                 CodeLogger.ConsoleLog("Minecraft server started!");
@@ -806,7 +812,6 @@ namespace Minecraft_Console
                         else if (e.Data.Contains("RCON running on"))
                         {
                             onServerRunning?.Invoke(worldNumber);
-                            MainWindow.serverRunning = true;
                         }
                     }
                 };
@@ -828,7 +833,6 @@ namespace Minecraft_Console
                         else if (e.Data.Contains("RCON running on"))
                         {
                             onServerRunning?.Invoke(worldNumber);
-                            MainWindow.serverRunning = true;
                         }
                     }
                 };
@@ -864,9 +868,7 @@ namespace Minecraft_Console
 
             Thread.Sleep(1000);
 
-            dbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{worldNumber}\";");
-            dbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL WHERE worldNumber = \"{worldNumber}\";");
-            dbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = NULL WHERE worldNumber = \"{worldNumber}\";");
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL, serverTempPsw = NULL, Process_ID = NULL WHERE worldNumber = \"{worldNumber}\";");
         }
 
         public static void Kill(int RCON_Port, int JMX_Port)
@@ -880,7 +882,7 @@ namespace Minecraft_Console
             // Replace with your server details
             ushort port = (ushort)RCON_Port; // RCON port
             string password = "";
-            List<object[]> data = dbChanger.GetFunc(worldNumber, true);
+            List<object[]> data = DbChanger.GetFunc(worldNumber, true);
 
             foreach (var row in data)
             {
@@ -934,7 +936,7 @@ namespace Minecraft_Console
                 return;
             }
 
-            string? currentSoftware = dbChanger.SpecificDataFunc($"SELECT software FROM worlds WHERE worldNumber = '{worldNumber}';")[0][0]?.ToString();
+            string? currentSoftware = DbChanger.SpecificDataFunc($"SELECT software FROM worlds WHERE worldNumber = '{worldNumber}';")[0][0]?.ToString();
             bool isCurrentPaperOrPurpur = currentSoftware == "Purpur" || currentSoftware == "Paper";
             bool isNewPaperOrPurpur = toSoftware == "Purpur" || toSoftware == "Paper";
 
@@ -944,7 +946,7 @@ namespace Minecraft_Console
 
             DeleteFiles(worldPath, false);
             CodeLogger.ConsoleLog("Database updated.");
-            dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{toSoftware}\", totalPlayers = \"{totalPlayers}\", Server_Port = \"{serverPort}\", JMX_Port = \"{jmxPort}\", RCON_Port = \"{rconPort}\", RMI_Port = \"{RMI_Port}\" WHERE worldNumber = \"{worldNumber}\";");
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{toSoftware}\", totalPlayers = \"{totalPlayers}\", Server_Port = \"{serverPort}\", JMX_Port = \"{jmxPort}\", RCON_Port = \"{rconPort}\", RMI_Port = \"{RMI_Port}\" WHERE worldNumber = \"{worldNumber}\";");
 
             CodeLogger.ConsoleLog("Creating New Server...");
             await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, toSoftware, totalPlayers, worldSettings, processMemoryAllocation, ipAddress, serverPort, jmxPort, rconPort, RMI_Port, worldNumber, Insert_Into_DB: false);
@@ -959,7 +961,7 @@ namespace Minecraft_Console
 
         public static void DeleteServer(string worldNumber, string serverDirectoryPath, bool deleteFromDB = true, bool deleteWholeDirectory = true)
         {
-            if (deleteFromDB) dbChanger.DeleteWorldFromDB(worldNumber);
+            if (deleteFromDB) DbChanger.DeleteWorldFromDB(worldNumber);
 
             DeleteFiles(serverDirectoryPath, deleteWholeDirectory);
             CodeLogger.ConsoleLog("Done!");
@@ -1037,7 +1039,7 @@ namespace Minecraft_Console
         private static async Task UpdateWorld(string worldPath, string rootWorldsFolder, string tempFolderPath, string defaultServerPropertiesPath, string version, string worldName, string toSoftware, int totalPlayers, object[,] worldSettings, int processMemoryAllocation, string ipAddress, int ServerPort, int jmxPort, int rconPort, int RMI_Port, string worldNumber, bool insertIntoDB)
         {
             DeleteFiles(worldPath, false);
-            dbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{toSoftware}\", totalPlayers = \"{totalPlayers}\", Server_Port = \"{ServerPort}\", JMX_Port = \"{jmxPort}\", RCON_Port = \"{rconPort}\", RMI_Port = \"{RMI_Port}\" WHERE worldNumber = \"{worldNumber}\";");
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET name = \"{worldName}\", version = \"{version}\", software = \"{toSoftware}\", totalPlayers = \"{totalPlayers}\", Server_Port = \"{ServerPort}\", JMX_Port = \"{jmxPort}\", RCON_Port = \"{rconPort}\", RMI_Port = \"{RMI_Port}\" WHERE worldNumber = \"{worldNumber}\";");
 
             CodeLogger.ConsoleLog("Creating New Server...");
             await ServerCreator.CreateServerFunc(rootWorldsFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, toSoftware, totalPlayers, worldSettings, processMemoryAllocation, ipAddress, ServerPort, jmxPort, rconPort, RMI_Port, worldNumber, insertIntoDB, false);

@@ -2,7 +2,7 @@
 using System.IO;
 
 namespace Minecraft_Console { 
-    class dbChanger
+    class DbChanger
     {
         private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
         private static readonly string? dbPath = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) + "\\database\\worlds.db";
@@ -24,6 +24,7 @@ namespace Minecraft_Console {
         private const string ColumnServerUser = "serverUser";
         private const string ColumnServerTempPsw = "serverTempPsw";
         private const string ColumnProcessId = "Process_ID";
+        private const string ColumnStartingStatus = "startingStatus";
 
         private static SQLiteConnection? CreateConnection()
         {
@@ -68,7 +69,8 @@ namespace Minecraft_Console {
                                $"{ColumnRconPassword} text," +
                                $"{ColumnServerUser} text," +
                                $"{ColumnServerTempPsw} text," +
-                               $"{ColumnProcessId} text" +
+                               $"{ColumnProcessId} text," +
+                               $"{ColumnStartingStatus} text" +
                                $")";
                 using SQLiteCommand command = new(query, connection);
                 command.ExecuteNonQuery();
@@ -76,8 +78,8 @@ namespace Minecraft_Console {
 
                 if (insertOneDefaultSQLVerificator)
                 {
-                    string insertDefaultSQL = $"INSERT INTO {dbName} ({ColumnWorldNumber}, {ColumnName}, {ColumnVersion}, {ColumnSoftware}, {ColumnTotalPlayers}, {ColumnRconPassword}, {ColumnProcessId}) " +
-                                            $"VALUES (@worldNumber, @name, @version, @software, @totalPlayers, @rconPassword, @processId);";
+                    string insertDefaultSQL = $"INSERT INTO {dbName} ({ColumnWorldNumber}, {ColumnName}, {ColumnVersion}, {ColumnSoftware}, {ColumnTotalPlayers}, {ColumnRconPassword}, {ColumnProcessId}, {ColumnStartingStatus}) " +
+                                            $"VALUES (@worldNumber, @name, @version, @software, @totalPlayers, @rconPassword, @processId, @startingStatus);";
                     using SQLiteCommand insertCommand = new(insertDefaultSQL, connection);
                     insertCommand.Parameters.AddWithValue("@worldNumber", "123456789");
                     insertCommand.Parameters.AddWithValue("@name", "Minecraft SMP");
@@ -86,6 +88,7 @@ namespace Minecraft_Console {
                     insertCommand.Parameters.AddWithValue("@totalPlayers", "20");
                     insertCommand.Parameters.AddWithValue("@rconPassword", "123456789123456789");
                     insertCommand.Parameters.AddWithValue("@processId", DBNull.Value); // Or null if your DB allows it directly
+                    insertCommand.Parameters.AddWithValue("@startingStatus", DBNull.Value); // Or null if your DB allows it directly
                     insertCommand.ExecuteNonQuery();
                     CodeLogger.ConsoleLog("Default data inserted successfully.");
                 }
@@ -151,7 +154,7 @@ namespace Minecraft_Console {
 
             try
             {
-                string selectQuery = $"SELECT {(verificator ? "*" : $"{ColumnId}, {ColumnWorldNumber}, {ColumnName}, {ColumnVersion}, {ColumnSoftware}, {ColumnTotalPlayers}, {ColumnServerPort}, {ColumnJmxPort}, {ColumnRconPort}, {ColumnRmiPort}")} " +
+                string selectQuery = $"SELECT {(verificator ? "*" : $"{ColumnId}, {ColumnWorldNumber}, {ColumnName}, {ColumnVersion}, {ColumnSoftware}, {ColumnTotalPlayers}, {ColumnServerPort}, {ColumnJmxPort}, {ColumnRconPort}, {ColumnRmiPort}, {ColumnServerUser}, {ColumnServerTempPsw}, {ColumnProcessId}, {ColumnStartingStatus}")} " +
                                      $"FROM {TableName} WHERE {ColumnWorldNumber} = @worldNumber;";
 
                 using SQLiteCommand selectCommand = new(selectQuery, connection);
