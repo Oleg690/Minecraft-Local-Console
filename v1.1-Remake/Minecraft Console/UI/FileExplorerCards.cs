@@ -631,7 +631,8 @@ namespace Minecraft_Console.UI
                 var scrollViewer = FindVisualChild<ScrollViewer>(parentGrid);
                 if (scrollViewer != null)
                 {
-                    scrollViewer.MaxHeight = parentGrid.ActualHeight - 72; // Adjust based on your layout
+                    double maxHeight = parentGrid.ActualHeight - 72;
+                    scrollViewer.MaxHeight = Math.Max(0, maxHeight);
                 }
             }
         }

@@ -20,6 +20,8 @@
     <None Remove="assets\Fonts\Istok Web\IstokWeb-Regular.ttf" />
     <None Remove="assets\Fonts\Itim\Itim-Regular.ttf" />
     <None Remove="assets\Fonts\Jomhuria\Jomhuria-Regular.ttf" />
+    <None Remove="assets\icons\Console Panel Icons\Clock.png" />
+    <None Remove="assets\icons\Console Panel Icons\Hard drive.png" />
     <None Remove="assets\icons\folder_file\file.png" />
     <None Remove="assets\icons\folder_file\folder.png" />
     <None Remove="assets\icons\Logo\logo.ico" />
@@ -27,6 +29,12 @@
     <None Remove="assets\icons\Manage Panel Icons\Heart.png" />
     <None Remove="assets\icons\Manage Panel Icons\Wifi.png" />
     <None Remove="assets\Minecraft_Photo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="assets\icons\Console Panel Icons\Clock.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
   <ItemGroup>
@@ -60,6 +68,9 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\Fonts\Jomhuria\Jomhuria-Regular.ttf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="assets\icons\Console Panel Icons\Hard drive.png">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Resource>
     <Resource Include="assets\icons\folder_file\file.png">

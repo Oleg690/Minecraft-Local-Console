@@ -146,9 +146,7 @@ namespace Minecraft_Console
             }
 
             // 🧹 Clean up temp values
-            DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL WHERE worldNumber = \"{uniqueNumber}\";");
-            DbChanger.SpecificDataFunc($"UPDATE worlds SET serverUser = NULL WHERE worldNumber = \"{uniqueNumber}\";");
-            DbChanger.SpecificDataFunc($"UPDATE worlds SET serverTempPsw = NULL WHERE worldNumber = \"{uniqueNumber}\";");
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL, serverUser = NULL, serverTempPsw = NULL, startingStatus = NULL WHERE worldNumber = \"{uniqueNumber}\";");
 
             CodeLogger.ConsoleLog("World Created Successfully");
             MainWindow.SetLoadingBarProgress(100);

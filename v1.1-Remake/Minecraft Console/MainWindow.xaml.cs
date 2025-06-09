@@ -295,13 +295,20 @@ namespace Minecraft_Console
                 if (worldEntry.Length < 2 || ServerWorlds == null) continue;
 
                 string worldNumber = worldEntry[0]?.ToString() ?? "";
+
+                if (string.IsNullOrWhiteSpace(worldNumber))
+                    continue;
+
+                if (!existingDirs.Contains(worldNumber))
+                {
+                    DbChanger.SpecificDataFunc($"DELETE FROM worlds WHERE worldNumber == \"{worldNumber}\";");
+                    continue;
+                }
+
                 string worldName = worldEntry[1]?.ToString() ?? "Unnamed World";
                 string worldVersion = worldEntry[2]?.ToString() ?? "";
                 string worldTotalPlayers = worldEntry[3]?.ToString() ?? "";
                 string processID = worldEntry[4]?.ToString() ?? "";
-
-                if (string.IsNullOrWhiteSpace(worldNumber) || !existingDirs.Contains(worldNumber))
-                    continue;
 
                 var button = ServerCard.CreateStyledButton(worldNumber, cornerRadius, worldName, worldVersion, worldTotalPlayers, processID, buttonMargin, ServerWorlds[worldNumber].IsRunning, () => OpenControlPanel(worldName, worldNumber));
 
@@ -384,14 +391,19 @@ namespace Minecraft_Console
 
             SetButtonStates(false, false, false);
 
-            List<object[]> worlds = DbChanger.SpecificDataFunc("SELECT worldNumber, Process_ID, startingStatus FROM worlds");
+            var worlds = DbChanger.SpecificDataFunc("SELECT worldNumber, Process_ID, startingStatus FROM worlds");
+            var existingDirs = Directory.Exists(rootWorldsFolder)
+                ? [.. Directory.GetDirectories(rootWorldsFolder).Select(Path.GetFileName)]
+                : new HashSet<string>();
 
             ServerWorlds = [];
 
             foreach (var world in worlds)
             {
                 string? worldNumber = world[0].ToString();
-                if (string.IsNullOrEmpty(worldNumber)) continue;
+
+                if (string.IsNullOrEmpty(worldNumber) || !existingDirs.Contains(worldNumber))
+                    continue; // Skip if world number is empty or directory doesn't exist
 
                 string? processID = world[1]?.ToString();
                 string? startingStatus = world[2]?.ToString();
@@ -447,7 +459,7 @@ namespace Minecraft_Console
                     worldValues.ButtonState3 = ButtonState3;
                 }
 
-                //CodeLogger.ConsoleLog($"Name: {worldNumber}; Process_ID: '{processID}'; IsActive: false; IsRunning: {IsRunning};");
+                //CodeLogger.ConsoleLog($"Name: {worldNumber}; Process_ID: '{processID}'; IsActive: false; IsRunning: {IsRunning};"); // For debugging
             }
         }
 
@@ -532,6 +544,12 @@ namespace Minecraft_Console
             if (string.IsNullOrEmpty(appDataPath))
             {
                 throw new InvalidOperationException("The 'userData' path is not set.");
+            }
+
+            if (serverRunning)
+            {
+                PopupWindow.CreateStatusPopup("Info", $"A server is already running. Please stop it before trying to create a new one.", PopupHost);
+                return;
             }
 
             try
@@ -691,7 +709,7 @@ namespace Minecraft_Console
                     JMX_Port,
                     RCON_Port,
                     RMI_Port,
-                    noGUI: false,
+                    noGUI: true,
                     onServerRunning: (_) =>
                     {
                         Dispatcher.Invoke(() =>
@@ -1362,6 +1380,38 @@ namespace Minecraft_Console
                     DirectoryCopy(subdir.FullName, newDestDir, copySubDirs);
                 }
             }
+        }
+
+        // TextBox Mouse Wheel Scrolling Handler
+        private void TextBox_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                // Check if Shift is pressed (standard for horizontal scrolling)
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                {
+                    // Scroll horizontally using offset
+                    var scrollViewer = GetScrollViewer(textBox);
+                    if (scrollViewer != null)
+                    {
+                        scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - e.Delta);
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+
+        private static ScrollViewer? GetScrollViewer(DependencyObject o)
+        {
+            if (o is ScrollViewer viewer) return viewer;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(o); i++)
+            {
+                var child = VisualTreeHelper.GetChild(o, i);
+                var result = GetScrollViewer(child);
+                if (result != null) return result;
+            }
+            return null;
         }
     }
 }

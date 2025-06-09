@@ -24,9 +24,6 @@
         <Style TargetType="Button">
             <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
         </Style>
-        <Style TargetType="ListViewItem">
-            <Setter Property="TextBlock.FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
-        </Style>
 
         <Style x:Key="ArhiveButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#1974da" />
@@ -207,6 +204,62 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <!--  1. Style for the buttons to be invisible  -->
+        <Style x:Key="InvisibleScrollBarButton" TargetType="{x:Type RepeatButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type RepeatButton}">
+                        <Border Background="Transparent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--  2. Style for the thumb  -->
+        <Style x:Key="ModernScrollThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Thumb}">
+                        <Border
+                            Background="#3D4045"
+                            BorderThickness="0"
+                            CornerRadius="4" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Width" Value="12" />
+            <!--  Comfortable width  -->
+        </Style>
+
+        <!--  3. Main ScrollBar style  -->
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid Background="Transparent">
+                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                <!--  Top/Left button (hidden)  -->
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.PageUpCommand" Style="{StaticResource InvisibleScrollBarButton}" />
+                                </Track.DecreaseRepeatButton>
+
+                                <!--  The draggable thumb  -->
+                                <Track.Thumb>
+                                    <Thumb Style="{StaticResource ModernScrollThumb}" />
+                                </Track.Thumb>
+
+                                <!--  Bottom/Right button (hidden)  -->
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Command="ScrollBar.PageDownCommand" Style="{StaticResource InvisibleScrollBarButton}" />
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -354,7 +407,14 @@
 
                 <!--  Server Control Panel (Initially Hidden)  -->
                 <Grid Panel.ZIndex="-1" Background="#1C2127">
-                    <Grid x:Name="ServerControlPanelDropBox">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid
+                        x:Name="ServerControlPanelDropBox"
+                        Grid.Row="0"
+                        Panel.ZIndex="1000">
                         <Grid.Resources>
                             <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
                                 <Setter Property="Grid.Column" Value="1" />
@@ -366,7 +426,7 @@
                                 <Setter Property="VerticalContentAlignment" Value="Center" />
                                 <Setter Property="FontSize" Value="14" />
                                 <Setter Property="Foreground" Value="White" />
-                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Background" Value="#802C303A" />
                                 <Setter Property="BorderThickness" Value="0" />
                                 <Setter Property="Padding" Value="5" />
                                 <Setter Property="Margin" Value="0,2,0,2" />
@@ -395,6 +455,7 @@
                                                             <Trigger Property="IsMouseOver" Value="True">
                                                                 <Setter Property="Cursor" Value="Hand" />
                                                                 <Setter TargetName="Bd" Property="Background" Value="#2c303a" />
+                                                                <Setter Property="Opacity" Value="1" />
                                                                 <Setter Property="Foreground" Value="White" />
                                                             </Trigger>
                                                             <Trigger Property="IsSelected" Value="True">
@@ -543,25 +604,15 @@
                     </Grid>
                     <Grid
                         x:Name="Manage"
+                        Grid.Row="1"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Visibility="Collapsed">
 
                         <Grid.Resources>
-                            <Style x:Key="TextBlockDefaultStyle" TargetType="TextBlock">
-                                <Setter Property="FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
-                                <Setter Property="FontSize" Value="25" />
-                                <Setter Property="Foreground" Value="White" />
-                                <Setter Property="FontWeight" Value="Bold" />
-                            </Style>
-
                             <Style x:Key="ButtonStyle" TargetType="Button">
                                 <Setter Property="FontSize" Value="35" />
                                 <Setter Property="Foreground" Value="White" />
-
-                                <!--  TEMP  -->
-                                <Setter Property="Background" Value="DarkGray" />
-                                <!--  TEMP  -->
 
                                 <Setter Property="FontWeight" Value="Bold" />
                                 <Setter Property="BorderThickness" Value="0" />
@@ -569,6 +620,13 @@
 
                                 <Setter Property="Width" Value="170" />
                                 <Setter Property="Height" Value="80" />
+                            </Style>
+
+                            <Style x:Key="TextBlockDefaultStyle" TargetType="TextBlock">
+                                <Setter Property="FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
+                                <Setter Property="FontSize" Value="25" />
+                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="FontWeight" Value="Bold" />
                             </Style>
                         </Grid.Resources>
                         <Viewbox Stretch="Uniform" StretchDirection="DownOnly">
@@ -1129,20 +1187,309 @@
                             </Grid>
                         </Viewbox>
                     </Grid>
-                    <Grid x:Name="Console" Visibility="Collapsed">
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock
-                                FontSize="30"
-                                Foreground="White"
-                                Text="Console" />
-                        </StackPanel>
+                    <Grid
+                        x:Name="Console"
+                        Grid.Row="1"
+                        Visibility="Collapsed">
+                        <Grid.Resources>
+                            <Style x:Key="TextBlockDefaultStyle" TargetType="TextBox">
+                                <Setter Property="FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
+                                <Setter Property="FontSize" Value="25" />
+                                <Setter Property="Foreground" Value="#e0e0e0" />
+                                <Setter Property="FontWeight" Value="Normal" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Style>
+                        </Grid.Resources>
+
+                        <Viewbox
+                            VerticalAlignment="Center"
+                            Stretch="Uniform"
+                            StretchDirection="DownOnly">
+                            <Grid Margin="25">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border
+                                    Grid.Column="0"
+                                    Width="1350"
+                                    Height="1000"
+                                    Margin="0,0,25,0"
+                                    Background="#222428"
+                                    CornerRadius="6">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                            <TextBox
+                                                x:Name="ConsoleTextBox"
+                                                Grid.Row="0"
+                                                Margin="10"
+                                                IsReadOnly="True"
+                                                Style="{StaticResource TextBlockDefaultStyle}"
+                                                Text="[17:59:19] [ServerMain/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD] &#x0a;[17:59:19] [ServerMain/INFO]: No existing world data, creating new world&#x0a;[17:59:20] [ServerMain/INFO]: Loaded 1370 recipes&#x0a;[17:59:20] [ServerMain/INFO]: Loaded 1481 advancements&#x0a;[17:59:20] [Server thread/INFO]: Starting minecraft server version 1.21.4&#x0a;[17:59:20] [Server thread/INFO]: Loading properties&#x0a;[17:59:20] [Server thread/INFO]: Default game type: SURVIVAL&#x0a;[17:59:20] [Server thread/INFO]: Generating keypair&#x0a;[17:59:20] [Server thread/INFO]: Starting Minecraft server on *:25565&#x0a;[17:59:20] [Server thread/INFO]: Using default channel type&#x0a;[17:59:20] [Server thread/WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!&#x0a;[17:59:20] [Server thread/WARN]: The server will make no attempt to authenticate usernames. Beware.&#x0a;[17:59:20] [Server thread/WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.&#x0a;[17:59:20] [Server thread/WARN]: To change this, set 'online-mode' to 'true' in the server.properties file.&#x0a;[17:59:20] [Server thread/INFO]: Preparing level 'world'&#x0a;[17:59:22] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld&#x0a;[17:59:22] [Worker-Main-9/INFO]: Preparing spawn area: 2%&#x0a;[17:59:22] [Worker-Main-4/INFO]: Preparing spawn area: 2%&#x0a;[17:59:23] [Worker-Main-8/INFO]: Preparing spawn area: 18%&#x0a;[17:59:23] [Worker-Main-20/INFO]: Preparing spawn area: 51%&#x0a;[17:59:23] [Server thread/INFO]: Time elapsed: 1616 ms&#x0a;[17:59:23] [Server thread/INFO]: Done (3.439s)! For help, type 'help'&#x0a;[17:59:23] [Server thread/INFO]: Starting GS4 status listener&#x0a;[17:59:24] [Server thread/INFO]: Thread Query Listener started&#x0a;[17:59:24] [Query Listener #1/INFO]: Query running on 0.0.0.0:25565&#x0a;[17:59:24] [Server thread/INFO]: Starting remote control listener&#x0a;[17:59:24] [Server thread/INFO]: Thread RCON Listener started&#x0a;[17:59:24] [Server thread/INFO]: RCON running on 0.0.0.0:25575&#x0a;"
+                                                TextWrapping="Wrap" />
+                                        </ScrollViewer>
+
+                                        <TextBlock
+                                            Grid.Row="1"
+                                            Width="210"
+                                            Height="35"
+                                            Margin="60,0,0,0"
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Top"
+                                            Panel.ZIndex="1000"
+                                            Background="#262A32"
+                                            FontSize="27"
+                                            FontWeight="Bold"
+                                            Foreground="White"
+                                            Text="Send Command"
+                                            TextAlignment="Center">
+                                            <TextBlock.RenderTransform>
+                                                <TranslateTransform Y="2" />
+                                            </TextBlock.RenderTransform>
+                                        </TextBlock>
+
+                                        <Border
+                                            Grid.Row="1"
+                                            Height="125"
+                                            Background="#262A32"
+                                            CornerRadius="0,0,6,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+
+                                                <TextBox
+                                                    Grid.Column="0"
+                                                    Margin="20,20,0,20"
+                                                    Padding="10"
+                                                    VerticalContentAlignment="Center"
+                                                    Background="Transparent"
+                                                    BorderThickness="2"
+                                                    CaretBrush="White"
+                                                    FontSize="30"
+                                                    Foreground="White"
+                                                    HorizontalScrollBarVisibility="Hidden"
+                                                    PreviewMouseWheel="TextBox_MouseWheel"
+                                                    ScrollViewer.CanContentScroll="False">
+                                                    <TextBox.Style>
+                                                        <Style TargetType="TextBox">
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="TextBox">
+                                                                        <Border
+                                                                            Background="{TemplateBinding Background}"
+                                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                                            CornerRadius="10">
+                                                                            <ScrollViewer
+                                                                                x:Name="PART_ContentHost"
+                                                                                Margin="0"
+                                                                                Padding="{TemplateBinding Padding}" />
+                                                                        </Border>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </TextBox.Style>
+                                                </TextBox>
+
+                                                <Button
+                                                    Grid.Column="1"
+                                                    Width="70"
+                                                    Height="70"
+                                                    Margin="20"
+                                                    Padding="0"
+                                                    HorizontalAlignment="Left"
+                                                    Background="#2F343F"
+                                                    BorderBrush="Transparent"
+                                                    Cursor="Hand"
+                                                    RenderTransformOrigin="0.5, 0.5">
+                                                    <Button.RenderTransform>
+                                                        <ScaleTransform x:Name="scale" ScaleX="1" ScaleY="1" />
+                                                    </Button.RenderTransform>
+
+                                                    <Button.Triggers>
+                                                        <!--  Scale Down Animation on Click  -->
+                                                        <EventTrigger RoutedEvent="Button.PreviewMouseLeftButtonDown">
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation
+                                                                        Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                        To="0.92"
+                                                                        Duration="0:0:0.1" />
+                                                                    <DoubleAnimation
+                                                                        Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                        To="0.92"
+                                                                        Duration="0:0:0.1" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </EventTrigger>
+                                                        <EventTrigger RoutedEvent="Button.PreviewMouseLeftButtonUp">
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation
+                                                                        Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)"
+                                                                        To="1"
+                                                                        Duration="0:0:0.1" />
+                                                                    <DoubleAnimation
+                                                                        Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)"
+                                                                        To="1"
+                                                                        Duration="0:0:0.1" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </EventTrigger>
+                                                    </Button.Triggers>
+
+                                                    <Button.Style>
+                                                        <Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="Button">
+                                                                        <Border
+                                                                            x:Name="border"
+                                                                            Background="{TemplateBinding Background}"
+                                                                            BorderThickness="0"
+                                                                            CornerRadius="12"
+                                                                            SnapsToDevicePixels="True">
+                                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                        </Border>
+                                                                        <ControlTemplate.Triggers>
+                                                                            <!--  Hover color change  -->
+                                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                                <Setter TargetName="border" Property="Background" Value="#3A404C" />
+                                                                            </Trigger>
+                                                                            <!--  Pressed color change  -->
+                                                                            <Trigger Property="IsPressed" Value="True">
+                                                                                <Setter TargetName="border" Property="Background" Value="#444B59" />
+                                                                            </Trigger>
+                                                                        </ControlTemplate.Triggers>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </Button.Style>
+
+                                                    <!--  Your arrow icon inside the button  -->
+                                                    <Viewbox Height="35">
+                                                        <Canvas Width="24" Height="24">
+                                                            <Path Data="M2,21 L23,12 L2,3 L2,10 L17,12 L2,14 Z" Fill="White" />
+                                                        </Canvas>
+                                                    </Viewbox>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <Grid Grid.Column="1">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid.Resources>
+                                        <Style x:Key="SideConsolePanel" TargetType="Border">
+                                            <Setter Property="Width" Value="400" />
+                                            <Setter Property="Height" Value="120" />
+                                            <Setter Property="CornerRadius" Value="15" />
+                                            <Setter Property="Background" Value="#262A32" />
+                                        </Style>
+
+                                        <Style x:Key="SideStatsStyle" TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="White" />
+                                            <Setter Property="FontSize" Value="25" />
+                                            <Setter Property="FontWeight" Value="Bold" />
+                                            <Setter Property="VerticalAlignment" Value="Center" />
+                                        </Style>
+                                    </Grid.Resources>
+
+                                    <Border
+                                        Grid.Row="0"
+                                        Margin="0,0,0,25"
+                                        Style="{StaticResource SideConsolePanel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Image
+                                                Grid.Column="0"
+                                                Height="70"
+                                                Margin="25"
+                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/Clock.png" />
+
+                                            <Grid Grid.Column="1" Margin="0,20">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    FontSize="22"
+                                                    Style="{StaticResource SideStatsStyle}"
+                                                    Text="Uptime:" />
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Style="{StaticResource SideStatsStyle}"
+                                                    Text="0h 5m 12s" />
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+
+                                    <Border Grid.Row="1" Style="{StaticResource SideConsolePanel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Image
+                                                Grid.Column="0"
+                                                Height="70"
+                                                Margin="25"
+                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/Hard drive.png" />
+
+                                            <Grid Grid.Column="1" Margin="0,20">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    FontSize="22"
+                                                    Style="{StaticResource SideStatsStyle}"
+                                                    Text="Memory:" />
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Style="{StaticResource SideStatsStyle}"
+                                                    Text="2.3GB / 4GB" />
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Viewbox>
+
                     </Grid>
-                    <Grid x:Name="Files" Visibility="Collapsed">
+                    <Grid
+                        x:Name="Files"
+                        Grid.Row="1"
+                        Visibility="Collapsed">
                         <Border
                             x:Name="SelectionPopup"
                             Width="310"
                             Height="110"
-                            Margin="30"
                             VerticalAlignment="Top"
                             Panel.ZIndex="2000"
                             Background="#21242c"
@@ -1217,7 +1564,7 @@
                                 </Grid>
                             </Grid>
                         </Border>
-                        <Grid Margin="0,35,0,0">
+                        <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="*" />
@@ -1375,7 +1722,10 @@
                                 VerticalAlignment="Stretch" />
                         </Grid>
                     </Grid>
-                    <Grid x:Name="Stats" Visibility="Collapsed">
+                    <Grid
+                        x:Name="Stats"
+                        Grid.Row="1"
+                        Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <TextBlock
                                 FontSize="30"
@@ -1383,7 +1733,10 @@
                                 Text="Stats" />
                         </StackPanel>
                     </Grid>
-                    <Grid x:Name="Settings" Visibility="Collapsed">
+                    <Grid
+                        x:Name="Settings"
+                        Grid.Row="1"
+                        Visibility="Collapsed">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                             <TextBlock
                                 FontSize="30"
@@ -1950,6 +2303,7 @@
                                                         x:Name="ServerNameInput"
                                                         HorizontalAlignment="Stretch"
                                                         Background="Transparent"
+                                                        CaretBrush="White"
                                                         HorizontalScrollBarVisibility="Auto"
                                                         MaxLength="15"
                                                         Style="{StaticResource InputTextBoxStyleServerName}" />
