@@ -10,6 +10,7 @@
     Title="Minecraft Console"
     Width="1200"
     Height="700"
+    Closing="Window_Closing"
     Icon="pack://application:,,,/assets/icons/Logo/logo.ico"
     mc:Ignorable="d">
     <Window.Resources>
@@ -1195,10 +1196,25 @@
                             <Style x:Key="TextBlockDefaultStyle" TargetType="TextBox">
                                 <Setter Property="FontFamily" Value="pack://application:,,,/assets/Fonts/Istok Web/#Istok Web" />
                                 <Setter Property="FontSize" Value="25" />
+                                <Setter Property="Margin" Value="10" />
+                                <Setter Property="IsReadOnlyCaretVisible" Value="True" />
+                                <Setter Property="TextWrapping" Value="Wrap" />
+                                <Setter Property="CaretBrush" Value="White" />
+                                <Setter Property="IsReadOnly" Value="True" />
                                 <Setter Property="Foreground" Value="#e0e0e0" />
                                 <Setter Property="FontWeight" Value="Normal" />
                                 <Setter Property="Background" Value="Transparent" />
                                 <Setter Property="BorderThickness" Value="0" />
+                            </Style>
+
+                            <Style x:Key="TextBlockOfflineStyle" TargetType="TextBlock">
+                                <Setter Property="FontFamily" Value="pack://application:,,,/assets/Fonts/Zain/#Zain" />
+                                <Setter Property="FontSize" Value="350" />
+                                <Setter Property="Opacity" Value="0.5" />
+                                <Setter Property="Margin" Value="10" />
+                                <Setter Property="Foreground" Value="#e0e0e0" />
+                                <Setter Property="FontWeight" Value="Normal" />
+                                <Setter Property="Background" Value="Transparent" />
                             </Style>
                         </Grid.Resources>
 
@@ -1214,7 +1230,7 @@
 
                                 <Border
                                     Grid.Column="0"
-                                    Width="1350"
+                                    Width="1300"
                                     Height="1000"
                                     Margin="0,0,25,0"
                                     Background="#222428"
@@ -1225,16 +1241,51 @@
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
 
-                                        <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                        <ScrollViewer
+                                            Grid.Row="0"
+                                            HorizontalScrollBarVisibility="Disabled"
+                                            VerticalScrollBarVisibility="Auto">
                                             <TextBox
                                                 x:Name="ConsoleTextBox"
-                                                Grid.Row="0"
-                                                Margin="10"
-                                                IsReadOnly="True"
                                                 Style="{StaticResource TextBlockDefaultStyle}"
-                                                Text="[17:59:19] [ServerMain/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD] &#x0a;[17:59:19] [ServerMain/INFO]: No existing world data, creating new world&#x0a;[17:59:20] [ServerMain/INFO]: Loaded 1370 recipes&#x0a;[17:59:20] [ServerMain/INFO]: Loaded 1481 advancements&#x0a;[17:59:20] [Server thread/INFO]: Starting minecraft server version 1.21.4&#x0a;[17:59:20] [Server thread/INFO]: Loading properties&#x0a;[17:59:20] [Server thread/INFO]: Default game type: SURVIVAL&#x0a;[17:59:20] [Server thread/INFO]: Generating keypair&#x0a;[17:59:20] [Server thread/INFO]: Starting Minecraft server on *:25565&#x0a;[17:59:20] [Server thread/INFO]: Using default channel type&#x0a;[17:59:20] [Server thread/WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!&#x0a;[17:59:20] [Server thread/WARN]: The server will make no attempt to authenticate usernames. Beware.&#x0a;[17:59:20] [Server thread/WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.&#x0a;[17:59:20] [Server thread/WARN]: To change this, set 'online-mode' to 'true' in the server.properties file.&#x0a;[17:59:20] [Server thread/INFO]: Preparing level 'world'&#x0a;[17:59:22] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld&#x0a;[17:59:22] [Worker-Main-9/INFO]: Preparing spawn area: 2%&#x0a;[17:59:22] [Worker-Main-4/INFO]: Preparing spawn area: 2%&#x0a;[17:59:23] [Worker-Main-8/INFO]: Preparing spawn area: 18%&#x0a;[17:59:23] [Worker-Main-20/INFO]: Preparing spawn area: 51%&#x0a;[17:59:23] [Server thread/INFO]: Time elapsed: 1616 ms&#x0a;[17:59:23] [Server thread/INFO]: Done (3.439s)! For help, type 'help'&#x0a;[17:59:23] [Server thread/INFO]: Starting GS4 status listener&#x0a;[17:59:24] [Server thread/INFO]: Thread Query Listener started&#x0a;[17:59:24] [Query Listener #1/INFO]: Query running on 0.0.0.0:25565&#x0a;[17:59:24] [Server thread/INFO]: Starting remote control listener&#x0a;[17:59:24] [Server thread/INFO]: Thread RCON Listener started&#x0a;[17:59:24] [Server thread/INFO]: RCON running on 0.0.0.0:25575&#x0a;"
-                                                TextWrapping="Wrap" />
+                                                Text="{Binding Console}"
+                                                Visibility="Hidden" />
                                         </ScrollViewer>
+
+                                        <Grid x:Name="ConsoleTextBoxOfflineStatus" Grid.Row="0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Image
+                                                Grid.Column="0"
+                                                Height="300"
+                                                VerticalAlignment="Center"
+                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/offline.png">
+
+                                                <Image.RenderTransform>
+                                                    <TranslateTransform X="40" Y="-40" />
+                                                </Image.RenderTransform>
+                                            </Image>
+
+                                            <TextBlock
+                                                Grid.Column="1"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Panel.ZIndex="100"
+                                                Style="{StaticResource TextBlockOfflineStyle}"
+                                                Text="Offline"
+                                                TextAlignment="Center"
+                                                TextWrapping="Wrap"
+                                                Visibility="Visible" />
+                                            <Grid.RenderTransform>
+                                                <TransformGroup>
+                                                    <RotateTransform Angle="25" />
+                                                    <TranslateTransform X="250" Y="-200" />
+                                                </TransformGroup>
+                                            </Grid.RenderTransform>
+                                        </Grid>
 
                                         <TextBlock
                                             Grid.Row="1"
@@ -1393,12 +1444,14 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
 
                                     <Grid.Resources>
                                         <Style x:Key="SideConsolePanel" TargetType="Border">
                                             <Setter Property="Width" Value="400" />
-                                            <Setter Property="Height" Value="120" />
+                                            <Setter Property="MinHeight" Value="120" />
                                             <Setter Property="CornerRadius" Value="15" />
                                             <Setter Property="Background" Value="#262A32" />
                                         </Style>
@@ -1408,6 +1461,7 @@
                                             <Setter Property="FontSize" Value="25" />
                                             <Setter Property="FontWeight" Value="Bold" />
                                             <Setter Property="VerticalAlignment" Value="Center" />
+                                            <Setter Property="TextWrapping" Value="Wrap" />
                                         </Style>
                                     </Grid.Resources>
 
@@ -1425,7 +1479,7 @@
                                                 Grid.Column="0"
                                                 Height="70"
                                                 Margin="25"
-                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/Clock.png" />
+                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/clock.png" />
 
                                             <Grid Grid.Column="1" Margin="0,20">
                                                 <Grid.RowDefinitions>
@@ -1441,12 +1495,15 @@
                                                 <TextBlock
                                                     Grid.Row="1"
                                                     Style="{StaticResource SideStatsStyle}"
-                                                    Text="0h 5m 12s" />
+                                                    Text="{Binding UpTime}" />
                                             </Grid>
                                         </Grid>
                                     </Border>
 
-                                    <Border Grid.Row="1" Style="{StaticResource SideConsolePanel}">
+                                    <Border
+                                        Grid.Row="1"
+                                        Margin="0,0,0,25"
+                                        Style="{StaticResource SideConsolePanel}">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="Auto" />
@@ -1457,7 +1514,7 @@
                                                 Grid.Column="0"
                                                 Height="70"
                                                 Margin="25"
-                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/Hard drive.png" />
+                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/ram.png" />
 
                                             <Grid Grid.Column="1" Margin="0,20">
                                                 <Grid.RowDefinitions>
@@ -1473,7 +1530,77 @@
                                                 <TextBlock
                                                     Grid.Row="1"
                                                     Style="{StaticResource SideStatsStyle}"
-                                                    Text="2.3GB / 4GB" />
+                                                    Text="{Binding MemoryUsage}" />
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+
+                                    <Border
+                                        Grid.Row="2"
+                                        Margin="0,0,0,25"
+                                        Style="{StaticResource SideConsolePanel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Image
+                                                Grid.Column="0"
+                                                Height="70"
+                                                Margin="25"
+                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/storage.png" />
+
+                                            <Grid Grid.Column="1" Margin="0,20">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    FontSize="22"
+                                                    Style="{StaticResource SideStatsStyle}"
+                                                    Text="World Size:" />
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Style="{StaticResource SideStatsStyle}"
+                                                    Text="{Binding WorldSize}" />
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+
+                                    <Border
+                                        Grid.Row="3"
+                                        Margin="0,0,0,25"
+                                        Style="{StaticResource SideConsolePanel}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <Image
+                                                Grid.Column="0"
+                                                Height="70"
+                                                Margin="25"
+                                                Source="pack://application:,,,/assets/icons/Console Panel Icons/players.png" />
+
+                                            <Grid Grid.Column="1" Margin="0,20">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock
+                                                    Grid.Row="0"
+                                                    FontSize="22"
+                                                    Style="{StaticResource SideStatsStyle}"
+                                                    Text="Online Players:" />
+                                                <TextBlock
+                                                    Grid.Row="1"
+                                                    Style="{StaticResource SideStatsStyle}"
+                                                    Text="{Binding PlayersOnline}" />
                                             </Grid>
                                         </Grid>
                                     </Border>

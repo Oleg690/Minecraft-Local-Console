@@ -63,10 +63,15 @@ namespace Minecraft_Console
         {
             try
             {
-                using (HttpClient client = new())
-                {
-                    return await client.GetStringAsync("https://api64.ipify.org");
-                }
+                // Use OpenDNS resolver to resolve "myip.opendns.com"
+                var lookup = new DnsClient.LookupClient
+                (
+                    new System.Net.IPEndPoint(System.Net.IPAddress.Parse("208.67.222.222"), 53) // resolver1.opendns.com
+                );
+
+                var result = await lookup.QueryAsync("myip.opendns.com", DnsClient.QueryType.A);
+                var answer = result.Answers.ARecords().FirstOrDefault();
+                return answer?.Address.ToString() ?? "Could not resolve IP.";
             }
             catch (Exception ex)
             {

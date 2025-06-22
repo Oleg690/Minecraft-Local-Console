@@ -1810,3 +1810,4 @@ D:\Minecraft-Console\v1.1-Remake\Minecraft Console\obj\Debug\net8.0-windows\refi
 D:\Minecraft-Console\v1.1-Remake\Minecraft Console\obj\Debug\net8.0-windows\Minecraft Console.pdb
 D:\Minecraft-Console\v1.1-Remake\Minecraft Console\obj\Debug\net8.0-windows\Minecraft Console.genruntimeconfig.cache
 D:\Minecraft-Console\v1.1-Remake\Minecraft Console\obj\Debug\net8.0-windows\ref\Minecraft Console.dll
+D:\Minecraft-Console\v1.1-Remake\Minecraft Console\bin\Debug\net8.0-windows\DnsClient.dll

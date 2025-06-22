@@ -3,7 +3,6 @@ using javax.management;
 using javax.management.openmbean;
 using javax.management.remote;
 using Newtonsoft.Json.Linq;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.Versioning;
@@ -12,74 +11,126 @@ using System.Text;
 namespace Minecraft_Console
 {
     [SupportedOSPlatform("windows")]
-    class ServerStats
+    public class ServerStats
     {
-        public static async Task GetServerInfo(ViewModel viewModel, string worldFolderPath, string worldNumber, object[] serverData, object[] userData, string ipAddress, int JMX_Port, int RCON_Port, int Server_Port, string user = "", string psw = "")
+        public static async Task MonitorServer(
+            ViewModel viewModel,
+            string worldFolderPath,
+            string version,
+            string ipAddress,
+            int JMX_Port,
+            int Server_Port,
+            string[] userData,
+            object[] serverData,
+            CancellationToken token)
         {
-            if (MainWindow.serverRunning == true)
-            {
-                Stopwatch stopwatch = new();
-                stopwatch.Start();
-
-                // Get server user and password for JMX
-                user = userData[0].ToString() ?? string.Empty;
-                psw = userData[1].ToString() ?? string.Empty;
-
-                // Get memory usage
-                string memoryUsage = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw)[0];
-                long getUsedHeapMemoryTime = stopwatch.ElapsedMilliseconds;
-                string[] memoryData = [memoryUsage, getUsedHeapMemoryTime.ToString()];
-                //viewModel.MemoryUsage = memoryData[0];
-                stopwatch.Restart();
-
-                // Get world folder size
-                string worldSize = GetFolderSize(worldFolderPath);
-                long getFolderSizeTime = stopwatch.ElapsedMilliseconds;
-                string[] worldData = [worldSize, getFolderSizeTime.ToString()];
-                //viewModel.WorldSize = worldData[0];
-                stopwatch.Restart();
-
-                // Get online players
-                string version = (string)serverData[0];
-                string maxPlayers = (string)serverData[1];
-
-                string playersResult = GetOnlinePlayersCount(ipAddress, Server_Port, GetProtocolVersion(version));
-                long getOnlinePlayersCountTime = stopwatch.ElapsedMilliseconds;
-                string[] playersData = [playersResult, getOnlinePlayersCountTime.ToString()];
-                //viewModel.PlayersOnline = $"{playersData[0]} / {maxPlayers}";
-                stopwatch.Restart();
-
-                // Get server uptime
-                string upTime = GetServerUptime(worldFolderPath);
-                long getServerUpTime = stopwatch.ElapsedMilliseconds;
-                string[] uptimeData = [upTime, getServerUpTime.ToString()];
-                //viewModel.UpTime = uptimeData[0];
-                stopwatch.Restart();
-
-                // Get console output
-                string consoleOutput = GetConsoleOutput(worldFolderPath);
-                long consoleOutputTime = stopwatch.ElapsedMilliseconds;
-                string[] consoleOutputData = [consoleOutput, consoleOutputTime.ToString()];
-                //viewModel.Console = consoleOutputData[0];
-                stopwatch.Restart();
-
-                //CodeLogger.ConsoleLog($"Updating VM for {worldNumber}: {viewModel.MemoryUsage}");
-
-                // Get elapsed time
-                long totalElapsedTime = getUsedHeapMemoryTime + getFolderSizeTime + getOnlinePlayersCountTime + getServerUpTime + consoleOutputTime;
-                int delayTime = Math.Max(0, 500 - (int)totalElapsedTime);
-                if (delayTime < 0) delayTime = 0;
-                await Task.Delay(delayTime);
-            }
-            else
-            {
-                await Task.Delay(1000);
+            if (viewModel == null)
                 return;
+
+            _ = Task.Run(() => MonitorServerUpTime(viewModel, worldFolderPath, token), token);
+
+            string? user = userData[0];
+            string? psw = userData[1];
+            string maxPlayers = serverData[5]?.ToString() ?? "?";
+
+            while (!token.IsCancellationRequested && MainWindow.serverRunning)
+            {
+                if (!viewModel.IsActivePanel)
+                    return;
+
+                var memoryStats = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw);
+
+                string usedPercent = memoryStats[0];        // "63.45%"
+                string freePercent = memoryStats[1];        // "36.55%"
+                string usedFormatted = memoryStats[2];      // "2.34 GB"
+                string freeFormatted = memoryStats[3];      // "1.36 GB"
+                string maxFormatted = memoryStats[4];       // "3.70 GB"
+
+                string form1 = $"{usedPercent}";
+                string form2 = $"{freePercent}";
+                string form3 = $"{freeFormatted}";
+                string form4 = $"{usedFormatted}";
+                string form5 = $"{freeFormatted} / {maxFormatted}";
+                string form6 = $"{usedFormatted} / {maxFormatted}";
+                string form7 = $"{usedFormatted} / {maxFormatted} ({usedPercent})";
+
+                viewModel.MemoryUsage = form6;
+
+                var protocol = GetProtocolVersion(version);
+                var online = GetOnlinePlayersCount(ipAddress, Server_Port, protocol);
+                viewModel.PlayersOnline = $"{online} / {maxPlayers}";
+
+                string worldSize = GetFolderSize(worldFolderPath);
+                viewModel.WorldSize = worldSize;
+
+                viewModel.Console = GetConsoleOutput(worldFolderPath);
+
+                try
+                {
+                    await Task.Delay(1000, token);
+                }
+                catch (TaskCanceledException)
+                {
+                    break;
+                }
             }
         }
 
+        public static async Task MonitorServerUpTime(
+            ViewModel viewModel,
+            string worldFolderPath,
+            CancellationToken token)
+        {
+            if (viewModel == null)
+                return;
+
+            DateTime startupTime;
+            string? parentDirectory = Path.GetDirectoryName(Path.GetDirectoryName(worldFolderPath));
+            if (parentDirectory == null)
+                return;
+
+            string? startupTimePath = Path.Combine(parentDirectory, "serverStartupTime.txt");
+            if (!File.Exists(startupTimePath))
+                return;
+
+            try
+            {
+                startupTime = DateTime.Parse(File.ReadAllText(startupTimePath));
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog("Error reading startup time: " + ex.Message);
+                return;
+            }
+
+            // Loop with accurate timing
+            while (!token.IsCancellationRequested && MainWindow.serverRunning)
+            {
+                if (!viewModel.IsActivePanel)
+                    return;
+
+                // Calculate uptime
+                TimeSpan uptime = DateTime.Now - startupTime;
+                viewModel.UpTime = uptime.ToString(@"hh\:mm\:ss");
+
+                // Wait until the next full second
+                DateTime nextTick = DateTime.Now.AddSeconds(1);
+                int delayMs = (int)(nextTick - DateTime.Now).TotalMilliseconds;
+
+                try
+                {
+                    await Task.Delay(delayMs, token); // wait precisely to the next second
+                }
+                catch (TaskCanceledException)
+                {
+                    break;
+                }
+            }
+        }
+
+
         // ------------------------ Method to get memory usage of Minecraft server ------------------------
-        private static string[] GetUsedHeapMemory(string ip, int port, string user, string psw)
+        public static string[] GetUsedHeapMemory(string ip, int port, string user, string psw)
         {
             try
             {
@@ -99,17 +150,26 @@ namespace Minecraft_Console
                 // Retrieve heap memory usage
                 CompositeData heapMemoryUsage = (CompositeData)mBeanConnection.getAttribute(memoryMXBean, "HeapMemoryUsage");
 
-                // Handle the Java Long to .NET long conversion
                 long usedHeap = ((java.lang.Long)heapMemoryUsage.get("used")).longValue();
                 long maxHeap = ((java.lang.Long)heapMemoryUsage.get("max")).longValue();
-
                 long freeHeap = maxHeap - usedHeap;
 
+                string usedHeapPercentage = ((double)usedHeap / maxHeap * 100).ToString("0.00");
                 string freeHeapPercentage = ((double)freeHeap / maxHeap * 100).ToString("0.00");
 
-                string usedHeapPercentage = ((double)usedHeap / maxHeap * 100).ToString("0.00");
+                string usedFormatted = FormatMemory(usedHeap);
+                string freeFormatted = FormatMemory(freeHeap);
+                string maxFormatted = FormatMemory(maxHeap);
 
-                return [$"{usedHeapPercentage}%", $"{freeHeapPercentage}%"];
+                return
+                [
+                    $"{usedHeapPercentage}%",
+                    $"{freeHeapPercentage}%",
+                    usedFormatted,
+                    freeFormatted,
+                    maxFormatted,
+                    usedHeap.ToString() // optional raw data
+                ];
             }
             catch (Exception ex)
             {
@@ -142,7 +202,7 @@ namespace Minecraft_Console
 
         // ------------------------ Method to get server uptime via StartupTime file last write time ------------------------
 
-        private static string GetServerUptime(string? worldFolderPath)
+        public static string GetServerUptime(string? worldFolderPath)
         {
             if (worldFolderPath == null)
             {
@@ -249,7 +309,7 @@ namespace Minecraft_Console
                         stream.Flush();
 
                         // Send status request packet.
-                        using (MemoryStream ms = new MemoryStream())
+                        using (MemoryStream ms = new())
                         {
                             WriteVarInt(ms, 1);
                             ms.WriteByte(0x00);
@@ -272,7 +332,7 @@ namespace Minecraft_Console
                             bytesRead += read;
                         }
 
-                        using (MemoryStream ms = new MemoryStream(responseData))
+                        using (MemoryStream ms = new(responseData))
                         {
                             int packetId = ReadVarInt(ms);
                             if (packetId != 0x00)
@@ -357,6 +417,13 @@ namespace Minecraft_Console
         }
 
         // ------------------------ Help Funcs for GetOnlinePlayersCount() ------------------------
+        private static string FormatMemory(long bytes)
+        {
+            double mb = bytes / 1024.0 / 1024.0;
+            double gb = mb / 1024.0;
+
+            return gb >= 1.0 ? $"{gb:F2} GB" : $"{mb:F2} MB";
+        }
 
         private static byte[] CreateHandshakePacket(string serverAddress, int serverPort, int protocolVersion)
         {
@@ -417,7 +484,7 @@ namespace Minecraft_Console
             return result;
         }
 
-        private static int GetProtocolVersion(string version)
+        public static int GetProtocolVersion(string version)
         {
             // Mapping based on commonly known Minecraft protocol versions.
             var mapping = new Dictionary<string, int>

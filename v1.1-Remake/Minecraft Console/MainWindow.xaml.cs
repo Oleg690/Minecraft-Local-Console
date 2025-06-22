@@ -1,4 +1,6 @@
 ﻿using Minecraft_Console.UI;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Windows;
@@ -80,7 +82,9 @@ namespace Minecraft_Console
 
     public partial class MainWindow : Window
     {
-        private static readonly ViewModel _viewModel = new();
+        private static ViewModel? viewModel;
+        private static readonly ViewModel _viewModel = new("default");
+        private readonly Dictionary<string, ServerMonitor> _activeMonitors = [];
         private Button? _selectedButton;
 
         private static readonly Color OfflineStatusColor = Color.FromRgb(255, 53, 53);
@@ -118,12 +122,23 @@ namespace Minecraft_Console
         {
             InitializeComponent();
 
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await SetStaticPaths();
+
             CodeLogger.CreateLogFile(5);
-            SetStaticPaths();
             LoadDataJSONFile();
             OnLoaded();
             LoadServersPage();
-            //_ = CheckRunningServersAsync();
+        }
+
+        // Closing func
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            StopAllMonitors();
         }
 
         private static void LoadDataJSONFile()
@@ -212,16 +227,17 @@ namespace Minecraft_Console
         }
 
         // Paths setter func
-        private static async void SetStaticPaths()
+        private static async Task SetStaticPaths()
         {
+            var publicIpTask = NetworkSetup.GetPublicIP();
             rootFolder = System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(System.IO.Path.GetDirectoryName(currentDirectory))) ?? string.Empty;
             rootWorldsFolder = System.IO.Path.Combine(rootFolder, "worlds") ?? string.Empty;
             serverVersionsPath = System.IO.Path.Combine(rootFolder, "versions") ?? string.Empty;
             tempFolderPath = System.IO.Path.Combine(rootFolder, "temp") ?? string.Empty;
             defaultServerPropertiesPath = System.IO.Path.Combine(rootFolder, "Preset Files\\server.properties") ?? string.Empty;
             appDataPath = System.IO.Path.Combine(rootFolder, "appProperties\\appData.json") ?? string.Empty;
-            Server_PublicComputerIP = await NetworkSetup.GetPublicIP() ?? string.Empty;
             Server_LocalComputerIP = NetworkSetup.GetLocalIP() ?? string.Empty;
+            Server_PublicComputerIP = await publicIpTask;
         }
 
         // GIF Loader/Unloader
@@ -266,6 +282,7 @@ namespace Minecraft_Console
         // Load Servers Page Funcs
         private void LoadServersPage()
         {
+            _viewModel.IsActivePanel = false;
             MainContent.Children.Clear();
             MainContent.Opacity = 0;
 
@@ -285,12 +302,12 @@ namespace Minecraft_Console
 
             int cornerRadius = 20;
             Thickness buttonMargin = new(25);
-            var worldsFromDb = DbChanger.SpecificDataFunc("SELECT worldNumber, name, version, totalPlayers, Process_ID FROM worlds");
+            var worldsData = DbChanger.SpecificDataFunc("SELECT worldNumber, name, version, totalPlayers, Server_Port, JMX_Port, Process_ID FROM worlds");
             var existingDirs = Directory.Exists(rootWorldsFolder)
                 ? [.. Directory.GetDirectories(rootWorldsFolder).Select(Path.GetFileName)]
                 : new HashSet<string>();
 
-            foreach (var worldEntry in worldsFromDb)
+            foreach (var worldEntry in worldsData)
             {
                 if (worldEntry.Length < 2 || ServerWorlds == null) continue;
 
@@ -305,12 +322,52 @@ namespace Minecraft_Console
                     continue;
                 }
 
-                string worldName = worldEntry[1]?.ToString() ?? "Unnamed World";
-                string worldVersion = worldEntry[2]?.ToString() ?? "";
-                string worldTotalPlayers = worldEntry[3]?.ToString() ?? "";
-                string processID = worldEntry[4]?.ToString() ?? "";
+                object[] serverData = DbChanger.GetFunc(worldNumber)[0];
 
-                var button = ServerCard.CreateStyledButton(worldNumber, cornerRadius, worldName, worldVersion, worldTotalPlayers, processID, buttonMargin, ServerWorlds[worldNumber].IsRunning, () => OpenControlPanel(worldName, worldNumber));
+                string worldName = serverData[2]?.ToString() ?? "Unnamed World";
+                string worldVersion = serverData[3]?.ToString() ?? "";
+                string totalPlayers = serverData[5]?.ToString() ?? "";
+                string processID = worldEntry[6]?.ToString() ?? "";
+
+                int mainPort = Convert.ToInt32(serverData[6]);
+                int jmxPort = Convert.ToInt32(serverData[7]);
+
+                if (!string.IsNullOrWhiteSpace(processID))
+                {
+                    // Capture values locally to use inside Task.Run
+                    string worldId = worldNumber;
+                    object[] localServerData = serverData;
+                    string localProcessId = processID;
+
+                    _ = Task.Run(() =>
+                    {
+                        if (string.IsNullOrWhiteSpace(rootWorldsFolder) ||
+                            string.IsNullOrWhiteSpace(Server_PublicComputerIP))
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                MessageBox.Show("Required fields are not set. Cannot start server monitoring.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                            });
+                            return;
+                        }
+
+                        var vm = ViewModelManager.Create(worldId); // Create in background
+                        var monitor = new ServerMonitor(vm, worldId);
+
+                        string serverWorldPath = Path.Combine(rootWorldsFolder, worldId);
+                        string[] userData = [$"{localServerData[10]}", $"{localServerData[11]}"];
+
+                        monitor.StartMonitoring(localServerData, userData, serverWorldPath, Server_PublicComputerIP, jmxPort, mainPort);
+
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            viewModel = vm;
+                            _activeMonitors[worldId] = monitor;
+                        });
+                    });
+                }
+
+                var button = ServerCard.CreateStyledButton(worldNumber, cornerRadius, worldName, worldVersion, totalPlayers, processID, buttonMargin, ServerWorlds[worldNumber].IsRunning, () => OpenControlPanel(worldName, worldNumber));
 
                 serverPanel.Children.Add(button);
             }
@@ -337,42 +394,41 @@ namespace Minecraft_Console
             ServerCard.AnimateFadeIn(MainContent);
         }
 
-        private void AnimateStatusColor(Color newColor, string worldNumber)
+        private void AnimateStatusColor(Color newColor, string worldNumber, int time)
         {
             ServerWorld? world = GetActiveWorld(worldNumber);
             if (world == null)
-            {
                 return;
-            }
 
             world.StatusColor = newColor;
 
-            var brush = (SolidColorBrush)FindResource("StatusBrush");
-
-            var colorAnimation = new ColorAnimation
+            // Map colors to running states and status text
+            var colorStateMap = new Dictionary<Color, (int IsRunning, string StatusText)>
             {
-                To = newColor,
-                Duration = new Duration(TimeSpan.FromMilliseconds(300)), // Smooth transition
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+                { OnlineStatusColor, (0, "Online") },
+                { LoadingStatusColor, (1, "Loading") },
+                { OfflineStatusColor, (2, "Offline") }
             };
 
-            brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+            if (colorStateMap.TryGetValue(newColor, out var state))
+            {
+                world.IsRunning = state.IsRunning;
 
-            if (newColor == OnlineStatusColor)
-            {
-                statusText.Text = "Online";
-                world.IsRunning = 0;
-            }
-            if (newColor == LoadingStatusColor)
-            {
-                statusText.Text = "Loading";
-                world.IsRunning = 1;
-            }
-            if (newColor == OfflineStatusColor)
-            {
+                if (worldNumber == openWorldNumber || worldNumber == "default")
+                {
+                    if (FindResource("StatusBrush") is SolidColorBrush brush)
+                    {
+                        var colorAnimation = new ColorAnimation
+                        {
+                            To = newColor,
+                            Duration = TimeSpan.FromMilliseconds(time),
+                            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+                        };
+                        brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
+                    }
 
-                statusText.Text = "Offline";
-                world.IsRunning = 2;
+                    statusText.Text = state.StatusText;
+                }
             }
         }
 
@@ -389,7 +445,7 @@ namespace Minecraft_Console
 
             brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
 
-            SetButtonStates(false, false, false);
+            SetButtonStates("default", false, false, false);
 
             var worlds = DbChanger.SpecificDataFunc("SELECT worldNumber, Process_ID, startingStatus FROM worlds");
             var existingDirs = Directory.Exists(rootWorldsFolder)
@@ -477,36 +533,11 @@ namespace Minecraft_Console
             serverNameBlock.Text = serverName;
             world.IsActive = true;
 
-            var brush = (SolidColorBrush)FindResource("StatusBrush");
+            viewModel = ViewModelManager.Get(worldNumber) ?? ViewModelManager.Create(worldNumber);
+            this.DataContext = viewModel;
 
-            var colorAnimation = new ColorAnimation
-            {
-                To = world.StatusColor,
-                Duration = new Duration(TimeSpan.FromMilliseconds(300)), // Smooth transition
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
-            };
-
-            brush.BeginAnimation(SolidColorBrush.ColorProperty, colorAnimation);
-
-            if (world.IsRunning == 0)
-            {
-                statusText.Text = "Online";
-            }
-            if (world.IsRunning == 1)
-            {
-                statusText.Text = "Loading";
-            }
-            if (world.IsRunning == 2)
-            {
-                statusText.Text = "Offline";
-            }
-
+            AnimateStatusColor(world.StatusColor, worldNumber, 0);
             ShowButtonStates(worldNumber);
-
-            //foreach (var entry in ServerWorlds)
-            //{
-            //    CodeLogger.ConsoleLog($"Name: {entry.Key}; IsActive: {entry.Value.IsActive}; IsRunning: {entry.Value.IsRunning};");
-            //}
 
             if (string.IsNullOrEmpty(worldNumber))
             {
@@ -673,12 +704,14 @@ namespace Minecraft_Console
 
                 ServerWorld? wolrd = GetActiveWorld(worldNumber);
 
-                AnimateStatusColor(LoadingStatusColor, worldNumber);
+                AnimateStatusColor(LoadingStatusColor, worldNumber, 300);
 
                 if (string.IsNullOrWhiteSpace(worldNumber) ||
                     string.IsNullOrWhiteSpace(rootWorldsFolder) ||
                     string.IsNullOrWhiteSpace(Server_PublicComputerIP) ||
                     string.IsNullOrWhiteSpace(serverDirectoryPath) ||
+                    string.IsNullOrWhiteSpace(rootFolder) ||
+                    viewModel == null ||
                     string.IsNullOrWhiteSpace(appDataPath))
                 {
                     MessageBox.Show("Some required fields are not set. Cannot start the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -709,17 +742,30 @@ namespace Minecraft_Console
                     JMX_Port,
                     RCON_Port,
                     RMI_Port,
-                    noGUI: true,
+                    noGUI: false,
                     onServerRunning: (_) =>
                     {
                         Dispatcher.Invoke(() =>
                         {
+                            if (_activeMonitors.TryGetValue(worldNumber, out var oldMonitor))
+                            {
+                                oldMonitor.StopMonitoring();
+                                _activeMonitors.Remove(worldNumber);
+                            }
+
+                            var monitor = new ServerMonitor(viewModel, worldNumber);
+                            string serverWorldPath = Path.Combine(rootWorldsFolder, worldNumber);
+                            string[] userData = ReadUserAndPassword(Path.Combine(rootFolder, "jmx\\jmxremote.password"));
+
+                            monitor.StartMonitoring(serverData, userData, serverWorldPath, Server_PublicComputerIP, JMX_Port, MainServerPort);
+                            _activeMonitors[worldNumber] = monitor;
+
                             DbChanger.SpecificDataFunc($"UPDATE worlds SET startingStatus = NULL WHERE worldNumber = '{worldNumber}';");
 
                             status = "Success";
 
                             ChangeButtonStates(worldNumber);
-                            AnimateStatusColor(OnlineStatusColor, worldNumber);
+                            AnimateStatusColor(OnlineStatusColor, worldNumber, 300);
 
                             PopupWindow.CreateStatusPopup(status, $"Server \"{serverName}\" has started successfully.", PopupHost);
                         });
@@ -754,9 +800,10 @@ namespace Minecraft_Console
 
             try
             {
-                AnimateStatusColor(LoadingStatusColor, worldNumber);
+                AnimateStatusColor(LoadingStatusColor, worldNumber, 300);
 
                 if (string.IsNullOrWhiteSpace(worldNumber) ||
+                    viewModel == null ||
                     string.IsNullOrWhiteSpace(Server_LocalComputerIP))
                 {
                     MessageBox.Show("Some required fields are not set. Cannot stop the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -781,9 +828,18 @@ namespace Minecraft_Console
                 );
                 });
 
+                ServerMonitor.VMDefaultValues(viewModel);
+
+                if (_activeMonitors.TryGetValue(worldNumber, out var monitor))
+                {
+                    monitor.StopMonitoring();
+                    _activeMonitors.Remove(worldNumber);
+                    ViewModelManager.Deactivate(worldNumber);
+                }
+
                 serverRunning = false; // Assuring the server stops successfully
                 ChangeButtonStates(worldNumber);
-                AnimateStatusColor(OfflineStatusColor, worldNumber);
+                AnimateStatusColor(OfflineStatusColor, worldNumber, 300);
 
                 PopupWindow.CreateStatusPopup(status, $"Server \"{serverName}\" has been stopped.", PopupHost);
             }
@@ -807,13 +863,15 @@ namespace Minecraft_Console
 
             try
             {
-                AnimateStatusColor(LoadingStatusColor, worldNumber);
+                AnimateStatusColor(LoadingStatusColor, worldNumber, 300);
 
                 if (string.IsNullOrWhiteSpace(worldNumber) ||
                     string.IsNullOrWhiteSpace(rootWorldsFolder) ||
                     string.IsNullOrWhiteSpace(Server_LocalComputerIP) ||
                     string.IsNullOrWhiteSpace(Server_PublicComputerIP) ||
                     string.IsNullOrWhiteSpace(serverDirectoryPath) ||
+                    string.IsNullOrWhiteSpace(rootFolder) ||
+                    viewModel == null ||
                     string.IsNullOrWhiteSpace(appDataPath))
                 {
                     MessageBox.Show("Some required fields are not set. Cannot start the server.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -841,6 +899,15 @@ namespace Minecraft_Console
                 );
                 });
 
+                ServerMonitor.VMDefaultValues(viewModel);
+
+                if (_activeMonitors.TryGetValue(worldNumber, out var monitor))
+                {
+                    monitor.StopMonitoring();
+                    _activeMonitors.Remove(worldNumber);
+                    ViewModelManager.Deactivate(worldNumber);
+                }
+
                 object[] outputID = [0, "Unknown error"];
 
                 await Task.Run(async () =>
@@ -860,14 +927,27 @@ namespace Minecraft_Console
                     {
                         Dispatcher.Invoke(() =>
                         {
+                            if (_activeMonitors.TryGetValue(worldNumber, out var oldMonitor))
+                            {
+                                oldMonitor.StopMonitoring();
+                                _activeMonitors.Remove(worldNumber);
+                            }
+
+                            var viewModel = ViewModelManager.Create(worldNumber);
+                            var monitor = new ServerMonitor(viewModel, worldNumber);
+                            string serverWorldPath = Path.Combine(rootWorldsFolder, worldNumber);
+                            string[] userData = ReadUserAndPassword(Path.Combine(rootFolder, "jmx\\jmxremote.password"));
+
+                            monitor.StartMonitoring(serverData, userData, serverWorldPath, Server_PublicComputerIP, JMX_Port, MainServerPort);
+                            _activeMonitors[worldNumber] = monitor;
+
                             DbChanger.SpecificDataFunc($"UPDATE worlds SET startingStatus = NULL WHERE worldNumber = '{worldNumber}';");
 
                             status = "Success";
-
                             ChangeButtonStates(worldNumber);
-                            AnimateStatusColor(OnlineStatusColor, worldNumber);
+                            AnimateStatusColor(OnlineStatusColor, worldNumber, 300);
 
-                            PopupWindow.CreateStatusPopup(status, $"Server \"{serverName}\" has been restarted!", PopupHost);
+                            PopupWindow.CreateStatusPopup(status, $"Server \"{serverName}\" has started successfully.", PopupHost);
                         });
                     }
                 );
@@ -886,6 +966,41 @@ namespace Minecraft_Console
         }
 
         // Helper methods for button states and world handling
+        public static string[] ReadUserAndPassword(string filePath)
+        {
+            if (!File.Exists(filePath))
+                return ["", ""];
+
+            try
+            {
+                string line = File.ReadAllText(filePath).Trim();
+
+                string[] parts = line.Split([' '], 2, StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length == 2)
+                {
+                    return [parts[0], parts[1]];
+                }
+
+                return ["", ""];
+            }
+            catch
+            {
+                return ["", ""];
+            }
+        }
+
+        public void StopAllMonitors()
+        {
+            foreach (var monitor in _activeMonitors.Values)
+            {
+                monitor.StopMonitoring();
+            }
+
+            _activeMonitors.Clear();
+            ViewModelManager.ClearAll();
+        }
+
         private ServerWorld? GetActiveWorld(string worldNumber)
         {
             if (worldNumber == null)
@@ -908,7 +1023,7 @@ namespace Minecraft_Console
             var world = GetActiveWorld(worldNumber);
             if (world == null) return;
 
-            SetButtonStates(world.ButtonState1, world.ButtonState2, world.ButtonState3);
+            SetButtonStates(worldNumber, world.ButtonState1, world.ButtonState2, world.ButtonState3);
         }
 
         private void DisableAllButtons(string worldNumber)
@@ -920,7 +1035,7 @@ namespace Minecraft_Console
             world.ButtonState2 = false;
             world.ButtonState3 = false;
 
-            SetButtonStates(false, false, false);
+            SetButtonStates(worldNumber, false, false, false);
         }
 
         private void ChangeButtonStates(string worldNumber)
@@ -943,7 +1058,7 @@ namespace Minecraft_Console
                 world.IsRunning = 2;
             }
 
-            SetButtonStates(world.ButtonState1, world.ButtonState2, world.ButtonState3);
+            SetButtonStates(worldNumber, world.ButtonState1, world.ButtonState2, world.ButtonState3);
         }
 
         private void SetDefaultButtonStates(string worldNumber)
@@ -955,18 +1070,32 @@ namespace Minecraft_Console
             world.ButtonState2 = false;
             world.ButtonState3 = false;
 
-            SetButtonStates(true, false, false);
+            SetButtonStates(worldNumber, true, false, false);
         }
 
-        private void SetButtonStates(bool ButtonState1, bool ButtonState2, bool ButtonState3)
+        private void SetButtonStates(string worldNumber, bool ButtonState1, bool ButtonState2, bool ButtonState3)
         {
-            StartBtn.IsEnabled = ButtonState1;
-            StopBtn.IsEnabled = ButtonState2;
-            RestartBtn.IsEnabled = ButtonState3;
+            if (worldNumber == openWorldNumber || worldNumber == "default")
+            {
+                StartBtn.IsEnabled = ButtonState1;
+                StopBtn.IsEnabled = ButtonState2;
+                RestartBtn.IsEnabled = ButtonState3;
+            }
+        }
+
+        public void SetConsoleOnline()
+        {
+            ConsoleTextBox.Visibility = Visibility.Visible;
+            ConsoleTextBoxOfflineStatus.Visibility = Visibility.Hidden;
+        }
+
+        public void SetConsoleOffline()
+        {
+            ConsoleTextBox.Visibility = Visibility.Hidden;
+            ConsoleTextBoxOfflineStatus.Visibility = Visibility.Visible;
         }
 
         // Create Server Page Show func
-
         private void CreateServerButton_Click()
         {
             ResetCreateServerButtons();
@@ -1115,21 +1244,6 @@ namespace Minecraft_Console
             if (Settings != null) Settings.Visibility = Visibility.Collapsed;
             if (ServerDropBox != null && verificator == true) ServerDropBox.Visibility = Visibility.Collapsed;
         }
-
-        //private static bool IsProcessRunning(int pid)
-        //{
-        //    try
-        //    {
-        //        if (pid <= 0) return false;
-        //        Process process = Process.GetProcessById(pid);
-        //        return !process.HasExited;
-        //    }
-        //    catch (ArgumentException)
-        //    {
-        //        // Thrown when no process with the specified ID is running
-        //        return false;
-        //    }
-        //}
 
         private void ResetCreateServerButtons()
         {

@@ -5,7 +5,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Minecraft_Console
 {
@@ -672,9 +671,6 @@ namespace Minecraft_Console
                 await NetworkSetup.Setup(Server_Port, JMX_Port, RMI_Port);
             }
 
-            CodeLogger.ConsoleLog($"World Number: '{worldNumber}'");
-            CodeLogger.ConsoleLog($"Software: '{software}'");
-
             string user = "admin";
             string psw = ServerCreator.GenerateRandomNumber(5);
 
@@ -717,7 +713,7 @@ namespace Minecraft_Console
                 WorkingDirectory = serverPath
             };
 
-            CodeLogger.ConsoleLog($"Starting {software} Server!");
+            CodeLogger.ConsoleLog($"Starting '{worldNumber}' {software} Server!");
 
             object[] serverData = DbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
 
@@ -1259,13 +1255,13 @@ namespace Minecraft_Console
 
                 if (!string.IsNullOrWhiteSpace(output))
                 {
-                    string[] lines = output.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] lines = output.Split([Environment.NewLine], StringSplitOptions.RemoveEmptyEntries);
                     foreach (var line in lines)
                     {
-                        string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] parts = line.Split([' '], StringSplitOptions.RemoveEmptyEntries);
                         if (parts.Length > 4)
                         {
-                            string pid = parts[parts.Length - 1];
+                            string pid = parts[^1];
 
                             CodeLogger.ConsoleLog($"Found PID: {pid}");
 
