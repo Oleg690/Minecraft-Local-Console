@@ -785,8 +785,6 @@ namespace Minecraft_Console
                 DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\", serverUser = \"{user}\", serverTempPsw = \"{psw}\" WHERE worldNumber = \"{worldNumber}\";");
                 object[] userData = [user, psw];
 
-                CodeLogger.ConsoleLog("Minecraft server started!");
-
                 RecordServerStart();
 
                 process.OutputDataReceived += (sender, e) =>
@@ -838,9 +836,8 @@ namespace Minecraft_Console
 
                 string message = process.ExitCode != 0
                     ? $"Server process exited with code: {process.ExitCode}"
-                    : "Server process exited successfully.";
+                    : "Server was stopped successfully.";
 
-                CodeLogger.ConsoleLog(message);
                 return [0, message];
             }
         }
@@ -891,10 +888,8 @@ namespace Minecraft_Console
                 // Create an RCON client
                 using (var rcon = new RCON(serverAddress, port, password))
                 {
-                    CodeLogger.ConsoleLog("Connecting to the server...");
                     await rcon.ConnectAsync();
 
-                    CodeLogger.ConsoleLog("Connected. Sending command...");
                     // Send a command
                     string response = await rcon.SendCommandAsync(input);
                     // Output the server response
@@ -1436,7 +1431,6 @@ namespace Minecraft_Console
             {
                 // Write the timestamp to the file
                 File.WriteAllText(StartupTimePath, startupTime.ToString("o")); // "o" for ISO 8601 format
-                CodeLogger.ConsoleLog($"Server start time recorded: {startupTime}");
             }
             else
             {

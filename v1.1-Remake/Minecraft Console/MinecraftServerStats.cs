@@ -13,67 +13,137 @@ namespace Minecraft_Console
     [SupportedOSPlatform("windows")]
     public class ServerStats
     {
-        public static async Task MonitorServer(
+        public static void MonitorServer(
             ViewModel viewModel,
             string worldFolderPath,
             string version,
             string ipAddress,
             int JMX_Port,
             int Server_Port,
+            string maxPlayers,
             string[] userData,
-            object[] serverData,
             CancellationToken token)
-        {
+            {
             if (viewModel == null)
                 return;
 
+            // Start Uptime monitor separat
             _ = Task.Run(() => MonitorServerUpTime(viewModel, worldFolderPath, token), token);
 
             string? user = userData[0];
             string? psw = userData[1];
-            string maxPlayers = serverData[5]?.ToString() ?? "?";
 
-            while (!token.IsCancellationRequested && MainWindow.serverRunning)
+            // Memory Monitor
+            _ = Task.Run(async () =>
             {
-                if (!viewModel.IsActivePanel)
-                    return;
-
-                var memoryStats = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw);
-
-                string usedPercent = memoryStats[0];        // "63.45%"
-                string freePercent = memoryStats[1];        // "36.55%"
-                string usedFormatted = memoryStats[2];      // "2.34 GB"
-                string freeFormatted = memoryStats[3];      // "1.36 GB"
-                string maxFormatted = memoryStats[4];       // "3.70 GB"
-
-                string form1 = $"{usedPercent}";
-                string form2 = $"{freePercent}";
-                string form3 = $"{freeFormatted}";
-                string form4 = $"{usedFormatted}";
-                string form5 = $"{freeFormatted} / {maxFormatted}";
-                string form6 = $"{usedFormatted} / {maxFormatted}";
-                string form7 = $"{usedFormatted} / {maxFormatted} ({usedPercent})";
-
-                viewModel.MemoryUsage = form6;
-
-                var protocol = GetProtocolVersion(version);
-                var online = GetOnlinePlayersCount(ipAddress, Server_Port, protocol);
-                viewModel.PlayersOnline = $"{online} / {maxPlayers}";
-
-                string worldSize = GetFolderSize(worldFolderPath);
-                viewModel.WorldSize = worldSize;
-
-                viewModel.Console = GetConsoleOutput(worldFolderPath);
-
-                try
+                while (!token.IsCancellationRequested && MainWindow.serverRunning)
                 {
-                    await Task.Delay(1000, token);
+                    try
+                    {
+                        var memoryStats = GetUsedHeapMemory(ipAddress, JMX_Port, user, psw);
+                        if (token.IsCancellationRequested) break;
+
+                        string usedFormatted = memoryStats[2];
+                        string maxFormatted = memoryStats[4];
+                        string usedPercent = memoryStats[0];
+
+                        viewModel.MemoryUsage = $"{usedFormatted} / {maxFormatted}";
+
+                        await Task.Delay(1000, token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        CodeLogger.ConsoleLog("[MemoryMonitor] Error: " + ex.Message);
+                        break;
+                    }
                 }
-                catch (TaskCanceledException)
+            }, token);
+
+            // Player Count Monitor
+            _ = Task.Run(async () =>
+            {
+                while (!token.IsCancellationRequested && MainWindow.serverRunning)
                 {
-                    break;
+                    try
+                    {
+                        int protocol = GetProtocolVersion(version);
+                        string online = GetOnlinePlayersCount(ipAddress, Server_Port, protocol);
+                        if (token.IsCancellationRequested) break;
+
+                        viewModel.PlayersOnline = $"{online} / {maxPlayers}";
+
+                        await Task.Delay(1000, token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        CodeLogger.ConsoleLog("[PlayerMonitor] Error: " + ex.Message);
+                        break;
+                    }
                 }
-            }
+            }, token);
+
+            // World Size Monitor
+            _ = Task.Run(async () =>
+            {
+                while (!token.IsCancellationRequested && MainWindow.serverRunning)
+                {
+                    try
+                    {
+                        string size = GetFolderSize(worldFolderPath);
+                        if (token.IsCancellationRequested) break;
+
+                        viewModel.WorldSize = size;
+
+                        await Task.Delay(5000, token); // Size doesn't need 1s updates
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        CodeLogger.ConsoleLog("[SizeMonitor] Error: " + ex.Message);
+                        break;
+                    }
+                }
+            }, token);
+
+            // Console Output Monitor
+            _ = Task.Run(async () =>
+            {
+                while (!token.IsCancellationRequested && MainWindow.serverRunning)
+                {
+                    try
+                    {
+                        string console = GetConsoleOutput(worldFolderPath);
+                        if (token.IsCancellationRequested) break;
+
+                        viewModel.Console = console;
+
+                        await Task.Delay(1000, token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        CodeLogger.ConsoleLog("[ConsoleMonitor] Error: " + ex.Message);
+                        break;
+                    }
+                }
+            }, token);
+
+            // Final log
+            //CodeLogger.ConsoleLog("[MainMonitor] All monitoring tasks started.");
         }
 
         public static async Task MonitorServerUpTime(
@@ -82,16 +152,25 @@ namespace Minecraft_Console
             CancellationToken token)
         {
             if (viewModel == null)
+            {
+                CodeLogger.ConsoleLog("[UptimeMonitor] ViewModel is null — monitoring aborted.");
                 return;
+            }
 
             DateTime startupTime;
             string? parentDirectory = Path.GetDirectoryName(Path.GetDirectoryName(worldFolderPath));
             if (parentDirectory == null)
+            {
+                CodeLogger.ConsoleLog($"[UptimeMonitor] Failed to locate parent directory for: {worldFolderPath}");
                 return;
+            }
 
-            string? startupTimePath = Path.Combine(parentDirectory, "serverStartupTime.txt");
+            string startupTimePath = Path.Combine(parentDirectory, "serverStartupTime.txt");
             if (!File.Exists(startupTimePath))
+            {
+                CodeLogger.ConsoleLog($"[UptimeMonitor] File not found: {startupTimePath}");
                 return;
+            }
 
             try
             {
@@ -99,27 +178,27 @@ namespace Minecraft_Console
             }
             catch (Exception ex)
             {
-                CodeLogger.ConsoleLog("Error reading startup time: " + ex.Message);
+                CodeLogger.ConsoleLog($"[UptimeMonitor] Error parsing startup time from file: {ex}");
                 return;
             }
 
-            // Loop with accurate timing
             while (!token.IsCancellationRequested && MainWindow.serverRunning)
             {
                 if (!viewModel.IsActivePanel)
+                {
+                    CodeLogger.ConsoleLog("[UptimeMonitor] ViewModel no longer active — exiting monitor.");
                     return;
+                }
 
-                // Calculate uptime
                 TimeSpan uptime = DateTime.Now - startupTime;
                 viewModel.UpTime = uptime.ToString(@"hh\:mm\:ss");
 
-                // Wait until the next full second
                 DateTime nextTick = DateTime.Now.AddSeconds(1);
                 int delayMs = (int)(nextTick - DateTime.Now).TotalMilliseconds;
 
                 try
                 {
-                    await Task.Delay(delayMs, token); // wait precisely to the next second
+                    await Task.Delay(delayMs, token);
                 }
                 catch (TaskCanceledException)
                 {
@@ -128,26 +207,26 @@ namespace Minecraft_Console
             }
         }
 
-
         // ------------------------ Method to get memory usage of Minecraft server ------------------------
         public static string[] GetUsedHeapMemory(string ip, int port, string user, string psw)
         {
             try
             {
-                // Construct the JMX service URL
                 string url = $"service:jmx:rmi:///jndi/rmi://{ip}:{port}/jmxrmi";
                 JMXServiceURL serviceURL = new(url);
 
                 var environment = new HashMap();
+
+                environment.put("jmx.remote.x.request.waiting.timeout", 3000L);
+                environment.put("jmx.remote.x.connection.timeout", 3000L);
+
                 environment.put(JMXConnector.CREDENTIALS, new string[] { user, psw });
 
-                // Connect to the JMX server
                 using JMXConnector connector = JMXConnectorFactory.connect(serviceURL, environment);
                 MBeanServerConnection mBeanConnection = connector.getMBeanServerConnection();
 
                 ObjectName memoryMXBean = new("java.lang:type=Memory");
 
-                // Retrieve heap memory usage
                 CompositeData heapMemoryUsage = (CompositeData)mBeanConnection.getAttribute(memoryMXBean, "HeapMemoryUsage");
 
                 long usedHeap = ((java.lang.Long)heapMemoryUsage.get("used")).longValue();
@@ -168,7 +247,7 @@ namespace Minecraft_Console
                     usedFormatted,
                     freeFormatted,
                     maxFormatted,
-                    usedHeap.ToString() // optional raw data
+                    usedHeap.ToString()
                 ];
             }
             catch (Exception ex)
@@ -183,16 +262,24 @@ namespace Minecraft_Console
         {
             if (!Directory.Exists(folderPath))
                 return $"Cannot find {folderPath}";
+
             try
             {
                 long sizeInBytes = new DirectoryInfo(folderPath)
                     .EnumerateFiles("*", SearchOption.AllDirectories)
                     .Sum(file => file.Length);
 
-                double sizeInMB = sizeInBytes / (1024.0 * 1024.0);
-                double sizeInGB = sizeInMB / 1024.0;
+                string[] sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+                double len = sizeInBytes;
+                int order = 0;
 
-                return sizeInGB >= 1 ? $"{sizeInGB:F2} GB" : $"{sizeInMB:F2} MB";
+                while (len >= 1024 && order < sizes.Length - 1)
+                {
+                    order++;
+                    len /= 1024;
+                }
+
+                return $"{len:F2} {sizes[order]}";
             }
             catch
             {
@@ -244,7 +331,7 @@ namespace Minecraft_Console
         {
             using TcpClient client = new();
             client.NoDelay = true;
-            client.ReceiveTimeout = 5000; // 5-second timeout
+            client.ReceiveTimeout = 3000; // 3-second timeout
             if (protocolVersion < 47)
             {
                 // Legacy ping (for versions pre-1.8)
@@ -377,30 +464,48 @@ namespace Minecraft_Console
                 string latestLogPath = Path.Combine(rootPath, "logs", "latest.log");
                 if (File.Exists(latestLogPath))
                 {
+                    // CodeLogger.ConsoleLog("[Log] Found latest.log");
                     return ReadFile(latestLogPath);
+                }
+                else
+                {
+                    CodeLogger.ConsoleLog("[Log] latest.log not found at: " + latestLogPath);
                 }
 
                 // 2. Check root directory for server.log
                 string serverLogPath = Path.Combine(rootPath, "server.log");
                 if (File.Exists(serverLogPath))
                 {
+                    // CodeLogger.ConsoleLog("[Log] Found server.log");
                     return ReadFile(serverLogPath);
+                }
+                else
+                {
+                    CodeLogger.ConsoleLog("[Log] server.log not found at: " + serverLogPath);
                 }
 
                 // 3. Search the entire directory for any .log file
                 string[] logFiles = Directory.GetFiles(rootPath, "*.log", SearchOption.AllDirectories);
                 if (logFiles.Length > 0)
                 {
-                    return ReadFile(logFiles[0]); // Return the first found log file
+                    CodeLogger.ConsoleLog($"[Log] Found fallback log file: {logFiles[0]}");
+                    return ReadFile(logFiles[0]);
+                }
+                else
+                {
+                    CodeLogger.ConsoleLog("[Log] No .log files found in directory: " + rootPath);
                 }
             }
             catch (Exception ex)
             {
+                CodeLogger.ConsoleLog("[Log] Exception while reading log file: " + ex);
                 return $"Error reading log file: {ex.Message}";
             }
 
+            CodeLogger.ConsoleLog("[Log] No log file found at all.");
             return "Log file not found.";
         }
+
 
         private static string ReadFile(string filePath)
         {
@@ -417,13 +522,19 @@ namespace Minecraft_Console
         }
 
         // ------------------------ Help Funcs for GetOnlinePlayersCount() ------------------------
-        private static string FormatMemory(long bytes)
+        public static string FormatMemory(long bytes)
         {
-            double mb = bytes / 1024.0 / 1024.0;
-            double gb = mb / 1024.0;
-
-            return gb >= 1.0 ? $"{gb:F2} GB" : $"{mb:F2} MB";
+            string[] sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB"];
+            double len = bytes;
+            int order = 0;
+            while (len >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                len /= 1024;
+            }
+            return $"{len:F2} {sizes[order]}";
         }
+
 
         private static byte[] CreateHandshakePacket(string serverAddress, int serverPort, int protocolVersion)
         {

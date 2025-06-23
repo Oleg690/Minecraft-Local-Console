@@ -7,12 +7,12 @@
       "RelativeMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|d:\\minecraft-console\\v1.1-remake\\minecraft console\\viewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|solutionrelative:viewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|d:\\minecraft-console\\v1.1-remake\\minecraft console\\minecraftserverstats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|solutionrelative:minecraftserverstats.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|d:\\minecraft-console\\v1.1-remake\\minecraft console\\servernetworkenable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|solutionrelative:servernetworkenable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|d:\\minecraft-console\\v1.1-remake\\minecraft console\\logs\\latest.log||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|solutionrelative:logs\\latest.log||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3ED578E5-1565-4037-9FFD-A76C6C18DB2F}|Minecraft Console.csproj|d:\\minecraft-console\\v1.1-remake\\minecraft console\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -37,7 +37,7 @@
               "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\MainWindow.xaml",
               "RelativeToolTip": "MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-05-23T13:34:09.375Z",
+              "WhenOpened": "2025-06-23T12:02:06.139Z",
               "IsPinned": true,
               "EditorCaption": ""
             },
@@ -49,7 +49,7 @@
               "RelativeDocumentMoniker": "MainWindow.xaml.cs",
               "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\MainWindow.xaml.cs",
               "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAAMQAAAAAAAAAAAAwwOEAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAGwCAAAAAAAAAAAwwK0DAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-04T13:01:15.952Z",
               "IsPinned": true,
@@ -66,27 +66,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ViewModel.cs",
-              "DocumentMoniker": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\ViewModel.cs",
-              "RelativeDocumentMoniker": "ViewModel.cs",
-              "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\ViewModel.cs",
-              "RelativeToolTip": "ViewModel.cs",
-              "ViewState": "AgIAAJUAAAAAAAAAAAAIwLMAAAA3AAAAAAAAAA==",
+              "Title": "MinecraftServerStats.cs",
+              "DocumentMoniker": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\MinecraftServerStats.cs",
+              "RelativeDocumentMoniker": "MinecraftServerStats.cs",
+              "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\MinecraftServerStats.cs",
+              "RelativeToolTip": "MinecraftServerStats.cs",
+              "ViewState": "AgIAAH8AAAAAAAAAAAAgwI8AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-22T20:10:24.865Z",
+              "WhenOpened": "2025-06-23T12:58:29.768Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "ServerNetworkEnable.cs",
-              "DocumentMoniker": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\ServerNetworkEnable.cs",
-              "RelativeDocumentMoniker": "ServerNetworkEnable.cs",
-              "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\ServerNetworkEnable.cs",
-              "RelativeToolTip": "ServerNetworkEnable.cs",
-              "ViewState": "AgIAADYAAAAAAAAAAAAnwEYAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-22T19:50:09.966Z",
+              "Title": "latest.log",
+              "DocumentMoniker": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\logs\\latest.log",
+              "RelativeDocumentMoniker": "logs\\latest.log",
+              "ToolTip": "D:\\Minecraft-Console\\v1.1-Remake\\Minecraft Console\\logs\\latest.log",
+              "RelativeToolTip": "logs\\latest.log",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-06-23T12:18:27.297Z",
               "EditorCaption": ""
             }
           ]

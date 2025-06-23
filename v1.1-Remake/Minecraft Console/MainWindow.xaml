@@ -1209,12 +1209,15 @@
 
                             <Style x:Key="TextBlockOfflineStyle" TargetType="TextBlock">
                                 <Setter Property="FontFamily" Value="pack://application:,,,/assets/Fonts/Zain/#Zain" />
-                                <Setter Property="FontSize" Value="350" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                                <Setter Property="HorizontalAlignment" Value="Left" />
+                                <Setter Property="FontSize" Value="200" />
                                 <Setter Property="Opacity" Value="0.5" />
                                 <Setter Property="Margin" Value="10" />
                                 <Setter Property="Foreground" Value="#e0e0e0" />
                                 <Setter Property="FontWeight" Value="Normal" />
                                 <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Panel.ZIndex" Value="100" />
                             </Style>
                         </Grid.Resources>
 
@@ -1260,29 +1263,25 @@
 
                                             <Image
                                                 Grid.Column="0"
-                                                Height="300"
+                                                Height="150"
                                                 VerticalAlignment="Center"
                                                 Source="pack://application:,,,/assets/icons/Console Panel Icons/offline.png">
 
                                                 <Image.RenderTransform>
-                                                    <TranslateTransform X="40" Y="-40" />
+                                                    <TranslateTransform X="-20" Y="-20" />
                                                 </Image.RenderTransform>
                                             </Image>
 
                                             <TextBlock
                                                 Grid.Column="1"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                                Panel.ZIndex="100"
                                                 Style="{StaticResource TextBlockOfflineStyle}"
                                                 Text="Offline"
-                                                TextAlignment="Center"
-                                                TextWrapping="Wrap"
                                                 Visibility="Visible" />
+
                                             <Grid.RenderTransform>
                                                 <TransformGroup>
-                                                    <RotateTransform Angle="25" />
-                                                    <TranslateTransform X="250" Y="-200" />
+                                                    <RotateTransform Angle="20" />
+                                                    <TranslateTransform X="475" Y="-100" />
                                                 </TransformGroup>
                                             </Grid.RenderTransform>
                                         </Grid>

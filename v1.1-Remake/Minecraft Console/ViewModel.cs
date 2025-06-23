@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
 
@@ -11,7 +12,9 @@ namespace Minecraft_Console
         private string _upTime = "0h 0m 0s";
         private string _memoryUsage = "0GB / 0GB";
         private string _playersOnline = "0 / 0";
-        private string _worldSize = "0MB";
+        private string _worldSize = MainWindow.rootWorldsFolder != null && MainWindow.openWorldNumber != null
+                  ? ServerStats.GetFolderSize(Path.Combine(MainWindow.rootWorldsFolder, MainWindow.openWorldNumber)) ?? "0MB"
+                  : "0MB";
         private string _console = "";
         private bool _isActivePanel;
 
@@ -138,6 +141,7 @@ namespace Minecraft_Console
         /// Starts the monitoring task for this server.
         /// </summary>
         public void StartMonitoring(
+            string worldNumber,
             object[] serverData,
             string[] userData,
             string worldFolderPath,
@@ -153,11 +157,14 @@ namespace Minecraft_Console
 
             _cts = new CancellationTokenSource();
 
-            Application.Current.Dispatcher.Invoke(() =>
+            if (MainWindow.openWorldNumber == worldNumber)
             {
-                var mainWindow = (MainWindow)Application.Current.MainWindow;
-                mainWindow.SetConsoleOnline();
-            });
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var mainWindow = (MainWindow)Application.Current.MainWindow;
+                    mainWindow.SetConsoleOnline();
+                });
+            }
 
             _monitorTask = Task.Run(() => ServerStats.MonitorServer(
                 _viewModel,
@@ -166,8 +173,8 @@ namespace Minecraft_Console
                 ip,
                 jmxPort,
                 serverPort,
+                serverData[5].ToString() ?? string.Empty,
                 userData,
-                serverData,
                 _cts.Token
             ));
         }
@@ -175,27 +182,55 @@ namespace Minecraft_Console
         /// <summary>
         /// It sets the default values to the promps.
         /// </summary>
-        public static void VMDefaultValues(ViewModel viewModel)
+        public static void VMDefaultValues(string worldNumber, ViewModel viewModel, bool offlineVerificator = true)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            if (MainWindow.openWorldNumber == worldNumber && offlineVerificator)
             {
-                var mainWindow = (MainWindow)Application.Current.MainWindow;
-                mainWindow.SetConsoleOffline();
-            });
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var mainWindow = (MainWindow)Application.Current.MainWindow;
+                    mainWindow.SetConsoleOffline();
+                });
+            }
 
             viewModel.UpTime = "0h 0m 0s";
             viewModel.MemoryUsage = "0GB / 0GB";
             viewModel.PlayersOnline = "0 / 0";
-            viewModel.WorldSize = "0MB";
+            if (MainWindow.rootWorldsFolder != null && MainWindow.openWorldNumber != null)
+            {
+                viewModel.WorldSize = ServerStats.GetFolderSize(Path.Combine(MainWindow.rootWorldsFolder, MainWindow.openWorldNumber)) ?? "0MB";
+            }
             viewModel.Console = "";
         }
 
         /// <summary>
         /// Cancels the monitoring task.
         /// </summary>
-        public void StopMonitoring()
+        public async Task StopMonitoringAsync()
         {
-            _cts?.Cancel();
+            if (_cts == null)
+                return;
+
+            try
+            {
+                _cts.Cancel();
+
+                if (_monitorTask != null)
+                    await _monitorTask;  // wait for monitoring loop to exit
+            }
+            catch (OperationCanceledException)
+            {
+                CodeLogger.ConsoleLog("\nCancel the _cts nowwwww@!!!!321523512\n");
+            }
+            catch (Exception ex)
+            {
+                CodeLogger.ConsoleLog($"Error stopping monitoring: {ex}");
+            }
+            finally
+            {
+                _cts.Dispose();
+                _monitorTask = null;
+            }
         }
 
         /// <summary>
