@@ -7,6 +7,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
+using System.Windows;
 
 namespace Minecraft_Console
 {
@@ -23,7 +24,7 @@ namespace Minecraft_Console
             string maxPlayers,
             string[] userData,
             CancellationToken token)
-            {
+        {
             if (viewModel == null)
                 return;
 
@@ -116,6 +117,14 @@ namespace Minecraft_Console
                 }
             }, token);
 
+            string console = GetConsoleOutput(worldFolderPath)[..^2];
+            viewModel.Console = console;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var mainWindow = (MainWindow)Application.Current.MainWindow;
+                mainWindow.ConsoleTextBoxScrollBar.ScrollToEnd();
+            });
+
             // Console Output Monitor
             _ = Task.Run(async () =>
             {
@@ -123,10 +132,23 @@ namespace Minecraft_Console
                 {
                     try
                     {
-                        string console = GetConsoleOutput(worldFolderPath);
+                        string console = GetConsoleOutput(worldFolderPath)[..^2];
                         if (token.IsCancellationRequested) break;
 
-                        viewModel.Console = console;
+                        if (console != viewModel.Console)
+                        {
+                            viewModel.Console = console;
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                var mainWindow = (MainWindow)Application.Current.MainWindow;
+
+                                if (mainWindow.ConsoleTextBoxScrollBar.VerticalOffset >= mainWindow.ConsoleTextBoxScrollBar.ScrollableHeight - 5)
+                                {
+                                    mainWindow.ConsoleTextBoxScrollBar.ScrollToEnd();
+                                }
+
+                            });
+                        }
 
                         await Task.Delay(1000, token);
                     }

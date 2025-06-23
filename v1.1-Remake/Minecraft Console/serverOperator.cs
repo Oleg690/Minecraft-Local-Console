@@ -868,37 +868,38 @@ namespace Minecraft_Console
             ClosePort(JMX_Port);
         }
 
-        public static async Task InputForServer(string input, string worldNumber, int RCON_Port, string serverIp)
+        public static async Task<string?> InputForServer(string input, string worldNumber, int RCON_Port, string serverIp)
         {
-            // Replace with your server details
-            ushort port = (ushort)RCON_Port; // RCON port
-            string password = "";
-            List<object[]> data = DbChanger.GetFunc(worldNumber, true);
-
-            foreach (var row in data)
-            {
-                password = (string)row[10]; // Your RCON password
-            }
-
             try
             {
-                // Parse the IP address
-                var serverAddress = IPAddress.Parse(serverIp);
-
-                // Create an RCON client
-                using (var rcon = new RCON(serverAddress, port, password))
+                List<object[]> data = DbChanger.GetFunc(worldNumber, true);
+                if (data == null || data.Count == 0 || data[0].Length <= 10)
                 {
-                    await rcon.ConnectAsync();
-
-                    // Send a command
-                    string response = await rcon.SendCommandAsync(input);
-                    // Output the server response
-                    CodeLogger.ConsoleLog($"Server response: {response}");
+                    return "No RCON password found for this world.";
                 }
+
+                string password = data[0][10]?.ToString() ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(password))
+                {
+                    return "RCON password is empty.";
+                }
+
+                if (!IPAddress.TryParse(serverIp, out var serverAddress))
+                {
+                    return $"Invalid server IP address: {serverIp}";
+                }
+
+                using var rcon = new RCON(serverAddress, (ushort)RCON_Port, password);
+                await rcon.ConnectAsync();
+
+                string response = await rcon.SendCommandAsync(input);
+                CodeLogger.ConsoleLog($"[Server Response] {response}");
+
+                return null; // success
             }
             catch (Exception ex)
             {
-                CodeLogger.ConsoleLog($"An error occurred: {ex.Message}");
+                return $"An exception occurred: {ex.Message}";
             }
         }
 

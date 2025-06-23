@@ -92,7 +92,8 @@ namespace Minecraft_Console
 
         public Dictionary<string, ServerWorld>? ServerWorlds = [];
 
-        public bool ExplorerPopupStatus = false;
+        public bool ExplorerPopupStatus = false; 
+        private bool noGUIonServerStartup = true;
 
         private static readonly string? currentDirectory = Directory.GetCurrentDirectory();
 
@@ -807,7 +808,7 @@ namespace Minecraft_Console
                     JMX_Port,
                     RCON_Port,
                     RMI_Port,
-                    noGUI: false,
+                    noGUI: noGUIonServerStartup,
                     onServerRunning: (_) =>
                     {
                         Dispatcher.Invoke(() =>
@@ -997,7 +998,7 @@ namespace Minecraft_Console
                         JMX_Port,
                         RCON_Port,
                         RMI_Port,
-                        noGUI: false,
+                        noGUI: noGUIonServerStartup,
                         onServerRunning: (_) =>
                         {
                             Dispatcher.Invoke(() =>
@@ -1228,6 +1229,9 @@ namespace Minecraft_Console
                     }
                     else if (selectedName == "Console")
                     {
+                        ConsoleInput.Text = string.Empty;
+                        ConsoleTextBoxScrollBar.ScrollToEnd();
+
                         if (openWorldNumber != null && viewModel != null)
                         {
                             if (ServerWorlds == null || !ServerWorlds.TryGetValue(openWorldNumber, out ServerWorld? world))
@@ -1249,55 +1253,71 @@ namespace Minecraft_Console
         }
 
         // Send Command to Server
-        //private async void Send_Command(object sender, RoutedEventArgs e)
-        //{
-        //    string? command = inputValue.Text;
-        //    if (serverRunning == false)
-        //    {
-        //        MessageBox.Show("Server is not running.");
-        //        return;
-        //    }
-        //    if (string.IsNullOrEmpty(command))
-        //    {
-        //        MessageBox.Show("Please enter a command.");
-        //        return;
-        //    }
-        //    if (command == "stop")
-        //    {
-        //        MessageBox.Show("Stop the server from the button in the manager tab.");
-        //        return;
-        //    }
-        //    if (string.IsNullOrEmpty(openWorldNumber))
-        //    {
-        //        MessageBox.Show("Stop the server from the button in the manager tab.");
-        //        return;
-        //    }
+        private async void SendConsoleCommand(object sender, RoutedEventArgs e)
+        {
+            string? command = ConsoleInput.Text?.Trim();
 
-        //    try
-        //    {
-        //        string query = $"SELECT RCON_Port FROM worlds WHERE worldNumber = {openWorldNumber};";
-        //        string? RCON_Port = dbChanger.SpecificDataFunc(query)[0][0].ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(openWorldNumber))
+            {
+                MessageBox.Show("No world is currently open (openWorldNumber is null or empty).", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            if (!serverRunning)
+            {
+                PopupWindow.CreateStatusPopup("Info", "Server is not running.", PopupHost);
+                return;
+            }
+            if (string.IsNullOrEmpty(command))
+            {
+                PopupWindow.CreateStatusPopup("Info", "Please enter a command.", PopupHost);
+                return;
+            }
+            if (command.Equals("stop", StringComparison.OrdinalIgnoreCase))
+            {
+                PopupWindow.CreateStatusPopup("Info", "Stop the server from the button in the manager tab.", PopupHost);
+                return;
+            }
 
-        //        if (string.IsNullOrEmpty(RCON_Port))
-        //        {
-        //            MessageBox.Show("Failed to retrieve the RCON port.");
-        //            return;
-        //        }
+            try
+            {
+                string query = $"SELECT RCON_Port FROM worlds WHERE worldNumber = {openWorldNumber};";
+                var rconPortData = DbChanger.SpecificDataFunc(query);
 
-        //        if (string.IsNullOrEmpty(Server_LocalComputerIP))
-        //        {
-        //            MessageBox.Show("Local IP is not set.");
-        //            return;
-        //        }
+                if (rconPortData == null || rconPortData.Count == 0 || rconPortData[0].Length == 0)
+                {
+                    PopupWindow.CreateStatusPopup("Error", "Failed to retrieve the RCON port from the database.", PopupHost);
+                    return;
+                }
 
-        //        await ServerOperator.InputForServer(command, openWorldNumber, Convert.ToInt32(RCON_Port), Server_LocalComputerIP);
-        //        //inputValue.Text = "";
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show($"An error occurred: {ex.Message}");
-        //    }
-        //}
+                string? RCON_Port = rconPortData[0][0]?.ToString();
+                if (!int.TryParse(RCON_Port, out int rconPort))
+                {
+                    PopupWindow.CreateStatusPopup("Error", "Invalid RCON port retrieved from database.", PopupHost);
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(Server_LocalComputerIP))
+                {
+                    PopupWindow.CreateStatusPopup("Error", "Local IP address is not set.", PopupHost);
+                    return;
+                }
+
+                // Send command and capture any error
+                string? error = await ServerOperator.InputForServer(command, openWorldNumber, rconPort, Server_LocalComputerIP);
+
+                if (error != null)
+                {
+                    PopupWindow.CreateStatusPopup("Error", error, PopupHost);
+                    return;
+                }
+
+                ConsoleInput.Text = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An unexpected error occurred:\n\n{ex.Message}", "Command Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         // Loading Screen Progress Bar Setter
 
@@ -1603,6 +1623,11 @@ namespace Minecraft_Console
                 if (result != null) return result;
             }
             return null;
+        }
+
+        private void ConsoleScrollUI(object sender, TextChangedEventArgs e)
+        {
+            ConsoleTextBox.ScrollToEnd();
         }
     }
 }

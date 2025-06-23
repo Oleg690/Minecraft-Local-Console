@@ -1245,6 +1245,7 @@
                                         </Grid.RowDefinitions>
 
                                         <ScrollViewer
+                                            x:Name="ConsoleTextBoxScrollBar"
                                             Grid.Row="0"
                                             HorizontalScrollBarVisibility="Disabled"
                                             VerticalScrollBarVisibility="Auto">
@@ -1317,6 +1318,7 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <TextBox
+                                                    x:Name="ConsoleInput"
                                                     Grid.Column="0"
                                                     Margin="20,20,0,20"
                                                     Padding="10"
@@ -1328,7 +1330,8 @@
                                                     Foreground="White"
                                                     HorizontalScrollBarVisibility="Hidden"
                                                     PreviewMouseWheel="TextBox_MouseWheel"
-                                                    ScrollViewer.CanContentScroll="False">
+                                                    ScrollViewer.CanContentScroll="False"
+                                                    Text="dw">
                                                     <TextBox.Style>
                                                         <Style TargetType="TextBox">
                                                             <Setter Property="Template">
@@ -1360,6 +1363,7 @@
                                                     HorizontalAlignment="Left"
                                                     Background="#2F343F"
                                                     BorderBrush="Transparent"
+                                                    Click="SendConsoleCommand"
                                                     Cursor="Hand"
                                                     RenderTransformOrigin="0.5, 0.5">
                                                     <Button.RenderTransform>
