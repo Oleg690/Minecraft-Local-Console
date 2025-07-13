@@ -114,6 +114,13 @@ namespace Minecraft_Console
                 {
                     CopyFiles(Path.Combine(tempFolderPath, "server"), customDirectory);
                     ServerOperator.DeleteFiles(tempFolderPath, false);
+                    File.Delete(jarPath);
+                    RenameFile(Path.Combine(customDirectory, "server.jar"), jarPath);
+                }
+                else if (software == "Fabric")
+                {
+                    File.Delete(jarPath);
+                    RenameFile(Path.Combine(customDirectory, "server.jar"), jarPath);
                 }
             }
 
@@ -144,13 +151,15 @@ namespace Minecraft_Console
                 }
             }
 
+            //CodeLogger.ConsoleLog($"jarPath: {jarPath}");
+
             // 🧹 Clean up temp values
             DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL, serverUser = NULL, serverTempPsw = NULL, startingStatus = NULL WHERE worldNumber = \"{uniqueNumber}\";");
 
-            CodeLogger.ConsoleLog("World Created Successfully");
+            //CodeLogger.ConsoleLog("World Created Successfully");
             MainWindow.SetLoadingBarProgress(100);
 
-            return ["Success", "World created", $"{uniqueNumber}"];
+            return ["Success", "World Created Successfully", $"{uniqueNumber}"];
         }
 
         // -------------------------------- Help Functions --------------------------------
@@ -159,94 +168,61 @@ namespace Minecraft_Console
         {
             try
             {
-                using (Process process = new() { StartInfo = processInfo })
+                using Process process = new() { StartInfo = processInfo };
+
+                bool installSuccess = false;
+                string lastOutput = string.Empty;
+
+                process.OutputDataReceived += (sender, e) =>
                 {
-                    int currentProgress = 0;
-                    int checksumCount = 0;
-                    bool installSuccess = false;
-
-                    process.OutputDataReceived += (sender, e) =>
+                    if (!string.IsNullOrEmpty(e.Data))
                     {
-                        if (string.IsNullOrEmpty(e.Data)) return;
+                        lastOutput = e.Data;
+                        Console.WriteLine(e.Data);
 
-                        if (software == "Forge")
+                        // Optionally look for success indicators in the output
+                        if (e.Data.Contains("Done") || e.Data.Contains("Starting server"))
                         {
-                            if (e.Data.Contains("Extracting main jar") && currentProgress < 10)
-                            {
-                                currentProgress = 10;
-                                MainWindow.SetLoadingBarProgress(15);
-                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Extracting main jar...");
-                            }
-                            else if (e.Data.Contains("Downloading libraries") && currentProgress < 30)
-                            {
-                                currentProgress = 30;
-                                MainWindow.SetLoadingBarProgress(20);
-                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Downloading libraries...");
-                            }
-                            else if (e.Data.Contains("Checksum validated"))
-                            {
-                                checksumCount++;
-                                if (checksumCount >= 3 && currentProgress < 50)
-                                {
-                                    currentProgress = 50;
-                                    MainWindow.SetLoadingBarProgress(25);
-                                    CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Libraries validated...");
-                                }
-                            }
-                            else if (e.Data.Contains("EXTRACT_FILES") && currentProgress < 70)
-                            {
-                                currentProgress = 70;
-                                MainWindow.SetLoadingBarProgress(30);
-                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Extracting server files...");
-                            }
-                            else if (e.Data.Contains("BUNDLER_EXTRACT") && currentProgress < 85)
-                            {
-                                currentProgress = 85;
-                                MainWindow.SetLoadingBarProgress(35);
-                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Processing bundled files...");
-                            }
-                            else if (e.Data.Contains("The server installed successfully"))
-                            {
-                                currentProgress = 100;
-                                MainWindow.SetLoadingBarProgress(40);
-                                CodeLogger.ConsoleLog($"Progress: {currentProgress}% - Installation complete!");
-                                installSuccess = true;
-                            }
+                            installSuccess = true;
                         }
-                        else
-                        {
-                            Console.WriteLine(e.Data);
-                        }
-                    };
+                    }
+                };
 
-                    process.ErrorDataReceived += (sender, e) =>
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    if (!string.IsNullOrEmpty(e.Data))
                     {
-                        if (!string.IsNullOrEmpty(e.Data))
-                        {
-                            CodeLogger.ConsoleLog($"Error: {e.Data}");
-                        }
-                    };
+                        CodeLogger.ConsoleLog($"[Error] {e.Data}");
+                    }
+                };
 
-                    // Start the process
-                    process.Start();
-                    process.BeginOutputReadLine();
-                    process.BeginErrorReadLine();
+                CodeLogger.ConsoleLog($"Minecraft {software} server installation is starting...");
 
-                    CodeLogger.ConsoleLog($"Minecraft {software} server installation is starting...");
-                    process.WaitForExit();
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
 
-                    CodeLogger.ConsoleLog("Installation completed!");
-                    MainWindow.loadingScreenProcentage = 45;
+                process.WaitForExit();
 
-                    return [installSuccess, "Installation completed!"];
-                }
+                // Fallback to checking exit code
+                if (process.ExitCode == 0)
+                    installSuccess = true;
+
+                string resultMessage = installSuccess ? "Installation completed successfully!" : "Installation finished, but may have failed.";
+
+                CodeLogger.ConsoleLog(resultMessage);
+                MainWindow.loadingScreenProcentage = 45;
+
+                return [installSuccess, resultMessage];
             }
             catch (Exception ex)
             {
-                CodeLogger.ConsoleLog($"Error: {ex.Message}");
-                return [false, ex.Message];
+                string error = $"[Exception] {ex.Message}";
+                CodeLogger.ConsoleLog(error);
+                return [false, error];
             }
         }
+
 
         private static async Task<object[]> BasicServerInitializator(string software, string customDirectory, string JarPath, object[,] rconSettings, object[,] worldSettings, int ProcessMemoryAlocation, string uniqueNumber, string worldName, string version, int totalPlayers, string rconPassword, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Insert_Into_DB = false)
         {
@@ -257,6 +233,8 @@ namespace Minecraft_Console
                     DbChanger.SetFunc($"{uniqueNumber}", $"{worldName}", $"{software}", $"{version}", $"{totalPlayers}", $"{Server_Port}", $"{JMX_Port}", $"{RCON_Port}", $"{RMI_Port}", $"{rconPassword}");
                 }
 
+                AcceptEULA(JarPath);
+
                 MainWindow.SetLoadingBarProgress(50);
 
                 object[] firstStartExitCode = await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
@@ -266,18 +244,9 @@ namespace Minecraft_Console
                     return [false, firstStartExitCode[1]];
                 }
 
-                MainWindow.SetLoadingBarProgress(70);
-
-                AcceptEULA(JarPath);
-
                 MainWindow.SetLoadingBarProgress(75);
 
-                object[] secondStartExitCode = await ServerOperator.Start(uniqueNumber, customDirectory, ProcessMemoryAlocation, ipAddress, Server_Port, JMX_Port, RCON_Port, RMI_Port, Auto_Stop: true);
-                if (Convert.ToInt32(secondStartExitCode[0]) != 0)
-                {
-                    CodeLogger.ConsoleLog($"Server failed to start the second time. Exit code: {secondStartExitCode[0]}");
-                    return [false, secondStartExitCode[1]];
-                }
+                //File.Delete(JarPath);
 
                 MainWindow.SetLoadingBarProgress(99);
 
@@ -345,7 +314,7 @@ namespace Minecraft_Console
             try
             {
                 File.WriteAllText(eulaFile, "eula=true");
-                CodeLogger.ConsoleLog("EULA accepted. Restart the server.");
+                CodeLogger.ConsoleLog("EULA accepted.");
             }
             catch (Exception ex)
             {
@@ -630,9 +599,14 @@ namespace Minecraft_Console
         private static ProcessStartInfo? serverProcessInfo = new();
 
         // ------------------------- Main Server Operator Commands -------------------------
-        public static async Task<object[]> Start(string worldNumber, string serverPath, int processMemoryAlocation, string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port, bool Auto_Stop = false, bool noGUI = true, ViewModel? viewModel = null, Action<string>? onServerRunning = null)
+        public static async Task<object[]> Start(
+            string worldNumber, string serverPath, int processMemoryAlocation,
+            string ipAddress, int Server_Port, int JMX_Port, int RCON_Port, int RMI_Port,
+            bool Auto_Stop = false, bool noGUI = true,
+            ViewModel? viewModel = null, Action<string>? onServerRunning = null)
         {
             DbChanger.SpecificDataFunc($"UPDATE worlds SET startingStatus = 'starting' WHERE worldNumber = '{worldNumber}';");
+
             bool verificator = true;
 
             void ValidateInput(string input, string errorMessage)
@@ -658,7 +632,7 @@ namespace Minecraft_Console
 
             string? software = DbChanger.SpecificDataFunc($"SELECT software FROM worlds where worldNumber = '{worldNumber}';")[0][0]?.ToString() ?? string.Empty;
             ValidateInput(software, "No software was supplied!");
-            if (!verificator) return [-1, "No software was supplied!"];
+            if (!verificator) return [-1, "Validation failed."];
 
             while (IsPortInUse(RCON_Port) || IsPortInUse(JMX_Port))
             {
@@ -677,13 +651,9 @@ namespace Minecraft_Console
             void WriteToFile(string path, string content, string fileType)
             {
                 if (!string.IsNullOrEmpty(path))
-                {
                     File.WriteAllText(path, content);
-                }
                 else
-                {
                     CodeLogger.ConsoleLog($"{fileType} path is null. Cannot write to file.");
-                }
             }
 
             if (File.Exists(JMX_Password_File_Path) && File.Exists(JMX_Access_File_Path))
@@ -692,17 +662,17 @@ namespace Minecraft_Console
                 WriteToFile(JMX_Password_File_Path, $"{user} {psw}", "JMX Password File");
             }
 
-            string Server_Settings = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
-                                     $"-Dcom.sun.management.jmxremote " +
-                                     $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
-                                     $"-Dcom.sun.management.jmxremote.rmi.port={RMI_Port} " +
-                                     $"-Dcom.sun.management.jmxremote.ssl=false " +
-                                     $"-Dcom.sun.management.jmxremote.authenticate=true " +
-                                     $"-Dcom.sun.management.jmxremote.access.file=\"{JMX_Access_File_Path}\" " +
-                                     $"-Dcom.sun.management.jmxremote.password.file=\"{JMX_Password_File_Path}\" " +
-                                     $"-Djava.rmi.server.hostname={ipAddress} ";
+            string serverSettings = $"-Xmx{processMemoryAlocation}M -Xms{processMemoryAlocation}M " +
+                                    $"-Dcom.sun.management.jmxremote " +
+                                    $"-Dcom.sun.management.jmxremote.port={JMX_Port} " +
+                                    $"-Dcom.sun.management.jmxremote.rmi.port={RMI_Port} " +
+                                    $"-Dcom.sun.management.jmxremote.ssl=false " +
+                                    $"-Dcom.sun.management.jmxremote.authenticate=true " +
+                                    $"-Dcom.sun.management.jmxremote.access.file=\"{JMX_Access_File_Path}\" " +
+                                    $"-Dcom.sun.management.jmxremote.password.file=\"{JMX_Password_File_Path}\" " +
+                                    $"-Djava.rmi.server.hostname={ipAddress} ";
 
-            serverProcessInfo = new()
+            ProcessStartInfo serverProcessInfo = new()
             {
                 FileName = "java",
                 RedirectStandardInput = true,
@@ -713,32 +683,28 @@ namespace Minecraft_Console
                 WorkingDirectory = serverPath
             };
 
-            CodeLogger.ConsoleLog($"Starting '{worldNumber}' {software} Server!");
-
             object[] serverData = DbChanger.SpecificDataFunc($"SELECT version, totalPlayers FROM worlds WHERE worldNumber = \"{worldNumber}\";")[0];
-
             string? toRunJarFile = string.Empty;
             string GetVersionedJarFile() => Path.Combine(serverPath, serverData[0].ToString() + ".jar");
 
             void SetServerArguments(string arguments)
             {
-                if (serverProcessInfo == null) return;
                 serverProcessInfo.Arguments = arguments;
+                CodeLogger.ConsoleLog($"Full arguments: {arguments}");
             }
 
             switch (software)
             {
                 case "Vanilla":
+                case "Fabric":
                 case "NeoForge":
                 case "Purpur":
                 case "Paper":
+                case "Quilt":
                     toRunJarFile = GetVersionedJarFile();
                     if (string.IsNullOrEmpty(toRunJarFile) || !File.Exists(toRunJarFile))
-                    {
-                        CodeLogger.ConsoleLog("Versioned JAR file not found for Vanilla-like server!");
-                        return [-1, "Versioned JAR file not found for Vanilla-like server!"];
-                    }
-                    SetServerArguments($"{Server_Settings} -jar \"{toRunJarFile}\"");
+                        return [-1, "Versioned JAR file not found."];
+                    SetServerArguments($"{serverSettings} -jar \"{toRunJarFile}\"");
                     break;
 
                 case "Forge":
@@ -746,101 +712,91 @@ namespace Minecraft_Console
                     if (!string.IsNullOrEmpty(winArgsPath)) winArgsPath = $"@\"{winArgsPath}\"";
 
                     toRunJarFile = FindClosestJarFile(serverPath, "forge-") ?? FindClosestJarFile(serverPath, "minecraft_server");
-                    if (string.IsNullOrEmpty(toRunJarFile) || !File.Exists(toRunJarFile))
-                    {
-                        CodeLogger.ConsoleLog("No Forge server JAR file found!");
-                        return [-1, "No Forge server JAR file found!"];
-                    }
+                    if (string.IsNullOrEmpty(toRunJarFile) || !File.Exists(ExtractPathFromQuotedJar(toRunJarFile)))
+                        return [-1, "No Forge server JAR file found."];
 
-                    SetServerArguments($"{Server_Settings} {winArgsPath} {toRunJarFile}");
-                    break;
-
-                case "Fabric":
-                case "Quilt":
-                    toRunJarFile = FindClosestJarFile(serverPath, "server");
-                    if (string.IsNullOrEmpty(toRunJarFile) || !File.Exists(toRunJarFile))
-                    {
-                        CodeLogger.ConsoleLog("No Fabric/Quilt server JAR file found!");
-                        return [-1, "No Fabric/Quilt server JAR file found!"];
-                    }
-
-                    SetServerArguments($"{Server_Settings} {toRunJarFile}");
+                    SetServerArguments($"{serverSettings} {winArgsPath} {toRunJarFile}");
                     break;
 
                 default:
-                    CodeLogger.ConsoleLog($"Invalid software type!");
-                    return [-1, "Invalid software type!"];
+                    return [-1, "Invalid software type."];
             }
 
             serverProcessInfo.Arguments += noGUI ? " nogui" : "";
 
-            using (Process? process = Process.Start(serverProcessInfo))
+            using Process? process = Process.Start(serverProcessInfo);
+            if (process == null)
+                return [-1, "Failed to start process."];
+
+            process.EnableRaisingEvents = true;
+            DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\", serverUser = \"{user}\", serverTempPsw = \"{psw}\" WHERE worldNumber = \"{worldNumber}\";");
+            RecordServerStart();
+
+            bool serverStarted = false;
+            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(30));
+
+            process.OutputDataReceived += (sender, e) =>
             {
-                if (process == null)
+                if (!string.IsNullOrEmpty(e.Data))
                 {
-                    CodeLogger.ConsoleLog("Failed to start the Minecraft server!");
-                    return [-1, "Failed to start the Minecraft server!"];
+                    CodeLogger.ConsoleLog(e.Data);
+
+                    if (e.Data.Contains("RCON running on"))
+                    {
+                        serverStarted = true;
+                        onServerRunning?.Invoke(worldNumber);
+                        cts.Cancel(); // cancel timeout
+                    }
+
+                    if (Auto_Stop && (e.Data.Contains("EULA") || e.Data.Contains("Done")))
+                        Kill(RCON_Port, JMX_Port);
                 }
+            };
 
-                DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = \"{process.Id}\", serverUser = \"{user}\", serverTempPsw = \"{psw}\" WHERE worldNumber = \"{worldNumber}\";");
-                object[] userData = [user, psw];
-
-                RecordServerStart();
-
-                process.OutputDataReceived += (sender, e) =>
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
                 {
-                    if (!string.IsNullOrEmpty(e.Data))
+                    CodeLogger.ConsoleLog("stderr: " + e.Data);
+
+                    if (e.Data.Contains("RCON running on"))
                     {
-                        Console.WriteLine($"{e.Data}");
-
-                        if (Auto_Stop && (e.Data.Contains("You need to agree to the EULA") || e.Data.Contains("Done")))
-                        {
-                            Kill(RCON_Port, JMX_Port);
-                        }
-                        else if (Auto_Stop && e.Data.Contains("RCON running on"))
-                        {
-                            Kill(RCON_Port, JMX_Port);
-                        }
-                        else if (e.Data.Contains("RCON running on"))
-                        {
-                            onServerRunning?.Invoke(worldNumber);
-                        }
+                        serverStarted = true;
+                        onServerRunning?.Invoke(worldNumber);
+                        cts.Cancel(); // cancel timeout
                     }
-                };
 
-                process.ErrorDataReceived += (sender, e) =>
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                    {
-                        Console.WriteLine($"e: {e.Data}");
+                    if (Auto_Stop && (e.Data.Contains("EULA") || e.Data.Contains("Done")))
+                        Kill(RCON_Port, JMX_Port);
+                }
+            };
 
-                        if (Auto_Stop && (e.Data.Contains("You need to agree to the EULA") || e.Data.Contains("Done")))
-                        {
-                            Kill(RCON_Port, JMX_Port);
-                        }
-                        else if (Auto_Stop && e.Data.Contains("RCON running on"))
-                        {
-                            Kill(RCON_Port, JMX_Port);
-                        }
-                        else if (e.Data.Contains("RCON running on"))
-                        {
-                            onServerRunning?.Invoke(worldNumber);
-                        }
-                    }
-                };
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
 
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                process.WaitForExit();
-
-                string message = process.ExitCode != 0
-                    ? $"Server process exited with code: {process.ExitCode}"
-                    : "Server was stopped successfully.";
-
-                return [0, message];
+            try
+            {
+                await Task.Delay(Timeout.InfiniteTimeSpan, cts.Token);
             }
+            catch (TaskCanceledException)
+            {
+                if (!serverStarted)
+                {
+                    CodeLogger.ConsoleLog("Timeout reached. Server didn't start.");
+                    try { process.Kill(true); } catch { }
+                    return [-1, "Server failed to start within 30 seconds."];
+                }
+            }
+
+            await process.WaitForExitAsync();
+
+            string message = process.ExitCode != 0
+                ? $"Server exited with code {process.ExitCode}"
+                : "Server stopped successfully.";
+
+            return [0, message];
         }
+
 
         public static async Task Stop(string operation, string worldNumber, string ipAddress, int RCON_Port, string time = "00:00")
         {
@@ -1172,19 +1128,30 @@ namespace Minecraft_Console
             return !isAvailable;
         }
 
-        public static string? FindClosestJarFile(string folderPath, string targetPattern, bool onlyFileName = false)
+        public static string? FindClosestJarFile(string folderPath, string targetPattern, bool onlyFileName = false, bool fallbackToFirst = false)
         {
             try
             {
-                // Ensure the folder exists
+                // Validate inputs
                 if (!Directory.Exists(folderPath))
                 {
                     CodeLogger.ConsoleLog("The specified folder does not exist.");
                     return null;
                 }
 
+                if (string.IsNullOrWhiteSpace(targetPattern))
+                {
+                    CodeLogger.ConsoleLog("Target pattern is null or empty.");
+                    return null;
+                }
+
                 // Get all .jar files in the folder
                 string[] jarFiles = Directory.GetFiles(folderPath, "*.jar");
+                if (jarFiles.Length == 0)
+                {
+                    CodeLogger.ConsoleLog("No .jar files found in the folder.");
+                    return null;
+                }
 
                 // Search for the closest match
                 string? bestMatch = null;
@@ -1192,30 +1159,39 @@ namespace Minecraft_Console
 
                 foreach (string file in jarFiles)
                 {
-                    string fileName = Path.GetFileName(file); // Extract only the file name
+                    string fileName = Path.GetFileName(file);
 
-                    // Check if the file name contains the target pattern
                     if (fileName.Contains(targetPattern, StringComparison.OrdinalIgnoreCase))
                     {
-                        // Calculate a score based on similarity (e.g., length or exact pattern match)
                         int score = CalculateMatchScore(fileName, targetPattern);
                         if (score > bestScore)
                         {
                             bestScore = score;
-                            bestMatch = fileName; // Store only the file name
+                            bestMatch = fileName;
                         }
                     }
                 }
+
+                // Optional fallback to first .jar file if no match found
                 if (string.IsNullOrEmpty(bestMatch))
                 {
-                    return null;
+                    if (fallbackToFirst)
+                    {
+                        bestMatch = Path.GetFileName(jarFiles[0]);
+                        CodeLogger.ConsoleLog("No close match found. Falling back to first .jar file.");
+                    }
+                    else
+                    {
+                        return null;
+                    }
                 }
 
                 if (onlyFileName)
                 {
                     return bestMatch;
                 }
-                return $"-jar \"{folderPath}\\{bestMatch}\"";
+
+                return $"-jar \"{Path.Combine(folderPath, bestMatch)}\"";
             }
             catch (Exception ex)
             {
@@ -1228,17 +1204,32 @@ namespace Minecraft_Console
         {
             if (fileName.Equals(targetPattern, StringComparison.OrdinalIgnoreCase))
             {
-                return int.MaxValue; // Exact match is best
+                return int.MaxValue; // Best possible match
             }
 
             int index = fileName.IndexOf(targetPattern, StringComparison.OrdinalIgnoreCase);
             if (index == -1)
             {
-                return 0; // No match
+                return 0;
             }
 
-            // Higher score for earlier occurrences + length of matching substring
-            return 1000 - index + targetPattern.Length;
+            int lengthMatch = targetPattern.Length;
+            int proximityScore = Math.Max(0, 1000 - index); // Earlier match = higher score
+
+            return proximityScore + lengthMatch * 10;
+        }
+
+        private static string? ExtractPathFromQuotedJar(string input)
+        {
+            int firstQuote = input.IndexOf('"');
+            int lastQuote = input.LastIndexOf('"');
+
+            if (firstQuote >= 0 && lastQuote > firstQuote)
+            {
+                return input.Substring(firstQuote + 1, lastQuote - firstQuote - 1);
+            }
+
+            return null; // Return null if quotes not found properly
         }
 
         public static bool ClosePort(int portInt)

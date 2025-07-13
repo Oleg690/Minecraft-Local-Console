@@ -1,10 +1,10 @@
-﻿using Logger;
-using CreateServerFunc;
+﻿using CreateServerFunc;
 using FileExplorer;
+using Logger;
+using Minecraft_Console;
 using MinecraftServerStats;
 using NetworkConfig;
 using System.Runtime.Versioning;
-using Updater;
 
 namespace MainAppFuncs
 {
@@ -15,7 +15,7 @@ namespace MainAppFuncs
         {
             // ↓ Server Settings ↓
             string software = "Vanilla";      // e.g. Vanilla
-            string version = "1.21";      // e.g. 1.21.4
+            string version = "1.16.5";      // e.g. 1.21.4
             string worldNumber = ""; // e.g. 123456789012
             string worldName = "";  // e.g. Minecfraft Server
             int totalPlayers = 20;
@@ -51,41 +51,47 @@ namespace MainAppFuncs
             string? currentDirectory = Directory.GetCurrentDirectory();
             string? rootFolder = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(currentDirectory))) ?? throw new InvalidOperationException("Root folder path is null");
             string? rootWorldsFolder = Path.Combine(rootFolder, "worlds");
-            string? serverVersionsPath = Path.Combine(rootFolder, "versions");
+            //string? serverVersionsPath = Path.Combine(rootFolder, "versions");
+            string? serverVersionsPath = Path.Combine("D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\versions\\");
             string? tempFolderPath = Path.Combine(rootFolder, "temp");
             string? defaultServerPropertiesPath = Path.Combine(rootFolder, "Preset Files\\server.properties");
             string? serverDirectoryPath = Path.Combine(rootWorldsFolder, worldNumber);
             // Create a log file
             CodeLogger.CreateLogFile();
 
+            //CodeLogger.ConsoleLog($"Server_LocalComputerIP: {Server_LocalComputerIP}");
+            //CodeLogger.ConsoleLog($"Server_PublicComputerIP: {Server_PublicComputerIP}");
+
             // ↓ Update Available Versions ↓
-            await VersionsUpdater.Update(serverVersionsPath);
-            await VersionsUpdater.Update(serverVersionsPath, software);
+            //await VersionsUpdater.Update(serverVersionsPath);
+            //await VersionsUpdater.Update(serverVersionsPath, software);
             await VersionsUpdater.Update(serverVersionsPath, software, version);
 
             // ↓ Create World Func ↓
-            worldNumber = await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
+            //worldNumber = await ServerCreator.CreateServerFunc(rootFolder, rootWorldsFolder, tempFolderPath, defaultServerPropertiesPath, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port);
 
-            // ↓ Start Server Func ↓
-            await ServerOperator.Start(worldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, noGUI: false);
-            await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, "00:00");
-            await ServerOperator.Restart(serverDirectoryPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, "00:00");
-            ServerOperator.Kill(RCON_Port, JMX_Port);
+            //// ↓ Start Server Func ↓
+            //await ServerOperator.Start(worldNumber, serverDirectoryPath, memoryAlocator, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, noGUI: false);
+            //await ServerOperator.Stop("stop", worldNumber, Server_LocalComputerIP, RCON_Port, JMX_Port, "00:00");
+            //await ServerOperator.Restart(serverDirectoryPath, worldNumber, memoryAlocator, Server_LocalComputerIP, Server_PublicComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, "00:00");
+            //ServerOperator.Kill(RCON_Port, JMX_Port);
 
-            // ↓ Send Server Command Func ↓
-            await ServerOperator.InputForServer("say Oleg690's Minecraft Console Project", worldNumber, RCON_Port, Server_PublicComputerIP);
+            //// ↓ Send Server Command Func ↓
+            //await ServerOperator.InputForServer("say Oleg690's Minecraft Console Project", worldNumber, RCON_Port, Server_PublicComputerIP);
 
-            // ↓ Change Version Func ↓
-            await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, defaultServerPropertiesPath, serverVersionsPath, rootFolder, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, Keep_World_On_Version_Change);
+            //// ↓ Change Version Func ↓
+            //await ServerOperator.ChangeVersion(worldNumber, serverDirectoryPath, tempFolderPath, defaultServerPropertiesPath, serverVersionsPath, rootFolder, version, worldName, software, totalPlayers, defaultWorldSettings, memoryAlocator, Server_LocalComputerIP, Server_Port, JMX_Port, RCON_Port, RMI_Port, Keep_World_On_Version_Change);
 
-            // ↓ Server Files Loop ↓
-            List<string> files = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
+            //// ↓ Server Files Loop ↓
+            //List<string> files = ServerFileExplorer.FileExplorer(serverDirectoryPath, worldNumber);
 
-            // ↓ Delete Server ↓
-            ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
+            //// ↓ Delete Server ↓
+            //ServerOperator.DeleteServer(worldNumber, serverDirectoryPath);
 
-            // ↓ Server Stats Loop ↓
-            ServerStats.GetServerInfo(serverDirectoryPath, worldNumber, Server_PublicComputerIP, JMX_Port, RCON_Port, Server_Port);
+            //// ↓ Server Stats Loop ↓
+            //ServerStats.GetServerInfo(serverDirectoryPath, worldNumber, Server_PublicComputerIP, JMX_Port, RCON_Port, Server_Port);
+
+            Console.ReadKey();
         }
     }
 }

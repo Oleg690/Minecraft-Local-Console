@@ -69,14 +69,14 @@ namespace NetworkConfig
         {
             try
             {
-                using (HttpClient client = new HttpClient())
+                using (HttpClient client = new())
                 {
                     return await client.GetStringAsync("https://api64.ipify.org");
                 }
             }
             catch (Exception ex)
             {
-                return "Error: " + ex.Message;
+                return "Error: " + ex.Message; 
             }
         }
 

@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Versioning;
 using System.Text;
-using Updater;
+using Minecraft_Console;
 
 namespace CreateServerFunc
 {

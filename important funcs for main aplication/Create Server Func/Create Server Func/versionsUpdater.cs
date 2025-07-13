@@ -1,10 +1,12 @@
-﻿using System.Text.Json;
+﻿using Logger;
+using Newtonsoft.Json.Linq;
+using System.IO;
+using System.Net.Http;
+using System.Text.Json;
 using System.Xml;
 using System.Xml.Linq;
-using Newtonsoft.Json.Linq;
-using Logger;
 
-namespace Updater
+namespace Minecraft_Console
 {
     class VersionsUpdater
     {
@@ -672,7 +674,7 @@ namespace Updater
 
         // ------------------------ ↓ Main Updater Funcs ↓ ------------------------
 
-        public static async Task Update(string serverVersionsPath)
+        public static async Task<bool> Update(string serverVersionsPath)
         {
             CodeLogger.ConsoleLog("--------------------------------------------");
             CodeLogger.ConsoleLog("Starting versions updater for all softwares.");
@@ -701,9 +703,11 @@ namespace Updater
             CodeLogger.ConsoleLog("--------------------------");
             CodeLogger.ConsoleLog("All softwares are updated!");
             CodeLogger.ConsoleLog("--------------------------");
+
+            return true;
         }
 
-        public static async Task Update(string serverVersionsPath, string software)
+        public static async Task<bool> Update(string serverVersionsPath, string software)
         {
             CodeLogger.ConsoleLog("--------------------------------------------");
             CodeLogger.ConsoleLog($"Starting versions updater for {software}.");
@@ -722,9 +726,11 @@ namespace Updater
             CodeLogger.ConsoleLog("-------------------------");
             CodeLogger.ConsoleLog("All versions are updated!");
             CodeLogger.ConsoleLog("-------------------------");
+
+            return true;
         }
 
-        public static async Task Update(string serverVersionsPath, string software, string version)
+        public static async Task<bool> Update(string serverVersionsPath, string software, string version)
         {
             CodeLogger.ConsoleLog("--------------------------------------------");
             CodeLogger.ConsoleLog($"Starting versions updater for {software}.");
@@ -743,6 +749,38 @@ namespace Updater
             CodeLogger.ConsoleLog("-------------------------");
             CodeLogger.ConsoleLog("All versions are updated!");
             CodeLogger.ConsoleLog("-------------------------");
+
+            return true;
+        }
+
+        public static List<string> GetSupportedSoftwares()
+        {
+            if (string.IsNullOrEmpty(versionsSupprortListXML))
+            {
+                CodeLogger.ConsoleLog("The path to the supported versions XML file is not set.");
+                throw new InvalidOperationException("The path to the supported versions XML file is not set.");
+            }
+
+            var doc = XDocument.Load(versionsSupprortListXML!); // Use null-forgiving operator to suppress CS8604
+            return [.. doc.Descendants("software")
+                      .Select(s => s.Attribute("name")?.Value)
+                      .Where(name => !string.IsNullOrEmpty(name))
+                      .Distinct()];
+        }
+
+        public static List<string> GetSupportedVersions(string softwareName)
+        {
+            if (string.IsNullOrEmpty(versionsSupprortListXML))
+            {
+                CodeLogger.ConsoleLog("The path to the supported versions XML file is not set.");
+                throw new InvalidOperationException("The path to the supported versions XML file is not set.");
+            }
+
+            var doc = XDocument.Load(versionsSupprortListXML);
+            return [.. doc.Descendants("software")
+                      .Where(s => s.Attribute("name")?.Value == softwareName)
+                      .Descendants("version")
+                      .Select(v => v.Value)];
         }
 
         // ------------------------ ↓ Helpers for Updater Funcs ↓ ------------------------
@@ -834,11 +872,11 @@ namespace Updater
                 throw new InvalidOperationException("The path to the supported versions XML file is not set.");
             }
 
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new();
             doc.Load(versionsSupprortListXML);
 
             XmlNodeList? softwareNodes = doc.SelectNodes("/minecraft_softwares/software");
-            List<object> softwareList = new List<object>();
+            List<object> softwareList = [];
 
             if (softwareNodes == null)
             {

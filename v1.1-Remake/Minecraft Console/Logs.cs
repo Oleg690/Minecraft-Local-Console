@@ -22,14 +22,6 @@ namespace Minecraft_Console
 
             if (File.Exists(latestLogPath))
             {
-                FileInfo logInfo = new(latestLogPath);
-
-                // If file is empty, don't create a new one
-                if (logInfo.Length == 0)
-                {
-                    return;
-                }
-
                 string timestamp = DateTime.Now.ToString("yyyy-MMM-dd");
                 string archivedLogName;
                 string archivedLogPath;
@@ -102,9 +94,20 @@ namespace Minecraft_Console
                 if (LogsPath != null)
                 {
                     string timestamp = $"[{DateTime.Now:ddMMMyyyy HH:mm:ss.fff}] ";
-                    string logLine = timestamp + message;
-                    
-                    File.AppendAllText(Path.Combine(LogsPath, "latest.log"), logLine + Environment.NewLine);
+
+                    string logLine;
+
+                    if (message is string str && str == "\n")
+                    {
+                        // If the message is exactly "\n", log timestamp on a line and then an empty line
+                        logLine = Environment.NewLine + Environment.NewLine;
+                    }
+                    else
+                    {
+                        logLine = timestamp + message + Environment.NewLine;
+                    }
+
+                    File.AppendAllText(Path.Combine(LogsPath, "latest.log"), logLine);
                 }
             }
             catch (Exception ex)

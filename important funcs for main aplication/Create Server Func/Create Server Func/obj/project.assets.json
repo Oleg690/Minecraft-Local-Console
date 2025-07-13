@@ -46,13 +46,13 @@
           "buildTransitive/net6.0/EntityFramework.targets": {}
         }
       },
-      "IKVM/8.11.2": {
+      "IKVM/8.12.0": {
         "type": "package",
         "dependencies": {
-          "IKVM.ByteCode": "9.3.0",
-          "IKVM.Image": "8.11.2",
-          "IKVM.MSBuild": "8.11.2",
-          "Microsoft.Extensions.DependencyModel": "8.0.0",
+          "IKVM.ByteCode": "9.3.4",
+          "IKVM.Image": "8.12.0",
+          "IKVM.MSBuild": "8.12.0",
+          "Microsoft.Extensions.DependencyModel": "8.0.2",
           "System.Collections.Immutable": "8.0.0",
           "System.Data.Odbc": "8.0.0",
           "System.Memory": "4.5.5",
@@ -164,33 +164,37 @@
           }
         }
       },
-      "IKVM.ByteCode/9.3.0": {
+      "IKVM.ByteCode/9.3.4": {
         "type": "package",
         "dependencies": {
           "System.Memory": "4.5.5",
           "System.Threading.Tasks.Extensions": "4.5.4"
         },
         "compile": {
-          "lib/net8.0/IKVM.ByteCode.dll": {}
+          "lib/net8.0/IKVM.ByteCode.dll": {
+            "related": ".xml"
+          }
         },
         "runtime": {
-          "lib/net8.0/IKVM.ByteCode.dll": {}
+          "lib/net8.0/IKVM.ByteCode.dll": {
+            "related": ".xml"
+          }
         }
       },
-      "IKVM.Image/8.11.2": {
+      "IKVM.Image/8.12.0": {
         "type": "package",
         "dependencies": {
-          "IKVM.Image.runtime.linux-arm": "8.11.2",
-          "IKVM.Image.runtime.linux-arm64": "8.11.2",
-          "IKVM.Image.runtime.linux-musl-arm": "8.11.2",
-          "IKVM.Image.runtime.linux-musl-arm64": "8.11.2",
-          "IKVM.Image.runtime.linux-musl-x64": "8.11.2",
-          "IKVM.Image.runtime.linux-x64": "8.11.2",
-          "IKVM.Image.runtime.osx-arm64": "8.11.2",
-          "IKVM.Image.runtime.osx-x64": "8.11.2",
-          "IKVM.Image.runtime.win-arm64": "8.11.2",
-          "IKVM.Image.runtime.win-x64": "8.11.2",
-          "IKVM.Image.runtime.win-x86": "8.11.2"
+          "IKVM.Image.runtime.linux-arm": "8.12.0",
+          "IKVM.Image.runtime.linux-arm64": "8.12.0",
+          "IKVM.Image.runtime.linux-musl-arm": "8.12.0",
+          "IKVM.Image.runtime.linux-musl-arm64": "8.12.0",
+          "IKVM.Image.runtime.linux-musl-x64": "8.12.0",
+          "IKVM.Image.runtime.linux-x64": "8.12.0",
+          "IKVM.Image.runtime.osx-arm64": "8.12.0",
+          "IKVM.Image.runtime.osx-x64": "8.12.0",
+          "IKVM.Image.runtime.win-arm64": "8.12.0",
+          "IKVM.Image.runtime.win-x64": "8.12.0",
+          "IKVM.Image.runtime.win-x86": "8.12.0"
         },
         "compile": {
           "lib/net8.0/_._": {}
@@ -203,7 +207,7 @@
           "buildTransitive/IKVM.Image.targets": {}
         }
       },
-      "IKVM.Image.runtime.linux-arm/8.11.2": {
+      "IKVM.Image.runtime.linux-arm/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -215,7 +219,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-arm.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-arm64/8.11.2": {
+      "IKVM.Image.runtime.linux-arm64/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -227,7 +231,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-musl-arm/8.11.2": {
+      "IKVM.Image.runtime.linux-musl-arm/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -239,7 +243,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-musl-arm.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-musl-arm64/8.11.2": {
+      "IKVM.Image.runtime.linux-musl-arm64/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -251,7 +255,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-musl-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-musl-x64/8.11.2": {
+      "IKVM.Image.runtime.linux-musl-x64/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -263,7 +267,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-musl-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.linux-x64/8.11.2": {
+      "IKVM.Image.runtime.linux-x64/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -275,7 +279,7 @@
           "buildTransitive/IKVM.Image.runtime.linux-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.osx-arm64/8.11.2": {
+      "IKVM.Image.runtime.osx-arm64/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -287,7 +291,7 @@
           "buildTransitive/IKVM.Image.runtime.osx-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.osx-x64/8.11.2": {
+      "IKVM.Image.runtime.osx-x64/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -299,7 +303,7 @@
           "buildTransitive/IKVM.Image.runtime.osx-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.win-arm64/8.11.2": {
+      "IKVM.Image.runtime.win-arm64/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -311,7 +315,7 @@
           "buildTransitive/IKVM.Image.runtime.win-arm64.props": {}
         }
       },
-      "IKVM.Image.runtime.win-x64/8.11.2": {
+      "IKVM.Image.runtime.win-x64/8.12.0": {
         "type": "package",
         "compile": {
           "lib/netstandard2.0/_._": {}
@@ -323,7 +327,7 @@
           "buildTransitive/IKVM.Image.runtime.win-x64.props": {}
         }
       },
-      "IKVM.Image.runtime.win-x86/8.11.2": {
+      "IKVM.Image.runtime.win-x86/8.12.0": {
         "type": "package",
         "compile": {
           "lib/net8.0/_._": {}
@@ -335,10 +339,10 @@
           "buildTransitive/IKVM.Image.runtime.win-x86.props": {}
         }
       },
-      "IKVM.MSBuild/8.11.2": {
+      "IKVM.MSBuild/8.12.0": {
         "type": "package",
         "dependencies": {
-          "IKVM.MSBuild.Tools": "8.11.2"
+          "IKVM.MSBuild.Tools": "8.12.0"
         },
         "compile": {
           "lib/net8.0/_._": {}
@@ -351,16 +355,16 @@
           "buildTransitive/IKVM.MSBuild.targets": {}
         }
       },
-      "IKVM.MSBuild.Tools/8.11.2": {
+      "IKVM.MSBuild.Tools/8.12.0": {
         "type": "package",
         "dependencies": {
-          "IKVM.MSBuild.Tools.runtime.linux-arm": "8.11.2",
-          "IKVM.MSBuild.Tools.runtime.linux-arm64": "8.11.2",
-          "IKVM.MSBuild.Tools.runtime.linux-x64": "8.11.2",
-          "IKVM.MSBuild.Tools.runtime.osx-arm64": "8.11.2",
-          "IKVM.MSBuild.Tools.runtime.osx-x64": "8.11.2",
-          "IKVM.MSBuild.Tools.runtime.win-arm64": "8.11.2",
-          "IKVM.MSBuild.Tools.runtime.win-x64": "8.11.2"
+          "IKVM.MSBuild.Tools.runtime.linux-arm": "8.12.0",
+          "IKVM.MSBuild.Tools.runtime.linux-arm64": "8.12.0",
+          "IKVM.MSBuild.Tools.runtime.linux-x64": "8.12.0",
+          "IKVM.MSBuild.Tools.runtime.osx-arm64": "8.12.0",
+          "IKVM.MSBuild.Tools.runtime.osx-x64": "8.12.0",
+          "IKVM.MSBuild.Tools.runtime.win-arm64": "8.12.0",
+          "IKVM.MSBuild.Tools.runtime.win-x64": "8.12.0"
         },
         "compile": {
           "lib/netstandard2.0/_._": {}
@@ -372,43 +376,43 @@
           "buildTransitive/IKVM.MSBuild.Tools.targets": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.linux-arm/8.11.2": {
+      "IKVM.MSBuild.Tools.runtime.linux-arm/8.12.0": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-arm.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.linux-arm64/8.11.2": {
+      "IKVM.MSBuild.Tools.runtime.linux-arm64/8.12.0": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-arm64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.linux-x64/8.11.2": {
+      "IKVM.MSBuild.Tools.runtime.linux-x64/8.12.0": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-x64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.osx-arm64/8.11.2": {
+      "IKVM.MSBuild.Tools.runtime.osx-arm64/8.12.0": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.osx-arm64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.osx-x64/8.11.2": {
+      "IKVM.MSBuild.Tools.runtime.osx-x64/8.12.0": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.osx-x64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.win-arm64/8.11.2": {
+      "IKVM.MSBuild.Tools.runtime.win-arm64/8.12.0": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.win-arm64.props": {}
         }
       },
-      "IKVM.MSBuild.Tools.runtime.win-x64/8.11.2": {
+      "IKVM.MSBuild.Tools.runtime.win-x64/8.12.0": {
         "type": "package",
         "build": {
           "buildTransitive/IKVM.MSBuild.Tools.runtime.win-x64.props": {}
@@ -470,12 +474,8 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/8.0.0": {
+      "Microsoft.Extensions.DependencyModel/8.0.2": {
         "type": "package",
-        "dependencies": {
-          "System.Text.Encodings.Web": "8.0.0",
-          "System.Text.Json": "8.0.0"
-        },
         "compile": {
           "lib/net8.0/Microsoft.Extensions.DependencyModel.dll": {
             "related": ".xml"
@@ -566,7 +566,7 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "Microsoft.Win32.SystemEvents/9.0.3": {
+      "Microsoft.Win32.SystemEvents/9.0.7": {
         "type": "package",
         "compile": {
           "lib/net8.0/Microsoft.Win32.SystemEvents.dll": {
@@ -680,7 +680,7 @@
           }
         }
       },
-      "System.CodeDom/9.0.3": {
+      "System.CodeDom/9.0.7": {
         "type": "package",
         "compile": {
           "lib/net8.0/System.CodeDom.dll": {
@@ -868,10 +868,10 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Drawing.Common/9.0.3": {
+      "System.Drawing.Common/9.0.7": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "9.0.3"
+          "Microsoft.Win32.SystemEvents": "9.0.7"
         },
         "compile": {
           "lib/net8.0/System.Drawing.Common.dll": {
@@ -909,10 +909,10 @@
           "buildTransitive/net6.0/_._": {}
         }
       },
-      "System.Management/9.0.3": {
+      "System.Management/9.0.7": {
         "type": "package",
         "dependencies": {
-          "System.CodeDom": "9.0.3"
+          "System.CodeDom": "9.0.7"
         },
         "compile": {
           "lib/net8.0/System.Management.dll": {
@@ -1042,28 +1042,6 @@
           "runtimes/win/lib/net8.0/System.Text.Encoding.CodePages.dll": {
             "assetType": "runtime",
             "rid": "win"
-          }
-        }
-      },
-      "System.Text.Encodings.Web/8.0.0": {
-        "type": "package",
-        "compile": {
-          "lib/net8.0/System.Text.Encodings.Web.dll": {
-            "related": ".xml"
-          }
-        },
-        "runtime": {
-          "lib/net8.0/System.Text.Encodings.Web.dll": {
-            "related": ".xml"
-          }
-        },
-        "build": {
-          "buildTransitive/net6.0/_._": {}
-        },
-        "runtimeTargets": {
-          "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll": {
-            "assetType": "runtime",
-            "rid": "browser"
           }
         }
       },
@@ -1202,10 +1180,10 @@
         "tools/net6.0/any/ef6.runtimeconfig.json"
       ]
     },
-    "IKVM/8.11.2": {
-      "sha512": "eGSNPVNa9DmmnXBE/K+pNgOOn0E7MuzgVtxZxWQhiB7iXi1XahZpRF7ocdDJo1yJmoKIN+9iB9VOibTXtRwnBQ==",
+    "IKVM/8.12.0": {
+      "sha512": "QUBXUyxvUUZZOQLDKNVDfsa/qCJ8nvw5JYiDjdWAOtD6JY/J7q6CYLjbda/ipjl68beeUNO6G7/kyr2gokDL6Q==",
       "type": "package",
-      "path": "ikvm/8.11.2",
+      "path": "ikvm/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1217,7 +1195,7 @@
         "buildTransitive/IKVM.IkvmReference.targets",
         "buildTransitive/IKVM.props",
         "buildTransitive/IKVM.targets",
-        "ikvm.8.11.2.nupkg.sha512",
+        "ikvm.8.12.0.nupkg.sha512",
         "ikvm.nuspec",
         "ikvm.snk",
         "lib/net472/IKVM.CoreLib.dll",
@@ -1302,28 +1280,33 @@
         "targets/generated.props"
       ]
     },
-    "IKVM.ByteCode/9.3.0": {
-      "sha512": "TbrsU8aKXENQDSZGGm4JXLKpaiGWNRdcdAnpSHLkUDw9bSRf68rropsnkL1vGYfOPSRvwGJi9FDxtsp24vt7jg==",
+    "IKVM.ByteCode/9.3.4": {
+      "sha512": "Hi4arsjbW/kLIFvqS+tyaQEUfms+srJ6SSO8sdk8U4Z9t81I/ndcU3qSInSasAZr7PK7gJ3CRk/FWYuPQzY+GQ==",
       "type": "package",
-      "path": "ikvm.bytecode/9.3.0",
+      "path": "ikvm.bytecode/9.3.4",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE",
         "README.md",
-        "ikvm.bytecode.9.3.0.nupkg.sha512",
+        "ikvm.bytecode.9.3.4.nupkg.sha512",
         "ikvm.bytecode.nuspec",
         "lib/net472/IKVM.ByteCode.dll",
+        "lib/net472/IKVM.ByteCode.xml",
         "lib/net6.0/IKVM.ByteCode.dll",
+        "lib/net6.0/IKVM.ByteCode.xml",
         "lib/net7.0/IKVM.ByteCode.dll",
+        "lib/net7.0/IKVM.ByteCode.xml",
         "lib/net8.0/IKVM.ByteCode.dll",
-        "lib/netstandard2.0/IKVM.ByteCode.dll"
+        "lib/net8.0/IKVM.ByteCode.xml",
+        "lib/netstandard2.0/IKVM.ByteCode.dll",
+        "lib/netstandard2.0/IKVM.ByteCode.xml"
       ]
     },
-    "IKVM.Image/8.11.2": {
-      "sha512": "i/q0tjwOZqo1n2TUDgnCyoTT3tEBkbWtO31uoCSH2XWWrH+pq1n1c3sY2Ntygyxm/ZLV0vYwwuIQ32R+14J50w==",
+    "IKVM.Image/8.12.0": {
+      "sha512": "gKGAWcxll10L3TAk2g/FrSFUgZCI2CeB5ViUhuTRfvITWev26RTf9X6Axv5HWAuPNSxgy1D/o4Zu6lIh2QE98Q==",
       "type": "package",
-      "path": "ikvm.image/8.11.2",
+      "path": "ikvm.image/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1332,7 +1315,7 @@
         "buildTransitive/IKVM.Image.props",
         "buildTransitive/IKVM.Image.targets",
         "buildTransitive/ikvm.properties",
-        "ikvm.image.8.11.2.nupkg.sha512",
+        "ikvm.image.8.12.0.nupkg.sha512",
         "ikvm.image.nuspec",
         "ikvm/any/any/LICENSE.md",
         "ikvm/any/any/README.md",
@@ -1370,17 +1353,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-arm/8.11.2": {
-      "sha512": "0FnkFJ4iaJOBzkTgLMUD3h92PcYcGpbg9g62QBuknMicqZ8YeCFe6nAiCKjYA0b74VTFIi7Vqc3B+OkPUtyUoA==",
+    "IKVM.Image.runtime.linux-arm/8.12.0": {
+      "sha512": "WlFqyn722+F/PE+v07s7ZUPu2Y/bn+ajXOmwV2BCceb5/mdlMQDZGktiip1jwsM2v2RBUiUULN4Mccy9+T5enQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-arm/8.11.2",
+      "path": "ikvm.image.runtime.linux-arm/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-arm.props",
-        "ikvm.image.runtime.linux-arm.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.linux-arm.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.linux-arm.nuspec",
         "ikvm/any/linux-arm/bin/libawt.so",
         "ikvm/any/linux-arm/bin/libawt_headless.so",
@@ -1422,17 +1405,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-arm64/8.11.2": {
-      "sha512": "O5MHsAUmJEtglm+smw0cwODMm5hRBcUB+DeJqo5wKpKgU2jFJ53u75iJNN1pwuQkiwEuBYVmtNmLRuHtwlZVzA==",
+    "IKVM.Image.runtime.linux-arm64/8.12.0": {
+      "sha512": "dWytl3Co/vnnGOQ7YZ0S89SEneenkRT8yoVcHJurJi7dnMHsTBfmcxM3oac+KJgfko62ObkLSqrH358zhx/ndQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-arm64/8.11.2",
+      "path": "ikvm.image.runtime.linux-arm64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-arm64.props",
-        "ikvm.image.runtime.linux-arm64.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.linux-arm64.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.linux-arm64.nuspec",
         "ikvm/any/linux-arm64/bin/libawt.so",
         "ikvm/any/linux-arm64/bin/libawt_headless.so",
@@ -1474,17 +1457,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-musl-arm/8.11.2": {
-      "sha512": "Q/1ba736snjAod019F48egMwclz9jH8Bml59uv5Osx+R3Sk6YlkAX4RWvoFjWSIXzsPi+LMOXBxmPPi6HrYhRA==",
+    "IKVM.Image.runtime.linux-musl-arm/8.12.0": {
+      "sha512": "JDYW83vocN5mWuZp6vEMi1Yrg6H9l7p4kR6ZoLtRnNIgVM9Alqr1jM0BQwcTpRQ2Otbmv217CfrHj3Op8/SKbg==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-musl-arm/8.11.2",
+      "path": "ikvm.image.runtime.linux-musl-arm/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-musl-arm.props",
-        "ikvm.image.runtime.linux-musl-arm.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.linux-musl-arm.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.linux-musl-arm.nuspec",
         "ikvm/any/linux-musl-arm/bin/libawt.so",
         "ikvm/any/linux-musl-arm/bin/libawt_headless.so",
@@ -1526,17 +1509,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-musl-arm64/8.11.2": {
-      "sha512": "xP2+/FhojHB2rGJ2nS0gDDFOYCBBceQodPZ6t1foWBMMWqUmbEoxVmky8W7Tb/Mms1wKKPUSptCvdNzdS2HqhQ==",
+    "IKVM.Image.runtime.linux-musl-arm64/8.12.0": {
+      "sha512": "oGlUK4e71PsmoVU827VGSdj8FQQk2kAQe3mr1oJ+SMPtyJPf3fKVmzfaw6ax63xlERcZzvBqJufl76lGjqFRVg==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-musl-arm64/8.11.2",
+      "path": "ikvm.image.runtime.linux-musl-arm64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-musl-arm64.props",
-        "ikvm.image.runtime.linux-musl-arm64.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.linux-musl-arm64.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.linux-musl-arm64.nuspec",
         "ikvm/any/linux-musl-arm64/bin/libawt.so",
         "ikvm/any/linux-musl-arm64/bin/libawt_headless.so",
@@ -1578,17 +1561,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-musl-x64/8.11.2": {
-      "sha512": "7s+PkOMti/5VzbWf7UGeBozPjxYrVCpKl5nKUkGNd0Z5wJbf3JfVuOn1xFAE3Nxu9LuykciTj59mmkUbiNH0dQ==",
+    "IKVM.Image.runtime.linux-musl-x64/8.12.0": {
+      "sha512": "5C2oZYpb3IrxAuGucsTk20nl0vCGqT4k+lKKrheCFNd1PVK99lzpbYWpSyZwJWXlJQNZllQkZlaRcfUR9OYwrg==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-musl-x64/8.11.2",
+      "path": "ikvm.image.runtime.linux-musl-x64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-musl-x64.props",
-        "ikvm.image.runtime.linux-musl-x64.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.linux-musl-x64.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.linux-musl-x64.nuspec",
         "ikvm/any/linux-musl-x64/bin/libawt.so",
         "ikvm/any/linux-musl-x64/bin/libawt_headless.so",
@@ -1630,17 +1613,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.linux-x64/8.11.2": {
-      "sha512": "2jBO6pH3tVitP9giMX98QcbKw8CwKCRJevKTPCtlhBOCp11woEYuh7TUhW8FqAoSKWt+XHgcObpd+eFIZrwUrg==",
+    "IKVM.Image.runtime.linux-x64/8.12.0": {
+      "sha512": "6jTW/MmAmKp7x5NlfNCiANk1HQ027IdpJQVqlpDd4gDXJtzXukQMTlYBs/Aqq//Qdg+wseSAaCTqevWJrbVNOQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.linux-x64/8.11.2",
+      "path": "ikvm.image.runtime.linux-x64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.linux-x64.props",
-        "ikvm.image.runtime.linux-x64.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.linux-x64.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.linux-x64.nuspec",
         "ikvm/any/linux-x64/bin/libawt.so",
         "ikvm/any/linux-x64/bin/libawt_headless.so",
@@ -1682,17 +1665,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.osx-arm64/8.11.2": {
-      "sha512": "g3Rs+P7B3e3d4McQG3X5Fpk8gQfD7FjKNrzuWTcfiavzq+rsPz3IjE8CmVvOYVTbUuzwoSz9l11IRKHayrSVIg==",
+    "IKVM.Image.runtime.osx-arm64/8.12.0": {
+      "sha512": "K/woAfQOWTe+cxhG8qAadgHxTu7g/zdQLagSA7LEcHe0yu3Uf5I3vNMWZzk9kuEylbS3Abda5pRrhlERcibDmA==",
       "type": "package",
-      "path": "ikvm.image.runtime.osx-arm64/8.11.2",
+      "path": "ikvm.image.runtime.osx-arm64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.osx-arm64.props",
-        "ikvm.image.runtime.osx-arm64.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.osx-arm64.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.osx-arm64.nuspec",
         "ikvm/any/osx-arm64/bin/libawt.dylib",
         "ikvm/any/osx-arm64/bin/libawt_lwawt.dylib",
@@ -1738,17 +1721,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.osx-x64/8.11.2": {
-      "sha512": "4A/m2eJBQw+pTOe33ggBs0QLHq8Cd7F//v6tII0J9I1V6NOQoIoV0Zsb3u2UI8hViiqbToJxIPkGQUt5Krvi+Q==",
+    "IKVM.Image.runtime.osx-x64/8.12.0": {
+      "sha512": "j/WcxgK0GHhS/uqO1n1cGyXy9oxcxBu+Sdd+V1fXuVs5t+sH/NlV3L9Qapy8TP/R43xi9b7JQEKgiOu1XwvJxg==",
       "type": "package",
-      "path": "ikvm.image.runtime.osx-x64/8.11.2",
+      "path": "ikvm.image.runtime.osx-x64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.osx-x64.props",
-        "ikvm.image.runtime.osx-x64.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.osx-x64.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.osx-x64.nuspec",
         "ikvm/any/osx-x64/bin/libawt.dylib",
         "ikvm/any/osx-x64/bin/libawt_lwawt.dylib",
@@ -1795,17 +1778,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.win-arm64/8.11.2": {
-      "sha512": "WVFXK+uEELhbTXzoPDnFSu1I9gk8eWeURjtHOJ2fxG2obt4KbpHm36JRrw2XgF+wpZEVkcZMHqFDK4yQ80TGJQ==",
+    "IKVM.Image.runtime.win-arm64/8.12.0": {
+      "sha512": "hQMMv7NwbdRa8z0ib/V5iv+mBn6o5XX3XBKUDAtv0EhbPJ2O+3mTlRXVAzJfUhzW0wAGjyQee72YjcF+x5XHxQ==",
       "type": "package",
-      "path": "ikvm.image.runtime.win-arm64/8.11.2",
+      "path": "ikvm.image.runtime.win-arm64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.win-arm64.props",
-        "ikvm.image.runtime.win-arm64.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.win-arm64.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.win-arm64.nuspec",
         "ikvm/any/win-arm64/bin/awt.dll",
         "ikvm/any/win-arm64/bin/fontmanager.dll",
@@ -1852,17 +1835,17 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.Image.runtime.win-x64/8.11.2": {
-      "sha512": "CUYLcYkEQlbKIKKL4ivzRz+0ps5REdMBtplGwAifx6UEqlFEPzjciFRigVrgCp38dQHNtyn5dxy7+Q4GlFbubw==",
+    "IKVM.Image.runtime.win-x64/8.12.0": {
+      "sha512": "WmFqvzG0xcUlvjgtpU8EsecdNWgtW92j47TdN5IVN2vK2m1+PY5Iog0BSR8lT9zGA8D6SUBDwfBWtbEcGjVFwg==",
       "type": "package",
-      "path": "ikvm.image.runtime.win-x64/8.11.2",
+      "path": "ikvm.image.runtime.win-x64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.win-x64.props",
-        "ikvm.image.runtime.win-x64.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.win-x64.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.win-x64.nuspec",
         "ikvm/any/win-x64/bin/awt.dll",
         "ikvm/any/win-x64/bin/fontmanager.dll",
@@ -1907,17 +1890,17 @@
         "lib/netstandard2.0/_._"
       ]
     },
-    "IKVM.Image.runtime.win-x86/8.11.2": {
-      "sha512": "h65V77MgiuzNUXuwk6UzZ5aS0idyr+rcS8pluxrZFwtSUuX2pJUSx43+t2ZaBm88+1EmYWTamPMkuMCkS52RGQ==",
+    "IKVM.Image.runtime.win-x86/8.12.0": {
+      "sha512": "j/CWPyjrQ1hP+IYoryPBf1+1pY0PfuOZ4B2iJFzDZ+ewERxF9IhS+SeKESOldJ0HanzHMZbrbJzCB+105fRDxA==",
       "type": "package",
-      "path": "ikvm.image.runtime.win-x86/8.11.2",
+      "path": "ikvm.image.runtime.win-x86/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.Image.runtime.win-x86.props",
-        "ikvm.image.runtime.win-x86.8.11.2.nupkg.sha512",
+        "ikvm.image.runtime.win-x86.8.12.0.nupkg.sha512",
         "ikvm.image.runtime.win-x86.nuspec",
         "ikvm/any/win-x86/bin/awt.dll",
         "ikvm/any/win-x86/bin/fontmanager.dll",
@@ -1964,10 +1947,10 @@
         "lib/net8.0/_._"
       ]
     },
-    "IKVM.MSBuild/8.11.2": {
-      "sha512": "tatmCZhDOBEzk7bKC1Uo+o0aH9BzBYpMU3FeNxN3vazaVpghMFyqHen1j2PFAVpZNZ04tI+ImUQmAXXEgEQVjg==",
+    "IKVM.MSBuild/8.12.0": {
+      "sha512": "iY/JpSg6h8dM200rnhLQTbkdC44KbRBwsi0+BbJe1PW4nMwtD0ELrDUDQvHP9kzJK3ZX9MxF+YWbRETNs7FScA==",
       "type": "package",
-      "path": "ikvm.msbuild/8.11.2",
+      "path": "ikvm.msbuild/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -1978,7 +1961,7 @@
         "buildTransitive/IKVM.MSBuild.Tasks.targets",
         "buildTransitive/IKVM.MSBuild.props",
         "buildTransitive/IKVM.MSBuild.targets",
-        "ikvm.msbuild.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.8.12.0.nupkg.sha512",
         "ikvm.msbuild.nuspec",
         "lib/net6.0/_._",
         "lib/net8.0/_._",
@@ -2001,6 +1984,7 @@
         "tasks/net472/IKVM.Tools.Runner.dll",
         "tasks/net472/IKVM.Tools.Runner.dll.config",
         "tasks/net472/IKVM.Util.dll",
+        "tasks/net472/IKVM.Util.dll.config",
         "tasks/net472/Microsoft.Bcl.AsyncInterfaces.dll",
         "tasks/net472/Microsoft.Bcl.HashCode.dll",
         "tasks/net472/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
@@ -2017,6 +2001,37 @@
         "tasks/net472/System.Threading.Tasks.Extensions.dll",
         "tasks/net472/System.ValueTuple.dll",
         "tasks/net472/ikvm.properties",
+        "tasks/net472/ikvm/android-arm/LICENSE.md",
+        "tasks/net472/ikvm/android-arm/README.md",
+        "tasks/net472/ikvm/android-arm/THIRD_PARTY_README",
+        "tasks/net472/ikvm/android-arm/TRADEMARK",
+        "tasks/net472/ikvm/android-arm/bin/ikvm.properties",
+        "tasks/net472/ikvm/android-arm/lib/calendars.properties",
+        "tasks/net472/ikvm/android-arm/lib/cmm/CIEXYZ.pf",
+        "tasks/net472/ikvm/android-arm/lib/cmm/GRAY.pf",
+        "tasks/net472/ikvm/android-arm/lib/cmm/LINEAR_RGB.pf",
+        "tasks/net472/ikvm/android-arm/lib/cmm/PYCC.pf",
+        "tasks/net472/ikvm/android-arm/lib/cmm/sRGB.pf",
+        "tasks/net472/ikvm/android-arm/lib/currency.data",
+        "tasks/net472/ikvm/android-arm/lib/hijrah-config-umalqura.properties",
+        "tasks/net472/ikvm/android-arm/lib/images/cursors/invalid32x32.gif",
+        "tasks/net472/ikvm/android-arm/lib/logging.properties",
+        "tasks/net472/ikvm/android-arm/lib/management/jmxremote.access",
+        "tasks/net472/ikvm/android-arm/lib/management/jmxremote.password.template",
+        "tasks/net472/ikvm/android-arm/lib/management/management.properties",
+        "tasks/net472/ikvm/android-arm/lib/management/snmp.acl.template",
+        "tasks/net472/ikvm/android-arm/lib/net.properties",
+        "tasks/net472/ikvm/android-arm/lib/psfont.properties.ja",
+        "tasks/net472/ikvm/android-arm/lib/psfontj2d.properties",
+        "tasks/net472/ikvm/android-arm/lib/security/blacklisted.certs",
+        "tasks/net472/ikvm/android-arm/lib/security/cacerts",
+        "tasks/net472/ikvm/android-arm/lib/security/java.policy",
+        "tasks/net472/ikvm/android-arm/lib/security/policy/limited/US_export_policy.jar",
+        "tasks/net472/ikvm/android-arm/lib/security/policy/limited/local_policy.jar",
+        "tasks/net472/ikvm/android-arm/lib/security/policy/unlimited/US_export_policy.jar",
+        "tasks/net472/ikvm/android-arm/lib/security/policy/unlimited/local_policy.jar",
+        "tasks/net472/ikvm/android-arm/lib/sound.properties",
+        "tasks/net472/ikvm/android-arm/lib/tzdb.dat",
         "tasks/net472/ikvm/android-arm64/LICENSE.md",
         "tasks/net472/ikvm/android-arm64/README.md",
         "tasks/net472/ikvm/android-arm64/THIRD_PARTY_README",
@@ -2871,6 +2886,37 @@
         "tasks/net6.0/System.Text.Encodings.Web.dll",
         "tasks/net6.0/System.Text.Json.dll",
         "tasks/net6.0/ikvm.properties",
+        "tasks/net6.0/ikvm/android-arm/LICENSE.md",
+        "tasks/net6.0/ikvm/android-arm/README.md",
+        "tasks/net6.0/ikvm/android-arm/THIRD_PARTY_README",
+        "tasks/net6.0/ikvm/android-arm/TRADEMARK",
+        "tasks/net6.0/ikvm/android-arm/bin/ikvm.properties",
+        "tasks/net6.0/ikvm/android-arm/lib/calendars.properties",
+        "tasks/net6.0/ikvm/android-arm/lib/cmm/CIEXYZ.pf",
+        "tasks/net6.0/ikvm/android-arm/lib/cmm/GRAY.pf",
+        "tasks/net6.0/ikvm/android-arm/lib/cmm/LINEAR_RGB.pf",
+        "tasks/net6.0/ikvm/android-arm/lib/cmm/PYCC.pf",
+        "tasks/net6.0/ikvm/android-arm/lib/cmm/sRGB.pf",
+        "tasks/net6.0/ikvm/android-arm/lib/currency.data",
+        "tasks/net6.0/ikvm/android-arm/lib/hijrah-config-umalqura.properties",
+        "tasks/net6.0/ikvm/android-arm/lib/images/cursors/invalid32x32.gif",
+        "tasks/net6.0/ikvm/android-arm/lib/logging.properties",
+        "tasks/net6.0/ikvm/android-arm/lib/management/jmxremote.access",
+        "tasks/net6.0/ikvm/android-arm/lib/management/jmxremote.password.template",
+        "tasks/net6.0/ikvm/android-arm/lib/management/management.properties",
+        "tasks/net6.0/ikvm/android-arm/lib/management/snmp.acl.template",
+        "tasks/net6.0/ikvm/android-arm/lib/net.properties",
+        "tasks/net6.0/ikvm/android-arm/lib/psfont.properties.ja",
+        "tasks/net6.0/ikvm/android-arm/lib/psfontj2d.properties",
+        "tasks/net6.0/ikvm/android-arm/lib/security/blacklisted.certs",
+        "tasks/net6.0/ikvm/android-arm/lib/security/cacerts",
+        "tasks/net6.0/ikvm/android-arm/lib/security/java.policy",
+        "tasks/net6.0/ikvm/android-arm/lib/security/policy/limited/US_export_policy.jar",
+        "tasks/net6.0/ikvm/android-arm/lib/security/policy/limited/local_policy.jar",
+        "tasks/net6.0/ikvm/android-arm/lib/security/policy/unlimited/US_export_policy.jar",
+        "tasks/net6.0/ikvm/android-arm/lib/security/policy/unlimited/local_policy.jar",
+        "tasks/net6.0/ikvm/android-arm/lib/sound.properties",
+        "tasks/net6.0/ikvm/android-arm/lib/tzdb.dat",
         "tasks/net6.0/ikvm/android-arm64/LICENSE.md",
         "tasks/net6.0/ikvm/android-arm64/README.md",
         "tasks/net6.0/ikvm/android-arm64/THIRD_PARTY_README",
@@ -3727,32 +3773,32 @@
         "tasks/net6.0/runtimes/win/lib/net6.0/System.Security.Cryptography.Pkcs.dll"
       ]
     },
-    "IKVM.MSBuild.Tools/8.11.2": {
-      "sha512": "QGEc9Icqt6vkAM8KPzg5AJwkSrSXgP5ZPwG6je42RjNpyT32SKovRdRt+pxSwIfh0DJx8S8PVSOXUa13thkqTQ==",
+    "IKVM.MSBuild.Tools/8.12.0": {
+      "sha512": "wYWjIqbcRbU7UlHYk1IYg83/sxr2dIQVgLWAlWkB+QhVa9cqD43qqZJFJPUH9mFOroFHn/O48M5bSUgSF3TiSw==",
       "type": "package",
-      "path": "ikvm.msbuild.tools/8.11.2",
+      "path": "ikvm.msbuild.tools/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.targets",
-        "ikvm.msbuild.tools.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.tools.8.12.0.nupkg.sha512",
         "ikvm.msbuild.tools.nuspec",
         "lib/netstandard2.0/_._"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.linux-arm/8.11.2": {
-      "sha512": "s+Mn8uV5P9S9iPQSc7Ad4S+3o4MIEpEttvjP2GeG++QLN3nXW50sfWsndSNy2RtLp9N5EnES7Zkibnyau8xehQ==",
+    "IKVM.MSBuild.Tools.runtime.linux-arm/8.12.0": {
+      "sha512": "63NhjJ0TG5nxgie2HBzBgUKF7GZr6xKJK44ucps0B+5I6f8yaPoBGNNmIbKltEn7D2sUJhtxjhJ8yM53+hs75A==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.linux-arm/8.11.2",
+      "path": "ikvm.msbuild.tools.runtime.linux-arm/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-arm.props",
-        "ikvm.msbuild.tools.runtime.linux-arm.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.linux-arm.8.12.0.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.linux-arm.nuspec",
         "ikvmc/net8.0/linux-arm/IKVM.ByteCode.dll",
         "ikvmc/net8.0/linux-arm/IKVM.CoreLib.dll",
@@ -4194,18 +4240,66 @@
         "ikvmstub/net8.0/linux-arm/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.linux-arm64/8.11.2": {
-      "sha512": "UGqNizqJ9F0qfZO89vh6igPn3EVr/JIakosHr1yq3aoYjUbHOoNCW7WhLsFOlqDsRGxrLK1uIZDyjyM4MEgeaw==",
+    "IKVM.MSBuild.Tools.runtime.linux-arm64/8.12.0": {
+      "sha512": "Xbn8grCYDtbTsnKhqCedu7eidLo8rGuFXTrNQZHhUXRltq5GNifPrYA5N6QUKMzaoMX7IUFo5tf7GbKPTQfZ6A==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.linux-arm64/8.11.2",
+      "path": "ikvm.msbuild.tools.runtime.linux-arm64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-arm64.props",
-        "ikvm.msbuild.tools.runtime.linux-arm64.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.linux-arm64.8.12.0.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.linux-arm64.nuspec",
+        "ikvmc/net472/linux-arm64/IKVM.ByteCode.dll",
+        "ikvmc/net472/linux-arm64/IKVM.CoreLib.dll",
+        "ikvmc/net472/linux-arm64/IKVM.CoreLib.dll.config",
+        "ikvmc/net472/linux-arm64/IKVM.CoreLib.pdb",
+        "ikvmc/net472/linux-arm64/IKVM.Reflection.dll",
+        "ikvmc/net472/linux-arm64/IKVM.Reflection.dll.config",
+        "ikvmc/net472/linux-arm64/IKVM.Reflection.pdb",
+        "ikvmc/net472/linux-arm64/IKVM.Tools.Core.dll",
+        "ikvmc/net472/linux-arm64/IKVM.Tools.Core.dll.config",
+        "ikvmc/net472/linux-arm64/IKVM.Tools.Core.pdb",
+        "ikvmc/net472/linux-arm64/IKVM.Tools.Importer.dll",
+        "ikvmc/net472/linux-arm64/IKVM.Tools.Importer.dll.config",
+        "ikvmc/net472/linux-arm64/IKVM.Tools.Importer.pdb",
+        "ikvmc/net472/linux-arm64/Microsoft.Bcl.AsyncInterfaces.dll",
+        "ikvmc/net472/linux-arm64/Microsoft.Bcl.HashCode.dll",
+        "ikvmc/net472/linux-arm64/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "ikvmc/net472/linux-arm64/Microsoft.Extensions.DependencyInjection.dll",
+        "ikvmc/net472/linux-arm64/Spectre.Console.dll",
+        "ikvmc/net472/linux-arm64/System.Buffers.dll",
+        "ikvmc/net472/linux-arm64/System.Collections.Immutable.dll",
+        "ikvmc/net472/linux-arm64/System.CommandLine.Rendering.dll",
+        "ikvmc/net472/linux-arm64/System.CommandLine.dll",
+        "ikvmc/net472/linux-arm64/System.IO.Pipelines.dll",
+        "ikvmc/net472/linux-arm64/System.Memory.dll",
+        "ikvmc/net472/linux-arm64/System.Numerics.Vectors.dll",
+        "ikvmc/net472/linux-arm64/System.Reflection.Metadata.dll",
+        "ikvmc/net472/linux-arm64/System.Runtime.CompilerServices.Unsafe.dll",
+        "ikvmc/net472/linux-arm64/System.Text.Encodings.Web.dll",
+        "ikvmc/net472/linux-arm64/System.Text.Json.dll",
+        "ikvmc/net472/linux-arm64/System.Threading.Channels.dll",
+        "ikvmc/net472/linux-arm64/System.Threading.Tasks.Extensions.dll",
+        "ikvmc/net472/linux-arm64/System.ValueTuple.dll",
+        "ikvmc/net472/linux-arm64/cs/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/de/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/es/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/fr/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/ikvmc.exe",
+        "ikvmc/net472/linux-arm64/ikvmc.exe.config",
+        "ikvmc/net472/linux-arm64/ikvmc.pdb",
+        "ikvmc/net472/linux-arm64/it/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/ja/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/ko/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/pl/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/pt-BR/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/ru/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/tr/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/zh-Hans/System.CommandLine.resources.dll",
+        "ikvmc/net472/linux-arm64/zh-Hant/System.CommandLine.resources.dll",
         "ikvmc/net8.0/linux-arm64/IKVM.ByteCode.dll",
         "ikvmc/net8.0/linux-arm64/IKVM.CoreLib.dll",
         "ikvmc/net8.0/linux-arm64/IKVM.CoreLib.pdb",
@@ -4425,6 +4519,54 @@
         "ikvmc/net8.0/linux-arm64/tr/System.CommandLine.resources.dll",
         "ikvmc/net8.0/linux-arm64/zh-Hans/System.CommandLine.resources.dll",
         "ikvmc/net8.0/linux-arm64/zh-Hant/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/IKVM.ByteCode.dll",
+        "ikvmstub/net472/linux-arm64/IKVM.CoreLib.dll",
+        "ikvmstub/net472/linux-arm64/IKVM.CoreLib.dll.config",
+        "ikvmstub/net472/linux-arm64/IKVM.CoreLib.pdb",
+        "ikvmstub/net472/linux-arm64/IKVM.Reflection.dll",
+        "ikvmstub/net472/linux-arm64/IKVM.Reflection.dll.config",
+        "ikvmstub/net472/linux-arm64/IKVM.Reflection.pdb",
+        "ikvmstub/net472/linux-arm64/IKVM.Tools.Core.dll",
+        "ikvmstub/net472/linux-arm64/IKVM.Tools.Core.dll.config",
+        "ikvmstub/net472/linux-arm64/IKVM.Tools.Core.pdb",
+        "ikvmstub/net472/linux-arm64/IKVM.Tools.Exporter.dll",
+        "ikvmstub/net472/linux-arm64/IKVM.Tools.Exporter.dll.config",
+        "ikvmstub/net472/linux-arm64/IKVM.Tools.Exporter.pdb",
+        "ikvmstub/net472/linux-arm64/Microsoft.Bcl.AsyncInterfaces.dll",
+        "ikvmstub/net472/linux-arm64/Microsoft.Bcl.HashCode.dll",
+        "ikvmstub/net472/linux-arm64/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "ikvmstub/net472/linux-arm64/Microsoft.Extensions.DependencyInjection.dll",
+        "ikvmstub/net472/linux-arm64/Spectre.Console.dll",
+        "ikvmstub/net472/linux-arm64/System.Buffers.dll",
+        "ikvmstub/net472/linux-arm64/System.Collections.Immutable.dll",
+        "ikvmstub/net472/linux-arm64/System.CommandLine.Rendering.dll",
+        "ikvmstub/net472/linux-arm64/System.CommandLine.dll",
+        "ikvmstub/net472/linux-arm64/System.IO.Pipelines.dll",
+        "ikvmstub/net472/linux-arm64/System.Memory.dll",
+        "ikvmstub/net472/linux-arm64/System.Numerics.Vectors.dll",
+        "ikvmstub/net472/linux-arm64/System.Reflection.Metadata.dll",
+        "ikvmstub/net472/linux-arm64/System.Runtime.CompilerServices.Unsafe.dll",
+        "ikvmstub/net472/linux-arm64/System.Text.Encodings.Web.dll",
+        "ikvmstub/net472/linux-arm64/System.Text.Json.dll",
+        "ikvmstub/net472/linux-arm64/System.Threading.Channels.dll",
+        "ikvmstub/net472/linux-arm64/System.Threading.Tasks.Extensions.dll",
+        "ikvmstub/net472/linux-arm64/System.ValueTuple.dll",
+        "ikvmstub/net472/linux-arm64/cs/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/de/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/es/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/fr/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/ikvmstub.exe",
+        "ikvmstub/net472/linux-arm64/ikvmstub.exe.config",
+        "ikvmstub/net472/linux-arm64/ikvmstub.pdb",
+        "ikvmstub/net472/linux-arm64/it/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/ja/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/ko/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/pl/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/pt-BR/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/ru/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/tr/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/zh-Hans/System.CommandLine.resources.dll",
+        "ikvmstub/net472/linux-arm64/zh-Hant/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/linux-arm64/IKVM.ByteCode.dll",
         "ikvmstub/net8.0/linux-arm64/IKVM.CoreLib.dll",
         "ikvmstub/net8.0/linux-arm64/IKVM.CoreLib.pdb",
@@ -4646,17 +4788,17 @@
         "ikvmstub/net8.0/linux-arm64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.linux-x64/8.11.2": {
-      "sha512": "uc58VRHGq9Ho5fz9zzPBrMxeby0/kOhSEwktchh0CK8qqL1zaOjl/J127cQHuk+nwfXmOpyK9iZcQHBTqDj0wA==",
+    "IKVM.MSBuild.Tools.runtime.linux-x64/8.12.0": {
+      "sha512": "1HLxf78JmLjLHqShrg92lo30bLijfYrB0vyoN0lwSVgS+lR4H5tJaq4XKOk0+TAsmtBrK3UMUIHy779lrptE7Q==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.linux-x64/8.11.2",
+      "path": "ikvm.msbuild.tools.runtime.linux-x64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.linux-x64.props",
-        "ikvm.msbuild.tools.runtime.linux-x64.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.linux-x64.8.12.0.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.linux-x64.nuspec",
         "ikvmc/net472/linux-x64/IKVM.ByteCode.dll",
         "ikvmc/net472/linux-x64/IKVM.CoreLib.dll",
@@ -5194,17 +5336,17 @@
         "ikvmstub/net8.0/linux-x64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.osx-arm64/8.11.2": {
-      "sha512": "nwGVstnIGjw49Tbg34BylyNCLqcb8qkZMCFsdQ6ql7ghYGi71G3exejaV8iOoQFMUZmCTmDKoVRp73XuQdxBKg==",
+    "IKVM.MSBuild.Tools.runtime.osx-arm64/8.12.0": {
+      "sha512": "mlCjkDv325V7x9FvWaDfSwLybctMUUywa+BJDKc9lJ4HlDUjugAakFRkrFp0hjwCVYnaVYkEJIcTFYwxqA5JwQ==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.osx-arm64/8.11.2",
+      "path": "ikvm.msbuild.tools.runtime.osx-arm64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.osx-arm64.props",
-        "ikvm.msbuild.tools.runtime.osx-arm64.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.osx-arm64.8.12.0.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.osx-arm64.nuspec",
         "ikvmc/net472/osx-arm64/IKVM.ByteCode.dll",
         "ikvmc/net472/osx-arm64/IKVM.CoreLib.dll",
@@ -5742,17 +5884,17 @@
         "ikvmstub/net8.0/osx-arm64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.osx-x64/8.11.2": {
-      "sha512": "e11Ow0nxvxgrD67odKDM8pPMIMwW4N+YmjxtwjfYmZGu/o4MJMA4yXpinlR2H0OFc69763s/PnJ7LrCtMRIwKQ==",
+    "IKVM.MSBuild.Tools.runtime.osx-x64/8.12.0": {
+      "sha512": "ejrMB5RK4e4ERlrHyCag5Zib5W/cmTk/4PwVhV6srtit71e8KDLD3BjD4bDp/us0fiIquPYc27vvAW4XtpCG9Q==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.osx-x64/8.11.2",
+      "path": "ikvm.msbuild.tools.runtime.osx-x64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.osx-x64.props",
-        "ikvm.msbuild.tools.runtime.osx-x64.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.osx-x64.8.12.0.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.osx-x64.nuspec",
         "ikvmc/net472/osx-x64/IKVM.ByteCode.dll",
         "ikvmc/net472/osx-x64/IKVM.CoreLib.dll",
@@ -6290,17 +6432,17 @@
         "ikvmstub/net8.0/osx-x64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.win-arm64/8.11.2": {
-      "sha512": "vlRwJ7fdnKz6/kZh/ux5qPTYMQ9lRTYtQ+YjYvg+GnftKbBIY9dLB6dEXKzwPWJ8CpYdSOZMrwtl3BseZyVXuA==",
+    "IKVM.MSBuild.Tools.runtime.win-arm64/8.12.0": {
+      "sha512": "yoFYGJJavMRf8yBy8HYn9zOB3mn9PSpvGyLxc9jZEU5IKWwde+2DaBNP1mSLbLDz/pXuS/o+dMGxlmW8ndTwTg==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.win-arm64/8.11.2",
+      "path": "ikvm.msbuild.tools.runtime.win-arm64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.win-arm64.props",
-        "ikvm.msbuild.tools.runtime.win-arm64.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.win-arm64.8.12.0.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.win-arm64.nuspec",
         "ikvmc/net472/win-arm64/IKVM.ByteCode.dll",
         "ikvmc/net472/win-arm64/IKVM.CoreLib.dll",
@@ -6557,7 +6699,7 @@
         "ikvmc/net8.0/win-arm64/ja/System.CommandLine.resources.dll",
         "ikvmc/net8.0/win-arm64/ko/System.CommandLine.resources.dll",
         "ikvmc/net8.0/win-arm64/mscordaccore.dll",
-        "ikvmc/net8.0/win-arm64/mscordaccore_arm64_arm64_8.0.1325.6609.dll",
+        "ikvmc/net8.0/win-arm64/mscordaccore_arm64_arm64_8.0.1725.26602.dll",
         "ikvmc/net8.0/win-arm64/mscordbi.dll",
         "ikvmc/net8.0/win-arm64/mscorlib.dll",
         "ikvmc/net8.0/win-arm64/mscorrc.dll",
@@ -6824,7 +6966,7 @@
         "ikvmstub/net8.0/win-arm64/ja/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/win-arm64/ko/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/win-arm64/mscordaccore.dll",
-        "ikvmstub/net8.0/win-arm64/mscordaccore_arm64_arm64_8.0.1325.6609.dll",
+        "ikvmstub/net8.0/win-arm64/mscordaccore_arm64_arm64_8.0.1725.26602.dll",
         "ikvmstub/net8.0/win-arm64/mscordbi.dll",
         "ikvmstub/net8.0/win-arm64/mscorlib.dll",
         "ikvmstub/net8.0/win-arm64/mscorrc.dll",
@@ -6838,17 +6980,17 @@
         "ikvmstub/net8.0/win-arm64/zh-Hant/System.CommandLine.resources.dll"
       ]
     },
-    "IKVM.MSBuild.Tools.runtime.win-x64/8.11.2": {
-      "sha512": "yAsAJc+a5fD082kX4/OpGwDAoZ7XhlQ8G6K2cGR3XhSKaqtLc0LuUSyg4F2g0PKK1wQkeQQgGgTbBp0SdInEhQ==",
+    "IKVM.MSBuild.Tools.runtime.win-x64/8.12.0": {
+      "sha512": "xGtQCECnu9mNNkjOINzgsXfgtaL+/i59GwSEvTBwIIS7nvBbw+DhtVR/j5zWmsTumARjXksQeO2Bovkg5Iji8w==",
       "type": "package",
-      "path": "ikvm.msbuild.tools.runtime.win-x64/8.11.2",
+      "path": "ikvm.msbuild.tools.runtime.win-x64/8.12.0",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
         "buildTransitive/IKVM.MSBuild.Tools.runtime.win-x64.props",
-        "ikvm.msbuild.tools.runtime.win-x64.8.11.2.nupkg.sha512",
+        "ikvm.msbuild.tools.runtime.win-x64.8.12.0.nupkg.sha512",
         "ikvm.msbuild.tools.runtime.win-x64.nuspec",
         "ikvmc/net472/win-x64/IKVM.ByteCode.dll",
         "ikvmc/net472/win-x64/IKVM.CoreLib.dll",
@@ -7105,7 +7247,7 @@
         "ikvmc/net8.0/win-x64/ja/System.CommandLine.resources.dll",
         "ikvmc/net8.0/win-x64/ko/System.CommandLine.resources.dll",
         "ikvmc/net8.0/win-x64/mscordaccore.dll",
-        "ikvmc/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.1325.6609.dll",
+        "ikvmc/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.1725.26602.dll",
         "ikvmc/net8.0/win-x64/mscordbi.dll",
         "ikvmc/net8.0/win-x64/mscorlib.dll",
         "ikvmc/net8.0/win-x64/mscorrc.dll",
@@ -7372,7 +7514,7 @@
         "ikvmstub/net8.0/win-x64/ja/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/win-x64/ko/System.CommandLine.resources.dll",
         "ikvmstub/net8.0/win-x64/mscordaccore.dll",
-        "ikvmstub/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.1325.6609.dll",
+        "ikvmstub/net8.0/win-x64/mscordaccore_amd64_amd64_8.0.1725.26602.dll",
         "ikvmstub/net8.0/win-x64/mscordbi.dll",
         "ikvmstub/net8.0/win-x64/mscorlib.dll",
         "ikvmstub/net8.0/win-x64/mscorrc.dll",
@@ -7532,10 +7674,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Extensions.DependencyModel/8.0.0": {
-      "sha512": "NSmDw3K0ozNDgShSIpsZcbFIzBX4w28nDag+TfaQujkXGazBm+lid5onlWoCBy4VsLxqnnKjEBbGSJVWJMf43g==",
+    "Microsoft.Extensions.DependencyModel/8.0.2": {
+      "sha512": "mUBDZZRgZrSyFOsJ2qJJ9fXfqd/kXJwf3AiDoqLD9m6TjY5OO/vLNOb9fb4juC0487eq4hcGN/M2Rh/CKS7QYw==",
       "type": "package",
-      "path": "microsoft.extensions.dependencymodel/8.0.0",
+      "path": "microsoft.extensions.dependencymodel/8.0.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -7557,7 +7699,7 @@
         "lib/net8.0/Microsoft.Extensions.DependencyModel.xml",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll",
         "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.xml",
-        "microsoft.extensions.dependencymodel.8.0.0.nupkg.sha512",
+        "microsoft.extensions.dependencymodel.8.0.2.nupkg.sha512",
         "microsoft.extensions.dependencymodel.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -7744,10 +7886,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.Win32.SystemEvents/9.0.3": {
-      "sha512": "Z0hIB2oeNqPOO0MYD0wkLpEe0LangoF3BSdMLLF5wft/rndYoXhLQvWni1OxymlWj+1adswAps2ZlrPmD9ZhBg==",
+    "Microsoft.Win32.SystemEvents/9.0.7": {
+      "sha512": "lFGY2aGgmMREPJEfOmZcA6v0CLjWVpcfNHRgqYMoSQhy80+GxhYqdW5xe+DCLrVqE1M7/0RpOkIo49/KH/cd/A==",
       "type": "package",
-      "path": "microsoft.win32.systemevents/9.0.3",
+      "path": "microsoft.win32.systemevents/9.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -7767,7 +7909,7 @@
         "lib/net9.0/Microsoft.Win32.SystemEvents.xml",
         "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll",
         "lib/netstandard2.0/Microsoft.Win32.SystemEvents.xml",
-        "microsoft.win32.systemevents.9.0.3.nupkg.sha512",
+        "microsoft.win32.systemevents.9.0.7.nupkg.sha512",
         "microsoft.win32.systemevents.nuspec",
         "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.dll",
         "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.xml",
@@ -7904,10 +8046,10 @@
         "stub.system.data.sqlite.core.netstandard.nuspec"
       ]
     },
-    "System.CodeDom/9.0.3": {
-      "sha512": "KeFk4+is5IB3FCjFmPjtFYaTSYhFA/l6ZOeWBQo6CVVQchpvl6vv+3kPPfNttkEoA/Gq78FsJFMu4Eej/ln44Q==",
+    "System.CodeDom/9.0.7": {
+      "sha512": "skI5aEl6XbZelP1hZvSmzzm3mM98k22x19Zu1Lf4rmuYoFEMJr7s7Te/MWUk9twjz4utyXt3q3pYXxGxI/Y+zA==",
       "type": "package",
-      "path": "system.codedom/9.0.3",
+      "path": "system.codedom/9.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -7927,7 +8069,7 @@
         "lib/net9.0/System.CodeDom.xml",
         "lib/netstandard2.0/System.CodeDom.dll",
         "lib/netstandard2.0/System.CodeDom.xml",
-        "system.codedom.9.0.3.nupkg.sha512",
+        "system.codedom.9.0.7.nupkg.sha512",
         "system.codedom.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -8268,10 +8410,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Drawing.Common/9.0.3": {
-      "sha512": "yDxzWfZGvOtk8zk5apWXP/tmro1Nghn7/4bWS5np5CtwIfiVCC74qCc1qvIsnywvXKzVqIbKXRk09wts+xGfeg==",
+    "System.Drawing.Common/9.0.7": {
+      "sha512": "1k/Pk7hcM3vP2tfIRRS2ECCCN7ya+hvocsM1JMc4ZDCU6qw7yOuUmqmCDfgXZ4Q4FS6jass2EAai5ByKodDi0g==",
       "type": "package",
-      "path": "system.drawing.common/9.0.3",
+      "path": "system.drawing.common/9.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -8305,7 +8447,7 @@
         "lib/xamarinmac20/_._",
         "lib/xamarintvos10/_._",
         "lib/xamarinwatchos10/_._",
-        "system.drawing.common.9.0.3.nupkg.sha512",
+        "system.drawing.common.9.0.7.nupkg.sha512",
         "system.drawing.common.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -8339,10 +8481,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Management/9.0.3": {
-      "sha512": "Wsb47+pRN1xnCxKOXcj+80FZ5OYQK2Dr8nnS8CHS1LVB+MXdzyK90sEmDYs/ux+btrxpE1N56FZo5rDbzpd1HA==",
+    "System.Management/9.0.7": {
+      "sha512": "9wHNgKnZRFLZ/vSQ7+Ai9LrKkxEKh9LvC+Ta5dwQgPsyni0ET5igPATg01WW4bx/E5Q3VtRgEGithhOXaKIh0A==",
       "type": "package",
-      "path": "system.management/9.0.3",
+      "path": "system.management/9.0.7",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -8363,7 +8505,7 @@
         "runtimes/win/lib/net8.0/System.Management.xml",
         "runtimes/win/lib/net9.0/System.Management.dll",
         "runtimes/win/lib/net9.0/System.Management.xml",
-        "system.management.9.0.3.nupkg.sha512",
+        "system.management.9.0.7.nupkg.sha512",
         "system.management.nuspec",
         "useSharedDesignerContext.txt"
       ]
@@ -8556,41 +8698,6 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "System.Text.Encodings.Web/8.0.0": {
-      "sha512": "yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ==",
-      "type": "package",
-      "path": "system.text.encodings.web/8.0.0",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "Icon.png",
-        "LICENSE.TXT",
-        "THIRD-PARTY-NOTICES.TXT",
-        "buildTransitive/net461/System.Text.Encodings.Web.targets",
-        "buildTransitive/net462/_._",
-        "buildTransitive/net6.0/_._",
-        "buildTransitive/netcoreapp2.0/System.Text.Encodings.Web.targets",
-        "lib/net462/System.Text.Encodings.Web.dll",
-        "lib/net462/System.Text.Encodings.Web.xml",
-        "lib/net6.0/System.Text.Encodings.Web.dll",
-        "lib/net6.0/System.Text.Encodings.Web.xml",
-        "lib/net7.0/System.Text.Encodings.Web.dll",
-        "lib/net7.0/System.Text.Encodings.Web.xml",
-        "lib/net8.0/System.Text.Encodings.Web.dll",
-        "lib/net8.0/System.Text.Encodings.Web.xml",
-        "lib/netstandard2.0/System.Text.Encodings.Web.dll",
-        "lib/netstandard2.0/System.Text.Encodings.Web.xml",
-        "runtimes/browser/lib/net6.0/System.Text.Encodings.Web.dll",
-        "runtimes/browser/lib/net6.0/System.Text.Encodings.Web.xml",
-        "runtimes/browser/lib/net7.0/System.Text.Encodings.Web.dll",
-        "runtimes/browser/lib/net7.0/System.Text.Encodings.Web.xml",
-        "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll",
-        "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.xml",
-        "system.text.encodings.web.8.0.0.nupkg.sha512",
-        "system.text.encodings.web.nuspec",
-        "useSharedDesignerContext.txt"
-      ]
-    },
     "System.Text.Json/8.0.5": {
       "sha512": "0f1B50Ss7rqxXiaBJyzUu9bWFOO2/zSlifZ/UNMdiIpDYe4cY4LQQicP4nirK1OS31I43rn062UIJ1Q9bpmHpg==",
       "type": "package",
@@ -8743,31 +8850,31 @@
     "net8.0": [
       "CoreRCON >= 5.4.2",
       "EntityFramework >= 6.5.1",
-      "IKVM >= 8.11.2",
+      "IKVM >= 8.12.0",
       "MCQuery >= 2022.7.13.192844",
       "Open.Nat >= 2.1.0",
       "System.Data.SQLite >= 1.0.119",
       "System.Data.SqlClient >= 4.9.0",
-      "System.Drawing.Common >= 9.0.3",
-      "System.Management >= 9.0.3",
+      "System.Drawing.Common >= 9.0.7",
+      "System.Management >= 9.0.7",
       "UPnP >= 1.1.6"
     ]
   },
   "packageFolders": {
     "C:\\Users\\crist\\.nuget\\packages\\": {},
-    "D:\\Visual Studio Code for C\\Shares\\NuGetPackages": {}
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj",
+      "projectUniqueName": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj",
       "projectName": "Server Main Functions",
-      "projectPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj",
+      "projectPath": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj",
       "packagesPath": "C:\\Users\\crist\\.nuget\\packages\\",
-      "outputPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\obj\\",
+      "outputPath": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "D:\\Visual Studio Code for C\\Shares\\NuGetPackages"
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
         "C:\\Users\\crist\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -8798,7 +8905,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.200"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -8814,7 +8921,7 @@
           },
           "IKVM": {
             "target": "Package",
-            "version": "[8.11.2, )"
+            "version": "[8.12.0, )"
           },
           "MCQuery": {
             "target": "Package",
@@ -8834,11 +8941,11 @@
           },
           "System.Drawing.Common": {
             "target": "Package",
-            "version": "[9.0.3, )"
+            "version": "[9.0.7, )"
           },
           "System.Management": {
             "target": "Package",
-            "version": "[9.0.3, )"
+            "version": "[9.0.7, )"
           },
           "UPnP": {
             "target": "Package",
@@ -8861,7 +8968,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
       }
     }
   },

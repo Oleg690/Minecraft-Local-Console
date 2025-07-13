@@ -710,8 +710,9 @@ namespace Minecraft_Console
 
                 if (creationStatus[0] == "Error" && creationStatus.Length == 3)
                 {
-                    ServerOperator.DeleteServer(creationStatus[2], Path.Combine(rootWorldsFolder, creationStatus[2])); // Auto-delete the server if creation failed
-                    PopupWindow.CreateStatusPopup("Info", "Creation failed – Server auto-deleted.", PopupHost);
+                    //ServerOperator.DeleteServer(creationStatus[2], Path.Combine(rootWorldsFolder, creationStatus[2])); // Auto-delete the server if creation failed
+                    //PopupWindow.CreateStatusPopup("Info", "Creation failed – Server auto-deleted.", PopupHost);
+                    PopupWindow.CreateStatusPopup("Info", "Creation failed", PopupHost);
                 }
             }
             catch (Exception ex)
@@ -838,7 +839,8 @@ namespace Minecraft_Console
                     PopupWindow.CreateStatusPopup("Error", $"{outputID[1]}", PopupHost);
                     serverRunning = false;
                     SetDefaultButtonStates(worldNumber);
-                    AnimateStatusColor(OfflineStatusColor, worldNumber, 300);
+                    AnimateStatusColor(OfflineStatusColor, worldNumber, 300); 
+                    DbChanger.SpecificDataFunc($"UPDATE worlds SET Process_ID = NULL, serverUser = NULL, serverTempPsw = NULL, startingStatus = NULL WHERE worldNumber = \"{worldNumber}\";");
                 }
             }
             catch (Exception ex)

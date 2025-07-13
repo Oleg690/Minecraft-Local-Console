@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj": {}
+    "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj": {}
   },
   "projects": {
-    "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj": {
+    "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj",
+        "projectUniqueName": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj",
         "projectName": "Server Main Functions",
-        "projectPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj",
+        "projectPath": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Server Main Functions.csproj",
         "packagesPath": "C:\\Users\\crist\\.nuget\\packages\\",
-        "outputPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\obj\\",
+        "outputPath": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "D:\\Visual Studio Code for C\\Shares\\NuGetPackages"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
           "C:\\Users\\crist\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -45,7 +45,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -61,7 +61,7 @@
             },
             "IKVM": {
               "target": "Package",
-              "version": "[8.11.2, )"
+              "version": "[8.12.0, )"
             },
             "MCQuery": {
               "target": "Package",
@@ -81,11 +81,11 @@
             },
             "System.Drawing.Common": {
               "target": "Package",
-              "version": "[9.0.3, )"
+              "version": "[9.0.7, )"
             },
             "System.Management": {
               "target": "Package",
-              "version": "[9.0.3, )"
+              "version": "[9.0.7, )"
             },
             "UPnP": {
               "target": "Package",
@@ -108,7 +108,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

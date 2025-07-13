@@ -1,14 +1,14 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\",
+  "WorkspaceRootPath": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-console\\important funcs for main aplication\\create server func\\create server func\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-server\\important funcs for main aplication\\create server func\\create server func\\serverfileexplorer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\serverfileexplorer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|d:\\minecraft-console\\important funcs for main aplication\\create server func\\create server func\\supportedversions.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{39EB7610-0583-412D-ABFC-A91BE555F99B}|Create Server Func\\Server Main Functions.csproj|solutionrelative:create server func\\supportedversions.xml||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
     }
   ],
   "DocumentGroupContainers": [
@@ -24,14 +24,15 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Program.cs",
-              "DocumentMoniker": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Program.cs",
+              "DocumentMoniker": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Program.cs",
               "RelativeDocumentMoniker": "Create Server Func\\Program.cs",
-              "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Program.cs",
+              "ToolTip": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\Program.cs",
               "RelativeToolTip": "Create Server Func\\Program.cs",
-              "ViewState": "AgIAABMAAAAAAAAAAAAgwDsAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAAABAAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-03-09T18:43:51.86Z",
-              "IsPinned": true
+              "IsPinned": true,
+              "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
@@ -44,14 +45,15 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "serverFileExplorer.cs",
-              "DocumentMoniker": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\serverFileExplorer.cs",
-              "RelativeDocumentMoniker": "Create Server Func\\serverFileExplorer.cs",
-              "ToolTip": "D:\\Minecraft-Server\\important funcs for main aplication\\Create Server Func\\Create Server Func\\serverFileExplorer.cs",
-              "RelativeToolTip": "Create Server Func\\serverFileExplorer.cs",
-              "ViewState": "AgIAAG8AAAAAAAAAAIAwwH4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-04-04T17:13:32.661Z"
+              "Title": "SupportedVersions.xml",
+              "DocumentMoniker": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\SupportedVersions.xml",
+              "RelativeDocumentMoniker": "Create Server Func\\SupportedVersions.xml",
+              "ToolTip": "D:\\Minecraft-Console\\important funcs for main aplication\\Create Server Func\\Create Server Func\\SupportedVersions.xml",
+              "RelativeToolTip": "Create Server Func\\SupportedVersions.xml",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABoAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003576|",
+              "WhenOpened": "2025-07-13T13:30:54.105Z",
+              "EditorCaption": ""
             }
           ]
         }
